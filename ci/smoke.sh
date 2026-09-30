@@ -2,9 +2,21 @@
 # Exercise the published images with the upstream Compose topology.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-export COMPOSE_FILE=docker-compose/docker-compose.yml
-export COMPOSE_PROJECT_NAME=neon-ci
+compose_dir="${RUNNER_TEMP:?}/neon-smoke-pg${PG_VERSION:?}"
+mkdir -p "$compose_dir"
+cp -a docker-compose/. "$compose_dir/"
+# GitHub's checkout owner differs from the upstream container's UID 1000.
+sudo chown -R 1000:1000 "$compose_dir/pageserver_config"
+export COMPOSE_FILE="$compose_dir/docker-compose.yml"
+export COMPOSE_PROJECT_NAME="neon-ci-pg$PG_VERSION"
 export REPOSITORY TAG PG_VERSION
+
+cleanup() {
+  mkdir -p logs
+  docker compose logs --no-color > "logs/smoke-pg$PG_VERSION.log" 2>&1 || true
+  docker compose down --volumes || true
+}
+trap cleanup EXIT
 
 wait_compute() {
   for attempt in $(seq 1 90); do
@@ -45,4 +57,3 @@ wait_compute
 after=$(docker compose exec -T compute1 psql -h localhost -p 55433 -U cloud_admin -d postgres -Atc "SELECT md5(string_agg(payload, ',' ORDER BY id)) FROM ci_durability")
 [[ "$before" = "$after" ]]
 echo "PG$PG_VERSION: queries, vector, PostGIS and recovery after compute replacement passed"
-docker compose down --volumes

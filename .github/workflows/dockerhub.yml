@@ -335,7 +335,9 @@ jobs:
         env:
           TEST_VERSION_ONLY: v${{ matrix.pg }}
           PARALLEL_COMPUTES: 1
-        run: ./docker-compose/docker_compose_test.sh
+        run: |
+          sudo chown -R 1000:1000 docker-compose/pageserver_config
+          ./docker-compose/docker_compose_test.sh
       - name: Capture service logs
         if: always()
         run: |
