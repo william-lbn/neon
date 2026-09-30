@@ -43,7 +43,7 @@ jobs:
           echo "compute_components=$(jq -c '{include: [.compute_components | to_entries[] | {name: .key, binary: .value}]}' ci/distribution.json)" >> "$GITHUB_OUTPUT"
   autoscaling:
     needs: prepare
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@3f031c25d0e555c6bc6dd0b8ade94b5c9144b979
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@1b74de96fed8682295ba973feb97beb7273f6f3a
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
