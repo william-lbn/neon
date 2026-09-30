@@ -72,7 +72,7 @@ for pg_version in ${TEST_VERSION_ONLY-14 15 16 17}; do
             echo "OK. The compute is ready to connect."
             echo "execute simple queries."
             for compute in "${COMPUTES[@]}"; do
-              docker compose exec "${compute}" /bin/bash -c "psql ${PSQL_OPTION} -c 'SELECT 1'"
+              docker compose exec -T "${compute}" /bin/bash -c "psql ${PSQL_OPTION} -c 'SELECT 1'"
             done
             break
         fi
@@ -89,9 +89,9 @@ for pg_version in ${TEST_VERSION_ONLY-14 15 16 17}; do
           # This is required for the pg_hint_plan test, to prevent flaky log message causing the test to fail
           # It cannot be moved to Dockerfile now because the database directory is created after the start of the container
           echo Adding dummy config on "${compute}"
-          docker compose exec "${compute}" touch /var/db/postgres/compute/compute_ctl_temp_override.conf
+          docker compose exec -T "${compute}" touch /var/db/postgres/compute/compute_ctl_temp_override.conf
           # Prepare for the PostGIS test
-          docker compose exec "${compute}" mkdir -p /tmp/pgis_reg/pgis_reg_tmp /ext-src/postgis-src/raster /ext-src/postgis-src/regress /ext-src/postgis-src/regress/00-regress-install
+          docker compose exec -T "${compute}" mkdir -p /tmp/pgis_reg/pgis_reg_tmp /ext-src/postgis-src/raster /ext-src/postgis-src/regress /ext-src/postgis-src/regress/00-regress-install
           docker compose cp "${CURRENT_TMPDIR}/postgis-src/test" "${compute}":/ext-src/postgis-src/raster/test
           docker compose cp "${CURRENT_TMPDIR}/postgis-src/00-regress-install" "${compute}":/ext-src/postgis-src/regress
           # The following block copies the files for the pg_hintplan test to the compute node for the extension test in an isolated docker-compose environment
@@ -107,10 +107,10 @@ for pg_version in ${TEST_VERSION_ONLY-14 15 16 17}; do
         # Tests listed in the RUN_FIRST variable will be run before others.
         # If parallelization is not used, this environment variable will be ignored.
 
-        docker compose exec -e USE_PGXS=1 -e SKIP=timescaledb-src,rdkit-src,pg_jsonschema-src,kq_imcx-src,wal2json_2_5-src,rag_jina_reranker_v1_tiny_en-src,rag_bge_small_en_v15-src \
+        docker compose exec -T -e USE_PGXS=1 -e SKIP=timescaledb-src,rdkit-src,pg_jsonschema-src,kq_imcx-src,wal2json_2_5-src,rag_jina_reranker_v1_tiny_en-src,rag_bge_small_en_v15-src \
         -e RUN_FIRST=hll-src,postgis-src,pgtap-src -e PARALLEL_COMPUTES="${PARALLEL_COMPUTES}" \
         neon-test-extensions /run-tests.sh /ext-src | tee testout.txt && EXT_SUCCESS=1 || EXT_SUCCESS=0
-        docker compose exec -e SKIP=start-scripts,postgres_fdw,ltree_plpython,jsonb_plpython,jsonb_plperl,hstore_plpython,hstore_plperl,dblink,bool_plperl \
+        docker compose exec -T -e SKIP=start-scripts,postgres_fdw,ltree_plpython,jsonb_plpython,jsonb_plperl,hstore_plpython,hstore_plperl,dblink,bool_plperl \
         -e PARALLEL_COMPUTES="${PARALLEL_COMPUTES}" \
         neon-test-extensions /run-tests.sh /postgres/contrib | tee testout_contrib.txt && CONTRIB_SUCCESS=1 || CONTRIB_SUCCESS=0
         if [[ ${EXT_SUCCESS} -eq 0 || ${CONTRIB_SUCCESS} -eq 0 ]]; then
@@ -119,7 +119,7 @@ for pg_version in ${TEST_VERSION_ONLY-14 15 16 17}; do
             [[ ${EXT_SUCCESS} -eq 0 ]] && FAILED=$(tail -1 testout.txt | awk '{for(i=1;i<=NF;i++){print "/ext-src/"$i;}}')
             [[ ${CONTRIB_SUCCESS} -eq 0 ]] && CONTRIB_FAILED=$(tail -1 testout_contrib.txt | awk '{for(i=0;i<=NF;i++){print "/postgres/contrib/"$i;}}')
             for d in ${FAILED} ${CONTRIB_FAILED}; do
-                docker compose exec neon-test-extensions bash -c 'for file in $(find '"${d}"' -name regression.diffs -o -name regression.out); do cat ${file}; done' || [[ ${?} -eq 1 ]]
+                docker compose exec -T neon-test-extensions bash -c 'for file in $(find '"${d}"' -name regression.diffs -o -name regression.out); do cat ${file}; done' || [[ ${?} -eq 1 ]]
             done
         exit 1
         fi

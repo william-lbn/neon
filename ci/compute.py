@@ -59,7 +59,7 @@ def render(args):
     for name, block in blocks.items():
         if (args.pg, name) in images and name != args.target:
             output.append(f"FROM {images[args.pg, name]} AS {name}\n")
-            output.append("ARG PG_VERSION\nARG DEBIAN_VERSION\nARG BUILD_TAG\nARG TARGETARCH\nARG BUILD_JOBS=2\n")
+            output.append("ARG PG_VERSION\nARG DEBIAN_VERSION\nARG TARGETARCH\nARG BUILD_JOBS=2\n")
             continue
         if name == "runtime":
             block = FROM.sub(lambda m: m.group(0) + " AS runtime", block, count=1)
@@ -73,6 +73,12 @@ def render(args):
             block = FROM.sub(lambda m: m.group(0) + "\nENV CARGO_BUILD_JOBS=2 CARGO_PROFILE_RELEASE_DEBUG=0", block, count=1)
         if name == "compute-tools":
             block = FROM.sub(lambda m: m.group(0) + "\nARG GIT_VERSION", block, count=1)
+        if name == "extension-tests" and args.pg in {"v14", "v15"}:
+            # Upstream publishes this harness only for PG16/17 and provides no
+            # pg_hint_plan test patches for the older versions. Keep their
+            # original regression sources without referencing nonexistent files.
+            block = block.replace("COPY compute/patches/pg_hint_plan_${PG_VERSION:?}.patch /ext-src\n", "")
+            block = block.replace("RUN cd /ext-src/pg_hint_plan-src && patch -p1 < /ext-src/pg_hint_plan_${PG_VERSION:?}.patch\n", "")
         output.append(block)
     if args.payload:
         if args.target not in extension_targets():

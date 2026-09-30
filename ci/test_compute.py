@@ -55,6 +55,14 @@ class ComputeBuildTests(unittest.TestCase):
         for name in ["proxy", "local-proxy", "pg-sni-router", "storage-controller", "vm-monitor", "neonvm-daemon", "cluster-autoscaler-neonvm"]:
             self.assertIn(name, names)
 
+    def test_old_pg_harness_does_not_reference_missing_upstream_patches(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for version in ["v14", "v15", "v16", "v17"]:
+                output = pathlib.Path(directory) / "Dockerfile"
+                compute.render(argparse.Namespace(pg=version, target="extension-tests", output=output, artifacts=directory, payload=False))
+                block = output.read_text().split(" AS extension-tests\n", 1)[1].split("\nFROM ", 1)[0]
+                self.assertEqual("pg_hint_plan_${PG_VERSION:?}.patch" in block, version in ["v16", "v17"])
+
 
 if __name__ == "__main__":
     unittest.main()
