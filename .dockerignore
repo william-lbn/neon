@@ -26,5 +26,7 @@
 !storage_broker/
 !storage_controller/
 !vendor/postgres-*/
+!vendor/revisions.json
+!ci/
 !workspace_hack/
 !build-tools/patches

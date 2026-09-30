@@ -1,0 +1,165 @@
+name: Full Compute images
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      pg:
+        required: true
+        type: string
+      debian:
+        required: true
+        type: string
+      arch:
+        required: true
+        type: string
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
+permissions:
+  contents: read
+defaults:
+  run:
+    shell: bash
+env:
+  REGISTRY: docker.io/williamluckyli
+  TAG: ${{ inputs.tag }}
+  PG: ${{ inputs.pg }}
+  DEBIAN: ${{ inputs.debian }}
+  ARCH: ${{ inputs.arch }}
+jobs:
+  dependencies:
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 350
+    outputs:
+      matrix: ${{ steps.matrix.outputs.value }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - id: matrix
+        run: echo "value=$(python3 ci/compute.py matrix)" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build pinned compiler and PostgreSQL stages
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts metadata
+          for stage in $(python3 ci/compute.py common); do
+            python3 ci/compute.py render --pg "$PG" --target "$stage" --output compute.ci.Dockerfile
+            image="$REGISTRY/neon-compute-build-$PG:$TAG-$stage"
+            cache="$REGISTRY/neon-compute-build-$PG:cache-$ARCH-$stage"
+            docker buildx build . --file compute.ci.Dockerfile --target "$stage" --push \
+              --platform "linux/$ARCH" --tag "$image" --metadata-file "metadata/$stage.json" \
+              --build-arg "PG_VERSION=$PG" --build-arg "DEBIAN_VERSION=$DEBIAN" --build-arg "BUILD_TAG=$TAG" \
+              --build-arg BUILD_JOBS=2 --build-arg "GIT_VERSION=$GITHUB_SHA" \
+              --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+              --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+              --cache-from "type=registry,ref=$cache" --cache-to "type=registry,ref=$cache,mode=min" \
+              --provenance mode=max --sbom true
+            python3 ci/compute.py record --stage --pg "$PG" --target "$stage" --image "$image" \
+              --metadata "metadata/$stage.json" --output "artifacts/$PG-$stage.json"
+            # Completed stages are now available by digest; free unreferenced build scratch space.
+            docker buildx prune --force --keep-storage 10GB
+          done
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: compute-dependencies-${{ inputs.pg }}
+          path: artifacts/*.json
+          if-no-files-found: error
+          retention-days: 30
+  extensions:
+    needs: dependencies
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.dependencies.outputs.matrix) }}
+    env:
+      STAGE: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: compute-dependencies-${{ inputs.pg }}
+          path: artifacts
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Compile and export one upstream extension
+        run: |
+          set -euo pipefail
+          python3 ci/compute.py render --pg "$PG" --target "$STAGE" --payload --output compute.ci.Dockerfile
+          image="$REGISTRY/neon-compute-build-$PG:$TAG-$STAGE"
+          cache="$REGISTRY/neon-compute-build-$PG:cache-$ARCH-$STAGE"
+          docker buildx build . --file compute.ci.Dockerfile --target payload --push \
+            --platform "linux/$ARCH" --tag "$image" --metadata-file metadata.json \
+            --build-arg "PG_VERSION=$PG" --build-arg "DEBIAN_VERSION=$DEBIAN" --build-arg "BUILD_TAG=$TAG" \
+            --build-arg BUILD_JOBS=2 --build-arg "GIT_VERSION=$GITHUB_SHA" \
+            --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --cache-from "type=registry,ref=$cache" --cache-to "type=registry,ref=$cache,mode=min" \
+            --provenance mode=max --sbom true
+          python3 ci/compute.py record --stage --pg "$PG" --target "$STAGE" --image "$image" \
+            --metadata metadata.json --output "output/$PG-$STAGE.json"
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: compute-extension-${{ inputs.pg }}-${{ matrix.target }}
+          path: output/*.json
+          if-no-files-found: error
+          retention-days: 30
+  assemble:
+    needs: [dependencies, extensions]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          pattern: compute-*
+          path: artifacts
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Assemble the full compute and regression images
+        run: |
+          set -euo pipefail
+          for target in runtime extension-tests; do
+            if [ "$target" = runtime ]; then name="compute-node-$PG"; else name="neon-test-extensions-$PG"; fi
+            python3 ci/compute.py render --pg "$PG" --target "$target" --output compute.ci.Dockerfile
+            image="$REGISTRY/$name:$TAG"
+            cache="$REGISTRY/neon-compute-build-$PG:cache-$ARCH-$target"
+            docker buildx build . --file compute.ci.Dockerfile --target "$target" --push \
+              --platform "linux/$ARCH" --tag "$image" --metadata-file "$target.json" \
+              --build-arg "PG_VERSION=$PG" --build-arg "DEBIAN_VERSION=$DEBIAN" --build-arg "BUILD_TAG=$TAG" \
+              --build-arg EXTENSIONS=all --build-arg BUILD_JOBS=2 --build-arg "GIT_VERSION=$GITHUB_SHA" \
+              --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
+              --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+              --label "org.opencontainers.image.version=$TAG" \
+              --cache-from "type=registry,ref=$cache" --cache-to "type=registry,ref=$cache,mode=min" \
+              --provenance mode=max --sbom true
+            python3 ci/compute.py record --pg "$PG" --target "$target" --image "$image" \
+              --metadata "$target.json" --output "output/$name.json"
+            docker buildx prune --force --keep-storage 10GB
+          done
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-compute-${{ inputs.pg }}
+          path: output/*.json
+          if-no-files-found: error
+          retention-days: 90

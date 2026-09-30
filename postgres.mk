@@ -87,7 +87,8 @@ $(BUILD_DIR)/%/config.status:
 	mkdir -p $(BUILD_DIR)/$*
 
 	VERSION=$*; \
-	EXTRA_VERSION=$$(cd $(ROOT_PROJECT_DIR)/vendor/postgres-$$VERSION && git rev-parse HEAD); \
+	EXTRA_VERSION=$$(cd $(ROOT_PROJECT_DIR)/vendor/postgres-$$VERSION && git rev-parse HEAD 2>/dev/null) || \
+	EXTRA_VERSION=$$(jq -r --arg version "$$VERSION" '.[$$version][1]' $(ROOT_PROJECT_DIR)/vendor/revisions.json); \
 	(cd $(BUILD_DIR)/$$VERSION && \
 	env PATH="$(EXTRA_PATH_OVERRIDES):$$PATH" $(ROOT_PROJECT_DIR)/vendor/postgres-$$VERSION/configure \
 		CFLAGS='$(PG_CFLAGS)' LDFLAGS='$(PG_LDFLAGS)' \

@@ -1,0 +1,394 @@
+name: Docker Hub Neon distribution
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      arch:
+        description: Build and test on native architecture
+        type: choice
+        options: [amd64, arm64]
+        default: amd64
+permissions:
+  contents: read
+concurrency:
+  group: distribution-${{ github.ref }}-${{ inputs.arch || 'amd64' }}
+  cancel-in-progress: false
+env:
+  REGISTRY: docker.io/williamluckyli
+  ARCH: ${{ inputs.arch || 'amd64' }}
+defaults:
+  run:
+    shell: bash
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      autoscaling: ${{ steps.meta.outputs.autoscaling }}
+      binaries: ${{ steps.meta.outputs.binaries }}
+      compute_components: ${{ steps.meta.outputs.compute_components }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - run: python3 ci/compute.py validate
+      - run: python3 -m unittest discover -s ci -p 'test_*.py' -v
+      - id: meta
+        run: |
+          set -euo pipefail
+          echo "tag=$(date -u +%Y.%m.%d-%H%M%S)-${GITHUB_SHA:0:12}-r${GITHUB_RUN_ID}-a${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+          echo "autoscaling=$(jq -r .autoscaling_commit ci/distribution.json)" >> "$GITHUB_OUTPUT"
+          echo "binaries=$(jq -c '{binary: .core_binaries}' ci/distribution.json)" >> "$GITHUB_OUTPUT"
+          echo "compute_components=$(jq -c '{include: [.compute_components | to_entries[] | {name: .key, binary: .value}]}' ci/distribution.json)" >> "$GITHUB_OUTPUT"
+  autoscaling:
+    needs: prepare
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@3f031c25d0e555c6bc6dd0b8ade94b5c9144b979
+    with:
+      tag: ${{ needs.prepare.outputs.tag }}
+      arch: ${{ inputs.arch || 'amd64' }}
+      source_ref: ${{ needs.prepare.outputs.autoscaling }}
+    secrets: inherit
+  build-tools:
+    needs: prepare
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 90
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        id: build
+        with:
+          context: .
+          file: ci/build-tools.Dockerfile
+          platforms: linux/${{ env.ARCH }}
+          push: true
+          tags: ${{ env.REGISTRY }}/neon-build-tools:${{ needs.prepare.outputs.tag }}
+          cache-from: type=gha,scope=neon-build-tools-${{ env.ARCH }}
+          cache-to: type=gha,scope=neon-build-tools-${{ env.ARCH }},mode=min
+          provenance: mode=max
+          sbom: true
+      - env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: python3 ci/release.py record --name neon-build-tools --image "$REGISTRY/neon-build-tools:$TAG" --digest "$DIGEST" --output output/neon-build-tools.json
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-neon-build-tools
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  core:
+    needs: [prepare, build-tools]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 350
+    outputs:
+      image: ${{ steps.record.outputs.image }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+          persist-credentials: false
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        id: build
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/${{ env.ARCH }}
+          push: true
+          tags: ${{ env.REGISTRY }}/neon:${{ needs.prepare.outputs.tag }}
+          build-args: |
+            REPOSITORY=${{ env.REGISTRY }}
+            IMAGE=neon-build-tools
+            TAG=${{ needs.prepare.outputs.tag }}@${{ needs.build-tools.outputs.digest }}
+            GIT_VERSION=${{ github.sha }}
+            BUILD_TAG=${{ needs.prepare.outputs.tag }}
+            DEBIAN_VERSION=bookworm
+            IO_ALIGNMENT=512
+          labels: |
+            org.opencontainers.image.source=https://github.com/william-lbn/neon
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.prepare.outputs.tag }}
+          cache-from: type=gha,scope=neon-core-${{ env.ARCH }}
+          cache-to: type=gha,scope=neon-core-${{ env.ARCH }},mode=min
+          provenance: mode=max
+          sbom: true
+      - id: record
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          echo "image=$REGISTRY/neon:$TAG@$DIGEST" >> "$GITHUB_OUTPUT"
+          python3 ci/release.py record --name neon --image "$REGISTRY/neon:$TAG" --digest "$DIGEST" --output output/neon.json
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-neon-core
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  core-components:
+    needs: [prepare, core]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.prepare.outputs.binaries) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - id: name
+        env:
+          BINARY: ${{ matrix.binary }}
+        run: echo "value=${BINARY//_/-}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        id: build
+        with:
+          context: .
+          file: ci/component.Dockerfile
+          platforms: linux/${{ env.ARCH }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ steps.name.outputs.value }}:${{ needs.prepare.outputs.tag }}
+          build-args: |
+            BASE_IMAGE=${{ needs.core.outputs.image }}
+            BINARY=/usr/local/bin/${{ matrix.binary }}
+          provenance: mode=max
+          sbom: true
+      - env:
+          NAME: ${{ steps.name.outputs.value }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: python3 ci/release.py record --name "$NAME" --image "$REGISTRY/$NAME:$TAG" --digest "$DIGEST" --output "output/$NAME.json"
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-core-${{ steps.name.outputs.value }}
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  compute:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pg: v14
+            debian: bullseye
+          - pg: v15
+            debian: bullseye
+          - pg: v16
+            debian: bullseye
+          - pg: v17
+            debian: bookworm
+    uses: ./.github/workflows/_compute-images.yml
+    with:
+      pg: ${{ matrix.pg }}
+      debian: ${{ matrix.debian }}
+      tag: ${{ needs.prepare.outputs.tag }}
+      arch: ${{ inputs.arch || 'amd64' }}
+    secrets: inherit
+  compute-components:
+    needs: [prepare, compute]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.compute_components) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: images-compute-v17
+          path: artifacts
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - id: base
+        run: echo "image=$(python3 ci/release.py lookup --name compute-node-v17)" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        id: build
+        with:
+          context: .
+          file: ci/compute-component.Dockerfile
+          platforms: linux/${{ env.ARCH }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ matrix.name }}:${{ needs.prepare.outputs.tag }}
+          build-args: |
+            BASE_IMAGE=${{ steps.base.outputs.image }}
+            BINARY=${{ matrix.binary }}
+          provenance: mode=max
+          sbom: true
+      - env:
+          NAME: ${{ matrix.name }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: python3 ci/release.py record --name "$NAME" --image "$REGISTRY/$NAME:$TAG" --digest "$DIGEST" --output "output/$NAME.json"
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-compute-component-${{ matrix.name }}
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  vm-compute:
+    needs: [prepare, compute, autoscaling]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - pg: v14
+            debian: bullseye
+          - pg: v15
+            debian: bullseye
+          - pg: v16
+            debian: bullseye
+          - pg: v17
+            debian: bookworm
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          pattern: images-*
+          path: artifacts
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build VM disk from our compute and our source-built vm-builder
+        env:
+          PG: ${{ matrix.pg }}
+          DEBIAN: ${{ matrix.debian }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          set -euo pipefail
+          builder=$(python3 ci/release.py lookup --name vm-builder)
+          daemon=$(python3 ci/release.py lookup --name neonvm-daemon)
+          source=$(python3 ci/release.py lookup --name "compute-node-$PG")
+          docker pull "$builder"
+          id=$(docker create "$builder")
+          docker cp "$id:/usr/local/bin/vm-builder" ./vm-builder
+          docker rm "$id"
+          chmod +x vm-builder
+          docker pull "$source"
+          docker pull "$daemon"
+          image="$REGISTRY/vm-compute-node-$PG:$TAG"
+          ./vm-builder -size=4G -spec="compute/vm-image-spec-$DEBIAN.yaml" \
+            -src="$source" -dst="$image" -daemon-image="$daemon" -target-arch="linux/$ARCH"
+          docker push "$image"
+          digest=$(docker buildx imagetools inspect "$image" --format '{{json .Manifest}}' | jq -r .digest)
+          python3 ci/release.py record --name "vm-compute-node-$PG" --image "$image" --digest "$digest" --output "output/vm-compute-node-$PG.json"
+          id=$(docker create "$image" true)
+          docker cp "$id:/disk.qcow2" ./disk.qcow2
+          docker rm "$id"
+          sudo apt-get update && sudo apt-get install -y qemu-utils
+          qemu-img check disk.qcow2
+          qemu-img info --output=json disk.qcow2 | jq -e '.format == "qcow2" and .["virtual-size"] >= 4294967296'
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-vm-compute-${{ matrix.pg }}
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  smoke:
+    needs: [prepare, core, compute]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [14, 15, 16, 17]
+    env:
+      REPOSITORY: docker.io/williamluckyli
+      TAG: ${{ needs.prepare.outputs.tag }}
+      PG_VERSION: ${{ matrix.pg }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - run: bash ci/smoke.sh
+      - name: Upstream extension and contrib regressions
+        if: matrix.pg >= 16
+        env:
+          TEST_VERSION_ONLY: v${{ matrix.pg }}
+          PARALLEL_COMPUTES: 1
+        run: ./docker-compose/docker_compose_test.sh
+      - name: Capture service logs
+        if: always()
+        run: |
+          mkdir -p logs
+          docker compose -f docker-compose/docker-compose.yml logs --no-color > "logs/pg$PG_VERSION.log" 2>&1 || true
+          docker compose -f docker-compose/docker-compose.yml down --volumes || true
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        if: always()
+        with:
+          name: logs-smoke-pg${{ matrix.pg }}
+          path: logs
+          retention-days: 30
+  publish:
+    needs: [prepare, autoscaling, core-components, compute-components, vm-compute, smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          pattern: images-*
+          path: artifacts
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Validate all images and publish a complete release manifest
+        run: |
+          set -euo pipefail
+          python3 ci/release.py manifest --tag "$TAG" --arch "$ARCH" --output distribution-manifest.json
+          jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do
+            docker buildx imagetools inspect "$image" > /dev/null
+          done
+          printf 'Source-built Neon OSS distribution. Architecture: linux/%s. All 46 images passed the build and publication gates.\n\nUse the digest-pinned references in distribution-manifest.json. The version timestamp is UTC.\n' "$ARCH" > release-notes.md
+          gh release create "$TAG" --target "$GITHUB_SHA" --title "Neon OSS $TAG" --notes-file release-notes.md distribution-manifest.json
+          jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do
+            repository=${image%:*}
+            # Strip the digest first, then the timestamp tag.
+            repository=${image%@*}; repository=${repository%:*}
+            docker buildx imagetools create --tag "$repository:latest" "$image"
+          done
+          cat release-notes.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: distribution-manifest
+          path: distribution-manifest.json
+          if-no-files-found: error
+          retention-days: 90

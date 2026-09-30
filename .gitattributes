@@ -1,2 +1,9 @@
 # allows for nicer hunk headers with git show
 *.rs diff=rust
+*.sh text eol=lf
+*.py text eol=lf
+*.mk text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.Dockerfile text eol=lf
+Dockerfile text eol=lf

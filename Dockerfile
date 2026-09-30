@@ -49,13 +49,14 @@ COPY --chown=nonroot vendor/postgres-v14 vendor/postgres-v14
 COPY --chown=nonroot vendor/postgres-v15 vendor/postgres-v15
 COPY --chown=nonroot vendor/postgres-v16 vendor/postgres-v16
 COPY --chown=nonroot vendor/postgres-v17 vendor/postgres-v17
+COPY --chown=nonroot vendor/revisions.json vendor/revisions.json
 COPY --chown=nonroot Makefile Makefile
 COPY --chown=nonroot postgres.mk postgres.mk
 COPY --chown=nonroot scripts/ninstall.sh scripts/ninstall.sh
 
 ENV BUILD_TYPE=release
 RUN set -e \
-    && mold -run make -j $(nproc) -s postgres
+    && mold -run make -j 2 -s postgres
 
 # 2. Prepare cargo-chef recipe
 FROM $REPOSITORY/$IMAGE:$TAG AS plan
@@ -80,6 +81,7 @@ ARG BUILD_TAG
 ARG ADDITIONAL_RUSTFLAGS=""
 ARG IO_ALIGNMENT=512
 ENV CARGO_FEATURES="default"
+ENV CARGO_BUILD_JOBS=2 CARGO_PROFILE_RELEASE_DEBUG=0
 
 # 3. Build cargo dependencies. Note that this step doesn't depend on anything else than
 # `recipe.json`, so the layer can be reused as long as none of the dependencies change.
@@ -121,8 +123,16 @@ RUN  --mount=type=secret,uid=1000,id=SUBZERO_ACCESS_TOKEN \
       --bin endpoint_storage \
       --bin neon_local \
       --bin storage_scrubber \
+      --bin compute_ctl \
+      --bin fast_import \
+      --bin local_proxy \
+      --bin vm-monitor \
+      --bin storcon_cli \
+      --bin pagebench \
+      --bin compaction-simulator \
+      --bin wal_craft \
       --locked --release \
-    && mold -run make -j $(nproc) -s neon-pg-ext
+    && mold -run make -j 2 -s neon-pg-ext
 
 # Assemble the final image
 FROM $BASE_IMAGE_SHA
@@ -164,6 +174,14 @@ COPY --from=build --chown=neon:neon /home/nonroot/target/release/proxy          
 COPY --from=build --chown=neon:neon /home/nonroot/target/release/endpoint_storage    /usr/local/bin
 COPY --from=build --chown=neon:neon /home/nonroot/target/release/neon_local          /usr/local/bin
 COPY --from=build --chown=neon:neon /home/nonroot/target/release/storage_scrubber    /usr/local/bin
+COPY --from=build --chown=neon:neon /home/nonroot/target/release/compute_ctl         /usr/local/bin
+COPY --from=build --chown=neon:neon /home/nonroot/target/release/fast_import         /usr/local/bin
+COPY --from=build --chown=neon:neon /home/nonroot/target/release/local_proxy         /usr/local/bin
+COPY --from=build --chown=neon:neon /home/nonroot/target/release/vm-monitor          /usr/local/bin
+COPY --from=build --chown=neon:neon /home/nonroot/target/release/storcon_cli         /usr/local/bin
+COPY --from=build --chown=neon:neon /home/nonroot/target/release/pagebench           /usr/local/bin
+COPY --from=build --chown=neon:neon /home/nonroot/target/release/compaction-simulator /usr/local/bin
+COPY --from=build --chown=neon:neon /home/nonroot/target/release/wal_craft           /usr/local/bin
 COPY --from=build /home/nonroot/pg_install/v14 /usr/local/v14/
 COPY --from=build /home/nonroot/pg_install/v15 /usr/local/v15/
 COPY --from=build /home/nonroot/pg_install/v16 /usr/local/v16/

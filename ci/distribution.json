@@ -1,0 +1,29 @@
+{
+  "registry": "docker.io/williamluckyli",
+  "autoscaling_repository": "william-lbn/autoscaling",
+  "autoscaling_commit": "3f031c25d0e555c6bc6dd0b8ade94b5c9144b979",
+  "postgres_repository": "william-lbn/postgres",
+  "postgres": {
+    "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",
+    "v15": "2aaab3bb4a13557aae05bb2ae0ef0a132d0c4f85",
+    "v16": "a42351fcd41ea01edede1daed65f651e838988fc",
+    "v17": "1e01fcea2a6b38180021aa83e0051d95286d9096"
+  },
+  "core_binaries": [
+    "pageserver", "safekeeper", "proxy", "pg_sni_router", "storage_broker",
+    "storage_controller", "endpoint_storage", "storage_scrubber", "neon_local",
+    "pagectl", "compute_ctl", "fast_import", "local_proxy", "vm-monitor",
+    "storcon_cli", "pagebench", "compaction-simulator", "wal_craft"
+  ],
+  "compute_components": {
+    "pgbouncer": "/usr/local/bin/pgbouncer",
+    "postgres-exporter": "/bin/postgres_exporter",
+    "pgbouncer-exporter": "/bin/pgbouncer_exporter",
+    "sql-exporter": "/bin/sql_exporter"
+  },
+  "autoscaling_images": [
+    "autoscaling-go-base", "vm-kernel", "vm-builder", "neonvm-controller",
+    "neonvm-vxlan-controller", "neonvm-runner", "neonvm-daemon",
+    "autoscale-scheduler", "autoscaler-agent", "cluster-autoscaler-neonvm"
+  ]
+}
