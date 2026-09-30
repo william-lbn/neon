@@ -19,6 +19,7 @@ class ComputeBuildTests(unittest.TestCase):
                 self.assertIn(f"COPY --from={target} /usr/local/pgsql/", text)
                 self.assertIn(" /ext-src/ /ext-src/", text)
                 self.assertNotIn("--default-toolchain stable", text)
+                self.assertIn('RUN bash /usr/local/bin/neon-apt-sources "$DEBIAN_VERSION"', text)
                 if target == "postgis-build":
                     self.assertIn("COPY --from=postgis-build /sfcgal/", text)
                 if target == "h3-pg-build":

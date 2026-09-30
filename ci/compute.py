@@ -64,6 +64,8 @@ def render(args):
         if name == "runtime":
             block = FROM.sub(lambda m: m.group(0) + " AS runtime", block, count=1)
         block = FROM.sub(lambda m: m.group(0) + "\nARG BUILD_JOBS=2", block, count=1)
+        if name in {"build-deps", "pgbouncer", "runtime"}:
+            block = FROM.sub(lambda m: m.group(0) + "\nARG DEBIAN_VERSION\nCOPY ci/apt-sources.sh /usr/local/bin/neon-apt-sources\nRUN bash /usr/local/bin/neon-apt-sources \"$DEBIAN_VERSION\"", block, count=1)
         block = block.replace("$(nproc)", '"$BUILD_JOBS"')
         block = block.replace("$(getconf _NPROCESSORS_ONLN)", '"$BUILD_JOBS"')
         block = block.replace("--default-toolchain stable", "--default-toolchain 1.88.0")

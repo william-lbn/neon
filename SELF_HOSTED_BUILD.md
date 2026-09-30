@@ -29,6 +29,10 @@ DuckDB 和 Rust 扩展。采用上游 Compute Dockerfile 的 `EXTENSIONS=all`，
 
 上游 CI 文件保存在 `.github/upstream-workflows/`，避免 fork 自动调用 Neon 的
 私有 runner、AWS 角色和发布端点。原始 Dockerfiles、构建逻辑和许可证保留。
+PG14–16 的 Bullseye 包源改为官方归档；安全包固定到最后一个 LTS 日期快照
+`20260831T235959Z`，保留 APT 签名和包哈希校验，以修复 Debian #1147093 的 404。
+这维持上游 ABI/ICU 兼容，但 Bullseye LTS 已结束；后续发行版升级需要重新验证
+数据库排序规则和扩展兼容性。
 
 ## 完整发行清单：46 个镜像
 
