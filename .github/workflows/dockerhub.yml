@@ -43,7 +43,7 @@ jobs:
           echo "compute_components=$(jq -c '{include: [.compute_components | to_entries[] | {name: .key, binary: .value}]}' ci/distribution.json)" >> "$GITHUB_OUTPUT"
   autoscaling:
     needs: prepare
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@1b74de96fed8682295ba973feb97beb7273f6f3a
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@c0052f5f2d38fce6c70e448f3f1ee2ee239a0a93
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
@@ -90,7 +90,7 @@ jobs:
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     timeout-minutes: 350
     outputs:
-      image: ${{ steps.record.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -129,7 +129,6 @@ jobs:
           TAG: ${{ needs.prepare.outputs.tag }}
           DIGEST: ${{ steps.build.outputs.digest }}
         run: |
-          echo "image=$REGISTRY/neon:$TAG@$DIGEST" >> "$GITHUB_OUTPUT"
           python3 ci/release.py record --name neon --image "$REGISTRY/neon:$TAG" --digest "$DIGEST" --output output/neon.json
       - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
@@ -166,7 +165,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ steps.name.outputs.value }}:${{ needs.prepare.outputs.tag }}
           build-args: |
-            BASE_IMAGE=${{ needs.core.outputs.image }}
+            BASE_IMAGE=${{ env.REGISTRY }}/neon:${{ needs.prepare.outputs.tag }}@${{ needs.core.outputs.digest }}
             BINARY=/usr/local/bin/${{ matrix.binary }}
           provenance: mode=max
           sbom: true
