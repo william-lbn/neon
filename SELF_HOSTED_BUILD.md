@@ -50,8 +50,12 @@ H3 的旧源码地址失效，改为维护方的 `postgis/h3-pg` 地址；仍使
 | 连接池与指标（4） | `pgbouncer`, `postgres-exporter`, `pgbouncer-exporter`, `sql-exporter` |
 | Autoscaling / NeonVM（10） | `autoscaling-go-base`, `vm-kernel`, `vm-builder`, `neonvm-controller`, `neonvm-vxlan-controller`, `neonvm-runner`, `neonvm-daemon`, `autoscale-scheduler`, `autoscaler-agent`, `cluster-autoscaler-neonvm` |
 
-另有 `neon-build-cache`、`neon-compute-build-v14` 到 `neon-compute-build-v17` 存放中间构建阶段和缓存，
-不是运行服务。客户端兼容测试示例、示例 VM 和代码生成容器不属于发行服务。
+Docker Hub 的 `neon-build-cache` 存放核心编译缓存。Compute 的公共阶段、扩展产物和缓存
+存放在自己的 `ghcr.io/william-lbn/neon-compute-build-v14` 到 `neon-compute-build-v17`，
+通过 Actions 的 `GITHUB_TOKEN` 访问。实际构建发现大量中间阶段触发 Docker Hub 的
+HTTP 429 拉取/请求限制，因而将这些编译阶段移到自己的 GHCR；最终 46 个发行镜像仍全部
+推送到 `docker.io/williamluckyli`。扩展缓存保留编译中间层，注册表临时网络错误采用有界重试。
+中间阶段不是运行服务。客户端兼容测试示例、示例 VM 和代码生成容器不属于发行服务。
 
 核心/Compute/Autoscaling 服务来自本 fork 源码；三种指标 exporter 沿用上游固定版本
 及校验和的发行二进制，PgBouncer 从源码编译。上游 OSS 无法获取的私有 Subzero

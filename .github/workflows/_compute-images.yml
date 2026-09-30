@@ -21,11 +21,13 @@ on:
         required: true
 permissions:
   contents: read
+  packages: write
 defaults:
   run:
     shell: bash
 env:
   REGISTRY: docker.io/williamluckyli
+  STAGE_REGISTRY: ghcr.io/william-lbn
   TAG: ${{ inputs.tag }}
   PG: ${{ inputs.pg }}
   DEBIAN: ${{ inputs.debian }}
@@ -47,21 +49,23 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr: 'true'
       - name: Build pinned compiler and PostgreSQL stages
         run: |
           set -euo pipefail
           mkdir -p artifacts metadata
           for stage in $(python3 ci/compute.py common); do
             python3 ci/compute.py render --pg "$PG" --target "$stage" --output compute.ci.Dockerfile
-            image="$REGISTRY/neon-compute-build-$PG:$TAG-$stage"
-            cache="$REGISTRY/neon-compute-build-$PG:cache-$ARCH-$stage"
-            docker buildx build . --file compute.ci.Dockerfile --target "$stage" --push \
+            image="$STAGE_REGISTRY/neon-compute-build-$PG:$TAG-$stage"
+            cache="$STAGE_REGISTRY/neon-compute-build-$PG:cache-$ARCH-$stage"
+            bash ci/registry-build.sh docker buildx build . --file compute.ci.Dockerfile --target "$stage" --push \
               --platform "linux/$ARCH" --tag "$image" --metadata-file "metadata/$stage.json" \
               --build-arg "PG_VERSION=$PG" --build-arg "DEBIAN_VERSION=$DEBIAN" --build-arg "BUILD_TAG=$TAG" \
               --build-arg BUILD_JOBS=2 --build-arg "GIT_VERSION=$GITHUB_SHA" \
               --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
-              --label "org.opencontainers.image.revision=$GITHUB_SHA" \
-              --cache-from "type=registry,ref=$cache" --cache-to "type=registry,ref=$cache,mode=min" \
+              --cache-from "type=registry,ref=$cache" \
+              --cache-from "type=registry,ref=$REGISTRY/neon-compute-build-$PG:cache-$ARCH-$stage" \
+              --cache-to "type=registry,ref=$cache,mode=min" \
               --provenance mode=max --sbom true
             python3 ci/compute.py record --stage --pg "$PG" --target "$stage" --image "$image" \
               --metadata "metadata/$stage.json" --output "artifacts/$PG-$stage.json"
@@ -97,19 +101,21 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr: 'true'
       - name: Compile and export one upstream extension
         run: |
           set -euo pipefail
           python3 ci/compute.py render --pg "$PG" --target "$STAGE" --payload --output compute.ci.Dockerfile
-          image="$REGISTRY/neon-compute-build-$PG:$TAG-$STAGE"
-          cache="$REGISTRY/neon-compute-build-$PG:cache-$ARCH-$STAGE"
-          docker buildx build . --file compute.ci.Dockerfile --target payload --push \
+          image="$STAGE_REGISTRY/neon-compute-build-$PG:$TAG-$STAGE"
+          cache="$STAGE_REGISTRY/neon-compute-build-$PG:cache-$ARCH-$STAGE"
+          bash ci/registry-build.sh docker buildx build . --file compute.ci.Dockerfile --target payload --push \
             --platform "linux/$ARCH" --tag "$image" --metadata-file metadata.json \
             --build-arg "PG_VERSION=$PG" --build-arg "DEBIAN_VERSION=$DEBIAN" --build-arg "BUILD_TAG=$TAG" \
             --build-arg BUILD_JOBS=2 --build-arg "GIT_VERSION=$GITHUB_SHA" \
             --label "org.opencontainers.image.source=https://github.com/$GITHUB_REPOSITORY" \
-            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
-            --cache-from "type=registry,ref=$cache" --cache-to "type=registry,ref=$cache,mode=min" \
+            --cache-from "type=registry,ref=$cache" \
+            --cache-from "type=registry,ref=$REGISTRY/neon-compute-build-$PG:cache-$ARCH-$STAGE" \
+            --cache-to "type=registry,ref=$cache,mode=max" \
             --provenance mode=max --sbom true
           python3 ci/compute.py record --stage --pg "$PG" --target "$STAGE" --image "$image" \
             --metadata metadata.json --output "output/$PG-$STAGE.json"
@@ -136,6 +142,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr: 'true'
       - name: Assemble the full compute and regression images
         run: |
           set -euo pipefail
@@ -143,8 +150,8 @@ jobs:
             if [ "$target" = runtime ]; then name="compute-node-$PG"; else name="neon-test-extensions-$PG"; fi
             python3 ci/compute.py render --pg "$PG" --target "$target" --output compute.ci.Dockerfile
             image="$REGISTRY/$name:$TAG"
-            cache="$REGISTRY/neon-compute-build-$PG:cache-$ARCH-$target"
-            docker buildx build . --file compute.ci.Dockerfile --target "$target" --push \
+            cache="$STAGE_REGISTRY/neon-compute-build-$PG:cache-$ARCH-$target"
+            bash ci/registry-build.sh docker buildx build . --file compute.ci.Dockerfile --target "$target" --push \
               --platform "linux/$ARCH" --tag "$image" --metadata-file "$target.json" \
               --build-arg "PG_VERSION=$PG" --build-arg "DEBIAN_VERSION=$DEBIAN" --build-arg "BUILD_TAG=$TAG" \
               --build-arg EXTENSIONS=all --build-arg BUILD_JOBS=2 --build-arg "GIT_VERSION=$GITHUB_SHA" \
