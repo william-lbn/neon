@@ -120,8 +120,8 @@ jobs:
             org.opencontainers.image.source=https://github.com/william-lbn/neon
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ needs.prepare.outputs.tag }}
-          cache-from: type=gha,scope=neon-core-${{ env.ARCH }}
-          cache-to: type=gha,scope=neon-core-${{ env.ARCH }},mode=min
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/neon-build-cache:core-${{ env.ARCH }}
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/neon-build-cache:core-${{ env.ARCH }},mode=max
           provenance: mode=max
           sbom: true
       - id: record

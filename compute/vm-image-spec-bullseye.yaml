@@ -105,6 +105,13 @@ build: |
   FROM debian@$BULLSEYE_SLIM_SHA as libcgroup-builder
   ENV LIBCGROUP_VERSION=v2.0.3
 
+  # Debian #1147093: retain the final signed LTS security packages.
+  RUN printf '%s\n' \
+      'deb http://archive.debian.org/debian bullseye main' \
+      'deb http://archive.debian.org/debian bullseye-updates main' \
+      'deb [check-valid-until=no] http://snapshot.debian.org/archive/debian-security/20260831T235959Z/ bullseye-security main' \
+      > /etc/apt/sources.list
+
   RUN set -exu \
       && apt update \
       && apt install --no-install-recommends -y \

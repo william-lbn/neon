@@ -76,8 +76,6 @@ RUN --mount=type=secret,uid=1000,id=SUBZERO_ACCESS_TOKEN \
 # Main build image
 FROM $REPOSITORY/$IMAGE:$TAG AS build
 WORKDIR /home/nonroot
-ARG GIT_VERSION=local
-ARG BUILD_TAG
 ARG ADDITIONAL_RUSTFLAGS=""
 ARG IO_ALIGNMENT=512
 ENV CARGO_FEATURES="default"
@@ -101,6 +99,8 @@ COPY --chown=nonroot . .
 COPY --chown=nonroot --from=plan     /home/nonroot/proxy/Cargo.toml         proxy/Cargo.toml
 COPY --chown=nonroot --from=plan     /home/nonroot/Cargo.lock               Cargo.lock
 
+ARG GIT_VERSION=local
+ARG BUILD_TAG
 RUN  --mount=type=secret,uid=1000,id=SUBZERO_ACCESS_TOKEN \
     set -e \
     && if [ -s /run/secrets/SUBZERO_ACCESS_TOKEN ]; then \

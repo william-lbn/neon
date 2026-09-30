@@ -48,7 +48,7 @@ PG14–16 的 Bullseye 包源改为官方归档；安全包固定到最后一个
 | 连接池与指标（4） | `pgbouncer`, `postgres-exporter`, `pgbouncer-exporter`, `sql-exporter` |
 | Autoscaling / NeonVM（10） | `autoscaling-go-base`, `vm-kernel`, `vm-builder`, `neonvm-controller`, `neonvm-vxlan-controller`, `neonvm-runner`, `neonvm-daemon`, `autoscale-scheduler`, `autoscaler-agent`, `cluster-autoscaler-neonvm` |
 
-另有 `neon-compute-build-v14` 到 `neon-compute-build-v17` 存放中间构建阶段和缓存，
+另有 `neon-build-cache`、`neon-compute-build-v14` 到 `neon-compute-build-v17` 存放中间构建阶段和缓存，
 不是运行服务。客户端兼容测试示例、示例 VM 和代码生成容器不属于发行服务。
 
 核心/Compute/Autoscaling 服务来自本 fork 源码；三种指标 exporter 沿用上游固定版本
