@@ -1,0 +1,33 @@
+name: Check automatic release permissions
+on:
+  workflow_dispatch:
+    inputs:
+      test_tag:
+        description: Temporary ci-permission-check-* lightweight tag created at an older source commit
+        required: true
+        type: string
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ inputs.test_tag }}
+    steps:
+      - name: Verify release creation with the default token and an existing source tag
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^ci-permission-check-[0-9-]+$ ]]
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --draft --title 'Temporary CI permission check' --notes 'Temporary draft: verify existing-tag release creation. Removed by the same test.'
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft' | grep -qx true
+      - name: Remove the temporary draft and tag
+        if: always()
+        run: |
+          set -euo pipefail
+          [[ "$TAG" =~ ^ci-permission-check-[0-9-]+$ ]]
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release delete "$TAG" --repo "$GITHUB_REPOSITORY" --yes
+          fi
+          gh api -X DELETE "repos/$GITHUB_REPOSITORY/git/refs/tags/$TAG"
