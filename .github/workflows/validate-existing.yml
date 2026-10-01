@@ -50,6 +50,8 @@ jobs:
           tag=$(python3 ci/release.py lookup --name neon | sed -E 's/.*:([^:@]+)@sha256:.*/\1/')
           [[ "$tag" == *"-r${BUILD_RUN}-a"* ]]
           python3 ci/release.py manifest --tag "$tag" --arch "$ARCH" --source-commit "$source_commit" --output validated-build.json
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.sha' > tag-source.txt
+          [[ "$(cat tag-source.txt)" == "$source_commit" ]]
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
   validate:

@@ -149,7 +149,7 @@ jobs:
           done
           printf 'Source-built Neon OSS distribution. Architecture: linux/%s. All 46 images passed build, runtime and publication gates.\n\nBuild source: %s\nValidation source: %s\nBuild run: https://github.com/%s/actions/runs/%s\nValidation run: https://github.com/%s/actions/runs/%s\n\nUse digest-pinned references in distribution-manifest.json. The version timestamp is UTC.\n' "$ARCH" "$SOURCE_COMMIT" "$GITHUB_SHA" "$GITHUB_REPOSITORY" '${{ inputs.source_run_id }}' "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > release-notes.md
           if ! gh release view "$TAG" > /dev/null 2>&1; then
-            gh release create "$TAG" --draft --target "$SOURCE_COMMIT" --title "Neon OSS $TAG" --notes-file release-notes.md
+            gh release create "$TAG" --verify-tag --draft --target "$SOURCE_COMMIT" --title "Neon OSS $TAG" --notes-file release-notes.md
           fi
           gh release upload "$TAG" distribution-manifest.json --clobber
           jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do

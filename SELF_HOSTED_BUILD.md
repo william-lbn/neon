@@ -75,6 +75,11 @@ contrib 回归测试（沿用上游 SKIP 清单）。VM 镜像做 qcow2 完整�
 CI 检查原构建的所有非验证任务均成功、46 个镜像完整、源码锁一致，再对原版本运行
 全部验证并发布，避免重复编译。发行清单分别记录 `neon_commit`（镜像源码）和
 `verification_commit`（验证代码）；修复测试脚本不会伪造镜像的源码版本。
+构建开始时 CI 创建同名轻量 Git 标签固定源码，避免长时间构建后分支头前进导致
+Actions 令牌不能为旧的 CI 修改提交创建 Release。Git 标签表示构建来源；只有成功
+发布的 GitHub Release 才表示通过全部关卡。恢复早期构建时，若没有同名标签，先
+用有 `repo`/`workflow` 权限的账户创建轻量标签并指向 manifest 的 `neon_commit`；
+恢复 CI 会验证标签目标，拒绝对其他提交发布。
 
 上游 Compose 的 MinIO/MC 公共镜像已无法拉取。CI 从固定的上游 2022 年源码提交
 构建相同服务端版本及同月客户端，发布到自己的 `ghcr.io/william-lbn/neon-ci-minio`

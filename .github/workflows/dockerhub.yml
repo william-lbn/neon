@@ -23,6 +23,8 @@ defaults:
 jobs:
   prepare:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     outputs:
       tag: ${{ steps.meta.outputs.tag }}
       autoscaling: ${{ steps.meta.outputs.autoscaling }}
@@ -41,6 +43,11 @@ jobs:
           echo "autoscaling=$(jq -r .autoscaling_commit ci/distribution.json)" >> "$GITHUB_OUTPUT"
           echo "binaries=$(jq -c '{binary: .core_binaries}' ci/distribution.json)" >> "$GITHUB_OUTPUT"
           echo "compute_components=$(jq -c '{include: [.compute_components | to_entries[] | {name: .key, binary: .value}]}' ci/distribution.json)" >> "$GITHUB_OUTPUT"
+      - name: Pin the build source before the default branch can advance
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
+        run: gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$TAG" -f "sha=$GITHUB_SHA"
   autoscaling:
     needs: prepare
     uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@c0052f5f2d38fce6c70e448f3f1ee2ee239a0a93
