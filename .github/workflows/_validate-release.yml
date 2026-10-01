@@ -144,12 +144,17 @@ jobs:
         run: |
           set -euo pipefail
           python3 ci/release.py manifest --tag "$TAG" --arch "$ARCH" --source-commit "$SOURCE_COMMIT" --output distribution-manifest.json
+          tag_source=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq '.object.sha')
+          [[ "$tag_source" == "$SOURCE_COMMIT" ]]
           jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do
             bash ci/registry-build.sh docker buildx imagetools inspect "$image" > /dev/null
           done
           printf 'Source-built Neon OSS distribution. Architecture: linux/%s. All 46 images passed build, runtime and publication gates.\n\nBuild source: %s\nValidation source: %s\nBuild run: https://github.com/%s/actions/runs/%s\nValidation run: https://github.com/%s/actions/runs/%s\n\nUse digest-pinned references in distribution-manifest.json. The version timestamp is UTC.\n' "$ARCH" "$SOURCE_COMMIT" "$GITHUB_SHA" "$GITHUB_REPOSITORY" '${{ inputs.source_run_id }}' "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > release-notes.md
           if ! gh release view "$TAG" > /dev/null 2>&1; then
-            gh release create "$TAG" --verify-tag --draft --target "$SOURCE_COMMIT" --title "Neon OSS $TAG" --notes-file release-notes.md
+            # The existing tag is already verified against the build SHA.
+            # Do not send an old SHA as target_commitish: GitHub rejects that
+            # for workflow-changing commits even with contents:write.
+            gh release create "$TAG" --verify-tag --draft --title "Neon OSS $TAG" --notes-file release-notes.md
           fi
           gh release upload "$TAG" distribution-manifest.json --clobber
           jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do
