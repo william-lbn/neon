@@ -132,12 +132,10 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806
-        with:
-          pattern: images-*
-          path: artifacts
-          run-id: ${{ inputs.source_run_id }}
-          github-token: ${{ github.token }}
+      - name: Download image records across every artifact page
+        env:
+          BUILD_RUN: ${{ inputs.source_run_id }}
+        run: gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --pattern 'images-*' --dir artifacts
       - uses: ./.github/actions/dockerhub-setup
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}

@@ -28,12 +28,11 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806
-        with:
-          pattern: images-*
-          path: artifacts
-          run-id: ${{ inputs.build_run_id }}
-          github-token: ${{ github.token }}
+      - name: Download image records across every artifact page
+        env:
+          BUILD_RUN: ${{ inputs.build_run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$BUILD_RUN" --repo "$GITHUB_REPOSITORY" --pattern 'images-*' --dir artifacts
       - name: Require all source image build and VM validation jobs to have succeeded
         id: verify
         env:
