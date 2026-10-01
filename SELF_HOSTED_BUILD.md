@@ -1,5 +1,30 @@
 # 自维护 Neon：源码与镜像发行
 
+## 首个已验证发行
+
+版本：`2026.09.30-162021-1f30cd02092d-r36742713551-a1`（UTC 构建时间）。
+46 个镜像均发布到 `docker.io/williamluckyli`，架构为 `linux/amd64`，支持 PG14–17。
+
+- [成功的验证与发布流水线](https://github.com/william-lbn/neon/actions/runs/36870577573)
+- [GitHub Release](https://github.com/william-lbn/neon/releases/tag/2026.09.30-162021-1f30cd02092d-r36742713551-a1)
+- [完整镜像与 digest 清单](https://github.com/william-lbn/neon/releases/download/2026.09.30-162021-1f30cd02092d-r36742713551-a1/distribution-manifest.json)
+- [默认 Actions 令牌自动创建发行的验证](https://github.com/william-lbn/neon/actions/runs/36876435255)
+
+原构建的 205 个任务成功，最后四个验证任务因上游 MinIO 公共镜像不可用而失败。
+修复测试依赖后复用了这次构建的全部镜像；PG14–17 SQL、vector、PostGIS、数据恢复，
+PG16/17 上游扩展与 contrib 回归，以及四个 VM 的 qcow2 检查均已通过。
+GitHub Release 的源码标签指向 `1f30cd02092dc151f5d00aef97e7c629105b454b`；
+验证代码提交为 `0c8d4f02e04c9a765c6f6f144a002ef7e10ba8b7`。历史失败记录保留，
+请以以上成功的验证发布流水线及 Release 为准。
+
+例如拉取本发行的 proxy：
+
+```sh
+docker pull williamluckyli/proxy:2026.09.30-162021-1f30cd02092d-r36742713551-a1
+```
+
+生产部署应使用清单中对应镜像的 `image@digest`，以固定实际镜像内容。
+
 ## Fork 审计
 
 三个 fork 的 parent 都是对应的 `neondatabase` 仓库。初始 Neon、Autoscaling
