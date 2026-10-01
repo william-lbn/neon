@@ -312,87 +312,16 @@ jobs:
           path: output/*.json
           retention-days: 90
           if-no-files-found: error
-  smoke:
-    needs: [prepare, core, compute]
-    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      matrix:
-        pg: [14, 15, 16, 17]
-    env:
-      REPOSITORY: docker.io/williamluckyli
-      TAG: ${{ needs.prepare.outputs.tag }}
-      PG_VERSION: ${{ matrix.pg }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - uses: ./.github/actions/dockerhub-setup
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          token: ${{ secrets.DOCKERHUB_TOKEN }}
-      - run: bash ci/smoke.sh
-      - name: Upstream extension and contrib regressions
-        if: matrix.pg >= 16
-        env:
-          TEST_VERSION_ONLY: v${{ matrix.pg }}
-          PARALLEL_COMPUTES: 1
-        run: |
-          sudo chown -R 1000:1000 docker-compose/pageserver_config
-          ./docker-compose/docker_compose_test.sh
-      - name: Capture service logs
-        if: always()
-        run: |
-          mkdir -p logs
-          docker compose -f docker-compose/docker-compose.yml logs --no-color > "logs/pg$PG_VERSION.log" 2>&1 || true
-          docker compose -f docker-compose/docker-compose.yml down --volumes || true
-      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
-        if: always()
-        with:
-          name: logs-smoke-pg${{ matrix.pg }}
-          path: logs
-          retention-days: 30
-  publish:
-    needs: [prepare, autoscaling, core-components, compute-components, vm-compute, smoke]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
+  validate:
+    needs: [prepare, autoscaling, core-components, compute-components, vm-compute]
     permissions:
       contents: write
-    env:
-      TAG: ${{ needs.prepare.outputs.tag }}
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
-        with:
-          pattern: images-*
-          path: artifacts
-      - uses: ./.github/actions/dockerhub-setup
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          token: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Validate all images and publish a complete release manifest
-        run: |
-          set -euo pipefail
-          python3 ci/release.py manifest --tag "$TAG" --arch "$ARCH" --output distribution-manifest.json
-          jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do
-            docker buildx imagetools inspect "$image" > /dev/null
-          done
-          printf 'Source-built Neon OSS distribution. Architecture: linux/%s. All 46 images passed the build and publication gates.\n\nUse the digest-pinned references in distribution-manifest.json. The version timestamp is UTC.\n' "$ARCH" > release-notes.md
-          gh release create "$TAG" --target "$GITHUB_SHA" --title "Neon OSS $TAG" --notes-file release-notes.md distribution-manifest.json
-          jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do
-            repository=${image%:*}
-            # Strip the digest first, then the timestamp tag.
-            repository=${image%@*}; repository=${repository%:*}
-            docker buildx imagetools create --tag "$repository:latest" "$image"
-          done
-          cat release-notes.md >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
-        with:
-          name: distribution-manifest
-          path: distribution-manifest.json
-          if-no-files-found: error
-          retention-days: 90
+      actions: read
+      packages: write
+    uses: ./.github/workflows/_validate-release.yml
+    with:
+      tag: ${{ needs.prepare.outputs.tag }}
+      arch: ${{ inputs.arch || 'amd64' }}
+      source_commit: ${{ github.sha }}
+      source_run_id: ${{ github.run_id }}
+    secrets: inherit

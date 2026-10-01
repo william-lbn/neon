@@ -1,0 +1,168 @@
+name: Validate and publish complete distribution
+on:
+  workflow_call:
+    inputs:
+      tag:
+        required: true
+        type: string
+      arch:
+        required: true
+        type: string
+      source_commit:
+        required: true
+        type: string
+      source_run_id:
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+  packages: write
+env:
+  REGISTRY: docker.io/williamluckyli
+  ARCH: ${{ inputs.arch }}
+defaults:
+  run:
+    shell: bash
+jobs:
+  test-storage:
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 45
+    outputs:
+      server: ${{ steps.server.outputs.digest }}
+      client: ${{ steps.client.outputs.digest }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr: 'true'
+      - name: Build the upstream test server from pinned source
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        id: server
+        with:
+          context: .
+          file: ci/minio.Dockerfile
+          target: server
+          platforms: linux/${{ inputs.arch }}
+          push: true
+          tags: ghcr.io/william-lbn/neon-ci-minio:RELEASE.2022-10-20T00-55-09Z
+          labels: |
+            org.opencontainers.image.source=https://github.com/william-lbn/neon
+          cache-from: type=gha,scope=ci-minio-${{ inputs.arch }}
+          cache-to: type=gha,scope=ci-minio-${{ inputs.arch }},mode=max
+          provenance: mode=max
+          sbom: true
+      - name: Build the matching test client from pinned source
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        id: client
+        with:
+          context: .
+          file: ci/minio.Dockerfile
+          target: client
+          platforms: linux/${{ inputs.arch }}
+          push: true
+          tags: ghcr.io/william-lbn/neon-ci-mc:RELEASE.2022-10-20T23-26-33Z
+          labels: |
+            org.opencontainers.image.source=https://github.com/william-lbn/neon
+          cache-from: type=gha,scope=ci-mc-${{ inputs.arch }}
+          cache-to: type=gha,scope=ci-mc-${{ inputs.arch }},mode=max
+          provenance: mode=max
+          sbom: true
+  smoke:
+    needs: test-storage
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [14, 15, 16, 17]
+    env:
+      REPOSITORY: docker.io/williamluckyli
+      TAG: ${{ inputs.tag }}
+      PG_VERSION: ${{ matrix.pg }}
+      MINIO_IMAGE: ghcr.io/william-lbn/neon-ci-minio@${{ needs.test-storage.outputs.server }}
+      MINIO_MC_IMAGE: ghcr.io/william-lbn/neon-ci-mc@${{ needs.test-storage.outputs.client }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr: 'true'
+      - run: bash ci/smoke.sh
+      - name: Upstream extension and contrib regressions
+        if: matrix.pg >= 16
+        env:
+          TEST_VERSION_ONLY: v${{ matrix.pg }}
+          PARALLEL_COMPUTES: 1
+        run: |
+          sudo chown -R 1000:1000 docker-compose/pageserver_config
+          ./docker-compose/docker_compose_test.sh
+      - name: Capture service logs
+        if: always()
+        run: |
+          mkdir -p logs
+          docker compose -f docker-compose/docker-compose.yml logs --no-color > "logs/pg$PG_VERSION.log" 2>&1 || true
+          docker compose -f docker-compose/docker-compose.yml down --volumes || true
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1
+        if: always()
+        with:
+          name: logs-smoke-pg${{ matrix.pg }}-attempt${{ github.run_attempt }}
+          path: logs
+          retention-days: 30
+  publish:
+    needs: [test-storage, smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+      actions: read
+    env:
+      TAG: ${{ inputs.tag }}
+      SOURCE_COMMIT: ${{ inputs.source_commit }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806
+        with:
+          pattern: images-*
+          path: artifacts
+          run-id: ${{ inputs.source_run_id }}
+          github-token: ${{ github.token }}
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Verify all images, promote tags and publish the release
+        run: |
+          set -euo pipefail
+          python3 ci/release.py manifest --tag "$TAG" --arch "$ARCH" --source-commit "$SOURCE_COMMIT" --output distribution-manifest.json
+          jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do
+            bash ci/registry-build.sh docker buildx imagetools inspect "$image" > /dev/null
+          done
+          printf 'Source-built Neon OSS distribution. Architecture: linux/%s. All 46 images passed build, runtime and publication gates.\n\nBuild source: %s\nValidation source: %s\nBuild run: https://github.com/%s/actions/runs/%s\nValidation run: https://github.com/%s/actions/runs/%s\n\nUse digest-pinned references in distribution-manifest.json. The version timestamp is UTC.\n' "$ARCH" "$SOURCE_COMMIT" "$GITHUB_SHA" "$GITHUB_REPOSITORY" '${{ inputs.source_run_id }}' "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" > release-notes.md
+          if ! gh release view "$TAG" > /dev/null 2>&1; then
+            gh release create "$TAG" --draft --target "$SOURCE_COMMIT" --title "Neon OSS $TAG" --notes-file release-notes.md
+          fi
+          gh release upload "$TAG" distribution-manifest.json --clobber
+          jq -r '.images[] | .image + "@" + .digest' distribution-manifest.json | while read -r image; do
+            repository=${image%@*}; repository=${repository%:*}
+            bash ci/registry-build.sh docker buildx imagetools create --tag "$repository:latest" "$image"
+          done
+          gh release edit "$TAG" --draft=false --notes-file release-notes.md
+          cat release-notes.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1
+        with:
+          name: distribution-manifest-attempt${{ github.run_attempt }}
+          path: distribution-manifest.json
+          if-no-files-found: error
+          retention-days: 90

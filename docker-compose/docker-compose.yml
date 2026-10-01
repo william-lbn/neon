@@ -1,7 +1,7 @@
 services:
   minio:
     restart: always
-    image: quay.io/minio/minio:RELEASE.2022-10-20T00-55-09Z
+    image: ${MINIO_IMAGE:-ghcr.io/william-lbn/neon-ci-minio:RELEASE.2022-10-20T00-55-09Z}
     ports:
       - 9000:9000
       - 9001:9001
@@ -11,7 +11,7 @@ services:
     command: server /data --address :9000 --console-address ":9001"
 
   minio_create_buckets:
-    image: minio/mc
+    image: ${MINIO_MC_IMAGE:-ghcr.io/william-lbn/neon-ci-mc:RELEASE.2022-10-20T23-26-33Z}
     environment:
       - MINIO_ROOT_USER=minio
       - MINIO_ROOT_PASSWORD=password
@@ -179,7 +179,7 @@ services:
       - pageserver
 
   compute_is_ready:
-    image: postgres:latest
+    image: ${REPOSITORY:-ghcr.io/neondatabase}/compute-node-v${PG_VERSION:-16}:${COMPUTE_TAG:-${TAG:-latest}}
     environment:
       - PARALLEL_COMPUTES=1
     entrypoint:

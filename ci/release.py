@@ -45,6 +45,7 @@ def main():
     manifest.add_argument("--tag", required=True)
     manifest.add_argument("--arch", required=True)
     manifest.add_argument("--output", required=True)
+    manifest.add_argument("--source-commit")
     args = parser.parse_args()
     if args.command == "record":
         if not re.fullmatch(r"sha256:[a-f0-9]{64}", args.digest):
@@ -63,7 +64,13 @@ def main():
     expected = expected_images()
     if set(images) != expected:
         raise ValueError(f"Distribution incomplete. Missing={sorted(expected - images.keys())}; extra={sorted(images.keys() - expected)}")
-    neon_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    verification_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    neon_commit = args.source_commit or verification_commit
+    if not re.fullmatch(r"[a-f0-9]{40}", neon_commit):
+        raise ValueError("Invalid source commit")
+    source_lock = json.loads(subprocess.check_output(["git", "show", neon_commit + ":ci/distribution.json"], text=True))
+    if source_lock != LOCK:
+        raise ValueError("Validation source lock differs from the image build source")
     for name, item in images.items():
         if not item["image"].startswith(LOCK["registry"] + "/") or not item["image"].endswith(":" + args.tag):
             raise ValueError(f"Image is outside this release: {name}")
@@ -75,6 +82,7 @@ def main():
     output = {"version": args.tag, "architecture": "linux/" + args.arch,
         "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "neon_commit": neon_commit,
+        "verification_commit": verification_commit,
         "source_lock": LOCK, "images": dict(sorted(images.items()))}
     pathlib.Path(args.output).write_text(json.dumps(output, indent=2) + "\n")
     print(f"Verified complete distribution: {len(images)} images")

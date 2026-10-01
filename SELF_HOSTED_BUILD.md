@@ -70,6 +70,18 @@ contrib 回归测试（沿用上游 SKIP 清单）。VM 镜像做 qcow2 完整�
 发布时核对所有 46 项、相同版本、源码提交、命名空间、digest 和远端 manifest。
 全部通过才创建 Release 并更新 `latest`。
 
+若所有镜像构建成功、仅运行验证或发布阶段失败，可手动运行
+**Validate and publish existing images**，填原始 `build_run_id` 和架构。
+CI 检查原构建的所有非验证任务均成功、46 个镜像完整、源码锁一致，再对原版本运行
+全部验证并发布，避免重复编译。发行清单分别记录 `neon_commit`（镜像源码）和
+`verification_commit`（验证代码）；修复测试脚本不会伪造镜像的源码版本。
+
+上游 Compose 的 MinIO/MC 公共镜像已无法拉取。CI 从固定的上游 2022 年源码提交
+构建相同服务端版本及同月客户端，发布到自己的 `ghcr.io/william-lbn/neon-ci-minio`
+和 `neon-ci-mc`，测试时通过 digest 使用；这是两个测试辅助镜像，不计入 46 个
+Neon 发行镜像。源码、许可证和提交固定在 `ci/minio.Dockerfile`。在本地使用这些
+私有 GHCR 镜像时需要登录 GHCR，也可通过 `MINIO_IMAGE`/`MINIO_MC_IMAGE` 指定镜像。
+
 部署建议使用 manifest 中的 `image@digest`，并让相关组件使用同一次发行。
 不要在生产中混用日期版本或让各组件自行追踪 `latest`。单独组件镜像继承上游
 运行环境，并以所选二进制为 ENTRYPOINT；配置、证书、持久卷、服务地址和参数

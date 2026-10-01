@@ -1,0 +1,68 @@
+name: Validate and publish existing images
+on:
+  workflow_dispatch:
+    inputs:
+      build_run_id:
+        description: Completed Docker Hub Neon distribution run with all image builds successful
+        required: true
+        type: string
+      arch:
+        description: Architecture built in that run
+        type: choice
+        options: [amd64, arm64]
+        default: amd64
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: release-existing-${{ inputs.build_run_id }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.verify.outputs.tag }}
+      source_commit: ${{ steps.verify.outputs.source_commit }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806
+        with:
+          pattern: images-*
+          path: artifacts
+          run-id: ${{ inputs.build_run_id }}
+          github-token: ${{ github.token }}
+      - name: Require all source image build and VM validation jobs to have succeeded
+        id: verify
+        env:
+          BUILD_RUN: ${{ inputs.build_run_id }}
+          ARCH: ${{ inputs.arch }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$BUILD_RUN" =~ ^[0-9]+$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN" > build-run.json
+          jq -e '.name == "Docker Hub Neon distribution" and .status == "completed" and .head_repository.full_name == "william-lbn/neon"' build-run.json
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$BUILD_RUN/jobs?per_page=100" --paginate --slurp > build-jobs.json
+          jq -e '[.[].jobs[] | select((.name | test("^smoke \\(|^publish$|^validate /")) | not)] | length >= 200 and all(.conclusion == "success")' build-jobs.json
+          source_commit=$(jq -r .head_sha build-run.json)
+          tag=$(python3 ci/release.py lookup --name neon | sed -E 's/.*:([^:@]+)@sha256:.*/\1/')
+          [[ "$tag" == *"-r${BUILD_RUN}-a"* ]]
+          python3 ci/release.py manifest --tag "$tag" --arch "$ARCH" --source-commit "$source_commit" --output validated-build.json
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "source_commit=$source_commit" >> "$GITHUB_OUTPUT"
+  validate:
+    needs: prepare
+    permissions:
+      contents: write
+      actions: read
+      packages: write
+    uses: ./.github/workflows/_validate-release.yml
+    with:
+      tag: ${{ needs.prepare.outputs.tag }}
+      source_commit: ${{ needs.prepare.outputs.source_commit }}
+      source_run_id: ${{ inputs.build_run_id }}
+      arch: ${{ inputs.arch }}
+    secrets: inherit
