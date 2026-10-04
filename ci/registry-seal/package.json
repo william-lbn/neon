@@ -1,0 +1,10 @@
+{
+  "name": "neon-control-plane-registry-bootstrap",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Owner-only encrypted migration to william-lbn/control-plane",
+  "dependencies": {
+    "libsodium": "0.7.15",
+    "libsodium-wrappers": "0.7.15"
+  }
+}

@@ -1,0 +1,42 @@
+name: Bootstrap control-plane registry credentials
+
+# Owner-authorized, manual, one-destination migration. GitHub Secret plaintext
+# never leaves this runner: only sealed ciphertext for the target repo is saved.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: control-plane-registry-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  seal:
+    if: github.actor == 'william-lbn' && github.repository == 'william-lbn/neon' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24.19.0'
+      - name: Install integrity-locked encryption library before exposing secrets
+        working-directory: ci/registry-seal
+        run: npm ci --ignore-scripts --no-audit --fund=false
+      - name: Seal existing credentials to the fixed control-plane public key
+        working-directory: ci/registry-seal
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          SEALED_OUTPUT: ${{ runner.temp }}/sealed-control-plane-registry.json
+        run: node seal.mjs
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sealed-control-plane-registry-${{ github.run_id }}
+          path: ${{ runner.temp }}/sealed-control-plane-registry.json
+          if-no-files-found: error
+          retention-days: 1
