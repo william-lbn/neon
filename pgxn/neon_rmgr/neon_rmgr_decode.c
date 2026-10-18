@@ -10,7 +10,7 @@
 
 #include "neon_rmgr.h"
 
-#endif /* PG >= 16 */
+#endif							/* PG >= 16 */
 
 #if PG_MAJORVERSION_NUM == 16
 
@@ -33,33 +33,38 @@ neon_rm_decode(LogicalDecodingContext *ctx, XLogRecordBuffer *buf)
 
 	ReorderBufferProcessXid(ctx->reorder, xid, buf->origptr);
 
-	/*
-	 * If we don't have snapshot or we are just fast-forwarding, there is no
-	 * point in decoding data changes.
+	/*-
+	 * fast-forward 虽不输出行变更，仍须调用 SnapBuildProcessChange 建立
+	 * 基础快照并保护 catalog_xmin。若在这里提前返回，推进复制槽之后的
+	 * VACUUM 可能回收仍被未提交事务引用的目录元组，导致后续解码缺属性。
+	 * 只有未形成完整快照时才整体跳过；具体行解码在下方单独判断。
 	 */
-	if (SnapBuildCurrentState(builder) < SNAPBUILD_FULL_SNAPSHOT ||
-		ctx->fast_forward)
+	if (SnapBuildCurrentState(builder) < SNAPBUILD_FULL_SNAPSHOT)
 		return;
 
 	switch (info)
 	{
 		case XLOG_NEON_HEAP_INSERT:
-			if (SnapBuildProcessChange(builder, xid, buf->origptr))
+			if (SnapBuildProcessChange(builder, xid, buf->origptr) &&
+				!ctx->fast_forward)
 				DecodeNeonInsert(ctx, buf);
 			break;
 		case XLOG_NEON_HEAP_DELETE:
-			if (SnapBuildProcessChange(builder, xid, buf->origptr))
+			if (SnapBuildProcessChange(builder, xid, buf->origptr) &&
+				!ctx->fast_forward)
 				DecodeNeonDelete(ctx, buf);
 			break;
 		case XLOG_NEON_HEAP_UPDATE:
 		case XLOG_NEON_HEAP_HOT_UPDATE:
-			if (SnapBuildProcessChange(builder, xid, buf->origptr))
+			if (SnapBuildProcessChange(builder, xid, buf->origptr) &&
+				!ctx->fast_forward)
 				DecodeNeonUpdate(ctx, buf);
 			break;
 		case XLOG_NEON_HEAP_LOCK:
 			break;
 		case XLOG_NEON_HEAP_MULTI_INSERT:
-			if (SnapBuildProcessChange(builder, xid, buf->origptr))
+			if (SnapBuildProcessChange(builder, xid, buf->origptr) &&
+				!ctx->fast_forward)
 				DecodeNeonMultiInsert(ctx, buf);
 			break;
 		default:
@@ -427,33 +432,38 @@ neon_rm_decode(LogicalDecodingContext *ctx, XLogRecordBuffer *buf)
 
 	ReorderBufferProcessXid(ctx->reorder, xid, buf->origptr);
 
-	/*
-	 * If we don't have snapshot or we are just fast-forwarding, there is no
-	 * point in decoding data changes.
+	/*-
+	 * fast-forward 虽不输出行变更，仍须调用 SnapBuildProcessChange 建立
+	 * 基础快照并保护 catalog_xmin。若在这里提前返回，推进复制槽之后的
+	 * VACUUM 可能回收仍被未提交事务引用的目录元组，导致后续解码缺属性。
+	 * 只有未形成完整快照时才整体跳过；具体行解码在下方单独判断。
 	 */
-	if (SnapBuildCurrentState(builder) < SNAPBUILD_FULL_SNAPSHOT ||
-		ctx->fast_forward)
+	if (SnapBuildCurrentState(builder) < SNAPBUILD_FULL_SNAPSHOT)
 		return;
 
 	switch (info)
 	{
 		case XLOG_NEON_HEAP_INSERT:
-			if (SnapBuildProcessChange(builder, xid, buf->origptr))
+			if (SnapBuildProcessChange(builder, xid, buf->origptr) &&
+				!ctx->fast_forward)
 				DecodeNeonInsert(ctx, buf);
 			break;
 		case XLOG_NEON_HEAP_DELETE:
-			if (SnapBuildProcessChange(builder, xid, buf->origptr))
+			if (SnapBuildProcessChange(builder, xid, buf->origptr) &&
+				!ctx->fast_forward)
 				DecodeNeonDelete(ctx, buf);
 			break;
 		case XLOG_NEON_HEAP_UPDATE:
 		case XLOG_NEON_HEAP_HOT_UPDATE:
-			if (SnapBuildProcessChange(builder, xid, buf->origptr))
+			if (SnapBuildProcessChange(builder, xid, buf->origptr) &&
+				!ctx->fast_forward)
 				DecodeNeonUpdate(ctx, buf);
 			break;
 		case XLOG_NEON_HEAP_LOCK:
 			break;
 		case XLOG_NEON_HEAP_MULTI_INSERT:
-			if (SnapBuildProcessChange(builder, xid, buf->origptr))
+			if (SnapBuildProcessChange(builder, xid, buf->origptr) &&
+				!ctx->fast_forward)
 				DecodeNeonMultiInsert(ctx, buf);
 			break;
 		default:

@@ -31,6 +31,16 @@ static void redo_neon_heap_update(XLogReaderState *record, bool hot_update);
 static void redo_neon_heap_lock(XLogReaderState *record);
 static void redo_neon_heap_multi_insert(XLogReaderState *record);
 
+/*-
+ * 同时处理旧 WAL 中隐含的 VM 清位和新版维护补丁登记的 VM block reference。
+ * UPDATE 的两个 heap block 可能共用一个 VM 页：必须在一次 LSN 判定中清掉
+ * 两组位，不能第一次清位后推进 LSN，使第二次误判为已经重放。
+ */
+static void neon_xlog_vm_clear(XLogReaderState *record,
+							   RelFileLocator rlocator,
+							   BlockNumber heapblk1, BlockNumber heapblk2,
+							   uint8 flags);
+
 const static RmgrData NeonRmgr = {
 	.rm_name = "neon",
 	.rm_redo = neon_rm_redo,
@@ -206,6 +216,83 @@ fix_infomask_from_infobits(uint8 infobits, uint16 *infomask, uint16 *infomask2)
 }
 
 static void
+neon_xlog_vm_clear(XLogReaderState *record, RelFileLocator rlocator,
+				   BlockNumber heapblk1, BlockNumber heapblk2, uint8 flags)
+{
+	Relation	reln = CreateFakeRelcacheEntry(rlocator);
+	BlockNumber heapblocks[2] = {heapblk1, heapblk2};
+	bool		handled[2] = {false, false};
+	int			i;
+
+#ifdef HEAP_INSERT_BLKREF_VM
+
+	/*-
+	 * 该宏与 visibilitymap_clear_locked 一起由 PG17 维护补丁引入。
+	 * 每个 heap block 在 VM 中占两个位；页头和对齐取当前构建定义，
+	 * 与 visibilitymap.c 的布局一致，不能按固定 VM 覆盖范围猜测。
+	 */
+	const uint32 heapblocks_per_vm_page =
+		(BLCKSZ - MAXALIGN(SizeOfPageHeaderData)) * BITS_PER_BYTE / 2;
+	int			block_id;
+
+	for (block_id = 0; block_id <= XLogRecMaxBlockId(record); block_id++)
+	{
+		RelFileLocator block_locator;
+		ForkNumber	forknum;
+		BlockNumber vmblk;
+		Buffer		vmbuffer = InvalidBuffer;
+		bool		matches[2];
+
+		if (!XLogRecGetBlockTagExtended(record, block_id, &block_locator,
+										&forknum, &vmblk, NULL) ||
+			forknum != VISIBILITYMAP_FORKNUM ||
+			!RelFileLocatorEquals(block_locator, rlocator))
+			continue;
+
+		for (i = 0; i < 2; i++)
+			matches[i] = BlockNumberIsValid(heapblocks[i]) &&
+				heapblocks[i] / heapblocks_per_vm_page == vmblk;
+		if (!matches[0] && !matches[1])
+			continue;
+
+		/* 恢复 API 负责 FPI 和页 LSN；不能绕过它直接清位。 */
+		if (XLogReadBufferForRedo(record, block_id, &vmbuffer) == BLK_NEEDS_REDO)
+		{
+			bool		changed = false;
+
+			for (i = 0; i < 2; i++)
+				if (matches[i])
+					changed |= visibilitymap_clear_locked(reln, heapblocks[i],
+														  vmbuffer, flags);
+			if (changed)
+				PageSetLSN(BufferGetPage(vmbuffer), record->EndRecPtr);
+		}
+		if (BufferIsValid(vmbuffer))
+			UnlockReleaseBuffer(vmbuffer);
+		for (i = 0; i < 2; i++)
+			handled[i] |= matches[i];
+	}
+#endif
+
+	/*-
+	 * 老 WAL 没有登记 VM 页；新版也可能只清除了 heap 的 PD_ALL_VISIBLE。
+	 * 对未登记的位保持原有兼容路径，不凭记录版本猜测其存在。
+	 */
+	for (i = 0; i < 2; i++)
+	{
+		Buffer		vmbuffer = InvalidBuffer;
+
+		if (!BlockNumberIsValid(heapblocks[i]) || handled[i] ||
+			(i == 1 && heapblocks[1] == heapblocks[0]))
+			continue;
+		visibilitymap_pin(reln, heapblocks[i], &vmbuffer);
+		visibilitymap_clear(reln, heapblocks[i], vmbuffer, flags);
+		ReleaseBuffer(vmbuffer);
+	}
+	FreeFakeRelcacheEntry(reln);
+}
+
+static void
 redo_neon_heap_insert(XLogReaderState *record)
 {
 	XLogRecPtr	lsn = record->EndRecPtr;
@@ -235,15 +322,8 @@ redo_neon_heap_insert(XLogReaderState *record)
 	 * already up-to-date.
 	 */
 	if (xlrec->flags & XLH_INSERT_ALL_VISIBLE_CLEARED)
-	{
-		Relation	reln = CreateFakeRelcacheEntry(target_locator);
-		Buffer		vmbuffer = InvalidBuffer;
-
-		visibilitymap_pin(reln, blkno, &vmbuffer);
-		visibilitymap_clear(reln, blkno, vmbuffer, VISIBILITYMAP_VALID_BITS);
-		ReleaseBuffer(vmbuffer);
-		FreeFakeRelcacheEntry(reln);
-	}
+		neon_xlog_vm_clear(record, target_locator, blkno, InvalidBlockNumber,
+						   VISIBILITYMAP_VALID_BITS);
 
 	/*
 	 * If we inserted the first and only tuple on the page, re-initialize the
@@ -344,15 +424,8 @@ redo_neon_heap_delete(XLogReaderState *record)
 	 * already up-to-date.
 	 */
 	if (xlrec->flags & XLH_DELETE_ALL_VISIBLE_CLEARED)
-	{
-		Relation	reln = CreateFakeRelcacheEntry(target_locator);
-		Buffer		vmbuffer = InvalidBuffer;
-
-		visibilitymap_pin(reln, blkno, &vmbuffer);
-		visibilitymap_clear(reln, blkno, vmbuffer, VISIBILITYMAP_VALID_BITS);
-		ReleaseBuffer(vmbuffer);
-		FreeFakeRelcacheEntry(reln);
-	}
+		neon_xlog_vm_clear(record, target_locator, blkno, InvalidBlockNumber,
+						   VISIBILITYMAP_VALID_BITS);
 
 	if (XLogReadBufferForRedo(record, 0, &buffer) == BLK_NEEDS_REDO)
 	{
@@ -444,16 +517,12 @@ redo_neon_heap_update(XLogReaderState *record, bool hot_update)
 	 * The visibility map may need to be fixed even if the heap page is
 	 * already up-to-date.
 	 */
-	if (xlrec->flags & XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED)
-	{
-		Relation	reln = CreateFakeRelcacheEntry(rlocator);
-		Buffer		vmbuffer = InvalidBuffer;
-
-		visibilitymap_pin(reln, oldblk, &vmbuffer);
-		visibilitymap_clear(reln, oldblk, vmbuffer, VISIBILITYMAP_VALID_BITS);
-		ReleaseBuffer(vmbuffer);
-		FreeFakeRelcacheEntry(reln);
-	}
+	if (xlrec->flags & (XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED |
+						XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED))
+		neon_xlog_vm_clear(record, rlocator,
+						   (xlrec->flags & XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED) ? oldblk : InvalidBlockNumber,
+						   (xlrec->flags & XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED) ? newblk : InvalidBlockNumber,
+						   VISIBILITYMAP_VALID_BITS);
 
 	/*
 	 * In normal operation, it is important to lock the two pages in
@@ -528,16 +597,7 @@ redo_neon_heap_update(XLogReaderState *record, bool hot_update)
 	 * The visibility map may need to be fixed even if the heap page is
 	 * already up-to-date.
 	 */
-	if (xlrec->flags & XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED)
-	{
-		Relation	reln = CreateFakeRelcacheEntry(rlocator);
-		Buffer		vmbuffer = InvalidBuffer;
-
-		visibilitymap_pin(reln, newblk, &vmbuffer);
-		visibilitymap_clear(reln, newblk, vmbuffer, VISIBILITYMAP_VALID_BITS);
-		ReleaseBuffer(vmbuffer);
-		FreeFakeRelcacheEntry(reln);
-	}
+	/* 新旧 heap 页的 VM 位已在同一次恢复判定中处理。 */
 
 	/* Deal with new tuple */
 	if (newaction == BLK_NEEDS_REDO)
@@ -685,18 +745,11 @@ redo_neon_heap_lock(XLogReaderState *record)
 	if (xlrec->flags & XLH_LOCK_ALL_FROZEN_CLEARED)
 	{
 		RelFileLocator rlocator;
-		Buffer		vmbuffer = InvalidBuffer;
 		BlockNumber block;
-		Relation	reln;
 
 		XLogRecGetBlockTag(record, 0, &rlocator, NULL, &block);
-		reln = CreateFakeRelcacheEntry(rlocator);
-
-		visibilitymap_pin(reln, block, &vmbuffer);
-		visibilitymap_clear(reln, block, vmbuffer, VISIBILITYMAP_ALL_FROZEN);
-
-		ReleaseBuffer(vmbuffer);
-		FreeFakeRelcacheEntry(reln);
+		neon_xlog_vm_clear(record, rlocator, block, InvalidBlockNumber,
+						   VISIBILITYMAP_ALL_FROZEN);
 	}
 
 	if (XLogReadBufferForRedo(record, 0, &buffer) == BLK_NEEDS_REDO)
@@ -776,15 +829,8 @@ redo_neon_heap_multi_insert(XLogReaderState *record)
 	 * already up-to-date.
 	 */
 	if (xlrec->flags & XLH_INSERT_ALL_VISIBLE_CLEARED)
-	{
-		Relation	reln = CreateFakeRelcacheEntry(rlocator);
-		Buffer		vmbuffer = InvalidBuffer;
-
-		visibilitymap_pin(reln, blkno, &vmbuffer);
-		visibilitymap_clear(reln, blkno, vmbuffer, VISIBILITYMAP_VALID_BITS);
-		ReleaseBuffer(vmbuffer);
-		FreeFakeRelcacheEntry(reln);
-	}
+		neon_xlog_vm_clear(record, rlocator, blkno, InvalidBlockNumber,
+						   VISIBILITYMAP_VALID_BITS);
 
 	if (isinit)
 	{

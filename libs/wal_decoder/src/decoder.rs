@@ -9,11 +9,39 @@ use pageserver_api::reltag::{RelTag, SlruKind};
 use pageserver_api::shard::ShardIdentity;
 use postgres_ffi::walrecord::*;
 use postgres_ffi::{PgMajorVersion, pg_constants};
-use postgres_ffi_types::forknum::VISIBILITYMAP_FORKNUM;
+use postgres_ffi_types::forknum::{MAIN_FORKNUM, VISIBILITYMAP_FORKNUM};
 use utils::lsn::Lsn;
 
 use crate::models::*;
 use crate::serialized_batch::SerializedValueBatch;
+
+/// UPDATE 的尾部引用可能是 VM 页，不能再用整个 block 列表的最后一项推断旧 heap 页。
+/// 只在主分支中按 WAL 引用顺序选最后一页，同时兼容同页 UPDATE 和旧 WAL。
+fn last_heap_block(decoded: &DecodedWALRecord) -> anyhow::Result<u32> {
+    decoded
+        .blocks
+        .iter()
+        .rev()
+        .find(|block| block.forknum == MAIN_FORKNUM)
+        .map(|block| block.blkno)
+        .ok_or_else(|| anyhow::anyhow!("heap WAL record has no main-fork block reference"))
+}
+
+/// 已显式登记的 VM 页由普通 block/FPI 路径重放；只为未登记的页生成兼容清位记录。
+/// 按关系和 VM 页分别判断，避免 UPDATE 只登记一张 VM 页时漏掉另一张隐含更新。
+fn implicit_vm_heap_block(decoded: &DecodedWALRecord, heap_block: Option<u32>) -> Option<u32> {
+    let relation = decoded.blocks.first()?;
+    heap_block.filter(|heap| {
+        let vm_block = pg_constants::HEAPBLK_TO_MAPBLOCK(*heap);
+        !decoded.blocks.iter().any(|block| {
+            block.forknum == VISIBILITYMAP_FORKNUM
+                && block.blkno == vm_block
+                && block.rnode_spcnode == relation.rnode_spcnode
+                && block.rnode_dbnode == relation.rnode_dbnode
+                && block.rnode_relnode == relation.rnode_relnode
+        })
+    })
+}
 
 impl InterpretedWalRecord {
     /// Decode and interpreted raw bytes which represent one Postgres WAL record.
@@ -228,7 +256,7 @@ impl MetadataRecord {
                         // we can't validate the remaining number of bytes without parsing
                         // the tuple data.
                         if (xlrec.flags & pg_constants::XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED) != 0 {
-                            old_heap_blkno = Some(decoded.blocks.last().unwrap().blkno);
+                            old_heap_blkno = Some(last_heap_block(decoded)?);
                         }
                         if (xlrec.flags & pg_constants::XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED) != 0 {
                             // PostgreSQL only uses XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED on a
@@ -295,7 +323,7 @@ impl MetadataRecord {
                         // we can't validate the remaining number of bytes without parsing
                         // the tuple data.
                         if (xlrec.flags & pg_constants::XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED) != 0 {
-                            old_heap_blkno = Some(decoded.blocks.last().unwrap().blkno);
+                            old_heap_blkno = Some(last_heap_block(decoded)?);
                         }
                         if (xlrec.flags & pg_constants::XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED) != 0 {
                             // PostgreSQL only uses XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED on a
@@ -362,7 +390,7 @@ impl MetadataRecord {
                         // we can't validate the remaining number of bytes without parsing
                         // the tuple data.
                         if (xlrec.flags & pg_constants::XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED) != 0 {
-                            old_heap_blkno = Some(decoded.blocks.last().unwrap().blkno);
+                            old_heap_blkno = Some(last_heap_block(decoded)?);
                         }
                         if (xlrec.flags & pg_constants::XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED) != 0 {
                             // PostgreSQL only uses XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED on a
@@ -429,7 +457,7 @@ impl MetadataRecord {
                         // we can't validate the remaining number of bytes without parsing
                         // the tuple data.
                         if (xlrec.flags & pg_constants::XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED) != 0 {
-                            old_heap_blkno = Some(decoded.blocks.last().unwrap().blkno);
+                            old_heap_blkno = Some(last_heap_block(decoded)?);
                         }
                         if (xlrec.flags & pg_constants::XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED) != 0 {
                             // PostgreSQL only uses XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED on a
@@ -474,6 +502,10 @@ impl MetadataRecord {
                 }
             }
         }
+
+        // 新旧 WAL 混合期间，显式 VM 引用与隐式清位可以按页并存。
+        new_heap_blkno = implicit_vm_heap_block(decoded, new_heap_blkno);
+        old_heap_blkno = implicit_vm_heap_block(decoded, old_heap_blkno);
 
         if new_heap_blkno.is_some() || old_heap_blkno.is_some() {
             let vm_rel = RelTag {
@@ -537,7 +569,7 @@ impl MetadataRecord {
                         // we can't validate the remaining number of bytes without parsing
                         // the tuple data.
                         if (xlrec.flags & pg_constants::XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED) != 0 {
-                            old_heap_blkno = Some(decoded.blocks.last().unwrap().blkno);
+                            old_heap_blkno = Some(last_heap_block(decoded)?);
                         }
                         if (xlrec.flags & pg_constants::XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED) != 0 {
                             // PostgreSQL only uses XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED on a
@@ -578,6 +610,10 @@ impl MetadataRecord {
                 pg_version
             ),
         }
+
+        // 新旧 WAL 混合期间，显式 VM 引用与隐式清位可以按页并存。
+        new_heap_blkno = implicit_vm_heap_block(decoded, new_heap_blkno);
+        old_heap_blkno = implicit_vm_heap_block(decoded, old_heap_blkno);
 
         if new_heap_blkno.is_some() || old_heap_blkno.is_some() {
             let vm_rel = RelTag {
@@ -983,5 +1019,172 @@ impl MetadataRecord {
         }
 
         Ok(None)
+    }
+}
+
+#[cfg(test)]
+mod vm_registration_tests {
+    use super::*;
+
+    fn block(forknum: u8, blkno: u32) -> DecodedBkpBlock {
+        let mut block = DecodedBkpBlock::new();
+        block.forknum = forknum;
+        block.blkno = blkno;
+        block.rnode_spcnode = 1663;
+        block.rnode_dbnode = 42;
+        block.rnode_relnode = 100;
+        block
+    }
+
+    /// 同一个用例同时覆盖普通 heap WAL 和 Neon 自定义 WAL 的元数据解码。
+    fn decode_update(neon: bool, blocks: Vec<DecodedBkpBlock>) -> Option<ClearVmBits> {
+        let decoded = DecodedWALRecord {
+            xl_rmid: if neon {
+                pg_constants::RM_NEON_ID
+            } else {
+                pg_constants::RM_HEAP_ID
+            },
+            xl_info: if neon {
+                pg_constants::XLOG_NEON_HEAP_UPDATE
+            } else {
+                pg_constants::XLOG_HEAP_UPDATE
+            },
+            blocks,
+            ..Default::default()
+        };
+        // 两种 PG17 UPDATE 头的 flags 都位于第 8 字节；Neon 额外保留四字节 CID。
+        // 其他字段置零，因为此处验证的是 block 身份和 VM 元数据路由，而非行内容。
+        let mut payload = vec![0; if neon { 18 } else { 14 }];
+        payload[7] = pg_constants::XLH_UPDATE_OLD_ALL_VISIBLE_CLEARED
+            | pg_constants::XLH_UPDATE_NEW_ALL_VISIBLE_CLEARED;
+        let mut payload = Bytes::from(payload);
+        let metadata = if neon {
+            MetadataRecord::decode_neonmgr_record(&mut payload, &decoded, PgMajorVersion::PG17)
+        } else {
+            MetadataRecord::decode_heapam_record(&mut payload, &decoded, PgMajorVersion::PG17)
+        }
+        .unwrap();
+        match metadata {
+            Some(MetadataRecord::Neonrmgr(NeonrmgrRecord::ClearVmBits(clear)))
+            | Some(MetadataRecord::Heapam(HeapamRecord::ClearVmBits(clear))) => Some(clear),
+            None => None,
+            _ => panic!("unexpected update metadata kind"),
+        }
+    }
+
+    #[test]
+    fn legacy_update_retains_both_implicit_vm_pages() {
+        for neon in [false, true] {
+            let clear = decode_update(
+                neon,
+                vec![block(MAIN_FORKNUM, 33), block(MAIN_FORKNUM, 40_000)],
+            )
+            .unwrap();
+            assert_eq!(clear.new_heap_blkno, Some(33));
+            assert_eq!(clear.old_heap_blkno, Some(40_000));
+        }
+    }
+
+    #[test]
+    fn trailing_vm_reference_does_not_replace_old_heap_identity() {
+        for neon in [false, true] {
+            let clear = decode_update(
+                neon,
+                vec![
+                    block(MAIN_FORKNUM, 33),
+                    block(MAIN_FORKNUM, 40_000),
+                    block(VISIBILITYMAP_FORKNUM, pg_constants::HEAPBLK_TO_MAPBLOCK(33)),
+                ],
+            )
+            .unwrap();
+            assert_eq!(clear.new_heap_blkno, None);
+            assert_eq!(clear.old_heap_blkno, Some(40_000));
+        }
+    }
+
+    #[test]
+    fn registered_old_vm_does_not_hide_unregistered_new_vm() {
+        for neon in [false, true] {
+            let clear = decode_update(
+                neon,
+                vec![
+                    block(MAIN_FORKNUM, 33),
+                    block(MAIN_FORKNUM, 40_000),
+                    block(
+                        VISIBILITYMAP_FORKNUM,
+                        pg_constants::HEAPBLK_TO_MAPBLOCK(40_000),
+                    ),
+                ],
+            )
+            .unwrap();
+            assert_eq!(clear.new_heap_blkno, Some(33));
+            assert_eq!(clear.old_heap_blkno, None);
+        }
+    }
+
+    #[test]
+    fn registered_vm_pages_use_block_replay_without_duplicate_metadata() {
+        for neon in [false, true] {
+            for with_image in [false, true] {
+                let mut new_vm =
+                    block(VISIBILITYMAP_FORKNUM, pg_constants::HEAPBLK_TO_MAPBLOCK(33));
+                let mut old_vm = block(
+                    VISIBILITYMAP_FORKNUM,
+                    pg_constants::HEAPBLK_TO_MAPBLOCK(40_000),
+                );
+                new_vm.has_image = with_image;
+                new_vm.apply_image = with_image;
+                old_vm.has_image = with_image;
+                old_vm.apply_image = with_image;
+                // FPI 与普通 VM delta 都只能交给登记的 block 路径处理一次。
+                assert!(
+                    decode_update(
+                        neon,
+                        vec![
+                            block(MAIN_FORKNUM, 33),
+                            block(MAIN_FORKNUM, 40_000),
+                            new_vm,
+                            old_vm,
+                        ]
+                    )
+                    .is_none()
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn one_registered_vm_page_covers_two_heap_pages() {
+        for neon in [false, true] {
+            assert!(
+                decode_update(
+                    neon,
+                    vec![
+                        block(MAIN_FORKNUM, 33),
+                        block(MAIN_FORKNUM, 34),
+                        block(VISIBILITYMAP_FORKNUM, pg_constants::HEAPBLK_TO_MAPBLOCK(33)),
+                    ]
+                )
+                .is_none()
+            );
+        }
+    }
+
+    #[test]
+    fn unrelated_relation_vm_reference_cannot_suppress_clear() {
+        let mut unrelated = block(VISIBILITYMAP_FORKNUM, pg_constants::HEAPBLK_TO_MAPBLOCK(33));
+        unrelated.rnode_relnode += 1;
+        let clear = decode_update(true, vec![block(MAIN_FORKNUM, 33), unrelated]).unwrap();
+        assert_eq!(clear.new_heap_blkno, Some(33));
+        assert_eq!(clear.old_heap_blkno, Some(33));
+    }
+
+    #[test]
+    fn malformed_update_without_heap_reference_returns_error() {
+        let decoded = DecodedWALRecord {
+            blocks: vec![block(VISIBILITYMAP_FORKNUM, 0)],
+            ..Default::default()
+        };
+        assert!(last_heap_block(&decoded).is_err());
     }
 }
