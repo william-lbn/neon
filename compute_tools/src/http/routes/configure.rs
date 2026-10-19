@@ -38,6 +38,20 @@ pub(in crate::http) async fn configure(
             return JsonResponse::invalid_status(state.status);
         }
 
+        // 不允许把启动预算改变伪装成在线SIGHUP配置成功；拒绝前不修改现有spec/状态。
+        if state.status == ComputeStatus::Running {
+            let previous = state
+                .pspec
+                .as_ref()
+                .and_then(|p| p.spec.dynamic_shared_buffers.as_ref());
+            if let Err(error) = compute_api::dynamic_shared_buffers::validate_reconfigure(
+                previous,
+                pspec.spec.dynamic_shared_buffers.as_ref(),
+            ) {
+                return JsonResponse::error(StatusCode::CONFLICT, error);
+            }
+        }
+
         // Pass the tracing span to the main thread that performs the startup,
         // so that the start_compute operation is considered a child of this
         // configure request for tracing purposes.

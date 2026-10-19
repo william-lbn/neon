@@ -56,6 +56,11 @@ pub fn write_postgres_conf(
     databricks_settings: Option<&DatabricksSettings>,
     lakebase_mode: bool,
 ) -> Result<()> {
+    let dsg_settings = spec
+        .dynamic_shared_buffers
+        .as_ref()
+        .map(|dsg| dsg.postgres_settings())
+        .transpose()?;
     let path = pgdata_path.join("postgresql.conf");
     // File::create() destroys the file content if it exists.
     let mut file = File::create(path)?;
@@ -373,6 +378,15 @@ pub fn write_postgres_conf(
             writeln!(file, "{}", settings.as_pg_settings())?;
         }
         writeln!(file, "# Databricks settings end")?;
+    }
+
+    // DSGA受管启动项同时由Postmaster命令行固定，因此旧auto.conf或临时
+    // override不能恢复大池。此处保留可审阅的文件值；普通静态配置不改变。
+    if let Some(settings) = dsg_settings {
+        writeln!(file, "# DSGA受管安全启动：运行时H不得持久化到此配置")?;
+        for (name, value) in settings {
+            writeln!(file, "{name}={}", escape_conf_value(&value))?;
+        }
     }
 
     // This is essential to keep this line at the end of the file,

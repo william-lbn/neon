@@ -35,6 +35,11 @@ fn default_reconfigure_concurrency() -> usize {
 pub struct ComputeSpec {
     pub format_version: f32,
 
+    /// DSGA受管启动规格。缺省保持官方静态路径；提供时必须完整协商预算，
+    /// 不能用原shared_buffers推测最低VM规格或自动打开新boot的普通SQL准入。
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dynamic_shared_buffers: Option<crate::dynamic_shared_buffers::DynamicSharedBuffersSpec>,
+
     // The control plane also includes a 'timestamp' field in the JSON document,
     // but we don't use it for anything. Serde will ignore missing fields when
     // deserializing it.

@@ -1,6 +1,6 @@
 # DSGA 当前实施状态
 
-更新：2026-10-19（Asia/Shanghai）。设计以 V3 为准；本文件只保留当前事实，历史测试见模块记录。
+更新：2026-10-20（Asia/Shanghai）。设计以 V3 为准；本文件只保留当前事实，历史测试见模块记录。
 
 最新完整性审查见[代码完整性复核](DSGA-代码完整性复核-20261019.md)：整体未完成，
 其中确认的 Grow/FATAL 缺陷已由36f1ed0修复并补5项永久回归；仍不能把模块测试通过当作生产可用。
@@ -8,13 +8,14 @@
 ## 当前目标与完成边界
 
 按项目所有者确认的 V3 继续实施，先完整完成 PG17，再逐版移植。
-M2f 引用/锁序、S2 checkpoint 工作区，以及 R05 IO/CV/恢复快速路径子片已完成 Mac
-模块验证。完整 Shrink 尚未实现；同 Postmaster 恢复预算、查询准入、外部 API 和
+M2f 引用/锁序、S2 checkpoint 工作区和安全bootstrap/新boot准入，以及 R05 IO/CV/恢复快速路径子片已完成 Mac
+模块验证。完整 Shrink 尚未实现；完整运行时私有/后台预算、外部 API 和
 Monitor/Agent/NeonVM 控制链仍待实施。不能将这些子片通过解释为生产功能完整交付。
 
 ## 分支与维护基线
 
-- PG：`codex/dsga-pg17-v3-20261019`，当前 Grow清理修复
+- PG：`codex/dsga-pg17-v3-20261019`，当前安全启动/准入
+  `f563e3014ce61b06a2d3d74f3130add0f0001eab`，包含 Grow清理修复
   `36f1ed0fcf003adeba1e7307ad036f3998bcb235`，依赖 S2 `9aebedf…`、M2f `b5785f8…`。
   PG 依赖已推送并核对远程完整 SHA，Neon 再提交/推送引用。
 - Neon：`codex/dsga-neon-v3-20261019`；V3 `2422ce9`、构建身份修复 `9df2ba8`、
@@ -67,14 +68,17 @@ operation。本次真实临时集群复现：旧操作退出把新操作从PREPA
 
 实际构建 `build/neon-integrated/v17`，安装 `build/neon-integrated-install/v17`。
 版本锁变更会使旧configure缓存失效；每次仍须实际核对postgres完整SHA并重编配套库。
-PG内部 API 为2。具体设计与约束见子模块：
+PG内部 API 为3。具体设计与约束见子模块：
 
 - `DSGA-M2f-引用寿命与锁序验证.md`
 - `DSGA-S2-checkpoint工作区寿命与并发验证.md`
 - `DSGA-R05-IO等待与恢复快速路径验证.md`
+- `DSGA-S2-安全启动与新boot准入.md`
 
-Grow/FATAL已修复并完成本地验收；下一批完成安全bootstrap、
-同Postmaster恢复预算和准入默认状态，再推进完整
+Grow/FATAL已修复并完成本地验收；安全bootstrap、同Postmaster恢复共享布局预算和新boot准入默认状态
+已完成本机候选验证，详见[Compute接入](DSGA-Compute安全启动与准入接入.md)：真实集群29项、
+开关check-world各81组/665项、compute_api12项、compute_tools全包22项通过。
+不能据此关闭R02全部运行时预算约束。接着推进完整
 Shrink/排水/回收/regrow，以及请求回执、API和外部控制链。所有进程/扩展的剩余引用
 与长Guard扫描活性继续按V3审查；Linux物理能力和完整端到端另验。
 

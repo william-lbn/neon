@@ -11,3 +11,27 @@ jobs:
           persist-credentials: false
       - run: python3 ci/compute.py validate
       - run: python3 -m unittest discover -s ci -p 'test_*.py' -v
+  dsga-pg17:
+    # 专项门禁必须真实运行，不能以contracts中的环境skip代替。只编译宿主PG，
+    # 不打包镜像，不部署K8s；真实VM/Provider能力按V3另行验收。
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Checkout exact PG17 dependency
+        run: git submodule update --init --depth 1 vendor/postgres-v17
+      - run: python3 ci/compute.py validate --source-ref HEAD --require-pg-checkout v17
+      - name: Install host build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential bison flex pkg-config
+      - name: Build asserted PG17 with deterministic injection points
+        run: |
+          make -j4 postgres-v17 POSTGRES_VERSIONS=v17 \
+            BUILD_DIR="$GITHUB_WORKSPACE/build/dsga-pg" \
+            POSTGRES_INSTALL_DIR="$GITHUB_WORKSPACE/build/dsga-install" \
+            PG_CONFIGURE_OPTS='--without-icu --without-readline --without-zlib --enable-debug --enable-cassert --enable-depend --enable-injection-points'
+      - name: Run every real DSGA lifecycle test
+        run: bash ci/test-dsg-postgres.sh "$GITHUB_WORKSPACE/build/dsga-pg/v17" "$GITHUB_WORKSPACE/build/dsga-install/v17"

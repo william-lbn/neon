@@ -8,6 +8,8 @@ test_dsg_region，NEON_TEST_RMGR_LIBRARY 指向配套 neon_rmgr 的完整库路�
 
 import os
 import signal
+import socket
+import struct
 import subprocess
 import tempfile
 import time
@@ -18,6 +20,51 @@ _REQUIRED_ENV = ("NEON_TEST_PG_BIN", "NEON_TEST_DSG_LIBRARY", "NEON_TEST_RMGR_LI
 _CONFIGURED_ENV = [name for name in _REQUIRED_ENV if os.environ.get(name)]
 if _CONFIGURED_ENV and len(_CONFIGURED_ENV) != len(_REQUIRED_ENV):
     raise RuntimeError("生命周期测试环境不完整，必须同时提供 " + ", ".join(_REQUIRED_ENV))
+
+
+class PgWireConnection:
+    """直接发送真实简单/扩展/FastPath消息，验证门禁没有漏掉协议入口。
+
+    仅连接测试临时集群的trust Unix socket；不实现认证或连接产品数据库。
+    错误后等到ReadyForQuery，再在同一连接继续，验证没有把SQL拒绝变成断连。
+    """
+
+    def __init__(self, directory, user):
+        self.connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        self.connection.settimeout(10)
+        self.connection.connect(str(directory / ".s.PGSQL.55432"))
+        body = struct.pack("!I", 196608) + f"user\0{user}\0database\0postgres\0\0".encode()
+        self.connection.sendall(struct.pack("!I", len(body) + 4) + body)
+        self.receive_ready()
+
+    def receive_exact(self, length):
+        chunks = bytearray()
+        while len(chunks) < length:
+            chunk = self.connection.recv(length - len(chunks))
+            if not chunk:
+                raise RuntimeError("PG协议测试连接提前断开")
+            chunks.extend(chunk)
+        return bytes(chunks)
+
+    def receive_ready(self):
+        messages = []
+        while True:
+            kind = self.receive_exact(1)
+            length = struct.unpack("!I", self.receive_exact(4))[0]
+            if not 4 <= length <= 16 * 1024 * 1024:
+                raise RuntimeError("PG协议测试收到非法长度")
+            body = self.receive_exact(length - 4)
+            messages.append((kind, body))
+            if kind == b"Z":
+                return messages
+
+    def exchange(self, messages):
+        for kind, body in messages:
+            self.connection.sendall(kind + struct.pack("!I", len(body) + 4) + body)
+        return self.receive_ready()
+
+    def close(self):
+        self.connection.close()
 
 
 @unittest.skipUnless(
@@ -77,8 +124,11 @@ class DsgPostgresLifecycle(unittest.TestCase):
             self.fail(f"{binary}: {result.stdout}\n{result.stderr}\n{log[-12000:]}")
         return result
 
-    def start(self, *, check=True):
-        result = self.command("pg_ctl", "-D", self.data, "-l", self.log, "-w", "start", check=check)
+    def start(self, *, check=True, options=None):
+        extra = [] if options is None else ["-o", options]
+        result = self.command(
+            "pg_ctl", "-D", self.data, "-l", self.log, "-w", *extra, "start", check=check
+        )
         self.running = result.returncode == 0
         return result
 
@@ -160,6 +210,155 @@ class DsgPostgresLifecycle(unittest.TestCase):
             "'test_dsg_io' LANGUAGE C STRICT;"
             f"CREATE FUNCTION dsg_io_control(text) RETURNS integer AS '{library}', "
             "'test_dsg_io_control' LANGUAGE C STRICT;"
+        )
+
+    def prepare_admission_fixture(self):
+        self.config(
+            "dynamic_shared_buffers_require_admission = on\n"
+            "dynamic_shared_buffers_startup_budget = '64MB'\n"
+        )
+        self.start()
+        self.install_functions()
+        library = self.quote(self.library)
+        self.sql(
+            "CREATE ROLE dsg_app LOGIN;"
+            f"CREATE FUNCTION dsg_admission(bigint,bigint,bigint,boolean) RETURNS boolean AS '{library}', "
+            "'test_dsg_admission' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_admission_snapshot() RETURNS text AS '{library}', "
+            "'test_dsg_admission_snapshot' LANGUAGE C;"
+            "CREATE FUNCTION dsg_grow(bigint,bigint,bigint,integer,integer,boolean) "
+            f"RETURNS text AS '{library}', 'test_dsg_grow' LANGUAGE C STRICT;"
+        )
+        return self.sql("SELECT dsg_boot()").stdout.strip()
+
+    def test_managed_bootstrap_checks_shared_layout_before_start(self):
+        self.config(
+            "dynamic_shared_buffers_require_admission = on\n"
+            "dynamic_shared_buffers_startup_budget = '1MB'\n"
+        )
+        self.assertNotEqual(self.start(check=False).returncode, 0)
+        self.assertIn("startup layout exceeds the shared-memory budget", self.log.read_text())
+
+    def test_managed_bootstrap_requires_explicit_budget(self):
+        self.config("dynamic_shared_buffers_require_admission = on\n")
+        self.assertNotEqual(self.start(check=False).returncode, 0)
+        self.assertIn("require an explicit startup shared-memory budget", self.log.read_text())
+
+    def test_managed_command_line_survives_auto_conf_and_include_override(self):
+        # 模拟恢复备份留下的大池auto.conf和官方末尾override。Compute必须用-c
+        # 固定启动契约；仅在postgresql.conf追加安全值不能保证内部恢复的小池。
+        (self.data / "postgresql.auto.conf").write_text(
+            "shared_buffers = '32MB'\nmax_shared_buffers = '32MB'\n"
+            "dynamic_shared_buffers_require_admission = off\n"
+        )
+        (self.data / "compute_ctl_temp_override.conf").write_text(
+            "shared_buffers = '16MB'\ndynamic_shared_buffers_require_admission = off\n"
+        )
+        self.config("include_if_exists = 'compute_ctl_temp_override.conf'\n")
+        self.start(
+            options="-c shared_buffers=2048kB -c max_shared_buffers=65536kB "
+            "-c dynamic_shared_buffers_require_admission=on "
+            "-c dynamic_shared_buffers_startup_budget=65536kB"
+        )
+        self.assertEqual(
+            self.sql(
+                "SELECT current_setting('shared_buffers'),current_setting('max_shared_buffers'),"
+                "current_setting('dynamic_shared_buffers_require_admission')"
+            ).stdout.strip(),
+            "2MB|64MB|on",
+        )
+
+    def test_closed_admission_rechecks_role_inside_multi_statement_query(self):
+        self.prepare_admission_fixture()
+        # 管理身份可执行SET ROLE；同一个Query里的下一条语句必须以新角色再检查。
+        attempt = self.sql("SET ROLE dsg_app; SELECT 42", check=False)
+        self.assertNotEqual(attempt.returncode, 0)
+        self.assertIn("admission is closed", attempt.stderr)
+        self.assertNotIn("42", attempt.stdout)
+
+    def test_admission_covers_simple_extended_and_fastpath_on_same_connection(self):
+        boot = self.prepare_admission_fixture()
+        wire = PgWireConnection(self.socket, "dsg_app")
+        self.addCleanup(wire.close)
+
+        def denied(messages):
+            errors = [body for kind, body in messages if kind == b"E"]
+            self.assertTrue(errors, messages)
+            self.assertIn(b"C55000\0", errors[0])
+            self.assertIn(b"admission is closed", errors[0])
+            self.assertFalse(any(kind == b"D" for kind, _ in messages))
+
+        denied(wire.exchange([(b"Q", b"SELECT 42\0")]))
+        parse = (b"P", b"dsg_statement\0SELECT 42\0" + struct.pack("!H", 0))
+        bind = (b"B", b"dsg_portal\0dsg_statement\0" + struct.pack("!HHH", 0, 0, 0))
+        execute = (b"E", b"dsg_portal\0" + struct.pack("!I", 0))
+        sync = (b"S", b"")
+        denied(wire.exchange([parse, sync]))
+        oid = int(self.sql("SELECT 'pg_catalog.int4pl(integer,integer)'::regprocedure::oid").stdout)
+        fastpath = struct.pack("!IHHH", oid, 1, 1, 2)
+        fastpath += struct.pack("!IiIiH", 4, 20, 4, 22, 1)
+        denied(wire.exchange([(b"F", fastpath)]))
+        self.sql(f"SELECT dsg_admission({boot},1,1,true)")
+        prepared = wire.exchange([parse, bind, sync])
+        self.assertTrue(any(kind == b"1" for kind, _ in prepared), prepared)
+        self.assertTrue(any(kind == b"2" for kind, _ in prepared), prepared)
+        self.sql(f"SELECT dsg_admission({boot},2,1,false)")
+        denied(wire.exchange([execute, sync]))
+        self.sql(f"SELECT dsg_admission({boot},3,1,true)")
+        completed = wire.exchange([bind, execute, sync])
+        self.assertTrue(
+            any(kind == b"D" and body.endswith(b"42") for kind, body in completed), completed
+        )
+        # 已连接会话同样受控，且普通角色在开放后也不能调用管理函数越权改门禁。
+        unauthorized = wire.exchange([(b"Q", f"SELECT dsg_admission({boot},4,1,false)\0".encode())])
+        self.assertTrue(any(kind == b"E" and b"C42501\0" in body for kind, body in unauthorized))
+        stale = self.sql(f"SELECT dsg_admission({boot},2,1,true)", check=False)
+        self.assertNotEqual(stale.returncode, 0)
+        self.assertIn("invalid or stale", stale.stderr)
+
+    def test_new_boot_closes_admission_and_returns_to_safe_bootstrap(self):
+        boot = self.prepare_admission_fixture()
+        original_postmaster = (self.data / "postmaster.pid").read_text().splitlines()[0]
+        self.sql(
+            f"SELECT dsg_admission({boot},1,1,true);"
+            "SELECT dsg_grow(1,1,1,1024,1000,false);"
+            "CREATE TABLE dsg_boot_data AS SELECT i FROM generate_series(1,1000) i; CHECKPOINT;"
+        )
+        # 必须取得确定仍在运行的Backend，不能向已经退出、可能复用的短会话PID发信号。
+        crash = self.background_sql("SELECT pg_sleep(20)", "dsg-bootstrap-crash")
+        self.wait_sql(
+            "SELECT count(*) FROM pg_stat_activity WHERE application_name='dsg-bootstrap-crash' AND wait_event='PgSleep'",
+            "1",
+        )
+        victim = int(
+            self.sql(
+                "SELECT pid FROM pg_stat_activity WHERE application_name='dsg-bootstrap-crash'"
+            ).stdout
+        )
+        os.kill(victim, signal.SIGKILL)
+        crash.communicate(timeout=10)
+        deadline = time.monotonic() + 15
+        new_boot = boot
+        while time.monotonic() < deadline:
+            observed = self.sql("SELECT dsg_boot()", check=False)
+            if observed.returncode == 0 and observed.stdout.strip() != boot:
+                new_boot = observed.stdout.strip()
+                break
+            time.sleep(0.02)
+        self.assertNotEqual(new_boot, boot)
+        self.assertEqual(
+            (self.data / "postmaster.pid").read_text().splitlines()[0], original_postmaster
+        )
+        snapshot = self.sql("SELECT dsg_admission_snapshot()").stdout.strip()
+        self.assertTrue(snapshot.startswith("open=no revision=0 high=256 shared="), snapshot)
+        rejected = self.sql(f"SELECT dsg_admission({boot},2,1,true)", check=False)
+        self.assertNotEqual(rejected.returncode, 0)
+        wire = PgWireConnection(self.socket, "dsg_app")
+        self.addCleanup(wire.close)
+        self.assertTrue(any(kind == b"E" for kind, _ in wire.exchange([(b"Q", b"SELECT 42\0")])))
+        self.sql(f"SELECT dsg_admission({new_boot},1,1,true)")
+        self.assertEqual(
+            self.sql("SELECT count(*),sum(i) FROM dsg_boot_data").stdout.strip(), "1000|500500"
         )
 
     def prepare_grow_exit_fixture(self, *, after_publish=False):

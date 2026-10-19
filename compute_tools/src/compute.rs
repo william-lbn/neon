@@ -305,6 +305,10 @@ impl ParsedSpec {
 impl TryFrom<ComputeSpec> for ParsedSpec {
     type Error = anyhow::Error;
     fn try_from(spec: ComputeSpec) -> Result<Self, anyhow::Error> {
+        // 在创建/重写PGDATA之前拒绝不完整预算，不把旧shared_buffers视为安全启动值。
+        if let Some(dsg) = &spec.dynamic_shared_buffers {
+            dsg.validate()?;
+        }
         // Extract the options from the spec file that are needed to connect to
         // the storage system.
         //
@@ -1816,8 +1820,20 @@ impl ComputeNode {
         };
 
         // Run postgres as a child process.
+        // 固定安全bootstrap通过命令行传给Postmaster；优先于auto.conf和任何
+        // include，且同一Postmaster内部重建共享内存时继续保留这些启动参数。
+        let mut dsg_arguments = Vec::new();
+        {
+            let state = self.state.lock().unwrap();
+            if let Some(dsg) = &state.pspec.as_ref().unwrap().spec.dynamic_shared_buffers {
+                for (name, value) in dsg.postgres_settings()? {
+                    dsg_arguments.extend(["-c".to_owned(), format!("{name}={value}")]);
+                }
+            }
+        }
         let mut pg = maybe_cgexec(&self.params.pgbin)
             .args(["-D", &self.params.pgdata])
+            .args(dsg_arguments)
             .envs(env_vars)
             .stderr(Stdio::piped())
             .spawn()

@@ -122,6 +122,24 @@ fn configurator_main_loop(compute: &Arc<ComputeNode>) {
                         // into the type system.
                         assert_eq!(state.status, ComputeStatus::RefreshConfiguration);
 
+                        // HCC刷新也必须遵守同一启动契约，不能绕过HTTP重配的检查。
+                        if let Err(error) =
+                            compute_api::dynamic_shared_buffers::validate_reconfigure(
+                                state
+                                    .pspec
+                                    .as_ref()
+                                    .and_then(|p| p.spec.dynamic_shared_buffers.as_ref()),
+                                pspec.spec.dynamic_shared_buffers.as_ref(),
+                            )
+                        {
+                            error!("Refresh configuration rejected: {error:#}");
+                            state.status = ComputeStatus::Running;
+                            compute.state_changed.notify_all();
+                            drop(state);
+                            std::thread::sleep(std::time::Duration::from_secs(5));
+                            continue;
+                        }
+
                         if state
                             .pspec
                             .as_ref()
