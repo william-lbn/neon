@@ -247,6 +247,79 @@ class DsgPostgresLifecycle(unittest.TestCase):
         self.assertEqual(self.sql("SELECT dsg_unpin_probe()").stdout.strip(), "t")
         self.assertEqual(self.sql(checksum).stdout, before)
 
+    def prepare_checkpoint_fixture(self):
+        # 工作集小于本测试的启动池，关闭后台清理，确保请求的 checkpoint
+        # 确实包含脏页。这里控制测试调度，不模拟 checkpoint 或改共享 flags。
+        self.config("shared_buffers = '8MB'\nbgwriter_lru_maxpages = 0")
+        self.start()
+        self.install_functions()
+        library = self.quote(self.library)
+        self.sql(
+            "CREATE FUNCTION dsg_grow(bigint, bigint, bigint, integer, integer, boolean) "
+            f"RETURNS text AS '{library}', 'test_dsg_grow' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_checkpoint(text) RETURNS boolean AS '{library}', "
+            "'test_dsg_checkpoint_control' LANGUAGE C STRICT;"
+            "CREATE TABLE dsg_checkpoint_data (id int PRIMARY KEY, payload text);"
+            "INSERT INTO dsg_checkpoint_data SELECT i, repeat(md5(i::text), 32) "
+            "FROM generate_series(1, 1500) i;"
+        )
+        return (
+            "SELECT count(*), sum(id), md5(string_agg(payload, ',' ORDER BY id)) "
+            "FROM dsg_checkpoint_data"
+        )
+
+    def test_checkpoint_workspace_lease_does_not_block_grow(self):
+        checksum = self.prepare_checkpoint_fixture()
+        before = self.sql(checksum).stdout
+        self.sql("SELECT dsg_checkpoint('attach')")
+        checkpoint = self.background_sql("CHECKPOINT", "dsg-checkpoint-request")
+        try:
+            self.wait_sql("SELECT dsg_checkpoint('waiting')", "t")
+            self.assertEqual(self.sql("SELECT dsg_checkpoint('available')").stdout.strip(), "f")
+            # checkpointer 仍持工作区租约时，另一个真实 Backend 必须能在
+            # 短期限内完成 Grow；旧全程数组 Guard 会使此调用超时拒绝。
+            self.assertEqual(
+                self.sql("SELECT dsg_grow(1, 1, 1, 2048, 1000, false)").stdout.strip(),
+                "committed high=2048 generation=2 replay=false",
+            )
+        finally:
+            self.sql("SELECT dsg_checkpoint('release')")
+            checkpoint_output, checkpoint_errors = checkpoint.communicate(timeout=10)
+            self.sql("SELECT dsg_checkpoint('detach')")
+        self.assertEqual(checkpoint.returncode, 0, checkpoint_errors)
+        self.assertEqual(checkpoint_output.strip(), "")
+        self.assertEqual(self.sql("SELECT dsg_checkpoint('available')").stdout.strip(), "t")
+        self.assertEqual(self.sql(checksum).stdout, before)
+        self.sql("CREATE EXTENSION amcheck; SELECT bt_index_check('dsg_checkpoint_data_pkey')")
+
+    def exercise_checkpoint_error(self, action):
+        checksum = self.prepare_checkpoint_fixture()
+        before = self.sql(checksum).stdout
+        boot = self.sql("SELECT dsg_boot()").stdout
+        self.sql(f"SELECT dsg_checkpoint('{action}')")
+        try:
+            result = self.sql("CHECKPOINT", check=False)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("DSGA test checkpoint failure", self.log.read_text())
+        finally:
+            self.sql("SELECT dsg_checkpoint('detach')")
+        self.assertEqual(self.sql("SELECT dsg_checkpoint('available')").stdout.strip(), "t")
+        self.assertEqual(
+            self.sql("SELECT dsg_grow(1, 1, 1, 2048, 1000, false)").stdout.strip(),
+            "committed high=2048 generation=2 replay=false",
+        )
+        self.sql("CHECKPOINT")
+        self.assertEqual(self.sql(checksum).stdout, before)
+        self.assertEqual(self.sql("SELECT dsg_boot()").stdout, boot)
+
+    def test_checkpoint_error_releases_workspace_lease(self):
+        self.exercise_checkpoint_error("attach_error")
+
+    def test_checkpoint_error_after_pin_cleans_pin_and_workspace(self):
+        # 在真实 pin 和 content lock 已建立后抛错，覆盖非末尾 LWLock 的
+        # 租约释放与 PG 原生 ResourceOwner 清理，不能仅测试扫描前失败。
+        self.exercise_checkpoint_error("attach_write_error")
+
     def test_grow_preserves_data_and_recovers_after_crash(self):
         self.start()
         self.install_functions()

@@ -1,12 +1,12 @@
 # DSGA M2：Neon 主仓接入与 Mac 验证
 
-日期：2026-10-19。本记录覆盖已完成的 Provider/初始布局、访问边界、真实扩容、回收边界、M2f引用寿命/锁序和版本绑定；
+日期：2026-10-19。本记录覆盖已完成的 Provider/初始布局、访问边界、真实扩容、回收边界、M2f引用寿命/锁序、S2 checkpoint工作区和版本绑定；
 完整在线扩缩、Granule 回收、Monitor/Agent/VM 业务链路仍在后续开发范围，不能声称功能已完整交付。
 
 ## 从主仓构建的证据
 
 Postgres 的真实源码现位于 `vendor/postgres-v17`，由主仓 `postgres.mk` 构建。
-当前候选 SHA 为 `b5785f810de56b583b6548a8697561989cd9aa8a`，对应 17.11。
+当前候选 SHA 为 `9aebedf238b8c890b8d972e9d2377f537cef9458`，对应 17.11。
 `ci/distribution.json`、`vendor/revisions.json` 和主仓 gitlink 已同步。
 
 Mac 上清理旧构建并启用依赖跟踪后，从 Neon 根目录执行：
@@ -23,7 +23,7 @@ make -j4 postgres-v17 POSTGRES_VERSIONS=v17 \
 实际 `postgres --version` 输出包含：
 
 ```text
-postgres (PostgreSQL) 17.11 (b5785f810de56b583b6548a8697561989cd9aa8a)
+postgres (PostgreSQL) 17.11 (9aebedf238b8c890b8d972e9d2377f537cef9458)
 ```
 
 这证明构建入口已经接到所选 fork 提交。原 `repos/postgres` 只是本地兼容符号链接，
@@ -59,7 +59,7 @@ postgres (PostgreSQL) 17.11 (b5785f810de56b583b6548a8697561989cd9aa8a)
 Linux/KVM/HugeTLB、Pageserver/Safekeeper 完整端到端和性能验收尚未完成。
 所有功能保持默认关闭，不合入主分支，不据本记录批准 VM 缩容。
 
-## V3 / M2f 当前组合
+## V3 / M2f 组合（历史验收）
 
 最新维护提交 `6a003bb…`、功能合并 `b2f05855…` 及 M2f `b5785f810…` 已进入
 自有 PG V3 新分支，远程 API 已核对完整 SHA。M2f 修订最后 unpin/waiter 的引用寿命，
@@ -69,7 +69,7 @@ Linux/KVM/HugeTLB、Pageserver/Safekeeper 完整端到端和性能验收尚未�
 - Mac 生产代码开启/关闭完整 check-world **各81组/665项报告检查通过**，TAP未启用。
 - 最终模块 **1项regress+4项isolation通过**：含真实 mappingX/accessX 指定交错、
   下界/上界拒绝、真实关系分配及临时关系拒绝。
-- 主仓按当前 gitlink/两份锁重新构建，实际二进制显示本文开头的 b5785f8 完整 SHA；
+- 主仓按当前 gitlink/两份锁重新构建，实际二进制显示M2f 的 b5785f8 完整 SHA；
   配套测试库与 rmgr 重新编译后，真实生命周期/访问测试 **9项通过，23.938s**。
 - CI prepare **13项逻辑检查通过、9项环境测试skipped**；上述9项另行真实执行，
   不将两次口径相加。pgindent/Ruff/diff及index实际源码锁检查通过。
@@ -81,4 +81,27 @@ Linux/KVM/HugeTLB、Pageserver/Safekeeper 完整端到端和性能验收尚未�
 日志：`build/check-world-v3-m2f-off.log`、`...-on.log`、
 `build/v3-m2f-module-accepted.log`、`build/neon-integrated-v3-m2f-reconfigured.log`、
 `build/neon-integrated-v3-m2f-lifecycle-verified.log`、`build/v3-m2f-ci-prepare-final.log`。
-完整 Shrink、checkpoint寿命、Compute恢复预算、外部控制链与Linux/端到端/性能仍待完成。
+该时点完整 Shrink、checkpoint寿命、Compute恢复预算、外部控制链与Linux/端到端/性能仍待完成。
+
+## V3 / S2 checkpoint 当前组合
+
+PG 提交 `9aebedf238b8c890b8d972e9d2377f537cef9458` 已推至自有 V3 分支并核对远程。
+主仓 gitlink 与两份锁同步到该提交，实际根目录构建的版本见本文开头。内部 API 为2，
+测试库及 neon_rmgr 均已按新 headers 重编，不能混用旧扩展。
+
+- checkpoint 持独立工作区租约，初始扫描每批至多128对象；真正写入前短保护、复核
+  当前 H/标志并取得原生 pin，再释放数组 Guard 后执行内容锁/IO。
+- Grow 不清零旧 checkpoint 仍使用的工作区前缀；后续 Shrink 必须条件取得工作区
+  独占租约，失败保留 backing 和预算，禁止在 accessX 下阻塞等待。
+- 动态开/关完整 check-world **各81组/665项报告检查通过**，零 not ok，TAP未启用。
+- 实际新 SHA 二进制及配套库 **12项真实集群测试通过，32.167s**；新增实际 checkpointer
+  暂停时 Grow、扫描后 ERROR、持 pin/content lock 后 ERROR 三种确定性交错。
+- CI prepare **13项逻辑检查通过、12项环境测试skipped**；上述12项已另行真实执行。
+  pgindent、Ruff、diff 和严格 index 源码绑定检查通过。
+
+日志：`build/check-world-v3-checkpoint-off.log`、`...-on.log`、
+`build/v3-checkpoint-lifecycle-final.log`、`build/neon-integrated-v3-checkpoint-build.log`、
+`build/neon-integrated-v3-checkpoint-lifecycle.log`、`build/v3-checkpoint-ci-prepare.log`。
+模块设计见 PG 的 `DSGA-S2-checkpoint工作区寿命与并发验证.md`。这只关闭 R04 的本次
+子片验证，不包括真实 Shrink/regrow、Compute恢复预算、R05全路径审计、外部控制链、
+Linux/KVM/HugeTLB、存储端到端及性能验收。最新进度以 `DSGA-当前实施状态.md` 为准。
