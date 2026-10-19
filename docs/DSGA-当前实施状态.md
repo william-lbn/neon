@@ -3,7 +3,7 @@
 更新：2026-10-19（Asia/Shanghai）。设计以 V3 为准；本文件只保留当前事实，历史测试见模块记录。
 
 最新完整性审查见[代码完整性复核](DSGA-代码完整性复核-20261019.md)：整体未完成，
-并新增确认下述 Grow/FATAL 缺陷，必须先修复，不能把现有模块测试通过当作生产可用。
+其中确认的 Grow/FATAL 缺陷已由36f1ed0修复并补5项永久回归；仍不能把模块测试通过当作生产可用。
 
 ## 当前目标与完成边界
 
@@ -14,8 +14,8 @@ Monitor/Agent/NeonVM 控制链仍待实施。不能将这些子片通过解释�
 
 ## 分支与维护基线
 
-- PG：`codex/dsga-pg17-v3-20261019`，当前 R05 提交
-  `c47f959016be5c71b576b57a58cea6a27e8b546c`，依赖 S2 `9aebedf…`、M2f `b5785f8…`。
+- PG：`codex/dsga-pg17-v3-20261019`，当前 Grow清理修复
+  `36f1ed0fcf003adeba1e7307ad036f3998bcb235`，依赖 S2 `9aebedf…`、M2f `b5785f8…`。
   PG 依赖已推送并核对远程完整 SHA，Neon 再提交/推送引用。
 - Neon：`codex/dsga-neon-v3-20261019`；V3 `2422ce9`、构建身份修复 `9df2ba8`、
   M2f 集成 `4cb4e9f`、S2 集成 `a53c447`；本批绑定上述 R05 PG 提交并加入6项真实场景。
@@ -54,12 +54,14 @@ R05 的 ERROR 审核点仍持Guard和自身pin；FATAL 审核点已无Guard但�
 `build/neon-integrated-v3-io-lifetime-lifecycle.log`；其他历史证据见主仓M2集成记录。
 pgindent/Ruff/diff通过；prepare为13项逻辑通过、18项环境skipped，后者已另行真跑。
 
-## 新确认的阻断缺陷
+## Grow/FATAL缺陷的修复状态
 
 Grow 的 FATAL 清理在原生释放 resize_lock 后，没有核验本操作身份就修改当前共享
 operation。本次真实临时集群复现：旧操作退出把新操作从PREPARING改为DENIED，
-新操作随后COMMITTED却残留INTERRUPTED原因。该缺陷尚未修复，原18项没有覆盖此
-交错；没有复现数据损坏。复现日志 `build/audit-grow-fatal/reproduce.log`，详见上文复核。
+新操作随后COMMITTED却残留INTERRUPTED原因。该缺陷已通过操作身份绑定与条件重获串行锁修复，新增5项永久交错；
+23项最终候选测试通过（49.377s），实际新SHA主仓二进制23项通过（45.714s）。
+开关check-world各81组/665项通过；prepare13项通过/23项环境skip，已另行实跑。
+原始复现日志仍保留，完整性复核是修复前快照，不能用历史“未修复”覆盖此状态。
 
 ## 恢复注意与下一阶段
 
@@ -71,10 +73,16 @@ PG内部 API 为2。具体设计与约束见子模块：
 - `DSGA-S2-checkpoint工作区寿命与并发验证.md`
 - `DSGA-R05-IO等待与恢复快速路径验证.md`
 
-下一批先修复上述Grow/FATAL操作归属与终态缺陷，并加永久回归；然后完成安全bootstrap、
+Grow/FATAL已修复并完成本地验收；下一批完成安全bootstrap、
 同Postmaster恢复预算和准入默认状态，再推进完整
 Shrink/排水/回收/regrow，以及请求回执、API和外部控制链。所有进程/扩展的剩余引用
 与长Guard扫描活性继续按V3审查；Linux物理能力和完整端到端另验。
 
 M2f旧备份stash `6f002a31196f2e623e8386c38a649ff87be2ada4` 已apply一次，禁止重复apply；
 旧未完成spec另存 `build/m2f-unpin-before-v3.spec`。不改isolationtester来伪造原生BufferPin等待。
+
+## 本轮环境约定
+
+Mac用于代码与可执行业务验证；暂不构建镜像、准备或执行K8s部署。后续到目标Linux
+K8s验收，按代码/部署分支系列记录对应SHA和未验证项。镜像、NeonVM/KVM、HugeTLB、
+真实物理回收与端到端/性能不能以Mac本地结果替代。

@@ -162,6 +162,109 @@ class DsgPostgresLifecycle(unittest.TestCase):
             "'test_dsg_io_control' LANGUAGE C STRICT;"
         )
 
+    def prepare_grow_exit_fixture(self, *, after_publish=False):
+        self.start()
+        library = self.quote(self.library)
+        self.sql(
+            "CREATE FUNCTION dsg_grow(bigint, bigint, bigint, integer, integer, boolean) "
+            f"RETURNS text AS '{library}', 'test_dsg_grow' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_grow_control(text) RETURNS text AS '{library}', "
+            "'test_dsg_grow_control' LANGUAGE C STRICT;"
+        )
+        self.sql(
+            "SELECT dsg_grow_control('"
+            + ("attach_after_publish" if after_publish else "attach")
+            + "')"
+        )
+
+    def start_fatal_grow(self):
+        old = self.background_sql(
+            "SELECT dsg_grow_control('arm_fatal'); SELECT dsg_grow(1, 1, 1, 1024, 10000, false)",
+            "dsg-old-fatal-grow",
+        )
+        self.wait_sql("SELECT dsg_grow_control('exit_waiting')", "yes")
+        return old
+
+    def finish_fatal_grow(self, old):
+        self.sql("SELECT dsg_grow_control('release_exit')")
+        _, errors = old.communicate(timeout=10)
+        self.assertNotEqual(old.returncode, 0)
+        self.assertIn("DSGA test Grow FATAL", errors)
+
+    def exercise_grow_fatal_competitor(self, *, after_publish=False, pause_new=True):
+        self.prepare_grow_exit_fixture(after_publish=after_publish)
+        old = self.start_fatal_grow()
+        if after_publish:
+            # 旧操作在发布后退出；下一操作仍必须暂停在发布前，不能把
+            # “新H已提交”误当成PREPARING状态。两点回调只消费本地一次武装。
+            self.sql("SELECT dsg_grow_control('attach')")
+        generation = 2 if after_publish else 1
+        high = 1024 if after_publish else 256
+        prefix = "SELECT dsg_grow_control('arm_pause'); " if pause_new else ""
+        new = self.background_sql(
+            prefix + f"SELECT dsg_grow(2, 2, {generation}, 2048, 10000, false)",
+            "dsg-new-grow",
+        )
+        if pause_new:
+            self.wait_sql("SELECT dsg_grow_control('prepare_waiting')", "yes")
+            before = self.sql("SELECT dsg_grow_control('operation')").stdout.strip()
+            self.assertEqual(before, f"op=2 phase=1 reason=0 high={high} generation={generation}")
+        else:
+            _, errors = new.communicate(timeout=10)
+            self.assertEqual(new.returncode, 0, errors)
+            before = self.sql("SELECT dsg_grow_control('operation')").stdout.strip()
+        self.finish_fatal_grow(old)
+        # 新协调者持锁时旧回调应放弃清理；新协调者已提交并放锁时，旧回调
+        # 即便重获锁也必须按身份拒绝写入。两条路径都不能把新操作标为DENIED。
+        self.assertEqual(self.sql("SELECT dsg_grow_control('operation')").stdout.strip(), before)
+        if pause_new:
+            self.sql("SELECT dsg_grow_control('release_prepare')")
+            _, errors = new.communicate(timeout=10)
+            self.assertEqual(new.returncode, 0, errors)
+        self.assertEqual(
+            self.sql("SELECT dsg_grow_control('operation')").stdout.strip(),
+            f"op=2 phase=2 reason=0 high=2048 generation={generation + 1}",
+        )
+        self.sql("SELECT dsg_grow_control('detach')")
+
+    def test_grow_fatal_cleanup_does_not_deny_new_preparing_operation(self):
+        self.exercise_grow_fatal_competitor()
+
+    def test_grow_committed_fatal_cleanup_does_not_deny_next_operation(self):
+        self.exercise_grow_fatal_competitor(after_publish=True)
+
+    def test_grow_fatal_cleanup_does_not_change_new_committed_operation(self):
+        self.exercise_grow_fatal_competitor(pause_new=False)
+
+    def test_grow_fatal_cleanup_reclaims_own_operation(self):
+        self.prepare_grow_exit_fixture()
+        failed = self.sql(
+            "SELECT dsg_grow_control('arm_fatal_unpaused'); "
+            "SELECT dsg_grow(1, 1, 1, 1024, 10000, false)",
+            check=False,
+        )
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("DSGA test Grow FATAL", failed.stderr)
+        self.wait_sql(
+            "SELECT dsg_grow_control('operation')", "op=1 phase=3 reason=3 high=256 generation=1"
+        )
+        self.assertIn("denied", self.sql("SELECT dsg_grow(1,1,1,1024,1000,false)").stdout)
+        self.assertIn("committed", self.sql("SELECT dsg_grow(2,2,1,1024,1000,false)").stdout)
+
+    def test_grow_rejected_request_does_not_clean_another_operation(self):
+        self.prepare_grow_exit_fixture()
+        old = self.start_fatal_grow()
+        before = self.sql("SELECT dsg_grow_control('operation')").stdout
+        rejected = self.sql("SELECT dsg_grow(2,2,99,2048,1000,false)", check=False)
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertIn("conflicts with current capacity", rejected.stderr)
+        self.assertEqual(self.sql("SELECT dsg_grow_control('operation')").stdout, before)
+        self.finish_fatal_grow(old)
+        self.assertEqual(
+            self.sql("SELECT dsg_grow_control('operation')").stdout.strip(),
+            "op=1 phase=3 reason=3 high=256 generation=1",
+        )
+
     def exercise_unpinned_io_wait(self, action, *, owner_finishes=True):
         # 初始数据已持久化；测试仅把同一页面标脏，Drop 只移除缓存而不删除文件。
         # 禁止后台抢先清理，以确保 writer 真正进入原生 StartBufferIO。

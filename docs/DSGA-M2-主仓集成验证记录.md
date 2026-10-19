@@ -127,3 +127,19 @@ PG `c47f959016be5c71b576b57a58cea6a27e8b546c` 在 S2 基础上补两个引用缺
 `build/neon-integrated-v3-io-lifetime-build.log`、`build/neon-integrated-v3-io-lifetime-lifecycle.log`。
 剩余完整Shrink/regrow、恢复预算/准入、API/控制链与Linux/存储端到端/性能仍待完成，
 不据本片批准VM缩容。
+
+## Grow退出归属修复
+
+PG `36f1ed0fcf003adeba1e7307ad036f3998bcb235` 已推送并核对远程SHA。旧FATAL回调
+不再无锁改写共享当前operation：清理绑定本次建立的请求，必要时条件重获resizeX，
+只清理身份相符的PREPARING。5项永久用例覆盖执行中/已提交新操作、自身清理及拒绝请求。
+
+Mac候选23项通过（49.377s），动态开/关完整check-world各81组/665项通过，TAP未启用；
+Neon实际新SHA二进制及重编配套库23项再次通过（45.714s），严格index源码绑定通过。
+prepare13项逻辑通过/23项环境skipped，后者另行真跑；pgindent/Ruff/diff通过。
+首次主仓重建遭遇中间依赖文件读取错误，重试完成后实际核验SHA并执行测试；不把
+失败的首轮构建视为通过，也未通过修改生产代码掩盖该构建错误。
+
+日志：build/v3-grow-cleanup-lifecycle-final.log、build/check-world-v3-grow-cleanup-{off,on}.log、
+build/neon-integrated-v3-grow-cleanup-build-retry.log、build/neon-integrated-v3-grow-cleanup-lifecycle.log。
+代码机制及不变量见PG的DSGA-Grow退出归属修复与验证.md。仍未完成全部代码/生产验收。
