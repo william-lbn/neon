@@ -11,6 +11,8 @@ import pathlib
 import re
 import subprocess
 
+from source_lock import validate_postgres_sources
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOCK = json.loads((ROOT / "ci/distribution.json").read_text())
 SOURCE = ROOT / "compute/compute-node.Dockerfile"
@@ -112,11 +114,8 @@ def record(args):
     path.write_text(json.dumps(item, indent=2) + "\n")
 
 
-def validate():
-    tracked = subprocess.check_output(["git", "ls-tree", "HEAD", "vendor/"], cwd=ROOT, text=True)
-    for version, commit in LOCK["postgres"].items():
-        if f"160000 commit {commit}\tvendor/postgres-{version}" not in tracked:
-            raise ValueError(f"Postgres lock differs from gitlink: {version}")
+def validate(source_ref="HEAD", require_checkout=False):
+    validate_postgres_sources(ROOT, source_ref, require_checkout)
     binary_text = (ROOT / "Dockerfile").read_text()
     for binary in LOCK["core_binaries"]:
         if f"--bin {binary}" not in binary_text:
@@ -134,7 +133,9 @@ def validate():
 def main():
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("validate")
+    validation = sub.add_parser("validate")
+    validation.add_argument("--source-ref", default="HEAD", help="HEAD, another commit, or index before committing")
+    validation.add_argument("--require-pg-checkout", action="append", default=[], metavar="VERSION")
     sub.add_parser("matrix")
     sub.add_parser("common")
     rendering = sub.add_parser("render")
@@ -148,7 +149,7 @@ def main():
     recording.add_argument("--stage", action="store_true")
     args = parser.parse_args()
     if args.command == "validate":
-        validate()
+        validate(args.source_ref, args.require_pg_checkout)
     elif args.command == "matrix":
         print(json.dumps({"target": extension_targets()}, separators=(",", ":")))
     elif args.command == "common":
