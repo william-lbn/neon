@@ -1,12 +1,12 @@
 # DSGA M2：Neon 主仓接入与 Mac 验证
 
-日期：2026-10-19。本记录覆盖已完成的 Provider/初始布局、访问边界、真实扩容、回收边界、M2f引用寿命/锁序、S2 checkpoint工作区和版本绑定；
+日期：2026-10-19。本记录覆盖已完成的 Provider/初始布局、访问边界、真实扩容、回收边界、M2f引用寿命/锁序、S2 checkpoint工作区、R05 IO/CV及版本绑定；
 完整在线扩缩、Granule 回收、Monitor/Agent/VM 业务链路仍在后续开发范围，不能声称功能已完整交付。
 
 ## 从主仓构建的证据
 
 Postgres 的真实源码现位于 `vendor/postgres-v17`，由主仓 `postgres.mk` 构建。
-当前候选 SHA 为 `9aebedf238b8c890b8d972e9d2377f537cef9458`，对应 17.11。
+当前候选 SHA 为 `c47f959016be5c71b576b57a58cea6a27e8b546c`，对应 17.11。
 `ci/distribution.json`、`vendor/revisions.json` 和主仓 gitlink 已同步。
 
 Mac 上清理旧构建并启用依赖跟踪后，从 Neon 根目录执行：
@@ -23,7 +23,7 @@ make -j4 postgres-v17 POSTGRES_VERSIONS=v17 \
 实际 `postgres --version` 输出包含：
 
 ```text
-postgres (PostgreSQL) 17.11 (9aebedf238b8c890b8d972e9d2377f537cef9458)
+postgres (PostgreSQL) 17.11 (c47f959016be5c71b576b57a58cea6a27e8b546c)
 ```
 
 这证明构建入口已经接到所选 fork 提交。原 `repos/postgres` 只是本地兼容符号链接，
@@ -83,10 +83,10 @@ Linux/KVM/HugeTLB、Pageserver/Safekeeper 完整端到端和性能验收尚未�
 `build/neon-integrated-v3-m2f-lifecycle-verified.log`、`build/v3-m2f-ci-prepare-final.log`。
 该时点完整 Shrink、checkpoint寿命、Compute恢复预算、外部控制链与Linux/端到端/性能仍待完成。
 
-## V3 / S2 checkpoint 当前组合
+## V3 / S2 checkpoint 组合（历史验收）
 
 PG 提交 `9aebedf238b8c890b8d972e9d2377f537cef9458` 已推至自有 V3 分支并核对远程。
-主仓 gitlink 与两份锁同步到该提交，实际根目录构建的版本见本文开头。内部 API 为2，
+主仓 gitlink 与两份锁同步到该提交，该批实际根目录构建版本为9aebedf完整SHA。内部 API 为2，
 测试库及 neon_rmgr 均已按新 headers 重编，不能混用旧扩展。
 
 - checkpoint 持独立工作区租约，初始扫描每批至多128对象；真正写入前短保护、复核
@@ -105,3 +105,25 @@ PG 提交 `9aebedf238b8c890b8d972e9d2377f537cef9458` 已推至自有 V3 分支�
 模块设计见 PG 的 `DSGA-S2-checkpoint工作区寿命与并发验证.md`。这只关闭 R04 的本次
 子片验证，不包括真实 Shrink/regrow、Compute恢复预算、R05全路径审计、外部控制链、
 Linux/KVM/HugeTLB、存储端到端及性能验收。最新进度以 `DSGA-当前实施状态.md` 为准。
+
+## V3 / R05 IO 与恢复快速路径当前组合
+
+PG `c47f959016be5c71b576b57a58cea6a27e8b546c` 在 S2 基础上补两个引用缺口：
+恢复小表快速helper在hash查找前取得Guard；未持自身pin的WaitIO在Guard内取得
+临时原生ResourceOwner pin，确保ERROR/FATAL清理CV后才放pin。FATAL时不能依靠
+数组Guard，因为shmem_exit在所有退出回调之前已释放LWLocks。没有改变通用PG退出
+顺序；动态关闭模式保留原生等待，控制结构/内部API2未变。详细交错见PG模块记录。
+
+- Mac开/关完整check-world **各81组/665项报告检查通过**，零not ok；TAP未启用。
+- 最终候选 **18项真实集群测试通过，48.098s**：原12项加5项IO等待场景和1项真实
+  物理备库WAL快速删除。既验证owner完成后等待者仍有自身pin，也验证广播前显式CV退队。
+- pgindent/Ruff/diff通过；CI prepare **13项逻辑通过、18项环境skipped**，上述18项另行真跑。
+- 主仓按新gitlink和两份锁重建，实际二进制完整SHA为本文开头的c47f959；测试模块
+  和rmgr按新headers重编，**18项真实集群测试再次通过，41.645s**。严格index源码锁检查
+  通过（18个二进制、4个PG锁、39个扩展阶段），三个最终构建日志均无warning/error。
+
+日志：`build/check-world-v3-io-lifetime-off.log`、`...-on.log`、
+`build/v3-io-lifetime-lifecycle-final.log`、`build/v3-io-lifetime-ci-prepare-final.log`、
+`build/neon-integrated-v3-io-lifetime-build.log`、`build/neon-integrated-v3-io-lifetime-lifecycle.log`。
+剩余完整Shrink/regrow、恢复预算/准入、API/控制链与Linux/存储端到端/性能仍待完成，
+不据本片批准VM缩容。

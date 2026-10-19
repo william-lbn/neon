@@ -153,6 +153,168 @@ class DsgPostgresLifecycle(unittest.TestCase):
             time.sleep(0.01)
         self.fail(f"状态未达到 {expected!r}: {result!r}\n{self.log.read_text()[-12000:]}")
 
+    def install_io_functions(self):
+        library = self.quote(self.library)
+        self.sql(
+            f"CREATE FUNCTION dsg_io(regclass, text) RETURNS boolean AS '{library}', "
+            "'test_dsg_io' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_io_control(text) RETURNS integer AS '{library}', "
+            "'test_dsg_io_control' LANGUAGE C STRICT;"
+        )
+
+    def exercise_unpinned_io_wait(self, action, *, owner_finishes=True):
+        # 初始数据已持久化；测试仅把同一页面标脏，Drop 只移除缓存而不删除文件。
+        # 禁止后台抢先清理，以确保 writer 真正进入原生 StartBufferIO。
+        self.config("bgwriter_lru_maxpages = 0\ncheckpoint_timeout = '1h'\n")
+        self.start()
+        self.install_functions()
+        self.install_io_functions()
+        self.sql(
+            "CREATE TABLE dsg_io_data AS SELECT i FROM generate_series(1, 100) i; "
+            "CHECKPOINT; SELECT dsg_io_control('attach');"
+        )
+        boot = self.sql("SELECT dsg_boot()").stdout
+        writer = self.background_sql("SELECT dsg_io('dsg_io_data', 'writer')", "dsg-io-writer")
+        self.wait_sql("SELECT dsg_io_control('writer_waiting')", "1")
+        waiter = self.background_sql(
+            "SELECT dsg_io('dsg_io_data', 'invalidate')", "dsg-io-invalidator"
+        )
+        self.wait_sql("SELECT dsg_io_control('waiter_waiting')", "1")
+
+        # 先让原 IO owner 完成并放下最后原始 pin。即使它的广播已经把等待者
+        # 从队列弹出，等待者的 cv_sleep_target 仍指向 IOCV，必须保留自身 pin。
+        if owner_finishes:
+            self.sql("SELECT dsg_io_control('release_writer')")
+            _, errors = writer.communicate(timeout=10)
+            self.assertEqual(writer.returncode, 0, errors)
+            self.wait_sql("SELECT dsg_io_control('waiter_alone')", "1")
+        if action == "wake":
+            self.sql("SELECT dsg_io_control('release_waiter')")
+        else:
+            function = "pg_cancel_backend" if action == "cancel" else "pg_terminate_backend"
+            self.assertEqual(
+                self.sql(
+                    f"SELECT {function}(pid) FROM pg_stat_activity "
+                    "WHERE application_name = 'dsg-io-invalidator'"
+                ).stdout.strip(),
+                "t",
+            )
+        _, errors = waiter.communicate(timeout=10)
+        if action == "wake":
+            self.assertEqual(waiter.returncode, 0, errors)
+        else:
+            self.assertNotEqual(waiter.returncode, 0)
+            self.assertIn(
+                "canceling statement due to user request"
+                if action == "cancel"
+                else "terminating connection due to administrator command",
+                errors,
+            )
+            # ERROR 展开到审核点时仍有 Guard；FATAL 则先 LWLockReleaseAll。
+            # 两者在原生资源清理放 pin 前都已退出 CV，并保有自身真实 pin。
+            self.assertEqual(
+                self.sql("SELECT dsg_io_control('audit')").stdout.strip(),
+                "7" if action == "cancel" else "3",
+            )
+        if not owner_finishes:
+            # 保持 owner 尚未广播，等待者原本仍在 CV 队列中。审核的退队位
+            # 因而验证显式清理，不能被“广播已弹出但 target 仍在”掩盖。
+            self.sql("SELECT dsg_io_control('release_writer')")
+            _, errors = writer.communicate(timeout=10)
+            self.assertEqual(writer.returncode, 0, errors)
+        self.sql("SELECT dsg_io_control('detach'); CHECKPOINT;")
+        self.assertEqual(self.sql("SELECT dsg_boot()").stdout, boot)
+        self.assertEqual(
+            self.sql("SELECT count(*), sum(i) FROM dsg_io_data").stdout.strip(), "100|5050"
+        )
+        self.assertEqual(self.sql("SELECT dsg_layout()").stdout.strip(), "t")
+
+    def test_unpinned_io_wait_finishes_after_owner_releases_pin(self):
+        self.exercise_unpinned_io_wait("wake")
+
+    def test_unpinned_io_wait_cancel_cleans_cv_before_guard(self):
+        self.exercise_unpinned_io_wait("cancel")
+
+    def test_unpinned_io_wait_terminate_retains_pin_until_cv_cleanup(self):
+        self.exercise_unpinned_io_wait("terminate")
+
+    def test_unpinned_io_wait_cancel_dequeues_before_owner_finishes(self):
+        self.exercise_unpinned_io_wait("cancel", owner_finishes=False)
+
+    def test_unpinned_io_wait_terminate_dequeues_before_owner_finishes(self):
+        self.exercise_unpinned_io_wait("terminate", owner_finishes=False)
+
+    def test_recovery_fast_drop_holds_array_guard(self):
+        self.start()
+        self.install_io_functions()
+        self.sql("CREATE TABLE dsg_drop_data AS SELECT i FROM generate_series(1, 100) i;")
+        standby = self.root / "standby"
+        standby_socket = self.root / "standby-socket"
+        standby_socket.mkdir()
+        standby_log = self.root / "standby.log"
+        self.command(
+            "pg_basebackup",
+            "-h",
+            self.socket,
+            "-p",
+            "55432",
+            "-D",
+            standby,
+            "-X",
+            "stream",
+            "-R",
+            "--checkpoint=fast",
+        )
+        with (standby / "postgresql.conf").open("a") as stream:
+            stream.write(
+                f"\nport = 55433\nunix_socket_directories = '{self.quote(standby_socket)}'\n"
+            )
+        self.addCleanup(
+            self.command, "pg_ctl", "-D", standby, "-m", "immediate", "stop", check=False
+        )
+        self.command("pg_ctl", "-D", standby, "-l", standby_log, "-w", "start")
+
+        def standby_sql(query):
+            result = self.command(
+                "psql",
+                "-h",
+                standby_socket,
+                "-p",
+                "55433",
+                "-d",
+                "postgres",
+                "-X",
+                "-qAt",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-c",
+                query,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr + standby_log.read_text()[-12000:])
+            return result.stdout.strip()
+
+        def wait_replay(lsn):
+            deadline = time.monotonic() + 10
+            while time.monotonic() < deadline:
+                if standby_sql(f"SELECT pg_last_wal_replay_lsn() >= '{lsn}'::pg_lsn") == "t":
+                    return
+                time.sleep(0.01)
+            self.fail("备库重放未达到目标\n" + standby_log.read_text()[-12000:])
+
+        # 使用真实物理备库和 WAL 重放触发只在恢复中启用的 size-cache 快速路径，
+        # 不伪造 InRecovery、缓存大小或 BufferTag。先重放一条 INSERT 形成原生缓存。
+        self.assertEqual(standby_sql("SELECT pg_is_in_recovery()"), "t")
+        standby_sql("SELECT dsg_io_control('attach_fast_drop')")
+        self.sql("INSERT INTO dsg_drop_data VALUES (101)")
+        wait_replay(self.sql("SELECT pg_current_wal_insert_lsn()").stdout.strip())
+        self.assertEqual(standby_sql("SELECT count(*) FROM dsg_drop_data"), "101")
+        self.sql("DROP TABLE dsg_drop_data")
+        wait_replay(self.sql("SELECT pg_current_wal_insert_lsn()").stdout.strip())
+        self.assertEqual(standby_sql("SELECT to_regclass('dsg_drop_data') IS NULL"), "t")
+        self.assertGreater(int(standby_sql("SELECT dsg_io_control('fast_drop_found')")), 0)
+        standby_sql("SELECT dsg_io_control('detach')")
+
     def exercise_cleanup_waiter(self, action):
         self.start()
         self.install_functions()

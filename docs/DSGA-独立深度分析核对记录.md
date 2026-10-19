@@ -5,8 +5,8 @@
 
 ## 采纳的结论
 
-完整 Shrink、外部 API、Compute/Monitor/Agent/NeonVM 联动尚未实现；R01/R04 等仍是
-后续必须解决的事项。Mac 不提供 Linux 物理回收证据，check-world 汇总不能代表
+审核时完整 Shrink、外部 API、Compute/Monitor/Agent/NeonVM 联动尚未实现，R01/R04
+均为后续必须解决的事项。恢复实施后的已关闭子片与剩余项见[当前实施状态](DSGA-当前实施状态.md)。Mac 不提供 Linux 物理回收证据，check-world 汇总不能代表
 DSGA 全部语义完成度，也不能据此给出生产可用结论。将当前状态收敛到单一文档，
 保留模块验证记录，冻结 V3 主体并集中实现。性能、真实 Linux Provider 和完整
 端到端分别验收；不根据未经权重定义的“30–35%”推算进度。
@@ -43,6 +43,16 @@ M2f 的验证为：returner 持真实 mappingX 后暂停；另一进程持 acces
   的 Rust WAL 解码和 C rmgr 兼容改动；它们不证明内存控制链完成，也不应被忽略。
 - 继续尊重项目所有者的环境约定：Mac 完成能执行的业务验证，Linux CI/实机另验；
   不因暂缺 KVM 就暂停所有可验证的内核、协议及接口工作，也不虚报物理完成。
+
+## 恢复实施后的引用审查补充
+
+M2f已消除归还路径的反向锁序；S2已拆分checkpoint工作区租约与短数组保护，具体
+验收以当前状态和模块记录为准。R05继续发现恢复快速helper缺Guard，以及非自身pin
+的IO等待者在ERROR/FATAL先放Guard后仍引用CV的窗口；已单独实现/验证对应修复。
+临时pin仅在WaitIO内部取得并在返回前释放，再由InvalidateBuffer按原协议复核，
+不是在持pin状态下直接调用原样InvalidateBuffer，仍遵守前述限制。
+FATAL先释放所有LWLocks，因此不能只登记退出回调；必须有原生pin覆盖CV清理到资源
+释放的间隔。真实备库和正常/取消/终止交错是本子片证据，尚不关闭全部R05。
 
 源码依据：PG `src/backend/storage/lmgr/lwlock.c` 的 `LWLockAttemptLock`/
 `LWLockWakeup`，`src/backend/storage/buffer/bufmgr.c` 的 `InvalidateBuffer`/
