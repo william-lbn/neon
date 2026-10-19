@@ -75,7 +75,10 @@ $(foreach pg_version,$(POSTGRES_VERSIONS),postgres-$(pg_version)): postgres-%: p
 ### main targets.
 
 # Run 'configure'
-$(BUILD_DIR)/%/config.status:
+# 发行锁改变后必须重新配置，更新 --with-extra-version 的实际 PG 身份；
+# 否则增量编译会使用新源码，却在二进制/头文件中保留旧 SHA。构建规则自身
+# 改变也需失效旧配置；未变化时保留缓存，避免每次构建都重跑 configure。
+$(BUILD_DIR)/%/config.status: $(ROOT_PROJECT_DIR)/vendor/revisions.json $(ROOT_PROJECT_DIR)/postgres.mk
 	mkdir -p $(BUILD_DIR)
 	test -e $(BUILD_DIR)/CACHEDIR.TAG || echo "$(CACHEDIR_TAG_CONTENTS)" > $(BUILD_DIR)/CACHEDIR.TAG
 
