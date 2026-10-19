@@ -107,6 +107,55 @@ class DsgPostgresLifecycle(unittest.TestCase):
             f"CREATE FUNCTION dsg_layout() RETURNS boolean AS '{library}', 'test_dsg_buffer_layout' LANGUAGE C;"
         )
 
+    def test_grow_preserves_data_and_recovers_after_crash(self):
+        self.start()
+        self.install_functions()
+        library = self.quote(self.library)
+        self.sql(
+            "CREATE FUNCTION dsg_grow(bigint, bigint, bigint, integer, integer, boolean) "
+            f"RETURNS text AS '{library}', 'test_dsg_grow' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_grown_used() RETURNS boolean AS '{library}', "
+            "'test_dsg_grow_verify' LANGUAGE C;"
+            "CREATE TABLE dsg_grow_data (id int PRIMARY KEY, payload text);"
+            "INSERT INTO dsg_grow_data SELECT i, repeat(md5(i::text), 32) "
+            "FROM generate_series(1, 12000) i;"
+        )
+        checksum = (
+            "SELECT count(*), sum(id), md5(string_agg(payload, ',' ORDER BY id)) FROM dsg_grow_data"
+        )
+        before = self.sql(checksum).stdout
+        boot = self.sql("SELECT dsg_boot()").stdout
+
+        # 同一真实连接执行扩容、继续查询并回滚 SQL 事务；共享容量应保留，
+        # 不能只用多次新建连接模拟“保持连接”。所有 SQL 只作用于本测试集群。
+        result = self.sql(
+            "BEGIN; CREATE TEMP TABLE dsg_connection AS SELECT pg_backend_pid() AS pid;"
+            "SELECT dsg_grow(10, 10, 1, 512, 1000, false);"
+            "SELECT pg_backend_pid() = (SELECT pid FROM dsg_connection); ROLLBACK;"
+        ).stdout.splitlines()
+        self.assertEqual(result, ["committed high=512 generation=2 replay=false", "t"])
+        self.assertEqual(
+            self.sql("SELECT dsg_grow(10, 10, 1, 512, 1000, false)").stdout.strip(),
+            "committed high=512 generation=2 replay=true",
+        )
+        self.assertEqual(
+            self.sql("SELECT dsg_grow(11, 11, 2, 2304, 1000, false)").stdout.strip(),
+            "committed high=2304 generation=3 replay=false",
+        )
+        self.assertEqual(self.sql(checksum).stdout, before)
+        self.assertEqual(self.sql("SELECT dsg_grown_used()").stdout.strip(), "t")
+        self.assertEqual(self.sql("SHOW shared_buffers").stdout.strip(), "2MB")
+        self.sql("VACUUM (FREEZE, ANALYZE) dsg_grow_data")
+
+        # immediate stop 留下真实恢复工作，重启必须换 boot 并使用启动初值；
+        # 扩容期间的数据仍由 Neon rmgr/WAL 恢复，不能把容量日志当作持久化数据。
+        self.stop()
+        self.start()
+        self.assertNotEqual(self.sql("SELECT dsg_boot()").stdout, boot)
+        self.assertEqual(self.sql(checksum).stdout, before)
+        self.assertEqual(self.sql("SELECT dsg_layout()").stdout.strip(), "t")
+        self.sql("CREATE EXTENSION amcheck; SELECT bt_index_check('dsg_grow_data_pkey')")
+
     def stop(self):
         self.command("pg_ctl", "-D", self.data, "-w", "-m", "immediate", "stop")
         self.running = False

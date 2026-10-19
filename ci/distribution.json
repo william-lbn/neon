@@ -7,7 +7,7 @@
     "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",
     "v15": "2aaab3bb4a13557aae05bb2ae0ef0a132d0c4f85",
     "v16": "a42351fcd41ea01edede1daed65f651e838988fc",
-    "v17": "d792ba944b0c3c27bce84d912827f7d752bdd1e0"
+    "v17": "a3bc37375ea337d041e716c243fa172274b091f4"
   },
   "core_binaries": [
     "pageserver", "safekeeper", "proxy", "pg_sni_router", "storage_broker",
