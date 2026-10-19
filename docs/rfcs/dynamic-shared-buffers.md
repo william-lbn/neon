@@ -1,7 +1,10 @@
 # Dynamic shared buffers and elastic compute
 
-Status: implementation in progress; disabled by default. This RFC supersedes
-the PG18 assumptions in the initial DSGA proposal. An implementation or a passing
+Status: the owner has confirmed V3 and resumed implementation; disabled by default.
+The [Chinese V3 implementation standard](../DSGA-架构复核与实施规范-V3.md)
+is authoritative for subsequent work, including the all-major-version requirement,
+bootstrap recovery, enforceable budgets, final VM fencing and platform test gates.
+This RFC retains the product integration contracts. An implementation or a passing
 build alone does not enable a feature in a released compute image.
 
 ## Scope and release contract
@@ -32,8 +35,11 @@ until that gate passes; the implementation must report unsupported capability.
 
 Use the existing integrated PG17 first. PG18 requires a separate main-repository,
 extension and image compatibility change; a postgres branch is not distribution
-support. Keep PG14-16 behavior unchanged except for separately validated upstream
-maintenance. Do not transplant dynamic-buffer code into every major at once.
+support. Complete PG17 and its available validation first, then implement PG16,
+PG15 and PG14 individually. All supported majors require their own semantic port
+and release evidence. PG18 additionally requires its distribution and AIO work.
+Do not transplant dynamic-buffer code into every major at once. Linux tests that
+are unavailable remain explicit release blockers, not implied successes.
 
 The source of truth is a distribution manifest containing:
 
@@ -50,8 +56,10 @@ Deploy readers first, then writers. Old WAL remains readable across the upgrade.
 ## Required invariants
 
 Let L be the allocation limit, H the initialized/access limit, and M the reserved
-maximum for one postmaster lifetime. In steady state, `0 < L = H <= M`. During
-shrink, `0 < L < H <= M` is allowed. M is a startup limit; exceeding it requires a
+maximum for one shared-memory lifetime. B_boot is the safe startup size budgeted
+against the minimum allowed VM specification. In steady state,
+`B_boot <= L = H <= M`; during shrink, `B_boot <= L < H <= M` is allowed.
+M is a startup limit; exceeding it requires a
 controlled compute restart or a later separately implemented region extension.
 
 1. New victim allocation uses [0,L). Existing pins in [L,H) remain valid.
@@ -71,7 +79,9 @@ controlled compute restart or a later separately implemented region extension.
 9. Logical commit and physical release are separate facts. Failure can retain
    extra resources, but must never authorize release of still-live resources.
 10. A resize permission is tied to VM UID, compute instance, PG boot identity
-    and operation revision; it is invalid after any of these identities changes.
+    and issuer epoch/operation revision; it is invalid after any of these identities
+    changes. An already issued VM action still requires reconciliation, and its
+    budget constraint must not disappear merely because the permission expired.
 
 The coordinator must not wait for a barrier while holding a lock needed by a
 participant to acknowledge it. Lock order, error cleanup and interrupt safety
@@ -91,6 +101,11 @@ minimum-spec overhead. Control metadata and locks are never reclaimed with a
 buffer granule. Round reclaim ranges inward to safe provider page boundaries;
 never discard an active object sharing the boundary page.
 
+Virtual reservation is not a promise of zero commit-accounting cost on every
+kernel. Probe the selected backing and measure metadata floors against the minimum
+VM size. A checkpoint workspace has an independent lifetime: do not hold the array
+access guard over checkpoint IO/throttling or reset a live workspace on regrow.
+
 DSGA is initially a small provider/coordinator interface. Do not introduce a
 general shared allocator or independently restartable MMAN process before buffer
 correctness is established. A second component must define its own references,
@@ -101,8 +116,10 @@ quiescence and recovery; an adapter does not make it resizable automatically.
 The monitor must negotiate the capability before enabling dynamic memory. Keep
 the existing agent Revision as the outer ordering mechanism. The PG client adds
 boot identity and a client-generated operation ID; replay of a request returns
-its known result rather than executing it twice. A changed target is a new
-operation, not reuse of an old ID.
+its known result rather than executing it twice. Expired history returns STALE or
+RESULT_EXPIRED plus current state, never a new execution. Separate the requesting
+operation's receipt from an observed snapshot of another operation. A changed
+target is a new operation, not reuse of an old ID.
 
 Report target bytes, L/H/M, physically committed bytes, unused committed bytes,
 release pending bytes, provider/page size, operation identity, phase and failure
@@ -113,8 +130,10 @@ administrator and enforce range/size checks inside the function.
 States include IDLE, PREPARING, DRAINING, LOGICAL_COMMITTED,
 PHYSICAL_PENDING, COMMITTED, DENIED and UNKNOWN. UNKNOWN prohibits VM shrink.
 Cancellation before logical commit can restore the old allocation boundary if
-backing remains intact. After physical release it cannot blindly restore ACTIVE;
-restoration is a new grow. All waits are interruptible and bounded by policy.
+backing remains intact. After logical commit, restoration is a new grow, even if
+release is still pending. Coordinator waits and batches have policy deadlines;
+these do not guarantee forcible cancellation of an in-flight kernel call or QMP
+action. Timeout means reconcile, not proof that nothing happened.
 
 ## Grow protocol
 
@@ -148,8 +167,11 @@ failed prepopulate must not publish the target or hide unused committed memory.
 
 PG can be small while the VM remains large. This is a safe pending state and
 must be observable. A prior permission cannot authorize shrink after a newer
-grow. Restart chooses startup shared buffers from current actual guest budget,
-not a stale larger `postgresql.auto.conf` value.
+grow. Internal crash recovery can rebuild shared memory in the same postmaster
+without invoking compute_ctl. Use the fixed safe B_boot for every rebuild, then
+negotiate growth. The new boot retains minimum-spec admission constraints or keeps
+ordinary work admission fenced until outstanding VM operations and their durable
+budget intent are reconciled. Rewriting postgresql.auto.conf alone is insufficient.
 
 ## Memory budget and policy
 
@@ -158,6 +180,13 @@ buffer commitment, active query and parallel-worker memory, maintenance, LFC
 metadata/resident working set, unreleased HugeTLB pool, transient resize overhead
 and margin. Deduplicate shared memory and HugeTLB accounting. Do not sum backend
 RSS or multiply `work_mem * max_connections` as if it were an exact bound.
+
+Historical measurements and cgroup memory.high are not enforceable future memory
+bounds. Require an auditable admission/budget mechanism, or drain unsuitable work
+and pause new work while keeping connections. Cover existing sessions and workers,
+not just new proxy connections. If that guarantee is unavailable, PG logical shrink
+may proceed but strict VM shrink is denied. This missing mechanism is an unfinished
+feature, not a successful implementation that always returns denial.
 
 Grow can be triggered by sustained CPU or memory demand, but distinguish IO/lock
 bottlenecks. Shrink requires sustained headroom across all budgets, a safe PG
