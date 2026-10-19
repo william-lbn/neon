@@ -107,6 +107,146 @@ class DsgPostgresLifecycle(unittest.TestCase):
             f"CREATE FUNCTION dsg_layout() RETURNS boolean AS '{library}', 'test_dsg_buffer_layout' LANGUAGE C;"
         )
 
+    def background_sql(self, query, application):
+        """启动本临时集群的真实会话，所有子进程都登记清理，避免断言失败后泄漏客户端。"""
+        process = subprocess.Popen(
+            [
+                str(self.pg_bin / "psql"),
+                "-h",
+                str(self.socket),
+                "-p",
+                "55432",
+                "-d",
+                "postgres",
+                "-X",
+                "-qAt",
+                "-v",
+                "ON_ERROR_STOP=1",
+                "-c",
+                "SET statement_timeout = '20s'; " + query,
+            ],
+            env={**os.environ, "PGAPPNAME": application},
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        self.addCleanup(self.close_background, process)
+        return process
+
+    @staticmethod
+    def close_background(process):
+        if process.poll() is None:
+            process.terminate()
+        try:
+            process.communicate(timeout=5)
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.communicate(timeout=5)
+
+    def wait_sql(self, query, expected):
+        """使用新事务读取实际状态；有界轮询只用于等待确定条件，不以 sleep 猜调度。"""
+        deadline = time.monotonic() + 10
+        while time.monotonic() < deadline:
+            result = self.sql(query).stdout.strip()
+            if result == expected:
+                return
+            time.sleep(0.01)
+        self.fail(f"状态未达到 {expected!r}: {result!r}\n{self.log.read_text()[-12000:]}")
+
+    def exercise_cleanup_waiter(self, action):
+        self.start()
+        self.install_functions()
+        library = self.quote(self.library)
+        self.sql(
+            f"CREATE FUNCTION dsg_pin(regclass, integer, text) RETURNS boolean AS '{library}', "
+            "'test_dsg_pin' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_pin_control(boolean) RETURNS boolean AS '{library}', "
+            "'test_dsg_pin_control' LANGUAGE C STRICT;"
+            "CREATE TABLE dsg_pin_data AS SELECT i FROM generate_series(1, 100) i; CHECKPOINT;"
+        )
+        boot = self.sql("SELECT dsg_boot()").stdout
+        holder = self.background_sql(
+            "SELECT dsg_pin('dsg_pin_data', 0, 'hold')", "dsg-native-pin-holder"
+        )
+        self.wait_sql("SELECT dsg_pin_control(false)", "t")
+        waiter = self.background_sql(
+            "SELECT dsg_pin('dsg_pin_data', 0, 'cleanup')", "dsg-native-pin-waiter"
+        )
+
+        # 原生 BufferPin 不属于 heavyweight lock，isolationtester 无法可靠识别。
+        # 必须先观察真实等待，再释放 holder 或发送取消，避免测成一次无竞争调用。
+        self.wait_sql(
+            "SELECT count(*) FROM pg_stat_activity WHERE "
+            "application_name = 'dsg-native-pin-waiter' AND state = 'active' "
+            "AND wait_event = 'BufferPin'",
+            "1",
+        )
+        if action != "wake":
+            function = "pg_cancel_backend" if action == "cancel" else "pg_terminate_backend"
+            self.assertEqual(
+                self.sql(
+                    f"SELECT {function}(pid) FROM pg_stat_activity "
+                    "WHERE application_name = 'dsg-native-pin-waiter'"
+                ).stdout.strip(),
+                "t",
+            )
+            _, errors = waiter.communicate(timeout=10)
+            self.assertNotEqual(waiter.returncode, 0)
+            self.assertIn(
+                "canceling statement due to user request"
+                if action == "cancel"
+                else "terminating connection due to administrator command",
+                errors,
+            )
+            self.assertEqual(self.sql("SELECT dsg_pin_control(false)").stdout.strip(), "t")
+
+        self.assertEqual(self.sql("SELECT dsg_pin_control(true)").stdout.strip(), "t")
+        holder_output, holder_errors = holder.communicate(timeout=10)
+        self.assertEqual(holder.returncode, 0, holder_errors)
+        self.assertEqual(holder_output.strip(), "t")
+        if action == "wake":
+            waiter_output, waiter_errors = waiter.communicate(timeout=10)
+            self.assertEqual(waiter.returncode, 0, waiter_errors)
+            self.assertEqual(waiter_output.strip(), "t")
+
+        # 再取 cleanup lock 验证 waiter flag、pin 和内容锁均已清理；FATAL 只终止
+        # 指定会话，Postmaster/共享 boot 应继续存活，数据也必须保持一致。
+        self.assertEqual(
+            self.sql("SELECT dsg_pin('dsg_pin_data', 0, 'cleanup')").stdout.strip(), "t"
+        )
+        self.assertEqual(
+            self.sql("SELECT count(*), sum(i) FROM dsg_pin_data").stdout.strip(), "100|5050"
+        )
+        self.assertEqual(self.sql("SELECT dsg_boot()").stdout, boot)
+
+    def test_native_pin_waiter_wakes_after_last_other_pin(self):
+        self.exercise_cleanup_waiter("wake")
+
+    def test_native_pin_waiter_cancel_cleans_references(self):
+        self.exercise_cleanup_waiter("cancel")
+
+    def test_native_pin_waiter_termination_cleans_references(self):
+        self.exercise_cleanup_waiter("terminate")
+
+    def test_last_unpin_stops_descriptor_access(self):
+        self.start()
+        library = self.quote(self.library)
+        self.sql(
+            "CREATE FUNCTION dsg_grow(bigint, bigint, bigint, integer, integer, boolean) "
+            f"RETURNS text AS '{library}', 'test_dsg_grow' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_unpin_probe() RETURNS boolean AS '{library}', "
+            "'test_dsg_unpin_probe' LANGUAGE C;"
+            "SELECT dsg_grow(1, 1, 1, 1024, 1000, false);"
+            "CREATE TABLE dsg_probe_data AS SELECT i, repeat(md5(i::text), 32) AS payload "
+            "FROM generate_series(1, 3000) i; CHECKPOINT;"
+        )
+        checksum = (
+            "SELECT count(*), sum(i), md5(string_agg(payload, ',' ORDER BY i)) FROM dsg_probe_data"
+        )
+        before = self.sql(checksum).stdout
+        self.assertEqual(self.sql("SELECT dsg_unpin_probe()").stdout.strip(), "t")
+        self.assertEqual(self.sql(checksum).stdout, before)
+
     def test_grow_preserves_data_and_recovers_after_crash(self):
         self.start()
         self.install_functions()
