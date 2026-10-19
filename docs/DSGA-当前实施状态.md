@@ -2,6 +2,9 @@
 
 更新：2026-10-19（Asia/Shanghai）。设计以 V3 为准；本文件只保留当前事实，历史测试见模块记录。
 
+最新完整性审查见[代码完整性复核](DSGA-代码完整性复核-20261019.md)：整体未完成，
+并新增确认下述 Grow/FATAL 缺陷，必须先修复，不能把现有模块测试通过当作生产可用。
+
 ## 当前目标与完成边界
 
 按项目所有者确认的 V3 继续实施，先完整完成 PG17，再逐版移植。
@@ -51,6 +54,13 @@ R05 的 ERROR 审核点仍持Guard和自身pin；FATAL 审核点已无Guard但�
 `build/neon-integrated-v3-io-lifetime-lifecycle.log`；其他历史证据见主仓M2集成记录。
 pgindent/Ruff/diff通过；prepare为13项逻辑通过、18项环境skipped，后者已另行真跑。
 
+## 新确认的阻断缺陷
+
+Grow 的 FATAL 清理在原生释放 resize_lock 后，没有核验本操作身份就修改当前共享
+operation。本次真实临时集群复现：旧操作退出把新操作从PREPARING改为DENIED，
+新操作随后COMMITTED却残留INTERRUPTED原因。该缺陷尚未修复，原18项没有覆盖此
+交错；没有复现数据损坏。复现日志 `build/audit-grow-fatal/reproduce.log`，详见上文复核。
+
 ## 恢复注意与下一阶段
 
 实际构建 `build/neon-integrated/v17`，安装 `build/neon-integrated-install/v17`。
@@ -61,7 +71,8 @@ PG内部 API 为2。具体设计与约束见子模块：
 - `DSGA-S2-checkpoint工作区寿命与并发验证.md`
 - `DSGA-R05-IO等待与恢复快速路径验证.md`
 
-下一批先完成安全bootstrap、同Postmaster恢复预算和准入默认状态，再推进完整
+下一批先修复上述Grow/FATAL操作归属与终态缺陷，并加永久回归；然后完成安全bootstrap、
+同Postmaster恢复预算和准入默认状态，再推进完整
 Shrink/排水/回收/regrow，以及请求回执、API和外部控制链。所有进程/扩展的剩余引用
 与长Guard扫描活性继续按V3审查；Linux物理能力和完整端到端另验。
 
