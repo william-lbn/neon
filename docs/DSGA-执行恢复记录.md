@@ -6,6 +6,31 @@
 
 ## 当前源码与分支
 
+### 最新Pod主体核验与PG17维护（优先于下文历史）
+
+- Autoscaling 3eeafd997c8cc9079fcf90ffd0df27aa32c13ce5已推送，工作树仅保留所有者
+  AGENTS.md。新增owner.Options.PodUID/Ownership/VerifyCurrent/PodVerifier及深拷贝
+  Snapshot VM；受影响278事件/12测试包、9无测试包、零case fail/skip，native lint0。
+  3个新增生产反向均真实断言失败，逐字节恢复后全量race/lint已通过。
+- PG17官方社区467bb7ea已完整合并为c8482eeec4710aa3035a1850b41f77586e3731d4并
+  推送核验，干净；候选225/225回归通过。Neon三处锁及Autoscaling发行引用工作区
+  已更新，准确SHA正式流水线已全部完成退出0；主仓提交仍须一致绑定与独立推送核验。
+- 准确流水线50483已终态退出0；80内核122.764s、52正式SQL79.391s、准确Go
+  8.41s通过，off/on两轮world/TAP各48报告/231文件/18410报告断言（含可选skip）。
+  Rust SDK10项14.97s/HTTP12项6.06s严格全部通过；prepare145为13通过/132环境skip。
+  不重复旧进程；本批完整结论见DSGA-主体核验与20261021上游验证.md。
+- 尚未接中心HTTP签发/Compute owned目标私钥与JWT发行、Agent真实消费、Driver
+  启动前初始化窗口、受控跨owner/boot SDK关闭及全部预算/Monitor/Runner。PodVerifier
+  不含私钥、不签JWT，协议夹具不是实际K8s TokenReview/RBAC，不关闭R03。
+- Control-plane工作区正在新增实际凭据HTTP路由及TLS/完整journal测试，尚未验证/
+  推送。复用自有Autoscaling3ee依赖；临时网络下载失败已通过代理+own-fork直连
+  分流处理。下一回合检查根checkpoint中真实Go编译session，不能重复启动。
+  缓存Go1.26.5满足go.mod的1.26.0最低声明，
+  原toolchain1.27.1未改动。own-fork Go模块查询已成功：
+  github.com/william-lbn/autoscaling v0.0.0-20261020225115-3eeafd997c8c，可在主模块
+  replace neondatabase路径到该固定自有版本，复用唯一journal/主体核验，不能再另写
+  压缩日志解码。已加入本地依赖与go.sum，尚未提交；临时直连/SSH映射参数保存在根checkpoint。
+
 ### 最新所有权与持久PG循环（优先于全部下文历史）
 
 - Autoscaling生产实现1bf247d06c89d24f141d15f32cf6ca50116b2f0c、阶段验证补强

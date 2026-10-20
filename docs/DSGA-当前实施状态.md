@@ -4,6 +4,23 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
+## 最新接续：远程凭据主体核验与PG17维护同步
+
+Autoscaling `3eeafd997c8cc9079fcf90ffd0df27aa32c13ce5`已推送核验，新增生产PodVerifier：
+专用TokenReview、真实SA/Pod UID、随机进程holder、同Node/生命周期、完整journal/
+固定Lease二次读取及独立期限。既有Session.Check复用统一核验，不另写owner镜像。
+受影响最终race278事件/12测试包、9无测试包，0case fail/skip；native标签lint0issues。
+新增3项实际断言反向后逐字节恢复并全量重验。**这是主体核验核心，不是已接通的
+凭据HTTP服务或Agent实际入口**，完整预算/Monitor/Runner等仍须实现，Goal active。
+
+重新fetch发现社区PG17新增官方维护467bb7ea，已完整合并为自有
+`c8482eeec4710aa3035a1850b41f77586e3731d4`并先推送核验。修复IS DOCUMENT反编译
+遗漏括号，官方代码/回归保留，无冲突。候选完整核心225/225通过；三处PG绑定及
+Autoscaling发行引用已在工作区更新。准确SHA重编、80内核/52正式SQL、真实Go链路、off/on全部world/TAP、SDK10/HTTP12
+均通过；world含可选skip，prepare145为13通过/132环境skip。详见
+[本批验证](DSGA-主体核验与20261021上游验证.md)。Control-plane实际凭据路由草稿
+正在本地编译测试，尚未推送，不计完整交付；Agent/Driver/预算/Runner继续。
+
 ## 最新接续：所有权选主与持久PG循环
 
 Autoscaling生产所有权/循环1bf247d及阶段门禁补强

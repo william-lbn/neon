@@ -135,6 +135,23 @@ Compute/epoch绑定；本机私有Session构造或协议夹具不能代替远端
 SDK未知原意图的解除须显式、持久且完整核验，不以一次查询/Fenced或重造空Client
 清除；跨owner/boot关闭协议未完成前仍禁止相关冲突动作。
 
+远程签发主体采用专用audience的Kubernetes TokenReview，并核对允许的SA及其
+实际UID、投影令牌绑定的真实Pod UID、Pod生命周期和所在Node。进程随机holder
+绑定该Pod UID；Pod名字、单纯SA名或调用方自报数字均不能当主体。签发器使用
+自己的RBAC客户端读取Lease→完整原journal→Lease，核验固定UID/incarnation/
+当前owner，不另设可漂移的未压缩owner镜像。续约新鲜度只用于保守拒绝，时钟
+不能证明最终执行权；所有检查有独立总期限、不缓存正向授权、不泄露Bearer。
+生产主体核验核心已实现，中心HTTP/私钥与Compute目标绑定、Agent实际消费仍
+须继续接线；详见Autoscaling的《DSGA-远程凭据主体核验》，不据此关闭R03。
+
+受管VM创建还必须有持久初始化屏障：apiserver分配真实VM UID后，Driver先
+持久化同一incarnation/Compute实例身份、安全启动spec与完整journal，再按准确
+UID/RV条件解除屏障。屏障期间Controller不得分配Runner/进入资源执行；失败或
+写成丢回复只重读同UID原事实，不新建身份或初始化空日志兜底。已有Runner、
+Node绑定、重启历史或丢失journal的实例不得在线改造成新的受管VM。Agent看到
+受管标记（包括损坏标记）后不得退回legacy监控/资源写入。屏障/API/Webhook/
+Driver及实际入口仍须实现验证，不能将这一代码缺口称为Linux待验。
+
 当前代码进度、实际链路及尚未接线的Agent/凭据/预算/Runner见
 [所有权与持久循环验证](DSGA-所有权与持久循环验证.md)，不据单模块通过关闭R03。
 
