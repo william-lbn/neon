@@ -7,7 +7,8 @@
 增加内核回执/历史/业务取消，见[内核接入](DSGA-R09-内核回执与取消接入.md)。
 后续又实现并实际加载[Neon管理SQL](DSGA-Neon管理SQL与实例身份.md)，含管理会话
 边界及C/Rust交叉向量；[Rust双连接客户端](DSGA-Rust双连接管理客户端.md)已进一步
-落实严格响应类型和原意图对账。HTTP/外层完整认证、预算与VM fencing仍未完成。普通解析
+落实严格响应类型和原意图对账。[Compute HTTP](DSGA-Compute管理HTTP与运行时接入.md)
+已接入严格专用认证和长期双连接；外层持久owner、完整预算与VM fencing仍未完成。普通解析
 成功不产生任何资源许可；动态模式仍须按V3完成全链路能力协商和发布门槛。
 
 ## 字段与跨语言表示
@@ -82,8 +83,8 @@ epoch/revision、承诺完整内容及有效约束；VM Controller/Runner仍须�
 
 ## Mac 实际验证
 
-最新客户端批次：compute_api32项、compute_tools23项默认全包通过，另8项实际原生
-客户端用例通过14.19s、零ignored。此前正式SQL批次完整Neon清理重编/
+最新HTTP批次：compute_api32项、compute_tools30项普通全包通过，原生默认ignored
+另有严格实测：SDK8项12.27s、HTTP11项6.09s，零ignored。此前正式SQL批次完整Neon清理重编/
 实际加载47项通过85.043s、零skip，见管理SQL文档。以下21项为最初wire历史记录。
 
 - `cargo test --locked --offline -p compute_api`：21项通过，零失败/ignored，包含

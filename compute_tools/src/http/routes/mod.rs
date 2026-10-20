@@ -6,6 +6,7 @@ pub(in crate::http) mod check_writability;
 pub(in crate::http) mod configure;
 pub(in crate::http) mod database_schema;
 pub(in crate::http) mod dbs_and_roles;
+pub(in crate::http) mod dsg;
 pub(in crate::http) mod extension_server;
 pub(in crate::http) mod extensions;
 pub(in crate::http) mod failpoints;

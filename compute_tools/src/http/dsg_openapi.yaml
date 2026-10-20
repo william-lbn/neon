@@ -1,0 +1,286 @@
+openapi: "3.0.2"
+info:
+  title: Neon DSGA PG management API
+  version: "1"
+paths:
+  /dsg/v1/capabilities:
+    get:
+      operationId: getDsgCapabilities
+      summary: 查询经真实观察连接确认仍有效的能力和实例
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 只表示逻辑控制能力，production_ready当前false，不产生VM许可
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Capabilities"}
+        default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/memory:
+    get:
+      operationId: getDsgMemory
+      summary: 独立观察通道的当前PG和Provider事实
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 完整boot/generation与逐数组预算事实，Cache-Control为no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/MemoryResponse"}
+        default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/resize:
+    post:
+      operationId: requestDsgResize
+      summary: 按完整不可变意图执行或幂等重放PG逻辑扩缩容
+      description: SQL提交不受事务回滚撤销；HTTP超时/断开不等于取消。预算ID仅为引用。
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/ResizeRequest"}
+      responses:
+        "200": {$ref: "#/components/responses/Control"}
+        default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/resize/status:
+    post:
+      operationId: getDsgResizeStatus
+      summary: 查询原操作回执和独立当前事实
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/OperationQuery"}
+      responses:
+        "200": {$ref: "#/components/responses/Control"}
+        default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/resize/cancel:
+    post:
+      operationId: cancelDsgResize
+      summary: 经独立连接请求业务取消，too_late仍须按实际终态对账
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/OperationQuery"}
+      responses:
+        "200": {$ref: "#/components/responses/Control"}
+        default: {$ref: "#/components/responses/Failure"}
+components:
+  securitySchemes:
+    DsgJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >-
+        专用aud=neon-dsga、scope=compute_ctl:dsga，必填compute_id、vm_uid、compute_instance_id、
+        issuer_epoch规范uint64字符串，以及整数秒nbf/exp，0<exp-nbf<=300，无时钟leeway。
+        必填唯一kid，配置JWK必须声明EdDSA或RS256且与header一致。无Hadron/本地免认证。
+        签名只证明调用身份，不能充当issuer租约或完整预算。
+  responses:
+    Control:
+      description: receipt只属于本key；observed可属于其他操作；所有结果均无VM许可
+      content:
+        application/json:
+          schema: {$ref: "#/components/schemas/ControlResponse"}
+    Failure:
+      description: >-
+        401认证失败；403实例/epoch不符；412未启用/未Running；409本次未发送；
+        503管理/观察失败或已发送结果unconfirmed；400语义错误，422结构错误，
+        413超过16KiB，415非JSON。解析/认证错误采用GenericError，运行时采用Failure。
+        503或断开绝不意味着PG未执行，必须保留完整原意图。全部DSGA路由不缓存。
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - {$ref: "#/components/schemas/Failure"}
+              - type: object
+                required: [error]
+                properties: {error: {type: string}}
+  schemas:
+    U64:
+      type: string
+      pattern: '^(0|[1-9][0-9]{0,19})$'
+      description: 规范十进制uint64字符串，数值<=18446744073709551615，由服务端再作数值校验
+    PositiveU64:
+      type: string
+      pattern: '^[1-9][0-9]{0,19}$'
+      description: 非零uint64字符串，数值上限由服务端校验；禁止浮点/JSON number中转
+    ID:
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: '^[!-~]+$'
+    Buffers:
+      type: integer
+      minimum: 16
+      maximum: 1073741823
+    Instance:
+      type: object
+      additionalProperties: false
+      required: [vm_uid, compute_instance_id, pg_boot_id]
+      properties:
+        vm_uid: {$ref: "#/components/schemas/ID"}
+        compute_instance_id: {$ref: "#/components/schemas/ID"}
+        pg_boot_id: {$ref: "#/components/schemas/PositiveU64"}
+    OperationID:
+      type: object
+      additionalProperties: false
+      required: [high, low]
+      description: 两半不能同时为0，按网络字节序拆分128位随机ID
+      properties:
+        high: {$ref: "#/components/schemas/U64"}
+        low: {$ref: "#/components/schemas/U64"}
+    Key:
+      type: object
+      additionalProperties: false
+      required: [instance, issuer_epoch, revision, operation_id]
+      properties:
+        instance: {$ref: "#/components/schemas/Instance"}
+        issuer_epoch: {$ref: "#/components/schemas/PositiveU64"}
+        revision: {$ref: "#/components/schemas/PositiveU64"}
+        operation_id: {$ref: "#/components/schemas/OperationID"}
+    ResizeRequest:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, key, kind, expected_capacity_generation, target_buffers, target_vm_memory_bytes, budget_commitment_id, deadline_unix_ms]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        key: {$ref: "#/components/schemas/Key"}
+        kind: {type: string, enum: [grow, shrink]}
+        expected_capacity_generation: {$ref: "#/components/schemas/PositiveU64"}
+        target_buffers: {$ref: "#/components/schemas/Buffers"}
+        target_vm_memory_bytes: {$ref: "#/components/schemas/PositiveU64"}
+        budget_commitment_id: {$ref: "#/components/schemas/ID"}
+        deadline_unix_ms: {$ref: "#/components/schemas/PositiveU64"}
+    OperationQuery:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, key]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        key: {$ref: "#/components/schemas/Key"}
+    Provider:
+      type: object
+      additionalProperties: false
+      required: [has_result, status, system_errno, requested_offset, requested_bytes, affected_offset, affected_bytes, physical_release_verified, allocation_may_be_partial, release_may_be_partial]
+      properties:
+        has_result: {type: boolean}
+        status: {type: string, enum: [unknown, ok, noop, unsupported, failed]}
+        system_errno: {type: integer, format: int32}
+        requested_offset: {$ref: "#/components/schemas/U64"}
+        requested_bytes: {$ref: "#/components/schemas/U64"}
+        affected_offset: {$ref: "#/components/schemas/U64"}
+        affected_bytes: {$ref: "#/components/schemas/U64"}
+        physical_release_verified: {type: boolean}
+        allocation_may_be_partial: {type: boolean}
+        release_may_be_partial: {type: boolean}
+    Array:
+      type: object
+      additionalProperties: false
+      required: [array, committed_upper_bytes, allocation_unknown, release_state, release_key, release_capacity_generation, provider]
+      properties:
+        array: {type: string, enum: [descriptors, blocks, iocv, checkpoint]}
+        committed_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
+        allocation_unknown: {type: boolean}
+        release_state: {type: string, enum: [none, pending, wait_checkpoint, verified, unsupported, failed]}
+        release_key:
+          type: object
+          nullable: true
+          allOf: [{$ref: "#/components/schemas/Key"}]
+        release_capacity_generation: {$ref: "#/components/schemas/U64"}
+        provider: {$ref: "#/components/schemas/Provider"}
+    Operation:
+      type: object
+      additionalProperties: false
+      required: [key, kind, phase, reason, target_buffers, expected_capacity_generation, context_sha256, cancel_requested, cancel_closed, replayed]
+      properties:
+        key: {$ref: "#/components/schemas/Key"}
+        kind: {type: string, enum: [grow, shrink]}
+        phase: {type: string, enum: [preparing, committed, denied]}
+        reason: {type: string, enum: [none, timeout, populate_failed, interrupted, cancelled]}
+        target_buffers: {$ref: "#/components/schemas/Buffers"}
+        expected_capacity_generation: {$ref: "#/components/schemas/PositiveU64"}
+        context_sha256: {type: string, pattern: '^[0-9a-f]{64}$'}
+        cancel_requested: {type: boolean}
+        cancel_closed: {type: boolean}
+        replayed: {type: boolean}
+    Snapshot:
+      type: object
+      additionalProperties: false
+      required: [instance, capacity_generation, low_buffers, high_buffers, maximum_buffers, admission_open, admission_revision, startup_shared_upper_bytes, operation, arrays]
+      properties:
+        instance: {$ref: "#/components/schemas/Instance"}
+        capacity_generation: {$ref: "#/components/schemas/PositiveU64"}
+        low_buffers: {$ref: "#/components/schemas/Buffers"}
+        high_buffers: {$ref: "#/components/schemas/Buffers"}
+        maximum_buffers: {$ref: "#/components/schemas/Buffers"}
+        admission_open: {type: boolean}
+        admission_revision: {$ref: "#/components/schemas/U64"}
+        startup_shared_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
+        operation:
+          type: object
+          nullable: true
+          allOf: [{$ref: "#/components/schemas/Operation"}]
+        arrays:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items: {$ref: "#/components/schemas/Array"}
+    Receipt:
+      type: object
+      additionalProperties: false
+      required: [key, disposition, has_result, result]
+      properties:
+        key: {$ref: "#/components/schemas/Key"}
+        disposition: {type: string, enum: [accepted, replayed, busy, stale, conflict, result_expired, not_found, cancel_requested, too_late, rejected]}
+        has_result: {type: boolean}
+        result:
+          type: object
+          nullable: true
+          allOf: [{$ref: "#/components/schemas/Snapshot"}]
+    ControlResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, receipt, observed]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        receipt: {$ref: "#/components/schemas/Receipt"}
+        observed: {$ref: "#/components/schemas/Snapshot"}
+    MemoryResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, observed]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        observed: {$ref: "#/components/schemas/Snapshot"}
+    Capabilities:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, production_ready, vm_shrink_permit, supported, buffer_api_version, enabled, instance_bound, history_capacity, provider_can_release, instance]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        production_ready: {type: boolean}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        supported: {type: boolean, enum: [true]}
+        buffer_api_version: {type: integer, enum: [5]}
+        enabled: {type: boolean, enum: [true]}
+        instance_bound: {type: boolean, enum: [true]}
+        history_capacity: {type: integer, minimum: 1}
+        provider_can_release: {type: boolean}
+        instance: {$ref: "#/components/schemas/Instance"}
+    Failure:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, state, key]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        state: {type: string, enum: [not_available, wrong_instance, management_unavailable, observation_unavailable, invalid_request, wrong_instance_or_epoch, not_sent, unconfirmed]}
+        key:
+          type: object
+          nullable: true
+          allOf: [{$ref: "#/components/schemas/Key"}]

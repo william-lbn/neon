@@ -7,6 +7,17 @@ servers:
   - url: "http://localhost:3080"
 
 paths:
+  # DSGA使用独立的严格认证和完整uint64字符串契约，定义保存在同目录模块中。
+  /dsg/v1/capabilities:
+    $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1capabilities"
+  /dsg/v1/memory:
+    $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1memory"
+  /dsg/v1/resize:
+    $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1resize"
+  /dsg/v1/resize/status:
+    $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1resize~1status"
+  /dsg/v1/resize/cancel:
+    $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1resize~1cancel"
   /status:
     get:
       tags:
@@ -410,6 +421,8 @@ paths:
 
 components:
   securitySchemes:
+    DsgJWT:
+      $ref: "./dsg_openapi.yaml#/components/securitySchemes/DsgJWT"
     JWT:
       type: http
       scheme: bearer

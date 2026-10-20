@@ -28,18 +28,20 @@ export NEON_TEST_PG_BIN="$pg_install/bin"
 export NEON_TEST_DSG_EXPECTED_SHA="$expected_sha"
 task_reports=$(mktemp -d)
 trap 'rm -rf "$task_reports"' EXIT
-cargo test --locked -p compute_api --features postgres-client --test dsg_postgres_client \
-    -- --list > "$task_reports/list"
-python3 - "$task_reports/list" <<'PY'
+run_suite() {
+    local task_package=$1 task_suite=$2
+    cargo test --locked -p "$task_package" --features compute_api/postgres-client --test "$task_suite" \
+        -- --list > "$task_reports/list"
+    python3 - "$task_reports/list" <<'PY'
 from pathlib import Path
 import sys
 names = [line for line in Path(sys.argv[1]).read_text().splitlines() if line.endswith(': test')]
 if not names:
     raise SystemExit('DSGA real Rust client suite contains zero tests')
 PY
-cargo test --locked -p compute_api --features postgres-client --test dsg_postgres_client \
-    -- --include-ignored --nocapture --test-threads=1 2>&1 | tee "$task_reports/run"
-python3 - "$task_reports/list" "$task_reports/run" <<'PY'
+    cargo test --locked -p "$task_package" --features compute_api/postgres-client --test "$task_suite" \
+        -- --include-ignored --nocapture --test-threads=1 2>&1 | tee "$task_reports/run"
+    python3 - "$task_reports/list" "$task_reports/run" <<'PY'
 from pathlib import Path
 import re
 import sys
@@ -49,5 +51,10 @@ reports = re.findall(r'test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignor
                      r'(\d+) measured; (\d+) filtered out;', output)
 if len(reports) != 1 or tuple(map(int, reports[0])) != (count, 0, 0, 0, 0):
     raise SystemExit('DSGA Rust client suite did not execute every required test')
-print(f'All {count} real DSGA Rust client tests executed successfully; zero ignored/filtered')
+print(f'All {count} DSGA suite tests executed successfully; zero ignored/filtered')
 PY
+}
+# SDK八项原生集群，以及Compute真实Router（含普通认证门禁和原生HTTP链路），
+# 分别校验非零/全量。不能只执行普通七项而让四项集成保持ignored。
+run_suite compute_api dsg_postgres_client
+run_suite compute_tools dsg_http

@@ -74,7 +74,7 @@ x509-cert.workspace = true
 postgres-types.workspace = true
 postgres_versioninfo.workspace = true
 postgres_initdb.workspace = true
-compute_api.workspace = true
+compute_api = { workspace = true, features = ["postgres-client"] }
 utils.workspace = true
 workspace_hack.workspace = true
 remote_storage = { version = "0.1", path = "../libs/remote_storage/" }
@@ -83,3 +83,6 @@ zstd = "0.13"
 bytes = "1.0"
 rust-ini = "0.20.0"
 rlimit = "0.10.1"
+
+[dev-dependencies]
+tempfile = "3.14.0"

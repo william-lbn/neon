@@ -21,7 +21,12 @@ active**。本页为当前事实入口；阶段性通过不能替代完整交付
   旧实验v1须补齐身份后受控重启。
 - 共享Rust管理客户端：严格响应类型、真实双SQL会话、可信schema/扩展成员核验、
   超时/future取消后保留完整原意图、独立状态/业务取消。已实际运行8项原生集群
-  用例；尚未接入Compute HTTP/Monitor。见[客户端模块](DSGA-Rust双连接管理客户端.md)。
+  用例；已owned接入Compute HTTP，Monitor仍未接入。另拒绝NOINHERIT但可SET ROLE
+  管理员的成员关系，保留旧校验漏拒绝的真实负向证据。见[客户端模块](DSGA-Rust双连接管理客户端.md)。
+- Compute五个正式HTTP路由与OnceCell长期双连接：严格专用短期JWT认证，不沿用
+  Hadron免认证；绑定Compute/VM/实例/epoch，限制原始JSON，禁止缓存；配置期间
+  仍可查询/取消在途操作，后端断连不隐式换客户端。11项实际路由门禁通过，含
+  4项原生/TCP链路。见[HTTP模块](DSGA-Compute管理HTTP与运行时接入.md)。
 - 完整Neon扩展的共享LSN锁、独立SLRU接口、安全文件发布与Buffer提示保护；
   原生恢复/逻辑槽/配置样例/资源释放缺陷修复及保留的反向证据。
 
@@ -35,12 +40,12 @@ active**。本页为当前事实入口；阶段性通过不能替代完整交付
 | 仓库 | 分支/身份 | 状态 |
 |---|---|---|
 | 实际PG17子模块 | codex/dsga-pg17-v3-20261019 / 48633803b05c1b7bd9a40d749b5278df9aaf01ac | 已先推送并核验GitHub refs，工作树干净 |
-| Neon主仓 | codex/dsga-neon-v3-20261019，gitlink/两份锁均486338 | 管理SQL ad1b26f已推送核验；本Rust客户端批次随当前记录提交推送，恢复以Git/refs为准 |
+| Neon主仓 | codex/dsga-neon-v3-20261019，gitlink/两份锁均486338 | 管理SQL ad1b26f、SDK 276230c已推送核验；本HTTP接入批次随当前记录提交推送，恢复以Git/refs为准 |
 | Autoscaling | codex/dsga-autoscaling-20261019 / ef6cd154… | 尚无完整DSGA运行时实现 |
 | control-plane | codex/dsga-control-plane-v3-20261020 / 928eec95… | Driver等运行时尚未完成 |
 | Helm | codex/dsga-neon-helm-v3-20261019 / 648488a… | 本业务配置/验收链尚未完成，不准备部署 |
 
-本客户端批次再次fresh fetch：Neon main仍fa504217c61bbcaf5c512d75830564541f917f8f，
+本HTTP批次再次fresh fetch：Neon main仍fa504217c61bbcaf5c512d75830564541f917f8f，
 Neon PG17仍56692dfb680281a963c7470fc7f0fec7f65ecfd4，社区PG17仍
 91246c72695cdddf62003f6bf4c4ade511f134f4；均为对应功能头的祖先。维护合并
 4a39412f…/873715d889保留；没有只挑选部分bug提交或覆盖自有功能。其他版本
@@ -56,8 +61,9 @@ repos/postgres仅为实际repos/neon/vendor/postgres-v17的兼容符号链接。
 | PG准确486338重编及内核专项 | 69项通过127.064s，零skip | 原48项加21项R09，不重复计数 |
 | 486338原生off/on | 各基础81组/666项；各48份TAP报告、231报告文件/18410报告断言，46PASS/2NOTESTS/零FAIL | 报告总数含平台/可选skip |
 | 本SQL批次完整Neon清理/构建/安装/加载 | 47项通过85.043s，零skip | 原22项存储专项加25项正式SQL测试，含Rust communicator |
-| Rust compute_api/compute_tools默认全包 | 32项/23项通过，零failed/ignored | 含新增8项事实校验；不是跨层完整执行 |
-| Rust双连接SDK原生门禁 | 8项通过14.19s，零ignored/filtered | 默认feature测试会ignored这8项，严格脚本已另行真实执行 |
+| Rust compute_api/compute_tools普通全包 | 32项/30项通过，零failed；另SDK8/HTTP4项ignored | 12项原生用例已另行严格实测，不能将普通运行的ignored算通过 |
+| Rust双连接SDK原生门禁 | 8项通过12.27s，零ignored/filtered | 含NOINHERIT/SET权限补强及owned生命周期 |
+| Compute HTTP严格门禁 | 11项通过6.09s，零ignored/filtered | 7项路由/认证、4项原生，含实际TCP→SQL→PG及数据校验 |
 | Rust Clippy | 两包已有门禁及客户端feature --no-deps --all-targets -D warnings退出0 | 依赖仍有remote_storage既有27条warnings |
 | 最终prepare | 129项：13通过、116环境skip | 69+47已另行真实执行，不能把skip算通过 |
 | C/脚本检查 | PG17及旧14/15/16头严格-Werror语法、pgindent、Ruff、Bash、diff、版本绑定通过 | 旧头仅证明不支持路径可编译，不代表功能移植 |
@@ -65,6 +71,8 @@ repos/postgres仅为实际repos/neon/vendor/postgres-v17的兼容符号链接。
 日志位于工作区根build/：neon-r09-exact-{build,lifecycle,extension,world,prepare}.log、
 neon-r09-api-{strict-extension-final,compute-tests,clippy,prepare-final}.log。
 客户端另见neon-dsg-client-{packages,default-final,strict-final,clippy}.log。
+HTTP与最新权限补强见neon-dsg-http-{packages-final,strict-final,clippy-final}.log。
+本HTTP prepare仍129项：13通过/116环境skip，日志neon-dsg-http-prepare-final.log。
 内核流水线70614、最终SQL流水线31469均终态退出0，不重复启动旧句柄。
 
 原生门禁未覆盖未启用的ICU/readline、额外DNS/encryption/xid_wraparound及
@@ -74,8 +82,8 @@ Safekeeper/RW/RO/branch本机端到端仍未执行，SLRU协议fixture不构成�
 
 ## 继续实施的完整范围
 
-1. 管理HTTP安全路由、共享Rust客户端的实际运行时接入、Go实际客户端、外层持久
-   意图/历史与唯一执行者、重连/
+1. Monitor的实际运行时接入、Go实际客户端、外层持久
+   意图/历史与唯一执行者、跨owner/进程重连/
    不确定结果对账；不能把旧Ok或当前PG状态当新请求结果/缩容许可。
 2. R02全部私有/查询/并行/DSM/维护/扩展/后台预算、硬约束、quiesce和资源承诺
    生命周期；RSS采样、填写预算ID或新boot门禁不能代替完整运行时预算。

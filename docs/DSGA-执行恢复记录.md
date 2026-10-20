@@ -6,15 +6,30 @@
 
 ## 当前源码与分支
 
+### 最新Compute HTTP与客户端门禁（优先于后续阶段快照）
+
+- SDK276230c已推送核验；owned/SET权限修复f4bd55c998a320120d6d3254c4872feb27da1362
+  已独立提交，HTTP接入与中文记录作为下一提交一并推送自有同一功能分支；恢复以
+  实际HEAD/GitHub refs核验。PG486338、三处锁及原生二进制不变。
+- 正式HTTP五路由、专用严格JWT、长期双连接/进程内原意图栅栏、No-store和
+  OpenAPI已完成本机模块验证；Monitor、持久owner/完整预算/VM链仍未完成。
+- 最终严格SDK8项12.27s、HTTP11项6.09s，零ignored/filtered（19071终态0）；
+  两包普通32/30通过，另默认8/4 ignored已另实测（60986终态0）；两包Clippy
+  --no-deps全targets -D warnings退出0（86660终态0），依赖27warnings保留。
+  prepare129项：13通过/116环境skip（34305终态0），不把skip或重复执行混计。
+- 最新日志build/neon-dsg-http-{packages-final,strict-final,clippy-final,prepare-final}.log，
+  反向权限证据neon-dsg-http-noinherit-negative.log。全部句柄已结束，不重新poll。
+  SDK/HTTP模块文档与下面最新接续节给出边界，全部目标保持active。
+
 ### 本轮R09已验证结果（优先于下面6009历史快照）
 
 - PG17当前干净提交`48633803b05c1b7bd9a40d749b5278df9aaf01ac`已推送自有
   功能分支并核验GitHub refs；新增内核独立回执、16条历史、epoch/hash绑定、
   业务取消与完整逐数组释放身份，Buffer ABI5。PG原48+新19项67项通过122.538s；
   最后补两项锁序/历史隔离后新增21项通过44.279s，均零skip。
-- Neon内核绑定批次`545c4cdbe623ff8640ca6f60d6c36293f9d11d71`已推送并核验；
-  gitlink/ci/distribution.json/vendor/revisions.json均486338。当前SQL/API批次随
-  本记录提交推送，恢复必须用git rev-parse HEAD及gh refs实时核验。
+- Neon内核绑定批次`545c4cdbe623ff8640ca6f60d6c36293f9d11d71`、正式SQL ad1b26f
+  已推送并核验；gitlink/ci/distribution.json/vendor/revisions.json均486338。
+  恢复必须用git rev-parse HEAD及gh refs实时核验最新客户端/HTTP提交。
 - 准确SHA唯一顺序流水线**70614已终态退出0**，不能重新poll或启动。实际二进制
   输出完整486338 SHA；69项内核通过127.064s、22项完整Neon扩展通过40.470s，
   均零skip。off/on各基础81组/666项；各48份TAP报告、231报告文件/18410报告
@@ -47,7 +62,7 @@
   三项及受管CLI覆盖非法备份配置均通过。最初45项失败日志不删除。
 - 日志build/neon-r09-api-{strict-extension-final,compute-tests,clippy,prepare-final}.log。
   87161/38031/41675/66764/8833/1671/31469/80756等均已终态，不重新poll/启动。
-- 后续继续实际HTTP安全路由/Rust-Go客户端、持久意图与历史、全量预算/quiesce、
+- 该阶段之后已完成共享Rust客户端/Compute HTTP；继续Monitor/Go客户端、持久意图与历史、全量预算/quiesce、
   跨层fencing与真实存储端到端；不是只待Linux实测。API仍production_ready=false、
   vm_shrink_permit=false；默认关闭，不构建镜像/部署/合并/发布。
 
@@ -138,7 +153,7 @@ CI本包测试另作中文提交；不改变PG锁/内核，不将DTO当成已实
 ## 后续必须继续的完整范围
 
 1. 正式Neon管理SQL、内核receipt/history/cancel及共享Rust双连接客户端已完成本机
-   模块验证；继续HTTP安全路由、Rust客户端运行时接入、Go实际客户端、外层持久
+   模块验证；Compute HTTP/owned运行时已另完成，继续Monitor/Go实际客户端、外层持久
    历史/意图与跨进程重连，不把模块当完整链路。
 2. 全部私有/并行/DSM/维护/扩展/后台预算与quiesce、持久承诺；Compute/Monitor/
    Agent/Scheduler/Controller/Runner实际执行fencing和恢复对账。旧Ok不能授权缩容。
@@ -170,4 +185,27 @@ CI本包测试另作中文提交；不改变PG锁/内核，不将DTO当成已实
 通过（63618），最终feature Clippy退出0（4265）；均已结束，不重启旧句柄。
 feature默认运行的8项ignored不能算通过，严格脚本已显式全量实际执行。
 日志build/neon-dsg-client-{packages,default-final,strict-final,clippy}.log。
-客户端没有VM许可，尚未接入Compute HTTP/Monitor；剩余全目标继续active。
+SDK初次提交时未接入HTTP/Monitor；后续HTTP接入见下节，Monitor仍待实现，均无VM许可。
+
+## Compute管理HTTP接续（2026-10-20）
+
+SDK 276230c5c90f25c795fa5be33bfdd317161fca4b已推自有功能分支并核验GitHub refs。
+本批新增五个正式HTTP路由、独立严格JWT、owned长期双连接/OnceCell、No-store、
+完整OpenAPI和11项路由用例；PG486338及三处锁未变。fresh fetch Neon main/
+Neon PG17/社区PG17均仍为当前状态页SHA且为功能头祖先。无主分支合并或发布。
+
+真实修复：SDK原先只检查直接/继承schema CREATE，漏掉NOINHERIT但可SET ROLE
+管理员成员边。新测试先验证实际权限组合，旧实现确定性失败1/1（其余7 filtered），
+日志build/neon-dsg-http-noinherit-negative.log。修复后最终严格脚本完整SDK8项
+12.27s/HTTP11项6.09s通过，零ignored/filtered（19071已终态0）。初始夹具SK重复、
+拆分import和schema名称查询错误另保留过程日志，不冒充业务负向证据。
+
+最新默认两包32/30通过，另SDK8/HTTP4默认ignored且已另行严格实测；两包
+--no-deps全targets Clippy -D warnings通过，remote_storage既有27 warnings保留。
+最终日志build/neon-dsg-http-{packages-final,strict-final,clippy-final}.log。Mac可执行
+门禁不等于Linux/VM认证。模块文档DSGA-Compute管理HTTP与运行时接入.md。
+
+本HTTP不自动重建失败客户端，不完成持久owner/租约/重连；Monitor、Go、完整预算/
+quiesce、最终VM fencing、多PG版本和真实Neon存储E2E仍须继续编码集成。下一模块
+从持久操作身份/唯一执行者及完整资源承诺推进，不重复构建未改的PG/C门禁，不把
+剩余业务归到Linux待测。全Goal保持active，依既定边界不构建镜像/部署/合主分支。

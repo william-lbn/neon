@@ -128,6 +128,10 @@ impl From<&Server> for Router<Arc<ComputeNode>> {
                 router
                     .merge(unauthenticated_router)
                     .merge(authenticated_router)
+                    .merge(super::routes::dsg::router(
+                        compute_id.clone(),
+                        config.jwks.clone(),
+                    ))
             }
         };
 

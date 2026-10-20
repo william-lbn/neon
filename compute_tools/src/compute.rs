@@ -159,6 +159,10 @@ pub struct ComputeNode {
     /// Handle to the extension stats collection task
     extension_stats_task: TaskHandle,
     lfc_offload_task: TaskHandle,
+
+    /// DSGA执行栅栏须跨HTTP请求存活。只能初始化一次；连接失效不自动换客户端，
+    /// 否则原执行结果未知时会丢掉本地原意图。持久恢复协议另由外层owner负责。
+    pub(crate) dsg_client: tokio::sync::OnceCell<compute_api::dsg_client::DsgSqlClient<'static>>,
 }
 
 // store some metrics about download size that might impact startup time
@@ -623,6 +627,7 @@ impl ComputeNode {
             compute_ctl_config: config.compute_ctl_config,
             extension_stats_task: Mutex::new(None),
             lfc_offload_task: Mutex::new(None),
+            dsg_client: tokio::sync::OnceCell::new(),
         })
     }
 
