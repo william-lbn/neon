@@ -268,3 +268,19 @@ DSGA-完整意图摘要跨语言核验.md。终态句柄58135退出0包含三步
 后续继续可信owner与持久协调循环、实际Monitor和完整预算、PG接管fence与最终
 Runner私有QMP串行隔离、其他PG版本/Driver/Helm及真实Neon存储E2E；这些仍是
 代码/集成剩余项，不是Linux待测。Goal保持active，所有既定环境约定继续有效。
+
+## Go到真实Compute/PG门禁接续（2026-10-20）
+
+自有Autoscaling 9f4669f3a2a9990268f52b58d458a568ebf34480已先推送且GitHub
+refs核验一致，仅保留所有者AGENTS.md未提交。新增显式tag的Go race真实消费者
+用例，本仓严格宿主脚本/共享HTTP夹具运行；完整结果见DSGA-Go客户端真实链路验证.md。
+
+已提交依赖准确复验1 Rust外层/2 Go进程4.53s、零skip/ignored/filtered，SDK8/
+HTTP11共享夹具回归14.25s/7.19s、普通34/30、两包全targets Clippy、Go tag lint
+均通过。17115多步流水线和98238准确依赖复验均终态0，不重启旧句柄。
+PG/三处锁仍486338；不重编未改PG/C。初始移动夹具路径/可见性和dead_code错误
+只算实现过程编译/lint错误，不能当业务反向证据。源码无故障版本留存。
+
+此门禁不跑Monitor/Agent/Scheduler/Runner或完整Neon存储。下一代码工作继续
+真实协调/预算、PG issuer接管fence及显式受控重连；不能靠重建空客户端丢旧意图，
+也不能把拒绝静默重连当成已经完成恢复。整体Goal仍active，后续代码范围不缩小。

@@ -31,7 +31,7 @@ active**。本页为当前事实入口；阶段性通过不能替代完整交付
   UID/resourceVersion条件写入及响应核验；保留同Revision分批批准。另完成Go
   请求/查询的无损完整身份契约，以及完整意图/命令的持久执行日志、写前条件提交、
   未知动作/接管/取消恢复与有界历史；受管标记禁止旧路径回退。Go正式消费者已
-  编写，但到真实Compute的整体门禁、可信owner分配与日志协调循环仍待集成；
+  编写，且到真实Compute/PG的整体门禁已执行；可信owner分配与日志协调循环仍待集成；
   账本不是租约认证或VM许可。
 - 完整Neon扩展的共享LSN锁、独立SLRU接口、安全文件发布与Buffer提示保护；
   原生恢复/逻辑槽/配置样例/资源释放缺陷修复及保留的反向证据。
@@ -44,7 +44,9 @@ active**。本页为当前事实入口；阶段性通过不能替代完整交付
 最新批次补齐Go正式五路由消费者/双连接池/未知意图栅栏及ABI5严格事实类型，
 拒绝null标量补零，并与Rust一起重算完整PG context摘要；不能借用同Key下不同
 VM目标/预算/期限的回执。见[跨语言摘要核验](DSGA-完整意图摘要跨语言核验.md)。
-Go客户端尚未接Agent协调循环，Go→真实Compute→PG同一门禁仍未执行。
+Go客户端尚未接Agent协调循环；Go→真实Compute→PG同一门禁已另完成，含实际
+提交丢回复、原意图重放、数据校验及真实PG重启拒绝静默重绑。见
+[真实链路门禁](DSGA-Go客户端真实链路验证.md)，它不等于完整Neon存储/VM端到端。
 
 ## 分支、源码与上游
 
@@ -52,7 +54,7 @@ Go客户端尚未接Agent协调循环，Go→真实Compute→PG同一门禁仍�
 |---|---|---|
 | 实际PG17子模块 | codex/dsga-pg17-v3-20261019 / 48633803b05c1b7bd9a40d749b5278df9aaf01ac | 已先推送并核验GitHub refs，工作树干净 |
 | Neon主仓 | codex/dsga-neon-v3-20261019，gitlink/两份锁均486338 | 管理SQL ad1b26f、SDK 276230c已推送核验；本HTTP接入批次随当前记录提交推送，恢复以Git/refs为准 |
-| Autoscaling | codex/dsga-autoscaling-20261019 / ee7f7df4cd162c7dd9efa737d4d869a5f1ce5e4e | 日志c5db379、评分测试f808bea、Go HTTP消费者ee7f7df已推送核验；完整运行链仍未完成 |
+| Autoscaling | codex/dsga-autoscaling-20261019 / 9f4669f3a2a9990268f52b58d458a568ebf34480 | 日志/HTTP消费者及真实Go联调已推送核验；完整运行链仍未完成 |
 | control-plane | codex/dsga-control-plane-v3-20261020 / 928eec95… | Driver等运行时尚未完成 |
 | Helm | codex/dsga-neon-helm-v3-20261019 / 648488a… | 本业务配置/验收链尚未完成，不准备部署 |
 
@@ -102,6 +104,10 @@ Go HTTP批次最终Mac race183pass事件、0fail/用例skip，10测试包通过/
 并单独修复，定向race100轮通过。Rust摘要原检查漏检已做真实反向，恢复后原生
 SDK8/HTTP11分别14.30s/7.46s通过，两包普通34/30通过、Clippy退出0；默认的
 8+4 ignored已另实际执行。日志neon-dsg-context-*及autoscaling-dsga-http-*。
+后续真实Go链路门禁1个Rust外层/2次独立Go race进程通过；9f4669f准确依赖复验
+4.53s，零skip/ignored/filtered。共享夹具重构后SDK8/HTTP11、两包普通34/30及
+Clippy也重验通过，普通新增跨语言1ignored已严格实际执行；日志neon-dsg-go-native-*。
+Go带标签lint0issues，普通183事件沿用未改生产代码的上批证据，不重复计入新用例。
 内核流水线70614、最终SQL流水线31469均终态退出0，不重复启动旧句柄。
 
 原生门禁未覆盖未启用的ICU/readline、额外DNS/encryption/xid_wraparound及
@@ -111,7 +117,7 @@ Safekeeper/RW/RO/branch本机端到端仍未执行，SLRU协议fixture不构成�
 
 ## 继续实施的完整范围
 
-1. Monitor的实际运行时接入、Go与真实Compute实链门禁、外层持久
+1. Monitor的实际运行时接入、外层持久
    协调循环与可信唯一执行者、跨owner/进程重连/
    不确定结果对账；不能把旧Ok或当前PG状态当新请求结果/缩容许可。
 2. R02全部私有/查询/并行/DSM/维护/扩展/后台预算、硬约束、quiesce和资源承诺
