@@ -6,6 +6,26 @@
 
 ## 当前源码与分支
 
+### 最新Autoscaling接续（优先于后续阶段快照）
+
+- Neon SDK/HTTP当前功能头6e63d8d57e3df8ce98c9770c8d322d7c296ca686已推送核验。
+  Autoscaling在自有codex/dsga-autoscaling-20261019新增0ec15c7固定UID/RV/动作
+  原资源快照条件写入、f37811d67cb7d68f58a915e64830342292bf6ed8 Go完整请求契约，
+  两项均已推送且GitHub refs与本地一致。PG486338及两份锁/准确二进制未变。
+- Go不能把官方进度Revision当不可变ID：同Revision的分批批准保持可用；实际
+  业务调用改为GET+UID/RV test+精确资源更新，空身份/陈旧动作/不一致响应拒绝。
+  原Go数据源新增可省略UID，VM和Pod来源区分正确；源码中文关键注释/模块提交。
+- Mac race受影响组合132个pass事件（含父/子测试/fuzz种子），0fail/用例skip，
+  8包通过、9包无测试文件不计；Go请求fuzz1275872次通过，v2 lint 0issues。
+  移除两条test操作，实际Revision6倒退5、新对象8slots误写4，两项确定性失败；
+  finally逐字节恢复后最终组合通过。日志build/autoscaling-dsga-cas-{full-final.jsonl,
+  full-final.stderr,lint-final.log,negative.log}和autoscaling-dsga-contract-fuzz.log。
+  62209/88750终态0，不重新poll。默认CLT27 SDK链接错误以既有Xcode14.4解决。
+- Autoscaling已有所有者AGENTS.md的7行边界修改保留，不混入业务。完整状态入口
+  为该仓docs/DSGA-执行状态与恢复.md。本批尚无Go实际HTTP消费者、持久账本/
+  issuer、全部预算或最终Runner fencing；直接QMP旧路径仍须封堵。API模拟CAS
+  不等于真实apiserver/etcd/QMP/VM，不能把这些代码剩余项归入Linux待测。
+
 ### 最新Compute HTTP与客户端门禁（优先于后续阶段快照）
 
 - SDK276230c已推送核验；owned/SET权限修复f4bd55c998a320120d6d3254c4872feb27da1362
