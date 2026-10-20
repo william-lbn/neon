@@ -869,7 +869,7 @@ class DsgPostgresLifecycle(unittest.TestCase):
             "op=1 phase=3 reason=3 high=256 generation=1",
         )
 
-    def exercise_unpinned_io_wait(self, action, *, owner_finishes=True):
+    def exercise_unpinned_io_wait(self, action, *, owner_finishes=True, releasing=False):
         # 初始数据已持久化；测试仅把同一页面标脏，Drop 只移除缓存而不删除文件。
         # 禁止后台抢先清理，以确保 writer 真正进入原生 StartBufferIO。
         self.config("bgwriter_lru_maxpages = 0\ncheckpoint_timeout = '1h'\n")
@@ -883,8 +883,9 @@ class DsgPostgresLifecycle(unittest.TestCase):
         boot = self.sql("SELECT dsg_boot()").stdout
         writer = self.background_sql("SELECT dsg_io('dsg_io_data', 'writer')", "dsg-io-writer")
         self.wait_sql("SELECT dsg_io_control('writer_waiting')", "1")
+        mode = "invalidate_release" if releasing else "invalidate"
         waiter = self.background_sql(
-            "SELECT dsg_io('dsg_io_data', 'invalidate')", "dsg-io-invalidator"
+            f"SELECT dsg_io('dsg_io_data', '{mode}')", "dsg-io-invalidator"
         )
         self.wait_sql("SELECT dsg_io_control('waiter_waiting')", "1")
 
@@ -918,7 +919,7 @@ class DsgPostgresLifecycle(unittest.TestCase):
                 errors,
             )
             # ERROR 展开到审核点时仍有 Guard；FATAL 则先 LWLockReleaseAll。
-            # 两者在原生资源清理放 pin 前都已退出 CV，并保有自身真实 pin。
+            # 两者在专属owner放pin前都已退出CV，并保有自身真实pin。
             self.assertEqual(
                 self.sql("SELECT dsg_io_control('audit')").stdout.strip(),
                 "7" if action == "cancel" else "3",
@@ -950,6 +951,15 @@ class DsgPostgresLifecycle(unittest.TestCase):
 
     def test_unpinned_io_wait_terminate_dequeues_before_owner_finishes(self):
         self.exercise_unpinned_io_wait("terminate", owner_finishes=False)
+
+    def test_releasing_owner_io_wait_finishes_after_writer(self):
+        self.exercise_unpinned_io_wait("wake", releasing=True)
+
+    def test_releasing_owner_io_wait_cancel_cleans_cv_and_pin(self):
+        self.exercise_unpinned_io_wait("cancel", releasing=True)
+
+    def test_releasing_owner_io_wait_terminate_cleans_cv_and_pin(self):
+        self.exercise_unpinned_io_wait("terminate", releasing=True)
 
     def test_recovery_fast_drop_holds_array_guard(self):
         self.start()

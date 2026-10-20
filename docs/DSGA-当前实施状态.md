@@ -15,13 +15,16 @@ Monitor/Agent/NeonVM 控制链仍待实施。不能将这些子片通过解释�
 
 ## 分支与维护基线
 
-- PG：`codex/dsga-pg17-v3-20261019`，当前
-  `864d32d9a8cfb23c71ea73caccc2c80360fb18bb`，包含S3 `7a1ff181…`、独立SLRU能力
+- PG：`codex/dsga-pg17-v3-20261019`，当前本地组合头
+  `6009cf4f7f64892f08e31201ceafb611dba1fbcc`，新增逻辑槽升级 `694d751f34`、配置
+  样例 `40777b2e9c` 及WaitIO释放入口修复。本批准确SHA全部门禁通过，PG已先推送并核验GitHub refs。
+  上次已推送并核验的 `864d32d9a8cfb23c71ea73caccc2c80360fb18bb` 包含S3 `7a1ff181…`、独立SLRU能力
   `76cfb197…`、关机restartpoint持久化修复 `e02a09ad…` 及TAP fixture适配，包含安全启动/准入 `f563e301…`、Grow清理修复
   `36f1ed0fcf003adeba1e7307ad036f3998bcb235`，依赖 S2 `9aebedf…`、M2f `b5785f8…`。
-  PG 依赖已推送并核对远程完整 SHA，Neon 再提交/推送引用。
+  Neon三处index已绑定6009cf4f；主仓随本记录的提交再推送核验。
 - Neon：`codex/dsga-neon-v3-20261019`；V3 `2422ce9`、构建身份修复 `9df2ba8`、
-  M2f 集成 `4cb4e9f`、S2 集成 `a53c447`、安全启动接入 `de8f02a`；本批绑定上述 S3 PG 提交并加入16项真实场景。
+  M2f 集成 `4cb4e9f`、S2 集成 `a53c447`、安全启动接入 `de8f02a`；完整存储接口
+  模块 `0f8dbed494…` 已推送并核验；当前新增3项释放阶段IO测试及原生全量CI入口待提交。
 - Autoscaling：`codex/dsga-autoscaling-20261019` / `ef6cd154aa3e60d72cab1e6b64abeb217ff9b245`，
   尚无 DSGA 业务改动；不能将文档分支当作 Agent 已接入发行。
 - 独立维护已验证/中文提交 `4a39412f154796461f404785d369a3dc9424fcdc`，包含 Neon PG17
@@ -52,11 +55,16 @@ Monitor/Agent/NeonVM 控制链仍待实施。不能将这些子片通过解释�
 | 最新存储接口/内核集成 | `864d32d9a8…`准确SHA重编后45项通过，86.415s | 含真实关机restartpoint修复 |
 | 完整Neon扩展 | 清理旧ABI对象、构建/安装/实际加载后22项通过，41.137s，零skip | 含有效tail提示跨Shrink、SLRU目录/身份边界及网络协议fixture；不是实际Pageserver端到端 |
 | 关机restartpoint反向/正向 | 旧版真实缺表；修复后开/关各4个TAP文件75断言通过 | 核心缺陷已修复，不再归为未定位 |
+| 逻辑槽升级修复 | 开/关各45断言通过13s；仅恢复旧pending判定真实失败3/35 | 保留业务DML/消息pending和升级后继续订阅复制 |
+| 回滚WaitIO修复候选 | 48项通过92.050s；旧版确定性失败；恢复后8项IO通过16.282s，真实主备027/9断言通过51s | 专属owner保护临时pin；准确SHA完整门禁仍运行中 |
+| 最新6009cf4f准确身份 | 准确SHA重编后48项内核通过92.573s、完整Neon扩展22项通过37.838s，均零skip | PG三个新提交已推送并核验 |
+| 最新完整off/on原生门禁 | 两组各基础81组/666项；48份TAP报告、231报告文件/18410报告断言，46PASS/2NOTESTS/零FAIL；整体退出0 | 报告数含平台/可选skip，不是所有配置或Linux/VM认证 |
+| 原生完整TAP扩展扫描 | 原候选off整体0/354.630s；on发现上述回滚断言后整体2/348.850s | 不能以off通过覆盖on失败，修复后组合须重验 |
 | 额外TAP维护基线 | 整体失败，8个文件失败 | 未含DSGA的维护组合；详细清单见下，不包装为通过 |
 | Linux普通页/KVM/HugeTLB/Neon存储端到端/性能 | 未执行 | 后续按T15–T22单独验收 |
 
-R05 的 ERROR 审核点仍持Guard和自身pin；FATAL 审核点已无Guard但仍有自身pin，
-两者均已从CV退队。分别覆盖IO owner完成并放pin之后，以及owner尚未广播时的
+R05 最新审核点位于内核撤CV之后、放专属owner的真实pin之前；ERROR仍持Guard，
+FATAL已无Guard但仍有pin。分别覆盖IO owner完成并放pin之后，以及owner尚未广播时的
 取消/终止。快速路径由真实备库WAL重放触发，没有伪造InRecovery/size cache。
 只关闭这两个引用缺口，不据此关闭整个R05或直接允许VM缩容。
 
@@ -85,6 +93,9 @@ PG内部 API 为4。具体设计与约束见子模块：
 - `DSGA-R05-IO等待与恢复快速路径验证.md`
 - `DSGA-S2-安全启动与新boot准入.md`
 - `DSGA-S3-尾部排水与逻辑缩容验证.md`
+- `DSGA-Neon逻辑槽升级兼容.md`
+- `DSGA-Neon配置样例完整性.md`
+- `DSGA-IO等待资源释放修复.md`
 
 Grow/FATAL已修复并完成本地验收；安全bootstrap、同Postmaster恢复共享布局预算和新boot准入默认状态
 已完成本机候选验证，详见[Compute接入](DSGA-Compute安全启动与准入接入.md)：真实集群29项、
@@ -99,8 +110,11 @@ S3 保护页探针经反向验证可检出显式引入的不安全读取。仅�
 
 额外启用的 TAP 检查发现 Mac 可复现的 rmgr fixture、序列语义及未定位恢复/逻辑槽
 问题，见 [TAP基线验证](DSGA-TAP基线验证-20261020.md)的后续状态。缺表根因为
-关机restartpoint遗漏写回，已经修复；最初8个失败文件中7个已有通过证据，
-`pg_upgrade/003`及首次因失败而未执行的TAP仍须处理/复跑。不能宣称TAP整体全绿。
+关机restartpoint遗漏写回，已经修复；最初8个失败文件均已有定向通过证据。
+完整keep-going扫描又发现配置样例遗漏和动态on回滚IO断言，均已编码并有专项通过；
+当前准确6009cf4f的完整开/关、48项内核、22项完整Neon门禁已通过，唯一流水线
+39556退出0。见[执行恢复记录](DSGA-执行恢复记录.md)的日志及skip边界；不能据此
+宣称整个业务完整、所有配置全绿或目标平台已认证。
 
 完整Neon扩展与最新PG的LSN锁、旧hook及SLRU接口兼容已实现并真实加载验证，见
 [存储接口与Mac验证](DSGA-Neon存储接口对齐与Mac验证.md)。其中旧版头的语法兼容

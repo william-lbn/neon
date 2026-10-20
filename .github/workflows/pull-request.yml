@@ -26,7 +26,7 @@ jobs:
       - name: Install host build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential bison flex pkg-config libcurl4-openssl-dev libssl-dev clang
+          sudo apt-get install -y build-essential bison flex pkg-config libcurl4-openssl-dev libssl-dev clang libipc-run-perl libio-pty-perl
       - name: Build asserted PG17 with deterministic injection points
         run: |
           make -j4 postgres-v17 POSTGRES_VERSIONS=v17 \
@@ -39,3 +39,5 @@ jobs:
         env:
           CARGO_BUILD_JOBS: "4"
         run: bash ci/test-dsg-neon-extension.sh "$GITHUB_WORKSPACE/build/dsga-pg/v17" "$GITHUB_WORKSPACE/build/dsga-install/v17"
+      - name: Run native regression and TAP with dynamic mode off and on
+        run: bash ci/test-dsg-postgres-world.sh "$GITHUB_WORKSPACE/build/dsga-pg/v17" "$GITHUB_WORKSPACE/build/dsga-install/v17"
