@@ -6,7 +6,8 @@
 最初wire提交只交付请求/查询/取消的共享数据类型、格式与结构校验；后续PG17已
 增加内核回执/历史/业务取消，见[内核接入](DSGA-R09-内核回执与取消接入.md)。
 后续又实现并实际加载[Neon管理SQL](DSGA-Neon管理SQL与实例身份.md)，含管理会话
-边界及C/Rust交叉向量；HTTP/外层完整认证、预算与VM fencing仍未完成。普通解析
+边界及C/Rust交叉向量；[Rust双连接客户端](DSGA-Rust双连接管理客户端.md)已进一步
+落实严格响应类型和原意图对账。HTTP/外层完整认证、预算与VM fencing仍未完成。普通解析
 成功不产生任何资源许可；动态模式仍须按V3完成全链路能力协商和发布门槛。
 
 ## 字段与跨语言表示
@@ -81,7 +82,8 @@ epoch/revision、承诺完整内容及有效约束；VM Controller/Runner仍须�
 
 ## Mac 实际验证
 
-最新正式SQL批次：compute_api24项、compute_tools23项通过；完整Neon清理重编/
+最新客户端批次：compute_api32项、compute_tools23项默认全包通过，另8项实际原生
+客户端用例通过14.19s、零ignored。此前正式SQL批次完整Neon清理重编/
 实际加载47项通过85.043s、零skip，见管理SQL文档。以下21项为最初wire历史记录。
 
 - `cargo test --locked --offline -p compute_api`：21项通过，零失败/ignored，包含

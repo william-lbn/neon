@@ -137,8 +137,9 @@ CI本包测试另作中文提交；不改变PG锁/内核，不将DTO当成已实
 
 ## 后续必须继续的完整范围
 
-1. 正式Neon管理SQL及内核receipt/history/cancel已完成本机模块验证；继续HTTP安全
-   路由、Rust/Go实际客户端、外层持久历史/意图与跨进程重连，不把SQL模块当完整链路。
+1. 正式Neon管理SQL、内核receipt/history/cancel及共享Rust双连接客户端已完成本机
+   模块验证；继续HTTP安全路由、Rust客户端运行时接入、Go实际客户端、外层持久
+   历史/意图与跨进程重连，不把模块当完整链路。
 2. 全部私有/并行/DSM/维护/扩展/后台预算与quiesce、持久承诺；Compute/Monitor/
    Agent/Scheduler/Controller/Runner实际执行fencing和恢复对账。旧Ok不能授权缩容。
 3. Provider平台探测、显式HugeTLB实现/账本等尚未完成部分继续审计编码；缺代码
@@ -157,3 +158,16 @@ CI本包测试另作中文提交；不改变PG锁/内核，不将DTO当成已实
 - 不构建镜像、不准备或执行K8s部署、不合主分支、不发布生产；无授权不建子代理。
 - 每批先核对相关官方维护，先推依赖再更新/推主仓，源码gitlink/两份锁/二进制SHA
   同一；中文关键注释及中文模块化提交。上个模块通过不能关闭全部持续目标。
+
+## Rust双连接客户端接续（2026-10-20）
+
+管理SQL提交ad1b26ff5657c7891bbacb2a1f25e8f773d7e0a8已推自有Neon功能分支并
+核验GitHub refs；PG486338及三处锁不变。fresh fetch相关Neon/PG官方维护头仍为
+当前状态页所列SHA且均为祖先。本批新增compute_api可选postgres-client、严格
+事实类型及ci/test-dsg-rust-client.sh；详见DSGA-Rust双连接管理客户端.md。
+
+真实原生8项14.19s通过（终态句柄8917），默认包compute_api32/compute_tools23
+通过（63618），最终feature Clippy退出0（4265）；均已结束，不重启旧句柄。
+feature默认运行的8项ignored不能算通过，严格脚本已显式全量实际执行。
+日志build/neon-dsg-client-{packages,default-final,strict-final,clippy}.log。
+客户端没有VM许可，尚未接入Compute HTTP/Monitor；剩余全目标继续active。

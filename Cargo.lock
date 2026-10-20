@@ -1319,6 +1319,9 @@ dependencies = [
  "remote_storage",
  "serde",
  "serde_json",
+ "tempfile",
+ "tokio",
+ "tokio-postgres",
  "url",
  "utils",
 ]

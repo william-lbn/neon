@@ -4,6 +4,10 @@ version = "0.1.0"
 edition = "2024"
 license.workspace = true
 
+[features]
+# DTO/communicator等默认不引入SQL客户端；Compute/Monitor可显式复用同一实现。
+postgres-client = ["dep:tokio", "dep:tokio-postgres"]
+
 [dependencies]
 anyhow.workspace = true
 chrono.workspace = true
@@ -13,6 +17,12 @@ serde.workspace = true
 serde_json.workspace = true
 regex.workspace = true
 url.workspace = true
+tokio = { workspace = true, optional = true, features = ["time"] }
+tokio-postgres = { workspace = true, optional = true }
 
 utils = { path = "../utils" }
 remote_storage = { version = "0.1", path = "../remote_storage/" }
+
+[dev-dependencies]
+tempfile = "3.14.0"
+tokio = { workspace = true, features = ["rt-multi-thread", "time", "macros"] }
