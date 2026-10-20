@@ -6,6 +6,31 @@
 
 ## 当前源码与分支
 
+### 本轮R09已验证结果（优先于下面6009历史快照）
+
+- PG17当前干净提交`48633803b05c1b7bd9a40d749b5278df9aaf01ac`已推送自有
+  功能分支并核验GitHub refs；新增内核独立回执、16条历史、epoch/hash绑定、
+  业务取消与完整逐数组释放身份，Buffer ABI5。PG原48+新19项67项通过122.538s；
+  最后补两项锁序/历史隔离后新增21项通过44.279s，均零skip。
+- Neon HEAD仍`0cbc146405106d71dfeadeb97b08b8dd48504828`，工作树含新21项测试
+  和严格入口；三处index已绑定486338并通过validate，本记录随本批独立提交推送。
+- 准确SHA唯一顺序流水线**70614已终态退出0**，不能重新poll或启动。实际二进制
+  输出完整486338 SHA；69项内核通过127.064s、22项完整Neon扩展通过40.470s，
+  均零skip。off/on各基础81组/666项；各48份TAP报告、231报告文件/18410报告
+  断言，46PASS/2NOTESTS/零FAIL；报告总数含skip，不是全部配置/平台均已执行。
+  prepare104项：13通过/91环境skip，真实69+22另有执行证据。脚本
+  `build/run-neon-r09-validation.sh`，日志
+  `build/neon-r09-exact-{build,lifecycle,extension,world,prepare}.log`。
+- 保留旧缺陷反向证据`build/neon-r09-guard-negative-fixed-fixture.log`：Grow/
+  Shrink在Guard未释放时业务取消仍等原期限，两项2秒超时；补绑定轮询后通过。
+  更早guard-negative是测试夹具错误，不是生产缺陷证据，详细模块文档有说明。
+- 准确SHA门禁已全部结束；主仓提交推送后继续生产Neon端点/完整预算/控制链。
+  pgxn/neon/dsg_control.{c,h}是下一模块未接入草稿，已做PG17严格语法检查，
+  尚未加入Makefile/_PG_init/SQL升级，未实际加载或完成API测试；不能据此报端点完成。
+  此模块不是全业务完成，Goal保持active。
+
+### R09之前的源码与6009门禁快照（历史）
+
 - PG17实际目录 `repos/neon/vendor/postgres-v17`，分支
   `codex/dsga-pg17-v3-20261019`，当前干净提交
   `6009cf4f7f64892f08e31201ceafb611dba1fbcc`，**已推送并GitHub refs核验**。

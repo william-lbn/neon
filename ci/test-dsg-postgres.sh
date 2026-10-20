@@ -21,6 +21,8 @@ if [[ $("$pg_config" --configure) != *--enable-injection-points* ]]; then
     echo "DSGA lifecycle tests require --enable-injection-points" >&2
     exit 2
 fi
+cd "$task_root"
+python3 ci/compute.py validate --source-ref index --require-pg-checkout v17
 
 # 能力和真实源码身份均要检查。当前先完成PG17，不能把其他大版本静默当成已测。
 python3 - "$task_root" "$pg_install" <<'PY'
@@ -48,6 +50,7 @@ python3 - <<'PY'
 import unittest
 
 suite = unittest.defaultTestLoader.discover('.', pattern='test_dsg_postgres.py')
+suite.addTests(unittest.defaultTestLoader.discover('.', pattern='test_dsg_control.py'))
 if suite.countTestCases() == 0:
     raise SystemExit('DSGA lifecycle suite contains zero tests')
 result = unittest.TextTestRunner(verbosity=2).run(suite)
