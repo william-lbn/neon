@@ -18,6 +18,8 @@ paths:
     $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1resize~1status"
   /dsg/v1/resize/cancel:
     $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1resize~1cancel"
+  /dsg/v1/issuer/fence:
+    $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1issuer~1fence"
   /status:
     get:
       tags:

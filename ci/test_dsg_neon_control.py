@@ -1,6 +1,6 @@
 """实际加载Neon扩展的管理SQL契约测试，不以C测试桥代替产品入口。
 
-独立临时PG，调用安装的neon--1.6--1.7 SQL和正式C函数；暂停夹具只安排真实
+独立临时PG，调用安装的neon--1.6--1.8 SQL和正式C函数；暂停夹具只安排真实
 协调器交错。此处不构建镜像/部署，不证明资源承诺/外部控制链或物理VM完成。
 """
 
@@ -32,7 +32,7 @@ class DsgNeonControl(unittest.TestCase):
             "neon.dsg_compute_instance_id='dsg-compute-1'\n"
         )
         self.pg.prepare_grow_exit_fixture()
-        self.pg.sql("CREATE EXTENSION neon VERSION '1.6'; ALTER EXTENSION neon UPDATE TO '1.7'")
+        self.pg.sql("CREATE EXTENSION neon VERSION '1.6'; ALTER EXTENSION neon UPDATE TO '1.8'")
         self.capabilities = self.value("SELECT neon_dsg_capabilities()")
 
     def value(self, statement):
@@ -69,6 +69,13 @@ class DsgNeonControl(unittest.TestCase):
     def state(self):
         return self.value("SELECT neon_dsg_memory_status()")["observed"]
 
+    def fence_request(self, epoch):
+        return {
+            "protocol_version": 1,
+            "instance": self.capabilities["instance"].copy(),
+            "issuer_epoch": str(epoch),
+        }
+
     def arm(self, action):
         self.pg.sql(f"SELECT dsg_grow_control('{action}')")
 
@@ -86,7 +93,7 @@ class DsgNeonControl(unittest.TestCase):
         return json.loads(output.strip().splitlines()[-1])
 
     def test_capabilities_and_installed_sql_contract(self):
-        self.assertEqual(self.capabilities["buffer_api_version"], 5)
+        self.assertEqual(self.capabilities["buffer_api_version"], 6)
         self.assertTrue(self.capabilities["supported"])
         self.assertTrue(self.capabilities["enabled"])
         self.assertTrue(self.capabilities["instance_bound"])
@@ -95,7 +102,7 @@ class DsgNeonControl(unittest.TestCase):
         self.assertEqual(self.capabilities["history_capacity"], 16)
         self.assertEqual(
             self.pg.sql("SELECT extversion FROM pg_extension WHERE extname='neon'").stdout.strip(),
-            "1.7",
+            "1.8",
         )
         state = self.state()
         self.assertEqual(state["instance"], self.capabilities["instance"])
@@ -125,6 +132,86 @@ class DsgNeonControl(unittest.TestCase):
             self.assertEqual(result["observed"]["high_buffers"], 2048)
             self.assertEqual(result["receipt"]["result"]["operation"]["key"], original["key"])
             self.assertFalse(result["vm_shrink_permit"])
+
+    def test_formal_fence_advances_epoch_without_resizing_or_authorizing_vm(self):
+        before = self.state()
+        request = self.fence_request(2)
+        result = self.call(request, "fence_issuer")
+        self.assertEqual(result["disposition"], "fenced")
+        self.assertEqual(result["requested_instance"], request["instance"])
+        self.assertEqual(result["requested_epoch"], "2")
+        self.assertFalse(result["vm_shrink_permit"])
+        self.assertEqual(result["observed"], dict(before, issuer_floor_epoch="2"))
+        self.assertEqual(self.call(request, "fence_issuer"), result)
+        self.assertEqual(self.call(self.request())["receipt"]["disposition"], "stale")
+        self.assertEqual(self.call(self.fence_request(1), "fence_issuer")["disposition"], "stale")
+        other = self.fence_request(9)
+        other["instance"]["vm_uid"] = "not-this-vm"
+        self.assertEqual(self.call(other, "fence_issuer")["disposition"], "stale")
+        self.assertEqual(self.state(), result["observed"])
+
+    def test_formal_fence_pending_cancels_old_grow_without_clearing_charged_arrays(self):
+        request = self.request()
+        running = self.paused(request)
+        prepared = self.state()
+        fenced = self.call(self.fence_request(2), "fence_issuer")
+        self.assertEqual(fenced["disposition"], "pending")
+        self.assertTrue(fenced["observed"]["operation"]["cancel_requested"])
+        self.assertEqual(fenced["observed"]["operation"]["key"], request["key"])
+        self.assertIsNone(running.poll())
+        result = self.finish(running)
+        self.assertEqual(result["receipt"]["result"]["operation"]["reason"], "cancelled")
+        self.assertEqual(result["observed"]["arrays"], prepared["arrays"])
+        self.assertEqual(result["observed"]["high_buffers"], 256)
+        self.assertEqual(self.call(self.fence_request(2), "fence_issuer")["disposition"], "fenced")
+
+    def test_formal_fence_waits_for_committed_provider(self):
+        self.call(self.request())
+        self.arm("attach_release")
+        request = self.request(revision=2, generation=2, target=256, kind="shrink")
+        running = self.paused(request)
+        pending = self.call(self.fence_request(2), "fence_issuer")
+        self.assertEqual(pending["disposition"], "pending")
+        self.assertEqual(pending["observed"]["operation"]["phase"], "committed")
+        self.assertTrue(pending["observed"]["operation"]["cancel_closed"])
+        self.assertFalse(pending["observed"]["operation"]["cancel_requested"])
+        self.assertIsNone(running.poll())
+        self.finish(running)
+        self.assertEqual(self.call(self.fence_request(2), "fence_issuer")["disposition"], "fenced")
+
+    def test_formal_fence_rejects_ambiguous_json_and_zero_identity_before_effect(self):
+        request = self.fence_request(2)
+        raw = json.dumps(request)
+        before = self.state()
+        malformed = [
+            raw.replace("{", '{"issuer_epoch":"2",', 1),
+            raw.replace("{", '{"other":1,', 1),
+            raw.replace('"2"', "2", 1),
+            raw.replace('"2"', '"02"', 1),
+            raw.replace('"2"', '"0"', 1),
+            raw.replace('"protocol_version": 1', '"protocol_version": 1.0', 1),
+            " " * 16385,
+        ]
+        for value in malformed:
+            with self.subTest(value=value[:80]):
+                failed = self.pg.sql(self.statement(value, "fence_issuer", raw=True), check=False)
+                self.assertNotEqual(failed.returncode, 0)
+                self.assertEqual(self.state(), before)
+
+    def test_fence_sql_downgrade_does_not_reset_floor(self):
+        self.call(self.fence_request(2), "fence_issuer")
+        before = self.state()
+        self.pg.sql("ALTER EXTENSION neon UPDATE TO '1.7'")
+        self.assertEqual(
+            self.pg.sql(
+                "SELECT to_regprocedure('neon_dsg_fence_issuer(text)') IS NULL"
+            ).stdout.strip(),
+            "t",
+        )
+        self.assertEqual(self.state(), before)
+        self.pg.sql("ALTER EXTENSION neon UPDATE TO '1.8'")
+        self.assertEqual(self.call(self.fence_request(2), "fence_issuer")["disposition"], "fenced")
+        self.assertEqual(self.state(), before)
 
     def test_full_outer_intent_is_immutable_for_same_operation(self):
         original = self.request()
@@ -321,7 +408,7 @@ class DsgNeonControl(unittest.TestCase):
             self.pg.sql("SELECT to_regprocedure('neon_dsg_capabilities()') IS NULL").stdout.strip(),
             "t",
         )
-        self.pg.sql("ALTER EXTENSION neon UPDATE TO '1.7'")
+        self.pg.sql("ALTER EXTENSION neon UPDATE TO '1.8'")
         result = self.call(self.query(request), "resize_status")
         self.assertEqual(result["receipt"]["disposition"], "replayed")
         self.assertEqual(result["observed"]["high_buffers"], 1024)
@@ -370,6 +457,7 @@ class DsgNeonControl(unittest.TestCase):
             "neon_dsg_request_resize(text)",
             "neon_dsg_resize_status(text)",
             "neon_dsg_cancel_resize(text)",
+            "neon_dsg_fence_issuer(text)",
         )
         self.pg.sql("CREATE ROLE dsg_api_user LOGIN")
         for signature in signatures:
@@ -394,6 +482,7 @@ class DsgNeonControl(unittest.TestCase):
             self.statement(request),
             self.statement(self.query(request), "resize_status"),
             self.statement(self.query(request), "cancel_resize"),
+            self.statement(self.fence_request(2), "fence_issuer"),
             "SELECT dsg_api_definer()",
         ):
             result = self.pg.sql(

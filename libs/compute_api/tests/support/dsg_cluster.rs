@@ -95,7 +95,7 @@ impl Cluster {
         cluster.start()?;
         cluster.command("psql", &["-h", cluster.socket.to_str().unwrap(), "-p", "55432", "-U", "dsg_admin",
             "-d", "postgres", "-X", "-v", "ON_ERROR_STOP=1", "-c", &format!(
-                "CREATE SCHEMA {NAMESPACE}; CREATE EXTENSION neon SCHEMA {NAMESPACE} VERSION '1.7';\
+                "CREATE SCHEMA {NAMESPACE}; CREATE EXTENSION neon SCHEMA {NAMESPACE} VERSION '1.8';\
                  CREATE FUNCTION public.dsg_control(text) RETURNS text AS '$libdir/test_dsg_region',\
                     'test_dsg_grow_control' LANGUAGE C STRICT;\
                  SELECT public.dsg_control('attach');")])?;

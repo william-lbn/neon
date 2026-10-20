@@ -67,6 +67,24 @@ paths:
       responses:
         "200": {$ref: "#/components/responses/Control"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/issuer/fence:
+    post:
+      operationId: fenceDsgIssuer
+      summary: 独立推进并确认PG resize最低issuer代次
+      description: pending已推进floor但仍有旧resize/Provider，fenced只确认该串行执行者退出；不清原意图/预算、不授权VM。
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/FenceRequest"}
+      responses:
+        "200":
+          description: 接管事实与独立当前状态；幂等重试同一实例/代次，超时不能当作floor未提升
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/FenceResponse"}
+        default: {$ref: "#/components/responses/Failure"}
 components:
   securitySchemes:
     DsgJWT:
@@ -99,6 +117,25 @@ components:
                 required: [error]
                 properties: {error: {type: string}}
   schemas:
+    FenceRequest:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, instance, issuer_epoch]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        instance: {$ref: "#/components/schemas/Instance"}
+        issuer_epoch: {$ref: "#/components/schemas/PositiveU64"}
+    FenceResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, requested_instance, requested_epoch, disposition, observed]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        requested_instance: {$ref: "#/components/schemas/Instance"}
+        requested_epoch: {$ref: "#/components/schemas/PositiveU64"}
+        disposition: {type: string, enum: [fenced, pending, stale]}
+        observed: {$ref: "#/components/schemas/Snapshot"}
     U64:
       type: string
       pattern: '^(0|[1-9][0-9]{0,19})$'
@@ -209,9 +246,10 @@ components:
     Snapshot:
       type: object
       additionalProperties: false
-      required: [instance, capacity_generation, low_buffers, high_buffers, maximum_buffers, admission_open, admission_revision, startup_shared_upper_bytes, operation, arrays]
+      required: [instance, issuer_floor_epoch, capacity_generation, low_buffers, high_buffers, maximum_buffers, admission_open, admission_revision, startup_shared_upper_bytes, operation, arrays]
       properties:
         instance: {$ref: "#/components/schemas/Instance"}
+        issuer_floor_epoch: {$ref: "#/components/schemas/U64"}
         capacity_generation: {$ref: "#/components/schemas/PositiveU64"}
         low_buffers: {$ref: "#/components/schemas/Buffers"}
         high_buffers: {$ref: "#/components/schemas/Buffers"}
@@ -266,7 +304,7 @@ components:
         production_ready: {type: boolean}
         vm_shrink_permit: {type: boolean, enum: [false]}
         supported: {type: boolean, enum: [true]}
-        buffer_api_version: {type: integer, enum: [5]}
+        buffer_api_version: {type: integer, enum: [6]}
         enabled: {type: boolean, enum: [true]}
         instance_bound: {type: boolean, enum: [true]}
         history_capacity: {type: integer, minimum: 1}

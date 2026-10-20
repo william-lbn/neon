@@ -3,7 +3,7 @@
 use anyhow::{Result, ensure};
 use serde::{Deserialize, Serialize};
 
-use crate::dsg_control::{DsgOperationKey, DsgUint64, validate_id};
+use crate::dsg_control::{DsgIssuerFenceRequest, DsgOperationKey, DsgUint64, validate_id};
 
 pub const DSG_HTTP_AUDIENCE: &str = "neon-dsga";
 pub const DSG_HTTP_SCOPE: &str = "compute_ctl:dsga";
@@ -25,6 +25,18 @@ pub struct DsgHttpClaims {
 }
 
 impl DsgHttpClaims {
+    /// 仅在验签、时间、aud/scope及Compute绑定均由中间件核验之后调用。接管
+    /// 必须等于签名中的当前epoch，不像历史查询允许更低epoch；数值本身不是租约。
+    pub fn authorize_fence(&self, request: &DsgIssuerFenceRequest) -> Result<()> {
+        request.validate()?;
+        ensure!(
+            request.instance.vm_uid == self.vm_uid
+                && request.instance.compute_instance_id == self.compute_instance_id
+                && request.issuer_epoch == self.issuer_epoch,
+            "DSGA fence instance or epoch is not authorized"
+        );
+        Ok(())
+    }
     /// 只有验签成功后才可使用本校验；结构合法不表示签名或issuer租约有效。
     pub fn validate_for_compute(&self, compute_id: &str) -> Result<()> {
         ensure!(self.aud == DSG_HTTP_AUDIENCE, "wrong DSGA audience");

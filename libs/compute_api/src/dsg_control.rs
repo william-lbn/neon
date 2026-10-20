@@ -145,6 +145,32 @@ pub struct DsgOperationQuery {
     pub key: DsgOperationKey,
 }
 
+/// 接管只绑定固定实例/boot与新代次，不伪造一个resize操作ID，也不更改任何容量。
+/// 完整所有权由签名凭据/外层持久租约证明，结构合法不代表有执行权。
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct DsgIssuerFenceRequest {
+    pub protocol_version: u32,
+    pub instance: DsgInstanceIdentity,
+    pub issuer_epoch: DsgUint64,
+}
+
+impl DsgIssuerFenceRequest {
+    pub fn validate(&self) -> Result<()> {
+        ensure!(
+            self.protocol_version == DSG_CONTROL_PROTOCOL_VERSION,
+            "unsupported DSGA fence protocol"
+        );
+        validate_id(&self.instance.vm_uid, "VM")?;
+        validate_id(&self.instance.compute_instance_id, "Compute")?;
+        ensure!(
+            self.instance.pg_boot_id.get() != 0 && self.issuer_epoch.get() != 0,
+            "zero DSGA fence identity"
+        );
+        Ok(())
+    }
+}
+
 pub(crate) fn validate_id(value: &str, name: &str) -> Result<()> {
     // 这里是UID/实例ID/承诺引用，不是显示名。跨C/Rust/Go统一字节长度，拒绝
     // NUL/控制字符/空白，避免C截断、日志伪造或不同规范化形成同一重放键。

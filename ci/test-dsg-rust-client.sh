@@ -54,7 +54,7 @@ if len(reports) != 1 or tuple(map(int, reports[0])) != (count, 0, 0, 0, 0):
 print(f'All {count} DSGA suite tests executed successfully; zero ignored/filtered')
 PY
 }
-# SDK八项原生集群，以及Compute真实Router（含普通认证门禁和原生HTTP链路），
+# 完整SDK原生集群，以及Compute真实Router（含普通认证门禁和原生HTTP链路），
 # 分别校验非零/全量。不能只执行普通七项而让四项集成保持ignored。
 run_suite compute_api dsg_postgres_client
 run_suite compute_tools dsg_http

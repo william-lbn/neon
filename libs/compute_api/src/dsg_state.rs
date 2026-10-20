@@ -7,8 +7,8 @@ use anyhow::{Result, ensure};
 use serde::{Deserialize, Serialize};
 
 use crate::dsg_control::{
-    DSG_CONTROL_PROTOCOL_VERSION, DsgInstanceIdentity, DsgOperationKey, DsgResizeKind,
-    DsgResizeRequest, DsgUint64, validate_id,
+    DSG_CONTROL_PROTOCOL_VERSION, DsgInstanceIdentity, DsgIssuerFenceRequest, DsgOperationKey,
+    DsgResizeKind, DsgResizeRequest, DsgUint64, validate_id,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -122,6 +122,7 @@ pub struct DsgOperationFact {
 #[serde(deny_unknown_fields)]
 pub struct DsgSnapshot {
     pub instance: DsgInstanceIdentity,
+    pub issuer_floor_epoch: DsgUint64,
     pub capacity_generation: DsgUint64,
     pub low_buffers: u32,
     pub high_buffers: u32,
@@ -160,6 +161,70 @@ pub struct DsgMemoryResponse {
     pub protocol_version: u32,
     pub vm_shrink_permit: bool,
     pub observed: DsgSnapshot,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DsgIssuerFenceDisposition {
+    Fenced,
+    Pending,
+    Stale,
+}
+
+/// Fenced证明PG串行执行者已退出，不证明Provider物理成功/VM完成；Pending已推进
+/// floor但还有旧执行者。两者都不能清除外层原意图、预算或客户端未知请求。
+#[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct DsgIssuerFenceResponse {
+    pub protocol_version: u32,
+    pub vm_shrink_permit: bool,
+    pub requested_instance: DsgInstanceIdentity,
+    pub requested_epoch: DsgUint64,
+    pub disposition: DsgIssuerFenceDisposition,
+    pub observed: DsgSnapshot,
+}
+
+impl DsgIssuerFenceResponse {
+    pub fn validate_for(
+        &self,
+        request: &DsgIssuerFenceRequest,
+        bound: &DsgInstanceIdentity,
+    ) -> Result<()> {
+        request.validate()?;
+        validate_envelope(self.protocol_version, self.vm_shrink_permit)?;
+        self.observed.validate()?;
+        ensure!(
+            self.requested_instance == request.instance
+                && self.requested_epoch == request.issuer_epoch
+                && self.observed.instance == *bound,
+            "issuer fence request or observed binding differs"
+        );
+        match self.disposition {
+            DsgIssuerFenceDisposition::Fenced | DsgIssuerFenceDisposition::Pending => {
+                ensure!(
+                    request.instance == *bound
+                        && self.observed.issuer_floor_epoch == request.issuer_epoch,
+                    "issuer fence did not establish requested floor"
+                );
+                if self.disposition == DsgIssuerFenceDisposition::Fenced {
+                    ensure!(
+                        !self
+                            .observed
+                            .operation
+                            .as_ref()
+                            .is_some_and(|op| op.phase == DsgPhase::Preparing),
+                        "fenced response still has an unreconciled operation"
+                    );
+                }
+            }
+            DsgIssuerFenceDisposition::Stale => ensure!(
+                request.instance != *bound
+                    || self.observed.issuer_floor_epoch > request.issuer_epoch,
+                "stale fence lacks a conflicting boot/instance or newer floor"
+            ),
+        }
+        Ok(())
+    }
 }
 
 /// 禁用/不支持的能力响应允许无boot或没有instance字段，不能补成合法运行实例。
@@ -226,8 +291,8 @@ impl DsgCapabilities {
         validate_id(vm_uid, "VM")?;
         validate_id(compute_instance_id, "Compute")?;
         ensure!(
-            self.supported && self.buffer_api_version == 5,
-            "DSGA Buffer ABI5 is required"
+            self.supported && self.buffer_api_version == 6,
+            "DSGA Buffer ABI6 is required"
         );
         ensure!(
             self.enabled && self.instance_bound,
@@ -313,6 +378,10 @@ impl DsgSnapshot {
                         "release belongs to another instance"
                     );
                     ensure!(
+                        key.issuer_epoch <= self.issuer_floor_epoch,
+                        "release epoch exceeds issuer floor"
+                    );
+                    ensure!(
                         array.release_capacity_generation.get() > 0
                             && array.release_capacity_generation <= self.capacity_generation,
                         "inconsistent DSGA release generation"
@@ -379,6 +448,10 @@ impl DsgSnapshot {
         }
         if let Some(operation) = &self.operation {
             operation.key.validate()?;
+            ensure!(
+                operation.key.issuer_epoch <= self.issuer_floor_epoch,
+                "operation epoch exceeds issuer floor"
+            );
             ensure!(
                 operation.key.instance == self.instance,
                 "operation belongs to another instance"

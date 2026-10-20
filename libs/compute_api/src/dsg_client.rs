@@ -15,10 +15,12 @@ use tokio::time::timeout;
 use tokio_postgres::Client;
 
 use crate::dsg_control::{
-    DsgInstanceIdentity, DsgOperationKey, DsgOperationQuery, DsgResizeRequest, validate_id,
+    DsgInstanceIdentity, DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery,
+    DsgResizeRequest, validate_id,
 };
 use crate::dsg_state::{
-    DsgCapabilities, DsgControlResponse, DsgDisposition, DsgMemoryResponse, DsgPhase,
+    DsgCapabilities, DsgControlResponse, DsgDisposition, DsgIssuerFenceResponse, DsgMemoryResponse,
+    DsgPhase,
 };
 
 const MAX_RESPONSE_BYTES: usize = 32 * 1024;
@@ -50,6 +52,35 @@ impl std::error::Error for DsgCallError {
         Some(match self {
             Self::NotSent(error) => error.as_ref(),
             Self::Unconfirmed { source, .. } => source.as_ref(),
+        })
+    }
+}
+
+/// 接管没有resize Key，不能伪造操作ID来表达不确定性。失败保留完整接管意图，
+/// 请求方须按同实例/代次重试对账；不得把超时当作floor提升未发生。
+#[derive(Debug)]
+pub enum DsgFenceCallError {
+    NotSent(anyhow::Error),
+    Unconfirmed {
+        request: DsgIssuerFenceRequest,
+        source: anyhow::Error,
+    },
+}
+
+impl fmt::Display for DsgFenceCallError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::NotSent(source) => write!(f, "DSGA issuer fence was not sent: {source}"),
+            Self::Unconfirmed { source, .. } => {
+                write!(f, "DSGA issuer fence is unconfirmed: {source}")
+            }
+        }
+    }
+}
+impl std::error::Error for DsgFenceCallError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        Some(match self {
+            Self::NotSent(source) | Self::Unconfirmed { source, .. } => source.as_ref(),
         })
     }
 }
@@ -278,6 +309,41 @@ impl<'a> DsgSqlClient<'a> {
         Ok(response)
     }
 
+    /// 独立观察连接推进/确认floor，执行连接阻塞时仍可到达PG。成功FENCED也只
+    /// 证明PG旧执行者退出，不清本客户端pending，更不清外层原意图/预算。
+    pub async fn fence_issuer(
+        &self,
+        request: &DsgIssuerFenceRequest,
+    ) -> Result<DsgIssuerFenceResponse, DsgFenceCallError> {
+        request.validate().map_err(DsgFenceCallError::NotSent)?;
+        if request.instance != self.instance {
+            return Err(DsgFenceCallError::NotSent(anyhow::anyhow!(
+                "issuer fence targets another bound instance"
+            )));
+        }
+        let payload =
+            serde_json::to_string(request).map_err(|e| DsgFenceCallError::NotSent(e.into()))?;
+        let response: DsgIssuerFenceResponse = self
+            .call(
+                &self.observer,
+                &self.observer_schema,
+                "neon_dsg_fence_issuer",
+                &payload,
+            )
+            .await
+            .map_err(|source| DsgFenceCallError::Unconfirmed {
+                request: request.clone(),
+                source,
+            })?;
+        response
+            .validate_for(request, &self.instance)
+            .map_err(|source| DsgFenceCallError::Unconfirmed {
+                request: request.clone(),
+                source,
+            })?;
+        Ok(response)
+    }
+
     fn reserve(&self, request: &DsgResizeRequest) -> Result<InFlight<'_>> {
         let mut state = self
             .execution_state
@@ -439,10 +505,10 @@ async fn discover(client: &Client, wait: Duration) -> Result<(String, i32)> {
             WHERE e.extname='neon' AND l.lanname='c' AND p.probin='$libdir/neon' \
                 AND p.prosrc=p.proname AND p.prorettype='pg_catalog.jsonb'::pg_catalog.regtype \
                 AND ((p.proname IN ('neon_dsg_capabilities','neon_dsg_memory_status') AND p.pronargs=0) \
-                  OR (p.proname IN ('neon_dsg_request_resize','neon_dsg_resize_status','neon_dsg_cancel_resize') \
+                  OR (p.proname IN ('neon_dsg_request_resize','neon_dsg_resize_status','neon_dsg_cancel_resize','neon_dsg_fence_issuer') \
                       AND p.pronargs=1 AND p.proargtypes[0]='pg_catalog.text'::pg_catalog.regtype))", &[]).await?;
-        // 五个精确签名均须属于真正Neon扩展，不能只看到同名租户SQL函数就启用。
-        ensure!(rows.len() == 5, "Neon DSGA management extension functions are missing or incompatible");
+        // 六个精确签名均须属于真正Neon扩展，不能只看到同名租户SQL函数就启用。
+        ensure!(rows.len() == 6, "Neon DSGA management extension functions are missing or incompatible");
         Ok((format!("\"{}\"", schema.replace('"', "\"\"")), pid))
     }).await.context("DSGA capability discovery deadline elapsed")?
 }

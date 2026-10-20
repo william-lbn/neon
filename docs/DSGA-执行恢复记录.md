@@ -1,10 +1,28 @@
 # DSGA 执行与恢复记录
 
-更新：2026-10-20（Asia/Shanghai）。V3是实施标准；Goal保持active、无预算。
+更新：2026-10-21（Asia/Shanghai）。V3是实施标准；Goal保持active、无预算。
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
 ## 当前源码与分支
+
+### 最新issuer floor/ABI6（优先于全部后续历史快照）
+
+- PG17 `6b7c3655ab74062e117eef7400953cd000679a49`已提交/推送且GitHub核验，
+  工作树干净。主仓gitlink及两份锁均6b7，准确重编二进制已核对。Autoscaling
+  `831a453e3adaa86f163027a1f7319139f78b55c5`也已推送核验，AGENTS.md用户改动保留。
+- 新内核单调floor/原子登记/Provider退出接管，Neon1.8六正式SQL/HTTP与双语言
+  SDK配套完成。兼容/恢复/锁序/反向及完整剩余业务见
+  [当前模块](DSGA-PG接管隔离与正式API.md)。不能用旧ABI5库混载；成功Fenced
+  不清未知意图或预算，不产生VM许可；可信owner与实际运行链继续实现。
+- 唯一准确SHA流水线17805终态退出0：内核80、SQL/存储52、SDK10、HTTP12、真实
+  Go外层1/独立race2通过；普通Rust36/31、Clippy通过。普通15ignored已严格另测。
+  prepare145中13通过/132环境skip。日志neon-issuer-*；旧句柄不要重新启动。
+  Autoscaling完整race185case pass事件/10测试包/9无测试包，0fail/用例skip；两lint0。
+- off/on全world+TAP来自与6b7 src diff SHA256相同的提交前候选，各成功但含平台/
+  可选skip；实际移除floor登记检查和提前Fenced的反向共3用例均失败、finally恢复。
+  不删除失败证据，不重apply 6f002a3/f5c4dfc stash。主仓本批需提交推送核验，
+  恢复以实际Git/远程refs为准，不能将候选当远程成果。
 
 ### 最新Autoscaling接续（优先于后续阶段快照）
 

@@ -16,6 +16,7 @@ GROW, SHRINK = 0, 1
 PREPARING, COMMITTED, DENIED = 1, 2, 3
 INTERRUPTED, CANCELLED = 3, 4
 MAX_U64 = (1 << 64) - 1
+FENCED, FENCE_PENDING, FENCE_STALE = range(3)
 
 
 @unittest.skipUnless(
@@ -37,6 +38,8 @@ class DsgControlLifecycle(unittest.TestCase):
             "'test_dsg_control_parse' LANGUAGE C STRICT;"
             f"CREATE FUNCTION dsg_hold_guard() RETURNS boolean AS '{library}', "
             "'test_dsg_control_hold_guard' LANGUAGE C;"
+            f"CREATE FUNCTION dsg_fence(text,text,boolean DEFAULT false) RETURNS jsonb "
+            f"AS '{library}', 'test_dsg_fence_issuer' LANGUAGE C STRICT;"
         )
         self.boot = self.state()["boot"]
 
@@ -65,6 +68,10 @@ class DsgControlLifecycle(unittest.TestCase):
 
     def state(self):
         return self.call("state", boot=0)["observed"]
+
+    def fence(self, epoch, *, boot=None):
+        boot = self.boot if boot is None else boot
+        return json.loads(self.pg.sql(f"SELECT dsg_fence('{boot}','{epoch}')").stdout)
 
     def arm(self, action):
         self.pg.sql(f"SELECT dsg_grow_control('{action}')")
@@ -414,6 +421,179 @@ class DsgControlLifecycle(unittest.TestCase):
         self.assertEqual(
             self.call(revision=2, lo=2, generation=2, target=2048)["result"]["phase"], COMMITTED
         )
+
+    def test_issuer_fence_without_resize_is_monotonic_and_preserves_capacity(self):
+        before = self.state()
+        result = self.fence(2)
+        self.assertEqual(result["disposition"], FENCED)
+        expected = dict(before, issuer_floor="2")
+        self.assertEqual(result["observed"], expected)
+        self.assertEqual(self.fence(2), result)
+        self.assertEqual(self.fence(1)["disposition"], FENCE_STALE)
+        for kind in (GROW, SHRINK):
+            stale = self.call(epoch=1, target=256, kind=kind)
+            self.assertEqual(stale["disposition"], STALE)
+            self.assertFalse(stale["has_result"])
+        self.assertEqual(self.state(), expected)
+        accepted = self.call(epoch=2, lo=2)
+        self.assertEqual(accepted["result"]["phase"], COMMITTED)
+        self.assertEqual(accepted["observed"]["issuer_floor"], "2")
+
+    def test_accepted_operation_also_advances_issuer_floor_without_losing_history(self):
+        self.call()
+        self.assertEqual(self.state()["issuer_floor"], "1")
+        self.call(epoch=2, lo=2, generation=2, target=2048)
+        before = self.state()
+        self.assertEqual(before["issuer_floor"], "2")
+        self.assertEqual(self.fence(1)["disposition"], FENCE_STALE)
+        historical = self.call("status")
+        self.assertEqual(historical["disposition"], REPLAYED)
+        self.assertEqual(historical["result"]["high"], 1024)
+        self.assertEqual(historical["observed"]["issuer_floor"], "2")
+        self.assertEqual(self.state(), before)
+
+    def test_issuer_takeover_cancels_preparing_grow_but_retains_charged_backing(self):
+        running = self.paused()
+        prepared = self.state()
+        result = self.fence(2)
+        self.assertEqual(result["disposition"], FENCE_PENDING)
+        self.assertEqual(result["observed"]["issuer_floor"], "2")
+        self.assertTrue(result["observed"]["cancel_requested"])
+        self.assertIsNone(running.poll())
+        finished = self.finish(running)
+        self.assertEqual(
+            (finished["result"]["phase"], finished["result"]["reason"]), (DENIED, CANCELLED)
+        )
+        self.assertEqual(finished["observed"]["high"], 256)
+        self.assertEqual(finished["observed"]["arrays"], prepared["arrays"])
+        self.assertEqual(self.fence(2)["disposition"], FENCED)
+        self.assertEqual(self.call()["result"]["reason"], CANCELLED)
+        self.assertEqual(self.call(epoch=2, lo=2)["result"]["phase"], COMMITTED)
+
+    def test_issuer_takeover_cancels_preparing_shrink_and_restores_allocation_limit(self):
+        checksum = self.fixture_data()
+        self.arm("attach_shrink_fence")
+        request = dict(revision=2, lo=2, generation=2, target=256, kind=SHRINK)
+        running = self.paused(**request)
+        self.assertEqual((self.state()["low"], self.state()["high"]), (256, 2048))
+        self.assertEqual(self.fence(2)["disposition"], FENCE_PENDING)
+        result = self.finish(running)
+        self.assertEqual(
+            (result["result"]["phase"], result["result"]["reason"]), (DENIED, CANCELLED)
+        )
+        self.assertEqual((result["observed"]["low"], result["observed"]["high"]), (2048, 2048))
+        self.assertEqual(self.fence(2)["disposition"], FENCED)
+        self.assertEqual(self.checksum(), checksum)
+
+    def test_committed_shrink_with_provider_in_flight_is_not_a_completed_fence(self):
+        checksum = self.fixture_data()
+        self.arm("attach_shrink_publish")
+        request = dict(revision=2, lo=2, generation=2, target=256, kind=SHRINK)
+        running = self.paused(**request)
+        result = self.fence(2)
+        self.assertEqual(result["observed"]["phase"], COMMITTED)
+        self.assertEqual(result["observed"]["high"], 256)
+        self.assertEqual(result["disposition"], FENCE_PENDING)
+        self.assertFalse(result["observed"]["cancel_requested"])
+        self.assertTrue(result["observed"]["cancel_closed"])
+        self.assertIsNone(running.poll())
+        self.assertEqual(self.finish(running)["result"]["phase"], COMMITTED)
+        self.assertEqual(self.fence(2)["disposition"], FENCED)
+        self.assertEqual(self.call("status", **request)["disposition"], REPLAYED)
+        self.assertEqual(self.checksum(), checksum)
+
+    def exercise_issuer_registration_race(self, kind):
+        request = {}
+        if kind == SHRINK:
+            self.call(target=2048)
+            request = dict(revision=2, lo=2, generation=2, target=256, kind=SHRINK)
+        before = self.state()
+        self.arm("attach_issuer_register")
+        running = self.paused(**request)
+        # 暂停在真实resizeX内、登记前；接管不等待该锁，必须先推进floor。
+        fenced = self.fence(2)
+        self.assertEqual(fenced["disposition"], FENCE_PENDING)
+        expected = dict(before, issuer_floor="2")
+        self.assertEqual(fenced["observed"], expected)
+        result = self.finish(running)
+        self.assertEqual(result["disposition"], STALE)
+        self.assertFalse(result["has_result"])
+        self.assertEqual(self.state(), expected)
+        self.assertEqual(self.fence(2)["disposition"], FENCED)
+
+    def test_grow_registration_rechecks_epoch_after_takeover_race(self):
+        self.exercise_issuer_registration_race(GROW)
+
+    def test_shrink_registration_rechecks_epoch_after_takeover_race(self):
+        self.exercise_issuer_registration_race(SHRINK)
+
+    def test_fence_reconciles_fatal_without_erasing_unknown_backing(self):
+        old = self.pg.background_sql(
+            "SELECT dsg_grow_control('arm_fatal'); " + self.statement(), "dsg-issuer-fatal"
+        )
+        self.pg.wait_sql("SELECT dsg_grow_control('exit_waiting')", "yes")
+        before = self.state()
+        self.assertEqual(before["phase"], PREPARING)
+        fenced = self.fence(2)
+        self.assertEqual(fenced["disposition"], FENCED)
+        self.assertEqual(
+            (fenced["observed"]["phase"], fenced["observed"]["reason"]), (DENIED, INTERRUPTED)
+        )
+        self.assertEqual(fenced["observed"]["arrays"], before["arrays"])
+        self.call(epoch=2, lo=2, target=2048)
+        before_exit = self.state()
+        self.arm("release_exit")
+        _, errors = old.communicate(timeout=10)
+        self.assertNotEqual(old.returncode, 0)
+        self.assertIn("DSGA test Grow FATAL", errors)
+        self.assertEqual(self.state(), before_exit)
+
+    def test_fence_rejects_reverse_lock_order_before_advancing_floor(self):
+        before = self.state()
+        result = self.pg.sql(f"SELECT dsg_fence('{self.boot}','2',true)", check=False)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("holding buffer coordination locks", result.stderr)
+        self.assertEqual(self.state(), before)
+        self.assertEqual(self.fence(2)["disposition"], FENCED)
+
+    def test_fence_preserves_full_uint64_and_resets_only_on_actual_new_boot(self):
+        other_boot = 1 if self.boot != "1" else 2
+        before = self.state()
+        self.assertEqual(self.fence(MAX_U64, boot=other_boot)["disposition"], FENCE_STALE)
+        self.assertEqual(self.state(), before)
+        self.assertEqual(self.fence(MAX_U64)["disposition"], FENCED)
+        self.assertEqual(self.state()["issuer_floor"], str(MAX_U64))
+        self.assertEqual(self.fence(MAX_U64 - 1)["disposition"], FENCE_STALE)
+        for boot, epoch in ((0, 1), (self.boot, 0)):
+            result = self.pg.sql(f"SELECT dsg_fence('{boot}','{epoch}')", check=False)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("invalid DSGA issuer fence", result.stderr)
+        self.pg.command("pg_ctl", "-D", self.pg.data, "-m", "fast", "-w", "stop")
+        self.pg.running = False
+        self.pg.start()
+        new_boot = self.state()["boot"]
+        self.assertNotEqual(new_boot, self.boot)
+        self.assertEqual(self.state()["issuer_floor"], "0")
+        self.assertEqual(self.fence(MAX_U64)["disposition"], FENCE_STALE)
+        self.assertEqual(self.state()["issuer_floor"], "0")
+        self.assertEqual(self.fence(1, boot=new_boot)["disposition"], FENCED)
+
+    def test_fence_requires_real_superuser_session_even_through_definer(self):
+        self.pg.sql(
+            "CREATE ROLE dsg_fence_app LOGIN; "
+            "GRANT EXECUTE ON FUNCTION dsg_fence(text,text,boolean) TO dsg_fence_app; "
+            "CREATE FUNCTION dsg_fence_definer(text,text) RETURNS jsonb LANGUAGE SQL "
+            "SECURITY DEFINER AS $$SELECT dsg_fence($1,$2)$$;"
+        )
+        before = self.state()
+        for function in ("dsg_fence", "dsg_fence_definer"):
+            result = self.pg.sql(
+                f"SET SESSION AUTHORIZATION dsg_fence_app; SELECT {function}('{self.boot}','2')",
+                check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("superuser session", result.stderr)
+        self.assertEqual(self.state(), before)
 
 
 if __name__ == "__main__":

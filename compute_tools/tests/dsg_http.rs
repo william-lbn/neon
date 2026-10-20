@@ -446,7 +446,7 @@ async fn internal_server_never_exposes_dsg_routes() -> Result<()> {
     let internal = Router::from(&Server::Internal { port: 0 }).with_state(compute);
     assert_eq!(
         invoke(
-            internal,
+            internal.clone(),
             Method::GET,
             "/dsg/v1/capabilities",
             Some(&signer.token(&signer.claims())),
@@ -455,6 +455,66 @@ async fn internal_server_never_exposes_dsg_routes() -> Result<()> {
         .await?
         .0,
         StatusCode::NOT_FOUND
+    );
+    assert_eq!(
+        invoke(
+            internal,
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            Some(&signer.token(&signer.claims())),
+            Some("{}")
+        )
+        .await?
+        .0,
+        StatusCode::NOT_FOUND
+    );
+    Ok(())
+}
+
+#[tokio::test]
+async fn issuer_fence_route_binds_signed_epoch_before_sql() -> Result<()> {
+    let signer = Signer::new();
+    let app = router(&node(signer.jwks.clone(), true, None));
+    let token = signer.token(&signer.claims());
+    let payload = json!({"protocol_version":1,"instance":{"vm_uid":VM,"compute_instance_id":COMPUTE,"pg_boot_id":"1"},"issuer_epoch":"2"});
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            Some(&token),
+            Some(&payload.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            None,
+            Some(&payload.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    let duplicate = payload
+        .to_string()
+        .replacen('{', "{\"issuer_epoch\":\"1\",", 1);
+    assert_eq!(
+        invoke(
+            app,
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            Some(&token),
+            Some(&duplicate)
+        )
+        .await?
+        .0,
+        StatusCode::UNPROCESSABLE_ENTITY
     );
     Ok(())
 }

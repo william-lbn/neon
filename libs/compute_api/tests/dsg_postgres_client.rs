@@ -6,8 +6,10 @@ use std::time::Duration;
 
 use anyhow::{Context, Result};
 use compute_api::dsg_client::{DsgCallError, DsgSqlClient};
-use compute_api::dsg_control::{DsgOperationQuery, DsgResizeKind, DsgResizeRequest, DsgUint64};
-use compute_api::dsg_state::{DsgDisposition, DsgPhase, DsgReason};
+use compute_api::dsg_control::{
+    DsgIssuerFenceRequest, DsgOperationQuery, DsgResizeKind, DsgResizeRequest, DsgUint64,
+};
+use compute_api::dsg_state::{DsgDisposition, DsgIssuerFenceDisposition, DsgPhase, DsgReason};
 use tokio::time::{sleep, timeout};
 use tokio_postgres::Client;
 
@@ -176,6 +178,102 @@ async fn observer_cancels_while_execution_is_blocked() -> Result<()> {
     client
         .request_resize(&request(&client, 2, 1, 2048, DsgResizeKind::Grow))
         .await?;
+    cluster.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn independent_issuer_fence_preserves_unknown_intent_and_rejects_old_epoch() -> Result<()> {
+    let mut cluster = Cluster::new()?;
+    let execution = cluster.connect().await?;
+    let observer = cluster.connect().await?;
+    let client = DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, WAIT).await?;
+    let before = client.memory_status().await?.observed;
+    let fence = DsgIssuerFenceRequest {
+        protocol_version: 1,
+        instance: client.instance().clone(),
+        issuer_epoch: DsgUint64::new(2),
+    };
+    let fact = client.fence_issuer(&fence).await?;
+    assert_eq!(fact.disposition, DsgIssuerFenceDisposition::Fenced);
+    assert_eq!(fact.observed.high_buffers, before.high_buffers);
+    assert_eq!(
+        fact.observed.capacity_generation,
+        before.capacity_generation
+    );
+    assert_eq!(fact.observed.issuer_floor_epoch, DsgUint64::new(2));
+    let old = request(&client, 1, 1, 1024, DsgResizeKind::Grow);
+    assert_eq!(
+        client.request_resize(&old).await?.receipt.disposition,
+        DsgDisposition::Stale
+    );
+    assert_eq!(
+        client.fence_issuer(&fence).await?.disposition,
+        DsgIssuerFenceDisposition::Fenced
+    );
+    let mut next = request(&client, 1, 1, 1024, DsgResizeKind::Grow);
+    next.key.issuer_epoch = DsgUint64::new(2);
+    next.key.operation_id.low = DsgUint64::new(2);
+    assert!(
+        matches!(
+            client.request_resize(&next).await,
+            Err(DsgCallError::NotSent(_))
+        ),
+        "PG fence cannot clear local unknown request"
+    );
+    let execution2 = cluster.connect().await?;
+    let observer2 = cluster.connect().await?;
+    let new_client = DsgSqlClient::bind(&execution2, &observer2, VM, COMPUTE, WAIT).await?;
+    assert_eq!(
+        new_client
+            .request_resize(&next)
+            .await?
+            .receipt
+            .result
+            .unwrap()
+            .operation
+            .unwrap()
+            .phase,
+        DsgPhase::Committed
+    );
+    cluster.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn issuer_fence_reaches_observer_while_old_execution_is_blocked() -> Result<()> {
+    let mut cluster = Cluster::new()?;
+    let execution = cluster.connect().await?;
+    let observer = cluster.connect().await?;
+    let control = cluster.connect().await?;
+    let client = DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, WAIT).await?;
+    let old = request(&client, 1, 1, 1024, DsgResizeKind::Grow);
+    let fence = DsgIssuerFenceRequest {
+        protocol_version: 1,
+        instance: client.instance().clone(),
+        issuer_epoch: DsgUint64::new(2),
+    };
+    arm(&execution, "arm_pause").await?;
+    let takeover = async {
+        wait_gate(&control).await?;
+        let fact = client.fence_issuer(&fence).await?;
+        assert_eq!(fact.disposition, DsgIssuerFenceDisposition::Pending);
+        assert!(fact.observed.operation.as_ref().unwrap().cancel_requested);
+        assert_eq!(fact.observed.operation.as_ref().unwrap().key, old.key);
+        arm(&control, "release_prepare").await
+    };
+    let (result, taken) = tokio::join!(client.request_resize(&old), takeover);
+    taken?;
+    assert_eq!(
+        result?.receipt.result.unwrap().operation.unwrap().reason,
+        DsgReason::Cancelled
+    );
+    assert_eq!(
+        client.fence_issuer(&fence).await?.disposition,
+        DsgIssuerFenceDisposition::Fenced
+    );
     cluster.passed = true;
     Ok(())
 }

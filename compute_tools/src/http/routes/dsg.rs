@@ -9,8 +9,10 @@ use axum::{
     routing::{get, post},
 };
 use compute_api::dsg_auth::DsgHttpClaims;
-use compute_api::dsg_client::{DsgCallError, DsgSqlClient};
-use compute_api::dsg_control::{DsgOperationKey, DsgOperationQuery, DsgResizeRequest};
+use compute_api::dsg_client::{DsgCallError, DsgFenceCallError, DsgSqlClient};
+use compute_api::dsg_control::{
+    DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery, DsgResizeRequest,
+};
 use compute_api::dsg_state::DsgControlResponse;
 use compute_api::responses::ComputeStatus;
 use http::{HeaderValue, StatusCode, header::CACHE_CONTROL};
@@ -29,6 +31,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/resize", post(resize))
         .route("/dsg/v1/resize/status", post(status))
         .route("/dsg/v1/resize/cancel", post(cancel))
+        .route("/dsg/v1/issuer/fence", post(fence))
         // 原始有类型JSON直接反序列化，不经Value/map去重；不得放入URL query或日志。
         .layer(DefaultBodyLimit::max(16 * 1024))
         .layer(AsyncRequireAuthorizationLayer::new(DsgAuthorize::new(
@@ -148,6 +151,29 @@ async fn cancel(
     Json(query): Json<DsgOperationQuery>,
 ) -> Response {
     query_operation(&compute, &claims, query, true).await
+}
+
+async fn fence(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<DsgIssuerFenceRequest>,
+) -> Response {
+    if request.validate().is_err() {
+        return failure(StatusCode::BAD_REQUEST, "invalid_request", None);
+    }
+    if claims.authorize_fence(&request).is_err() {
+        return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
+    }
+    match client(&compute, &claims).await {
+        Ok(client) => match client.fence_issuer(&request).await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(DsgFenceCallError::NotSent(_)) => failure(StatusCode::CONFLICT, "not_sent", None),
+            Err(DsgFenceCallError::Unconfirmed { .. }) => {
+                failure(StatusCode::SERVICE_UNAVAILABLE, "unconfirmed", None)
+            }
+        },
+        Err(error) => error,
+    }
 }
 
 async fn query_operation(

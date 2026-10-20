@@ -1,8 +1,27 @@
 # DSGA 当前实施状态
 
-更新：2026-10-20（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal保持
+更新：2026-10-21（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal保持
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
+
+## 最新批次（优先于下文历史证据）
+
+PG17 `6b7c3655ab74062e117eef7400953cd000679a49`已先推送核验，新增独立单调
+issuer floor及原子登记检查；COMMITTED仍在同步Provider时接管只返回Pending。
+gitlink/两份锁与准确重编二进制均绑定6b7。Neon扩展1.8/Buffer ABI6、六个正式
+SQL/HTTP入口、Rust/Go独立观察通道接管均已接线；旧未知意图不会因Fenced清除。
+Autoscaling依赖`831a453e3adaa86f163027a1f7319139f78b55c5`已推送核验。
+
+准确SHA严格门禁：内核80项120.900s，正式SQL/存储52项78.346s，SDK10项14.42s、
+HTTP12项6.08s均零skip/ignored/filtered；真实Go门禁1 Rust外层/2 Go race进程
+通过。普通Rust36/31通过，其15ignored已另严格执行；Clippy退出0。Go完整race185
+case pass事件、0fail/用例skip，10测试包/9无测试包分列；普通/native lint0issues。
+prepare145项为13通过/132环境skip，实际80+52已另执行。候选world与已提交PG src
+逐字节匹配，各off/on全world+TAP成功但含可选skip。两种实际反向均失败、源码已
+恢复。详细契约、日志、升级限制及复现见[本批记录](DSGA-PG接管隔离与正式API.md)。
+
+PG floor不是租约/VM许可或全预算；可信owner/持久循环/Monitor/受控重绑与下文
+剩余业务继续实现。Neon本批提交与远程状态以Git/refs为准，不把工作树当已推送。
 
 ## 当前已经实现的范围
 

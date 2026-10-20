@@ -111,13 +111,16 @@ async fn native_go_compute_sql_round_trip_and_lost_response() -> Result<()> {
     );
     let mut rejected = signer.claims();
     rejected["scope"] = json!("compute_ctl:admin");
+    let mut next_owner = signer.claims();
+    next_owner["issuer_epoch"] = json!("2");
 
     // 一次性JWT只经匿名stdin管道传入Go，不放argv/env/测试输出或持久账本。Go
     // 会按真实header送达生产验签中间件；原始输入及失败stderr不能输出配置对象。
     let mut input = json!({
         "http_base_url":format!("http://{address}"), "instance":initial.observed.instance,
         "issuer_epoch":"1", "token":token,
-        "rejected_token":signer.raw_token(&serde_json::to_string(&rejected)?), "original":original, "after_restart":false
+        "rejected_token":signer.raw_token(&serde_json::to_string(&rejected)?),
+        "next_token":signer.token(&next_owner), "original":original, "after_restart":false
     });
     run_go(&binary, &serde_json::to_vec(&input)?).await?;
 

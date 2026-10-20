@@ -1,10 +1,93 @@
 //! 跨字段协议校验单元测试；人工快照只测解码/关联规则，不冒充物理或集群执行。
-use compute_api::dsg_control::{DsgResizeRequest, DsgUint64};
+use compute_api::dsg_control::{DsgIssuerFenceRequest, DsgResizeRequest, DsgUint64};
 use compute_api::dsg_state::*;
 use serde_json::json;
 
 fn request() -> DsgResizeRequest {
     serde_json::from_str(include_str!("../testdata/dsg_request_v1.json")).unwrap()
+}
+
+#[test]
+fn issuer_fence_does_not_conflate_pending_committed_or_vm_permission() {
+    let original = request();
+    let fence = DsgIssuerFenceRequest {
+        protocol_version: 1,
+        instance: original.key.instance.clone(),
+        issuer_epoch: DsgUint64::new(original.key.issuer_epoch.get() + 1),
+    };
+    let mut fact = DsgIssuerFenceResponse {
+        protocol_version: 1,
+        vm_shrink_permit: false,
+        requested_instance: fence.instance.clone(),
+        requested_epoch: fence.issuer_epoch,
+        disposition: DsgIssuerFenceDisposition::Pending,
+        observed: snapshot(&original, 2, 1024),
+    };
+    fact.observed.issuer_floor_epoch = fence.issuer_epoch;
+    // COMMITTED不能让消费者自行推算FENCED，Provider可能仍在途；保留Pending。
+    fact.validate_for(&fence, &fence.instance).unwrap();
+    fact.disposition = DsgIssuerFenceDisposition::Fenced;
+    fact.validate_for(&fence, &fence.instance).unwrap();
+    fact.observed = snapshot(&original, 1, 512);
+    fact.observed.issuer_floor_epoch = fence.issuer_epoch;
+    let operation = fact.observed.operation.as_mut().unwrap();
+    operation.phase = DsgPhase::Preparing;
+    operation.cancel_closed = false;
+    operation.cancel_requested = true;
+    assert!(fact.validate_for(&fence, &fence.instance).is_err());
+    fact.disposition = DsgIssuerFenceDisposition::Pending;
+    fact.validate_for(&fence, &fence.instance).unwrap();
+    fact.vm_shrink_permit = true;
+    assert!(fact.validate_for(&fence, &fence.instance).is_err());
+}
+
+#[test]
+fn issuer_fence_rejects_forged_floor_identity_and_ambiguous_schema() {
+    let original = request();
+    let request = DsgIssuerFenceRequest {
+        protocol_version: 1,
+        instance: original.key.instance.clone(),
+        issuer_epoch: original.key.issuer_epoch,
+    };
+    let good = DsgIssuerFenceResponse {
+        protocol_version: 1,
+        vm_shrink_permit: false,
+        requested_instance: request.instance.clone(),
+        requested_epoch: request.issuer_epoch,
+        disposition: DsgIssuerFenceDisposition::Fenced,
+        observed: snapshot(&original, 2, 1024),
+    };
+    good.validate_for(&request, &request.instance).unwrap();
+    for change in 0..5 {
+        let mut changed = good.clone();
+        match change {
+            0 => changed.observed.issuer_floor_epoch = DsgUint64::new(0),
+            1 => changed.requested_epoch = DsgUint64::new(1),
+            2 => changed.observed.instance.pg_boot_id = DsgUint64::new(1),
+            3 => changed.disposition = DsgIssuerFenceDisposition::Stale,
+            _ => changed.requested_instance.vm_uid.push_str("-other"),
+        }
+        assert!(changed.validate_for(&request, &request.instance).is_err());
+    }
+    let mut older = request.clone();
+    older.issuer_epoch = DsgUint64::new(request.issuer_epoch.get() - 1);
+    let mut stale = good.clone();
+    stale.requested_epoch = older.issuer_epoch;
+    stale.disposition = DsgIssuerFenceDisposition::Stale;
+    stale.validate_for(&older, &older.instance).unwrap();
+    let mut value = serde_json::to_value(&good).unwrap();
+    value["observed"]
+        .as_object_mut()
+        .unwrap()
+        .remove("issuer_floor_epoch");
+    assert!(serde_json::from_value::<DsgIssuerFenceResponse>(value).is_err());
+    let raw = serde_json::to_string(&request).unwrap();
+    for bad in [
+        raw.replacen('{', "{\"issuer_epoch\":\"1\",", 1),
+        raw.replace("\"protocol_version\":1", "\"protocol_version\":null"),
+    ] {
+        assert!(serde_json::from_str::<DsgIssuerFenceRequest>(&bad).is_err());
+    }
 }
 
 #[test]
@@ -74,6 +157,7 @@ fn snapshot(request: &DsgResizeRequest, generation: u64, high: u32) -> DsgSnapsh
     .collect();
     DsgSnapshot {
         instance: request.key.instance.clone(),
+        issuer_floor_epoch: request.key.issuer_epoch,
         capacity_generation: DsgUint64::new(generation),
         low_buffers: high,
         high_buffers: high,

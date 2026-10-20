@@ -29,7 +29,7 @@
 #include "storage/dynamic_shared_buffers.h"
 #endif
 #endif
-#if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION == 5
+#if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION == 6
 #define NEON_DSG_CONTROL_SUPPORTED 1
 #endif
 
@@ -41,6 +41,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_request_resize);
 PG_FUNCTION_INFO_V1(neon_dsg_resize_status);
 PG_FUNCTION_INFO_V1(neon_dsg_cancel_resize);
 PG_FUNCTION_INFO_V1(neon_dsg_memory_status);
+PG_FUNCTION_INFO_V1(neon_dsg_fence_issuer);
 
 static char *dsg_vm_uid;
 static char *dsg_compute_instance_id;
@@ -256,19 +257,13 @@ NeonDsgHashIntent(Jsonb *input, unsigned char *output)
 	/*- 哈希是本boot内完整语义意图的绑定，不是外部签名/认证或预算许可。 */
 }
 
-static void
-NeonDsgParse(text *raw, bool resize, NeonDsgIntent *intent)
+/*- 所有入口共用原始长度/整数token/唯一键校验，禁止先归一化后才检查。 */
+static Jsonb *
+NeonDsgParseRaw(text *raw)
 {
 	JsonLexContext lex;
 	JsonSemAction sem = {0};
-	Jsonb	   *input;
-	JsonbContainer *root;
-	JsonbContainer *key;
-	JsonbContainer *instance;
-	JsonbContainer *operation;
-	uint64		target;
 
-	MemSet(intent, 0, sizeof(*intent));
 	if (VARSIZE_ANY_EXHDR(raw) > NEON_DSG_MAX_REQUEST_BYTES)
 		ereport(ERROR, (errcode(ERRCODE_PROGRAM_LIMIT_EXCEEDED), errmsg("DSGA request exceeds 16 KiB")));
 	makeJsonLexContext(&lex, raw, true);
@@ -279,7 +274,20 @@ NeonDsgParse(text *raw, bool resize, NeonDsgIntent *intent)
 	 * true要求解析过程中检查每层唯一键；不能先普通jsonb_in吞掉重复键，
 	 * 再以规范化后的对象冒充已验证。转义后相同的键也由原生解析器拒绝。
 	 */
-	input = DatumGetJsonbP(jsonb_from_text(raw, true));
+	return DatumGetJsonbP(jsonb_from_text(raw, true));
+}
+
+static void
+NeonDsgParse(text *raw, bool resize, NeonDsgIntent *intent)
+{
+	Jsonb	   *input = NeonDsgParseRaw(raw);
+	JsonbContainer *root;
+	JsonbContainer *key;
+	JsonbContainer *instance;
+	JsonbContainer *operation;
+	uint64		target;
+
+	MemSet(intent, 0, sizeof(*intent));
 	root = &input->root;
 	NeonDsgObject(root, resize ? 8 : 2);
 	if (NeonDsgInteger(root, "protocol_version") != 1)
@@ -392,11 +400,12 @@ NeonDsgAppendSnapshot(StringInfo output, const DsgBufferSnapshot *snapshot)
 	/*- IDLE也必须带完整当前实例；STALE请求的receipt身份不能代替observed身份。 */
 	appendStringInfoString(output, "{\"instance\":");
 	NeonDsgAppendInstance(output, dsg_vm_uid, dsg_compute_instance_id, &snapshot->boot_id);
-	appendStringInfo(output, ",\"capacity_generation\":\"" UINT64_FORMAT
+	appendStringInfo(output, ",\"issuer_floor_epoch\":\"" UINT64_FORMAT
+					 "\",\"capacity_generation\":\"" UINT64_FORMAT
 					 "\",\"low_buffers\":%d,\"high_buffers\":%d,\"maximum_buffers\":%d,"
 					 "\"admission_open\":%s,\"admission_revision\":\"" UINT64_FORMAT
 					 "\",\"startup_shared_upper_bytes\":\"%zu\",\"operation\":",
-					 snapshot->generation, snapshot->low, snapshot->high, snapshot->maximum,
+					 snapshot->issuer_floor_epoch, snapshot->generation, snapshot->low, snapshot->high, snapshot->maximum,
 					 snapshot->admission_open ? "true" : "false", snapshot->admission_revision, snapshot->startup_shared_upper_bytes);
 	if (snapshot->operation.phase == DSG_OP_IDLE)
 		appendStringInfoString(output, "null");
@@ -532,6 +541,55 @@ NeonDsgExecute(text *raw, int action)
 		DsgBufferControlCancel(&intent.key, &response);
 	return NeonDsgRespond(&intent, &response);
 }
+
+/*-
+ * 独立接管不改变容量/预算，不接收调用者自报的“已完成”。完整实例和代次从
+ * 原始严格对象读取；C层只认证管理员会话，真实issuer租约仍由上层认证执行链
+ * 核验。PENDING不能当接管成功，旧Provider未退出时不发任何PG/VM完成许可。
+ */
+static Datum
+NeonDsgFence(text *raw)
+{
+	Jsonb	   *input = NeonDsgParseRaw(raw);
+	JsonbContainer *root = &input->root;
+	JsonbContainer *instance;
+	char	   *vm_uid;
+	char	   *compute_instance_id;
+	uint64		boot;
+	uint64		epoch;
+	DsgBufferIssuerFenceResponse response;
+	StringInfoData output;
+	static const char *const dispositions[] = {"fenced", "pending", "stale"};
+
+	NeonDsgCheckEnabled();
+	NeonDsgObject(root, 3);
+	if (NeonDsgInteger(root, "protocol_version") != 1)
+		ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("unsupported DSGA control protocol version")));
+	instance = NeonDsgChild(root, "instance", 3);
+	vm_uid = NeonDsgId(instance, "vm_uid");
+	compute_instance_id = NeonDsgId(instance, "compute_instance_id");
+	boot = NeonDsgUint64(instance, "pg_boot_id");
+	epoch = NeonDsgUint64(root, "issuer_epoch");
+	if (boot == 0 || epoch == 0)
+		ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("DSGA issuer fence identity must be nonzero")));
+	if (strcmp(vm_uid, dsg_vm_uid) != 0 || strcmp(compute_instance_id, dsg_compute_instance_id) != 0)
+	{
+		MemSet(&response, 0, sizeof(response));
+		response.disposition = DSG_ISSUER_STALE;
+		DsgBufferGetSnapshot(&response.observed);
+	}
+	else
+		DsgBufferFenceIssuer(boot, epoch, &response);
+	initStringInfo(&output);
+	appendStringInfoString(&output, "{\"protocol_version\":1,\"vm_shrink_permit\":false,\"requested_instance\":");
+	NeonDsgAppendInstance(&output, vm_uid, compute_instance_id, &boot);
+	appendStringInfo(&output, ",\"requested_epoch\":\"" UINT64_FORMAT "\",\"disposition\":\"%s\",\"observed\":",
+					 epoch, NeonDsgEnumName(response.disposition, dispositions, lengthof(dispositions)));
+	NeonDsgAppendSnapshot(&output, &response.observed);
+	appendStringInfoChar(&output, '}');
+	return NeonDsgJson(&output);
+}
+
 #endif
 
 Datum
@@ -614,6 +672,18 @@ neon_dsg_cancel_resize(PG_FUNCTION_ARGS)
 	NeonDsgCheckAdministrator();
 #ifdef NEON_DSG_CONTROL_SUPPORTED
 	PG_RETURN_DATUM(NeonDsgExecute(PG_GETARG_TEXT_PP(0), 2));
+#else
+	NeonDsgUnsupported();
+	PG_RETURN_NULL();
+#endif
+}
+
+Datum
+neon_dsg_fence_issuer(PG_FUNCTION_ARGS)
+{
+	NeonDsgCheckAdministrator();
+#ifdef NEON_DSG_CONTROL_SUPPORTED
+	PG_RETURN_DATUM(NeonDsgFence(PG_GETARG_TEXT_PP(0)));
 #else
 	NeonDsgUnsupported();
 	PG_RETURN_NULL();
