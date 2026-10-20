@@ -9,22 +9,24 @@
 
 按项目所有者确认的 V3 继续实施，先完整完成 PG17，再逐版移植。
 M2f 引用/锁序、S2 checkpoint 工作区和安全bootstrap/新boot准入，以及 R05 IO/CV/恢复快速路径子片已完成 Mac
-模块验证。完整 Shrink 尚未实现；完整运行时私有/后台预算、外部 API 和
+模块验证。S3 尾部排水、逻辑 Shrink、逐数组保守回收与 regrow 已完成 Mac 模块验证；
+完整运行时私有/后台预算、外部 API 和
 Monitor/Agent/NeonVM 控制链仍待实施。不能将这些子片通过解释为生产功能完整交付。
 
 ## 分支与维护基线
 
-- PG：`codex/dsga-pg17-v3-20261019`，当前安全启动/准入
-  `f563e3014ce61b06a2d3d74f3130add0f0001eab`，包含 Grow清理修复
+- PG：`codex/dsga-pg17-v3-20261019`，当前 S3
+  `7a1ff18108b311b6787dc5fb3c6dd9d13de5a462`，包含安全启动/准入 `f563e301…`、Grow清理修复
   `36f1ed0fcf003adeba1e7307ad036f3998bcb235`，依赖 S2 `9aebedf…`、M2f `b5785f8…`。
   PG 依赖已推送并核对远程完整 SHA，Neon 再提交/推送引用。
 - Neon：`codex/dsga-neon-v3-20261019`；V3 `2422ce9`、构建身份修复 `9df2ba8`、
-  M2f 集成 `4cb4e9f`、S2 集成 `a53c447`；本批绑定上述 R05 PG 提交并加入6项真实场景。
+  M2f 集成 `4cb4e9f`、S2 集成 `a53c447`、安全启动接入 `de8f02a`；本批绑定上述 S3 PG 提交并加入16项真实场景。
 - Autoscaling：`codex/dsga-autoscaling-20261019` / `ef6cd154aa3e60d72cab1e6b64abeb217ff9b245`，
   尚无 DSGA 业务改动；不能将文档分支当作 Agent 已接入发行。
-- 独立维护已验证/中文提交 `6a003bbf61c7ba00247f151939fc08f5c20e352a`，包含 Neon PG17
+- 独立维护已验证/中文提交 `4a39412f154796461f404785d369a3dc9424fcdc`，包含 Neon PG17
   `56692dfb680281a963c7470fc7f0fec7f65ecfd4` 及社区 PG17
-  `63de1f8fa42060e10326d2d9a0d48e559594ab86`，再合入 V3 功能分支。
+  `91246c72695cdddf62003f6bf4c4ade511f134f4`，由 `873715d889` 合入 V3 功能分支。
+  最新两项为反解析/分区聚合测试修复；6个官方文件与上游一致，无文本冲突。
 - 本轮同步快照：Neon main `fa504217c61bbcaf5c512d75830564541f917f8f`、Autoscaling main
   `a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f`；PG14–18 官方维护头已 fetch。
   其他 PG 的发行升级/功能移植尚未完成，每版实施前必须重新核对，不承诺遗漏时点后的更新。
@@ -43,6 +45,10 @@ Monitor/Agent/NeonVM 控制链仍待实施。不能将这些子片通过解释�
 | R05 开关完整回归 | 开/关各81组/665项报告检查通过，零not ok | 不含真实Shrinker/物理回收 |
 | R05 最终候选真实集群 | 18项通过，48.098s | 5项IO/CV交错及1项实际物理备库WAL快速删除，连同原12项 |
 | R05 主仓最终身份/集成 | c47f959实际二进制及重编配套库18项通过，41.645s | 已核对完整SHA，三处版本绑定一致 |
+| S3 最新维护组合专项 | 45项真实集群通过，86.968s；原生1regress+5isolation通过 | 真实数据/尾部pin与IO/失败读/取消/FATAL/保守预算/regrow |
+| S3 最新维护组合基础全量 | 开/关各81组/666项报告检查通过 | TAP未启用；不证明VM许可或物理能力 |
+| S3 主仓最终身份/集成 | `7a1ff18108…`准确SHA重编、配套库重编后45项通过，84.343s | gitlink/两份锁一致；专项入口零skip |
+| 额外TAP维护基线 | 整体失败，8个文件失败 | 未含DSGA的维护组合；详细清单见下，不包装为通过 |
 | Linux普通页/KVM/HugeTLB/Neon存储端到端/性能 | 未执行 | 后续按T15–T22单独验收 |
 
 R05 的 ERROR 审核点仍持Guard和自身pin；FATAL 审核点已无Guard但仍有自身pin，
@@ -68,19 +74,28 @@ operation。本次真实临时集群复现：旧操作退出把新操作从PREPA
 
 实际构建 `build/neon-integrated/v17`，安装 `build/neon-integrated-install/v17`。
 版本锁变更会使旧configure缓存失效；每次仍须实际核对postgres完整SHA并重编配套库。
-PG内部 API 为3。具体设计与约束见子模块：
+PG内部 API 为4。具体设计与约束见子模块：
 
 - `DSGA-M2f-引用寿命与锁序验证.md`
 - `DSGA-S2-checkpoint工作区寿命与并发验证.md`
 - `DSGA-R05-IO等待与恢复快速路径验证.md`
 - `DSGA-S2-安全启动与新boot准入.md`
+- `DSGA-S3-尾部排水与逻辑缩容验证.md`
 
 Grow/FATAL已修复并完成本地验收；安全bootstrap、同Postmaster恢复共享布局预算和新boot准入默认状态
 已完成本机候选验证，详见[Compute接入](DSGA-Compute安全启动与准入接入.md)：真实集群29项、
 开关check-world各81组/665项、compute_api12项、compute_tools全包22项通过。
 不能据此关闭R02全部运行时预算约束。接着推进完整
-Shrink/排水/回收/regrow，以及请求回执、API和外部控制链。所有进程/扩展的剩余引用
+请求回执、有界历史、API、完整预算/准入和外部控制链。所有进程/扩展的剩余引用
 与长Guard扫描活性继续按V3审查；Linux物理能力和完整端到端另验。
+
+S3 保护页探针经反向验证可检出显式引入的不安全读取。仅回退 hash 冲突归还顺序时，
+原 StrategyFreeBuffer 的 VA/L 防护仍使测试通过，文档已纠正，不将防御加固误报为
+复现旧版缺陷。正式生产API尚未接入，测试函数不能充当对外管理接口。
+
+额外启用的 TAP 检查发现 Mac 可复现的 rmgr fixture、序列语义及未定位恢复/逻辑槽
+问题，见 [TAP基线验证](DSGA-TAP基线验证-20261020.md)。其中备库重启后缺表问题
+必须继续查明；不能归入“待Linux验证”或宣称已有生产可用完整交付。
 
 M2f旧备份stash `6f002a31196f2e623e8386c38a649ff87be2ada4` 已apply一次，禁止重复apply；
 旧未完成spec另存 `build/m2f-unpin-before-v3.spec`。不改isolationtester来伪造原生BufferPin等待。

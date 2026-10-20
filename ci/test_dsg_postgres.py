@@ -6,6 +6,7 @@ test_dsg_region，NEON_TEST_RMGR_LIBRARY 指向配套 neon_rmgr 的完整库路�
 这里验证 Mac 可执行的生命周期，不声称验证 Linux 物理回收。
 """
 
+import json
 import os
 import signal
 import socket
@@ -375,6 +376,410 @@ class DsgPostgresLifecycle(unittest.TestCase):
             + ("attach_after_publish" if after_publish else "attach")
             + "')"
         )
+
+    def prepare_shrink_fixture(self):
+        # 禁止后台提前写净，确保Shrink真实走脏页WAL/smgr写回。PLAIN禁止
+        # TOAST/压缩把测试工作集缩成只落在bootstrap内，实际表必须超过小池。
+        self.config("bgwriter_lru_maxpages=0\ncheckpoint_timeout='1h'\n")
+        self.start()
+        self.install_functions()
+        library = self.quote(self.library)
+        self.sql(
+            "CREATE FUNCTION dsg_grow(bigint,bigint,bigint,integer,integer,boolean) "
+            f"RETURNS text AS '{library}', 'test_dsg_grow' LANGUAGE C STRICT;"
+            "CREATE FUNCTION dsg_shrink(bigint,bigint,bigint,integer,integer,boolean) "
+            f"RETURNS text AS '{library}', 'test_dsg_shrink' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_resize_state() RETURNS text AS '{library}', "
+            "'test_dsg_shrink_snapshot' LANGUAGE C;"
+            f"CREATE FUNCTION dsg_grow_control(text) RETURNS text AS '{library}', "
+            "'test_dsg_grow_control' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_tail_block(regclass,integer) RETURNS bigint AS '{library}', "
+            "'test_dsg_tail_block' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_invalid_tail(regclass,integer) RETURNS integer AS '{library}', "
+            "'test_dsg_invalid_tail' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_collision_unpin(regclass) RETURNS boolean AS '{library}', "
+            "'test_dsg_collision_unpin' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_allocation_limit(integer) RETURNS text AS '{library}', "
+            "'test_dsg_allocation_limit' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_relation_below(regclass,integer) RETURNS boolean AS '{library}', "
+            "'test_dsg_relation_below' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_pin(regclass,integer,text) RETURNS boolean AS '{library}', "
+            "'test_dsg_pin' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_pin_control(boolean) RETURNS boolean AS '{library}', "
+            "'test_dsg_pin_control' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_checkpoint_control(text) RETURNS boolean AS '{library}', "
+            "'test_dsg_checkpoint_control' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_grow_verify() RETURNS boolean AS '{library}', "
+            "'test_dsg_grow_verify' LANGUAGE C;"
+            f"CREATE FUNCTION dsg_stale_hint() RETURNS boolean AS '{library}', "
+            "'test_dsg_stale_hint' LANGUAGE C;"
+            "SELECT dsg_grow(1,1,1,2048,10000,false);"
+            "CREATE TABLE dsg_shrink_data(i integer,pad text);"
+            "ALTER TABLE dsg_shrink_data ALTER pad SET STORAGE PLAIN;"
+            "INSERT INTO dsg_shrink_data SELECT i,repeat(md5(i::text),150) "
+            "FROM generate_series(1,600) i;"
+        )
+        self.assertEqual(self.sql("SELECT dsg_grow_verify()").stdout.strip(), "t")
+        self.assertGreater(
+            int(self.sql("SELECT pg_relation_size('dsg_shrink_data')").stdout), 2 * 1024 * 1024
+        )
+        return self.shrink_data_checksum()
+
+    def shrink_data_checksum(self):
+        return self.sql(
+            "SELECT count(*),sum(i),sum(octet_length(pad)),sum(hashtextextended(pad,0)) "
+            "FROM dsg_shrink_data"
+        ).stdout.strip()
+
+    def resize_state(self):
+        return json.loads(self.sql("SELECT dsg_resize_state()").stdout)
+
+    def shrink_call(self, revision=2, generation=2, target=256, timeout=10000, *, check=True):
+        return self.sql(
+            f"SELECT dsg_shrink({revision},{revision},{generation},{target},{timeout},false)",
+            check=check,
+        )
+
+    def hold_shrink_tail(self):
+        block = self.sql("SELECT dsg_tail_block('dsg_shrink_data',256)").stdout.strip()
+        self.assertTrue(block, "真实数据页没有驻留在待排水尾部")
+        holder = self.background_sql(
+            f"SELECT dsg_pin('dsg_shrink_data',{block},'tail_hold')", "dsg-shrink-holder"
+        )
+        self.wait_sql("SELECT dsg_pin_control(false)", "t")
+        return holder
+
+    def release_shrink_tail(self, holder):
+        self.sql("SELECT dsg_pin_control(true)")
+        _, errors = holder.communicate(timeout=10)
+        self.assertEqual(holder.returncode, 0, errors)
+
+    def test_shrink_writes_dirty_tail_and_regrow_preserves_real_data(self):
+        expected = self.prepare_shrink_fixture()
+        before = self.resize_state()
+        self.assertIn("committed high=256 generation=3", self.shrink_call().stdout)
+        after = self.resize_state()
+        self.assertEqual((after["low"], after["high"], after["generation"]), (256, 256, 3))
+        self.assertEqual(after["drain"][0], 2048 - 256)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+        if os.uname().sysname == "Darwin":
+            self.assertTrue(any(a["state"] == 4 for a in after["arrays"]))
+            for old, new in zip(before["arrays"], after["arrays"], strict=True):
+                self.assertEqual(new["upper"], old["upper"])
+                self.assertFalse(new["verified"])
+        else:
+            self.assertTrue(all(a["state"] == 3 for a in after["arrays"]))
+        self.assertIn("replay=true", self.shrink_call().stdout)
+        wrong_kind = self.sql("SELECT dsg_grow(2,2,2,256,1000,false)", check=False)
+        self.assertNotEqual(wrong_kind.returncode, 0)
+        self.assertIn("identity was reused", wrong_kind.stderr)
+        self.assertIn(
+            "committed high=3072 generation=4",
+            self.sql("SELECT dsg_grow(3,3,3,3072,10000,false)").stdout,
+        )
+        self.sql(
+            "INSERT INTO dsg_shrink_data SELECT i,repeat(md5(i::text),150) "
+            "FROM generate_series(601,1200) i"
+        )
+        self.assertEqual(self.sql("SELECT dsg_grow_verify()").stdout.strip(), "t")
+        self.assertEqual(
+            self.sql("SELECT count(*),sum(i) FROM dsg_shrink_data").stdout.strip(), "1200|720600"
+        )
+        self.assertIn("committed", self.shrink_call(4, 4).stdout)
+        self.assertEqual(
+            self.sql("SELECT count(*),sum(i) FROM dsg_shrink_data").stdout.strip(), "1200|720600"
+        )
+        # 初始布局测试要求预算恰等于bootstrap，不适用于Mac保守保留backing。
+        # 此处检查真正收缩后的inactive tail提示拒绝，不削弱原启动预算断言。
+        self.assertEqual(self.sql("SELECT dsg_stale_hint()").stdout.strip(), "t")
+
+    def test_shrink_pin_timeout_restores_allocation_then_retry_succeeds(self):
+        expected = self.prepare_shrink_fixture()
+        holder = self.hold_shrink_tail()
+        denied = self.shrink_call(timeout=100)
+        self.assertIn("denied high=2048 generation=2", denied.stdout)
+        state = self.resize_state()
+        self.assertEqual(
+            (state["low"], state["high"], state["phase"], state["reason"]), (2048, 2048, 3, 1)
+        )
+        self.assertGreater(state["drain"][1], 0)
+        self.release_shrink_tail(holder)
+        self.assertIn("committed high=256", self.shrink_call(3, 2).stdout)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def test_shrink_waits_for_real_pin_and_completes_after_release(self):
+        expected = self.prepare_shrink_fixture()
+        holder = self.hold_shrink_tail()
+        shrinking = self.background_sql("SELECT dsg_shrink(2,2,2,256,10000,false)", "dsg-shrinker")
+        self.wait_sql("SELECT dsg_resize_state()::json->>'low'", "256")
+        state = self.resize_state()
+        self.assertEqual((state["high"], state["phase"]), (2048, 1))
+        self.assertIsNone(shrinking.poll())
+        self.release_shrink_tail(holder)
+        output, errors = shrinking.communicate(timeout=10)
+        self.assertEqual(shrinking.returncode, 0, errors)
+        self.assertIn("committed high=256", output)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def test_shrink_cancel_restores_fence_without_changing_high(self):
+        self.prepare_shrink_fixture()
+        holder = self.hold_shrink_tail()
+        shrinking = self.background_sql(
+            "SELECT dsg_shrink(2,2,2,256,10000,false)", "dsg-cancel-shrinker"
+        )
+        self.wait_sql("SELECT dsg_resize_state()::json->>'low'", "256")
+        self.assertEqual(
+            self.sql(
+                "SELECT pg_cancel_backend(pid) FROM pg_stat_activity "
+                "WHERE application_name='dsg-cancel-shrinker'"
+            ).stdout.strip(),
+            "t",
+        )
+        _, errors = shrinking.communicate(timeout=10)
+        self.assertNotEqual(shrinking.returncode, 0)
+        self.assertIn("canceling statement due to user request", errors)
+        state = self.resize_state()
+        self.assertEqual(
+            (state["low"], state["high"], state["generation"], state["reason"]), (2048, 2048, 2, 3)
+        )
+        self.release_shrink_tail(holder)
+        self.assertIn("committed", self.shrink_call(3, 2).stdout)
+
+    def test_shrink_committed_error_keeps_high_and_pending_budget(self):
+        expected = self.prepare_shrink_fixture()
+        before = self.resize_state()
+        self.sql("SELECT dsg_grow_control('attach_shrink_publish')")
+        failed = self.sql(
+            "SELECT dsg_grow_control('arm_error'); SELECT dsg_shrink(2,2,2,256,10000,false)",
+            check=False,
+        )
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("DSGA test resize ERROR", failed.stderr)
+        state = self.resize_state()
+        self.assertEqual((state["low"], state["high"], state["phase"]), (256, 256, 2))
+        for old, new in zip(before["arrays"], state["arrays"], strict=True):
+            self.assertEqual(new["upper"], old["upper"])
+            self.assertEqual(new["state"], 1)
+            self.assertTrue(new["partial"])
+        self.assertIn("replay=true", self.shrink_call().stdout)
+        self.sql("SELECT dsg_grow_control('detach_shrink')")
+        self.assertIn("committed high=256 generation=3", self.shrink_call(3, 3).stdout)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def exercise_shrink_fatal_competitor(self, *, after_publish, during_filter=False):
+        expected = self.prepare_shrink_fixture()
+        self.sql(
+            "SELECT dsg_grow_control('"
+            + (
+                "attach_shrink_filter"
+                if during_filter
+                else ("attach_shrink_publish" if after_publish else "attach_shrink_fence")
+            )
+            + "')"
+        )
+        old = self.background_sql(
+            "SELECT dsg_grow_control('arm_fatal'); SELECT dsg_shrink(2,2,2,256,10000,false)",
+            "dsg-old-fatal-shrink",
+        )
+        self.wait_sql("SELECT dsg_grow_control('exit_waiting')", "yes")
+        generation = 3 if after_publish else 2
+        self.assertIn(
+            "committed high=3072",
+            self.sql(f"SELECT dsg_grow(3,3,{generation},3072,10000,false)").stdout,
+        )
+        before = self.resize_state()
+        self.finish_fatal_grow(old)
+        self.assertEqual(self.resize_state(), before)
+        self.sql("SELECT dsg_grow_control('detach_shrink')")
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def test_shrink_fatal_before_publish_is_reconciled_before_new_grow(self):
+        self.exercise_shrink_fatal_competitor(after_publish=False)
+
+    def test_shrink_fatal_mid_freelist_filter_reconciles_shared_cursor(self):
+        self.exercise_shrink_fatal_competitor(after_publish=False, during_filter=True)
+
+    def test_shrink_fatal_after_publish_never_releases_new_grow_tail(self):
+        self.exercise_shrink_fatal_competitor(after_publish=True)
+
+    def test_shrink_keeps_checkpoint_workspace_while_regrowing(self):
+        expected = self.prepare_shrink_fixture()
+        self.sql("SELECT dsg_checkpoint_control('attach')")
+        checkpoint = self.background_sql("CHECKPOINT", "dsg-shrink-checkpoint")
+        self.wait_sql("SELECT dsg_checkpoint_control('waiting')", "t")
+        self.assertIn("committed high=256", self.shrink_call().stdout)
+        state = self.resize_state()
+        self.assertEqual(state["arrays"][3]["state"], 2)
+        self.assertFalse(state["arrays"][3]["verified"])
+        self.assertIn(
+            "committed high=1024",
+            self.sql("SELECT dsg_grow(3,3,3,1024,10000,false)").stdout,
+        )
+        self.sql("SELECT dsg_checkpoint_control('release')")
+        _, errors = checkpoint.communicate(timeout=10)
+        self.assertEqual(checkpoint.returncode, 0, errors)
+        self.sql("SELECT dsg_checkpoint_control('detach')")
+        self.assertIn("committed high=256", self.shrink_call(4, 4).stdout)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def test_shrink_hash_miss_reloads_below_fence_before_high_publication(self):
+        expected = self.prepare_shrink_fixture()
+        self.sql("SELECT dsg_grow_control('attach_shrink_prepare')")
+        shrinking = self.background_sql(
+            "SELECT dsg_grow_control('arm_pause'); SELECT dsg_shrink(2,2,2,256,10000,false)",
+            "dsg-shrink-untagged",
+        )
+        self.wait_sql("SELECT dsg_grow_control('prepare_waiting')", "yes")
+        self.assertEqual(self.resize_state()["high"], 2048)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+        self.assertEqual(
+            self.sql("SELECT dsg_relation_below('dsg_shrink_data',256)").stdout.strip(), "t"
+        )
+        self.sql("SELECT dsg_grow_control('release_prepare')")
+        output, errors = shrinking.communicate(timeout=10)
+        self.assertEqual(shrinking.returncode, 0, errors)
+        self.assertIn("committed high=256", output)
+        self.sql("SELECT dsg_grow_control('detach_shrink')")
+
+    def test_shrink_removes_real_failed_read_tagged_invalid_tail(self):
+        expected = self.prepare_shrink_fixture()
+        # 600正好越过现有文件EOF，仍在已存在的segment0内，确保走真实读失败
+        # 而非在打开不存在segment1时提前报错。
+        failed = self.sql("SELECT dsg_pin('dsg_shrink_data',600,'read')", check=False)
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertRegex(failed.stderr, r"could not read (?:block|blocks).*600")
+        self.assertGreater(
+            int(self.sql("SELECT dsg_invalid_tail('dsg_shrink_data',256)").stdout), 0
+        )
+        self.assertIn("committed high=256", self.shrink_call().stdout)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def test_shrink_second_array_release_error_retains_unproven_budget(self):
+        expected = self.prepare_shrink_fixture()
+        before = self.resize_state()
+        self.sql("SELECT dsg_grow_control('attach_release')")
+        failed = self.sql(
+            "SELECT dsg_grow_control('arm_second_release_error'); "
+            "SELECT dsg_shrink(2,2,2,256,10000,false)",
+            check=False,
+        )
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("second array release ERROR", failed.stderr)
+        state = self.resize_state()
+        self.assertEqual((state["high"], state["phase"]), (256, 2))
+        self.assertIn(state["arrays"][0]["state"], (3, 4))
+        for old, new in zip(before["arrays"][1:], state["arrays"][1:], strict=True):
+            self.assertEqual(new["upper"], old["upper"])
+            self.assertEqual(new["state"], 1)
+            self.assertTrue(new["partial"])
+        self.sql("SELECT dsg_grow_control('detach_shrink')")
+        self.assertIn("committed", self.shrink_call(3, 3).stdout)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def test_shrink_repeated_cross_granule_resize_and_invalid_requests(self):
+        expected = self.prepare_shrink_fixture()
+        generation, high = 2, 2048
+        for revision, target in enumerate((256, 3072, 512, 4096, 768, 2048, 256), start=2):
+            command = "dsg_shrink" if target < high else "dsg_grow"
+            result = self.sql(
+                f"SELECT {command}({revision},{revision},{generation},{target},10000,false)"
+            )
+            generation += 1
+            high = target
+            self.assertIn(f"committed high={high} generation={generation}", result.stdout)
+            self.assertEqual(self.shrink_data_checksum(), expected)
+        for args in (
+            f"9,9,{generation},255,1000,false",
+            f"9,9,{generation},512,1000,false",
+            f"9,9,{generation - 1},256,1000,false",
+            f"9,9,{generation},256,1000,true",
+            f"8,8,{generation},256,1000,false",
+        ):
+            self.assertNotEqual(self.sql(f"SELECT dsg_shrink({args})", check=False).returncode, 0)
+        self.assertEqual(self.resize_state()["generation"], generation)
+
+    def test_shrink_collision_victim_is_not_accessed_after_last_unpin(self):
+        expected = self.prepare_shrink_fixture()
+        boot = self.sql("SELECT dsg_boot()").stdout
+        self.install_io_functions()
+        # 先持久化，再仅丢弃缓存，使两个真实ReadBuffer都从hash miss开始。
+        self.sql("CHECKPOINT; SELECT dsg_io('dsg_shrink_data','invalidate')")
+        collision = self.background_sql(
+            "SELECT dsg_collision_unpin('dsg_shrink_data')", "dsg-real-hash-collision"
+        )
+        self.wait_sql("SELECT dsg_grow_control('prepare_waiting')", "yes")
+        # 原victim已在尾部持pin；新读者只能选bootstrap前缀，避免两者恰在
+        # 同一张Descriptor页而使页保护探针对合法胜者访问产生误报。
+        self.sql("SELECT dsg_allocation_limit(256); SELECT dsg_pin('dsg_shrink_data',0,'read')")
+        self.sql("SELECT dsg_grow_control('release_prepare')")
+        output, errors = collision.communicate(timeout=10)
+        self.assertEqual(collision.returncode, 0, errors + self.log.read_text()[-12000:])
+        self.assertIn("t", output)
+        self.assertEqual(self.sql("SELECT dsg_boot()").stdout, boot)
+        self.sql("SELECT dsg_allocation_limit(2048)")
+        self.assertIn("committed high=256", self.shrink_call().stdout)
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def test_shrink_skips_real_tail_io_without_holding_access_guard(self):
+        expected = self.prepare_shrink_fixture()
+        self.install_io_functions()
+        library = self.quote(self.library)
+        self.sql(
+            f"CREATE FUNCTION dsg_io_at(regclass,text,integer) RETURNS boolean AS '{library}', "
+            "'test_dsg_io' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_exclusive_available() RETURNS boolean AS '{library}', "
+            "'test_dsg_exclusive_available' LANGUAGE C;"
+            "SELECT dsg_io_control('attach')"
+        )
+        block = self.sql("SELECT dsg_tail_block('dsg_shrink_data',256)").stdout.strip()
+        self.assertTrue(block)
+        writer = self.background_sql(
+            f"SELECT dsg_io_at('dsg_shrink_data','writer',{block})", "dsg-tail-io-owner"
+        )
+        self.wait_sql("SELECT dsg_io_control('writer_waiting')", "1")
+        shrinking = self.background_sql(
+            "SELECT dsg_shrink(2,2,2,256,10000,false)", "dsg-tail-io-shrinker"
+        )
+        self.wait_sql("SELECT (dsg_resize_state()::json->'drain'->>2)::integer>0", "t")
+        self.assertEqual(self.resize_state()["high"], 2048)
+        self.assertEqual(self.sql("SELECT dsg_exclusive_available()").stdout.strip(), "t")
+        self.sql("SELECT dsg_io_control('release_writer')")
+        for process in (writer, shrinking):
+            output, errors = process.communicate(timeout=10)
+            self.assertEqual(process.returncode, 0, errors)
+        self.assertIn("committed high=256", output)
+        self.sql("SELECT dsg_io_control('detach')")
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
+    def test_shrink_cancel_during_provider_keeps_committed_capacity_and_budget(self):
+        expected = self.prepare_shrink_fixture()
+        before = self.resize_state()
+        self.sql("SELECT dsg_grow_control('attach_release')")
+        shrinking = self.background_sql(
+            "SELECT dsg_grow_control('arm_pause'); SELECT dsg_shrink(2,2,2,256,10000,false)",
+            "dsg-cancel-release",
+        )
+        self.wait_sql("SELECT dsg_grow_control('prepare_waiting')", "yes")
+        self.assertEqual(
+            self.sql(
+                "SELECT pg_cancel_backend(pid) FROM pg_stat_activity "
+                "WHERE application_name='dsg-cancel-release'"
+            ).stdout.strip(),
+            "t",
+        )
+        _, errors = shrinking.communicate(timeout=10)
+        self.assertNotEqual(shrinking.returncode, 0)
+        self.assertIn("canceling statement due to user request", errors)
+        state = self.resize_state()
+        self.assertEqual((state["low"], state["high"], state["phase"]), (256, 256, 2))
+        for old, new in zip(before["arrays"], state["arrays"], strict=True):
+            self.assertEqual(new["upper"], old["upper"])
+            self.assertEqual(new["state"], 1)
+        self.sql("SELECT dsg_grow_control('detach_shrink')")
+        self.assertIn(
+            "committed high=3072", self.sql("SELECT dsg_grow(3,3,3,3072,10000,false)").stdout
+        )
+        self.assertEqual(self.shrink_data_checksum(), expected)
 
     def start_fatal_grow(self):
         old = self.background_sql(
