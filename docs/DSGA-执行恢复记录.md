@@ -14,9 +14,9 @@
 - 官方维护组合 `4a39412f154796461f404785d369a3dc9424fcdc` 已包含Neon PG17
   `56692dfb680281a963c7470fc7f0fec7f65ecfd4` 与社区
   `91246c72695cdddf62003f6bf4c4ade511f134f4` 的全部祖先；本批fresh fetch未变。
-- Neon分支 `codex/dsga-neon-v3-20261019`；上个已核验远程存储集成头
-  `0f8dbed494b15e751e989548df1d192a34280426`。本记录随新6009绑定/宿主门禁
-  提交更新；恢复用git rev-parse HEAD与gh refs核验本提交，文档本身不证明已推送。
+- Neon分支 `codex/dsga-neon-v3-20261019`；6009绑定/完整宿主门禁
+  `6cdc52e`已推送并核验GitHub refs，保留存储集成0f8dbed全部内容。本记录随
+  后续wire契约模块提交更新，恢复仍须以git rev-parse HEAD和gh refs核验本提交。
   gitlink、ci/distribution.json、vendor/revisions.json均已绑定6009并通过严格检查。
 - Neon官方main仍fa504217…，Autoscaling官方main仍a4bce09e…，均已为各自功能
   基线祖先。自有主分支/稳定分支未合并、未发布；其他PG发行升级与移植尚未完成。
@@ -75,7 +75,7 @@ PR CI新增宿主原生全量门禁和Perl依赖，**没有远程Linux执行证�
 新PG模块文档分别为DSGA-Neon逻辑槽升级兼容.md、DSGA-Neon配置样例完整性.md、
 DSGA-IO等待资源释放修复.md。不能根据旧过程里的“还在运行”重启旧句柄。
 
-## 下一批生产契约草稿（独立于上面的6009门禁提交）
+## 生产请求契约模块（独立于上面的6009门禁提交）
 
 等待PG全量时，在现有compute_api新增dsg_control.rs及lib.rs导出，详见
 DSGA-生产控制请求契约.md。这批只交付wire类型/范围/期限，不是生产端点或许可。
@@ -84,9 +84,9 @@ Rust本包21项通过（含9项新增，零ignored）；--no-deps Clippy -D warn
 日志 build/neon-dsg-control-compute-api{,-clippy,-clippy-local}.log。
 本机独立rustfmt过旧，显式rustup run 1.88.0 rustfmt，未改全局环境。
 
-提交顺序：先只提交已暂存的6009版本绑定、三项Python回归、world脚本/CI及对应
-验证文档，推送核验；随后将wire类型、导出、契约文档及其CI测试独立中文提交。
-不要用git add -A混入另一批，也不要将DTO当成已实现控制API。
+6009绑定/回归/world脚本及记录已独立提交推送核验。wire类型、导出、契约文档及
+CI本包测试另作中文提交；不改变PG锁/内核，不将DTO当成已实现控制API。新的
+请求receipt/observed state、历史和控制端点仍须继续编写，不能据共享类型关闭R09。
 
 ## 后续必须继续的完整范围
 

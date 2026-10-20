@@ -41,3 +41,7 @@ jobs:
         run: bash ci/test-dsg-neon-extension.sh "$GITHUB_WORKSPACE/build/dsga-pg/v17" "$GITHUB_WORKSPACE/build/dsga-install/v17"
       - name: Run native regression and TAP with dynamic mode off and on
         run: bash ci/test-dsg-postgres-world.sh "$GITHUB_WORKSPACE/build/dsga-pg/v17" "$GITHUB_WORKSPACE/build/dsga-install/v17"
+      - name: Validate DSGA shared control request contracts
+        env:
+          CARGO_BUILD_JOBS: "4"
+        run: cargo test --locked -p compute_api
