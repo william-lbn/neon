@@ -118,9 +118,25 @@ bootstrap 只限制 Buffer Pool，不自动限制恢复后新查询的私有内�
 
 ### R03 / P0：Revision 记录进度，不自动构成最终执行权
 
-当前 Agent 的 VM JSON Patch 使用 replace，没有附带 VM UID/resourceVersion/操作身份的条件检查；当前 Revision 实现主要用于配置进度。旧 Agent、重试请求或已进入 QMP 的操作，可能晚于新目标生效。仅 PG 拒绝旧请求不能封住这条路径。
+复核基线中的 Agent VM JSON Patch 使用 replace，没有附带 VM UID/resourceVersion/操作身份的条件检查；当前 Revision 实现主要用于配置进度。旧 Agent、重试请求或已进入 QMP 的操作，可能晚于新目标生效。仅 PG 拒绝旧请求不能封住这条路径。
 
 **约定：** 沿用 Revision，但补持久的操作身份与唯一执行者约束。最终 VM 执行必须核验 UID、领导权代次、目标、Revision 和预算承诺；Kubernetes 更新使用条件更新，Controller/Runner 还要串行处理实际 QMP 动作。API CAS 不能代替已发出的 QMP 对账。超时或租约到期均不是取消成功；旧动作未查明之前禁止与其冲突的新动作。权限超时后不得自动撤掉仍可能被 VM 缩容消费的目标预算。
+
+**2026-10-21实施约定补充：** 协调者选择采用绑定完整VM UID/incarnation的Lease，
+进程holder随机且不复用；实际issuer epoch来自原journal的CAS单调接管，不能从
+LeaseTransitions、Pod名或请求方数字推导。已派发原请求保留旧epoch，换owner后
+只允许观察/取消/真实效果对账，不改写成新epoch继续派发。Lease和journal均须
+核验真实对象UID/RV/绑定；固定Lease对象被重建时当前会话失败关闭，不重置日志。
+
+选主不等于最终fencing。失租要取消当前调用并等待已登记工作真正退出，不能靠
+提前释放Lease宣称旧动作消失。远端凭据签发还须验证当前已授权主体与完整VM/
+Compute/epoch绑定；本机私有Session构造或协议夹具不能代替远端认证/RBAC。
+授权API/凭据回调必须有独立等待期限；HTTP Client自身超时不覆盖Do前的取凭据。
+SDK未知原意图的解除须显式、持久且完整核验，不以一次查询/Fenced或重造空Client
+清除；跨owner/boot关闭协议未完成前仍禁止相关冲突动作。
+
+当前代码进度、实际链路及尚未接线的Agent/凭据/预算/Runner见
+[所有权与持久循环验证](DSGA-所有权与持久循环验证.md)，不据单模块通过关闭R03。
 
 ### R04 / P1 发布阻断：checkpoint 全程 Guard 不满足在线伸缩时效目标
 
@@ -286,14 +302,14 @@ LFC 文件大小、驻留页缓存和内存消耗不是同一数字。增大 Sha
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
 
-最小接口为 `capabilities`、`request_resize`、`resize_status`、`cancel_resize`、`memory_status`。实现位置可以是 `pgxn/neon` 包装内核接口；只能由内部管理身份调用，函数内部仍检查权限和状态。请求期间不能携带调用者任意业务事务已有的 buffer pin/锁；生产管理连接使用独立会话和受限执行环境。普通角色、只读副本普通用户、重复 ID 改参数、负数/溢出/超限必须有拒绝测试。
+最小接口为 `capabilities`、`request_resize`、`resize_status`、`cancel_resize`、`memory_status`、`fence_issuer`（独立代次接管）。实现位置可以是 `pgxn/neon` 包装内核接口；只能由内部管理身份调用，函数内部仍检查权限和状态。请求期间不能携带调用者任意业务事务已有的 buffer pin/锁；生产管理连接使用独立会话和受限执行环境。普通角色、只读副本普通用户、重复 ID 改参数、负数/溢出/超限必须有拒绝测试。
 
 内部 SQL 控制端点不是普通应用查询接口；需要明确其对只读 Compute 的支持方式，避免借“只读”开关绕过管理认证。JSON/Rust/Go/SQL 的数字范围统一；不得把 uint64 身份在 bigint/浮点之间无损性不明地转换。
 
 状态必须分别包含：
 
 - 请求 receipt：本请求的 ID、accepted/replayed/stale/busy、终态/错误原因。
-- 当前 PG：boot、L/H/M、capacity generation、当前操作、各数组预算和未知区间。
+- 当前 PG：boot、issuer_floor_epoch、L/H/M、capacity generation、当前操作、各数组预算和未知区间。
 - 外层资源：目标/实际 Guest、QMP plugged、Host/Scheduler 承诺、HugeTLB 使用/池/待释放。
 - 能力：Provider、实际页粒度、是否支持受控 populate/物理 release、协议/内核 ABI 版本。
 - 进度与阻塞：pin/IO/dirty/扫描/工作区/预算/迁移/不支持能力的分类及耗时。

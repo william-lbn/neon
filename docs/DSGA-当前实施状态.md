@@ -4,7 +4,19 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新接续：PG持久执行适配器
+## 最新接续：所有权选主与持久PG循环
+
+Autoscaling生产所有权/循环1bf247d及阶段门禁补强
+`75187718d7f4e99ed46924305e89ad83a943b0de`已推送核验。固定Lease/VM绑定、journal
+CAS单调epoch、真正退出join、有界API/凭据等待、持久PG循环均实现；真实epoch2
+循环实际扩到4096并验证丢回复恢复及显式重放。最终race254事件/12测试包，9无
+测试包分列，0fail/用例skip；native lint0issues。8生产反向恢复后全量重验通过，
+阶段缺失的PASS-only门禁反向另被拒绝。详见[新模块](DSGA-所有权与持久循环验证.md)。
+
+尚未接Agent实际入口/凭据发放、完整预算/Monitor/Runner等，不关闭R03或Goal。
+V3已补充选主与最终fencing、不可改写旧epoch及SDK受控关闭约定。PG6b7/三处锁不变。
+
+## PG持久执行适配器（阶段记录）
 
 Autoscaling `48f01e2aee8208ba1ab5392a518434e276086066`已推送核验，PG写前派发、
 完整原意图恢复、显式安全重放和四数组Provider单独核验完成。受影响race219事件/
@@ -59,7 +71,7 @@ PG floor不是租约/VM许可或全预算；可信owner/持久循环/Monitor/受
   UID/resourceVersion条件写入及响应核验；保留同Revision分批批准。另完成Go
   请求/查询的无损完整身份契约，以及完整意图/命令的持久执行日志、写前条件提交、
   未知动作/接管/取消恢复与有界历史；受管标记禁止旧路径回退。Go正式消费者已
-  编写，且到真实Compute/PG的整体门禁已执行；可信owner分配与日志协调循环仍待集成；
+  编写，且到真实Compute/PG的整体门禁已执行；owner选择/PG循环已实现，Agent入口/凭据及完整领域循环仍待集成；
   账本不是租约认证或VM许可。
 - 完整Neon扩展的共享LSN锁、独立SLRU接口、安全文件发布与Buffer提示保护；
   原生恢复/逻辑槽/配置样例/资源释放缺陷修复及保留的反向证据。
@@ -82,7 +94,7 @@ Go客户端尚未接Agent协调循环；Go→真实Compute→PG同一门禁已�
 |---|---|---|
 | 实际PG17子模块 | codex/dsga-pg17-v3-20261019 / 6b7c3655ab74062e117eef7400953cd000679a49 | 已先推送并核验GitHub refs，工作树干净 |
 | Neon主仓 | codex/dsga-neon-v3-20261019，gitlink/两份锁均6b7c3655 | API/ABI6集成960551d已推送核验；本轮PG持久链路文档随当前提交，恢复以Git/refs为准 |
-| Autoscaling | codex/dsga-autoscaling-20261019 / 48f01e2aee8208ba1ab5392a518434e276086066 | 日志/HTTP消费者及真实Go联调已推送核验；完整运行链仍未完成 |
+| Autoscaling | codex/dsga-autoscaling-20261019 / 75187718d7f4e99ed46924305e89ad83a943b0de | 日志/HTTP消费者及真实Go联调已推送核验；完整运行链仍未完成 |
 | control-plane | codex/dsga-control-plane-v3-20261020 / 928eec95… | Driver等运行时尚未完成 |
 | Helm | codex/dsga-neon-helm-v3-20261019 / 648488a… | 本业务配置/验收链尚未完成，不准备部署 |
 

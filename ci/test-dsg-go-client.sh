@@ -62,5 +62,7 @@ if len(reports) != 1 or tuple(map(int, reports[0])) != (1, 0, 0, 0, 0):
     raise SystemExit('native cross-repository Rust gate did not execute fully')
 if text.count('--- PASS: TestNativeComputeHTTPChain') != 2 or '--- SKIP:' in text or '--- FAIL:' in text:
     raise SystemExit('native Go gate did not execute fully')
+if text.count('DSGA_NATIVE_OWNER_LOOP epoch=2 buffers=4096 journal=recorded replay=confirmed') != 1:
+    raise SystemExit('native Go gate did not execute the confirmed ownership and persistent PG loop phase')
 print('Actual Go -> TLS -> Compute Router -> SQL -> PG gate passed in both normal and post-restart processes; zero skip/ignored/filtered')
 PY

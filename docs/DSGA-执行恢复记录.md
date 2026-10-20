@@ -6,6 +6,22 @@
 
 ## 当前源码与分支
 
+### 最新所有权与持久PG循环（优先于全部下文历史）
+
+- Autoscaling生产实现1bf247d06c89d24f141d15f32cf6ca50116b2f0c、阶段验证补强
+  75187718d7f4e99ed46924305e89ad83a943b0de均已推送/GitHub核验；所有者AGENTS.md
+  7行修改保留。owner包与长期PGWorker已实现，Agent入口/凭据/完整领域循环还需接线。
+- 最终254事件/12测试包/9无测试包，0fail/用例skip；native全范围lint0。8项实际
+  断言反向恢复3份源码后完整race重验，48130终态退出0，不重新启动。源码SHA和
+  夹具失败边界见[本模块](DSGA-所有权与持久循环验证.md)，旧stash不能再apply。
+- 真实epoch2循环4096 grow及第二次提交丢回复/持久查询/显式重放，1外层/2 Go race
+  已执行；带阶段硬约束候选8.09s，准确依赖复验见neon-owner-native-pinned.log。
+  删除阶段仅保留PASS的日志被同一门禁拒绝。PG6b7及ABI6/三处锁/二进制不变，
+  主仓当前仅门禁/中文方案记录，推送状态以实际Git/refs核验，不误报全业务完成。
+- Neon/Autoscaling main、Neon/社区PG17 fresh fetch均已包含。继续Agent实际接线与
+  凭据broker/Driver、受控跨owner/boot关闭、全预算/Monitor/最终Runner/其余PG等。
+  Goal active，不构建镜像、不准备K8s、不合main。Linux物理认证后验。
+
 ### 最新PG持久派发适配器（优先于下文历史）
 
 - Autoscaling `48f01e2aee8208ba1ab5392a518434e276086066`已提交/推送并GitHub核验，
