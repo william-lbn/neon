@@ -43,6 +43,7 @@ revision后声称内核必然能发现篡改。RESULT_EXPIRED不证明旧请求�
 
 CANCEL_REQUESTED不是取消终态/资源回收证明，COMMITTED也不是VM完成。外层预算
 承诺、实例身份/issuer所有权、Provider/Guest/QMP/Host回执与最后执行fencing
-仍须完整落实。正式capabilities/request/status/cancel/memory_status、生产
-认证、C/Go/Rust交叉编码、全量预算/控制链与其他PG版本仍是代码剩余项，不能
-列为Linux环境待测。Mac只证明已执行用例；真实Linux物理/VM/K8s/性能后验。
+仍须完整落实。后续[Neon正式管理SQL](DSGA-Neon管理SQL与实例身份.md)已完成
+五个入口、superuser会话边界与C/Rust共享向量的实际加载验证；外层HTTP安全路由、
+Go客户端、持久历史、全量预算/控制链与其他PG版本仍是代码剩余项，不能列为
+Linux环境待测。Mac只证明已执行用例；真实Linux物理/VM/K8s/性能后验。

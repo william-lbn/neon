@@ -71,6 +71,7 @@ python3 - <<'PY'
 import unittest
 
 suite = unittest.defaultTestLoader.discover('.', pattern='test_dsg_neon_extension.py')
+suite.addTests(unittest.defaultTestLoader.discover('.', pattern='test_dsg_neon_control.py'))
 if suite.countTestCases() == 0:
     raise SystemExit('Neon extension suite contains zero tests')
 result = unittest.TextTestRunner(verbosity=2).run(suite)

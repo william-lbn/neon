@@ -32,6 +32,7 @@
 
 #include "communicator.h"
 #include "communicator_process.h"
+#include "dsg_control.h"
 #include "extension_server.h"
 #include "file_cache.h"
 #include "neon.h"
@@ -510,6 +511,7 @@ _PG_init(void)
 	 */
 
 	/* Stage 1: Define GUCs, and other early intialization */
+	pg_init_dsg_control();
 	pg_init_libpagestore();
 	relsize_hash_init();
 	lfc_init();

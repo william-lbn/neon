@@ -144,7 +144,7 @@ pub struct DsgOperationQuery {
     pub key: DsgOperationKey,
 }
 
-fn validate_id(value: &str, name: &str) -> Result<()> {
+pub(crate) fn validate_id(value: &str, name: &str) -> Result<()> {
     // 这里是UID/实例ID/承诺引用，不是显示名。跨C/Rust/Go统一字节长度，拒绝
     // NUL/控制字符/空白，避免C截断、日志伪造或不同规范化形成同一重放键。
     ensure!(
@@ -229,6 +229,57 @@ impl DsgOperationQuery {
 mod tests {
     use super::*;
     use serde_json::json;
+
+    #[test]
+    fn production_c_api_and_rust_share_unsigned_json_vector() {
+        // C端真实SQL测试读取同一文件，只替换该临时PG真实boot后执行。
+        // 固定向量覆盖高位epoch/revision/opID，不能经JSON number或SQL bigint。
+        let source = include_str!("../testdata/dsg_request_v1.json");
+        let value: DsgResizeRequest = serde_json::from_str(source).unwrap();
+        value.validate().unwrap();
+        assert_eq!(value.key.instance.pg_boot_id.get(), u64::MAX);
+        assert_eq!(value.key.issuer_epoch.get(), 9_007_199_254_740_993);
+        assert_eq!(value.key.revision.get(), 1_u64 << 63);
+        assert_eq!(
+            value.key.operation_id.to_be_bytes(),
+            0xfedc_ba98_7654_3210_0123_4567_89ab_cdef_u128.to_be_bytes()
+        );
+        let encoded = serde_json::to_string(&value).unwrap();
+        assert_eq!(
+            serde_json::from_str::<DsgResizeRequest>(&encoded).unwrap(),
+            value
+        );
+    }
+
+    #[test]
+    fn json_integer_lexemes_match_production_c_parser() {
+        // PG JSONB会归一化1e0，C边界须先校验原token；此处确保Rust仍拒绝
+        // 相同浮点/指数/符号输入，避免两个执行者对同一请求给出不同身份。
+        let source = include_str!("../testdata/dsg_request_v1.json");
+        for (field, original, bad_values) in [
+            (
+                "protocol_version",
+                "1",
+                vec!["1.0", "1e0", "-0", "true", "\"1\""],
+            ),
+            (
+                "target_buffers",
+                "1024",
+                vec!["1024.0", "1024e0", "-1024", "4294967296", "null"],
+            ),
+        ] {
+            for invalid in bad_values {
+                let request = source.replace(
+                    &format!("\"{field}\": {original}"),
+                    &format!("\"{field}\": {invalid}"),
+                );
+                assert!(
+                    serde_json::from_str::<DsgResizeRequest>(&request).is_err(),
+                    "{field}={invalid}"
+                );
+            }
+        }
+    }
 
     fn request() -> DsgResizeRequest {
         DsgResizeRequest {

@@ -7,7 +7,9 @@
 use anyhow::{Result, ensure};
 use serde::{Deserialize, Serialize};
 
-pub const DSG_BOOTSTRAP_SPEC_VERSION: u32 = 1;
+// 新启动契约必须绑定真实VM UID/Compute执行实例；旧实验v1缺少身份，明确拒绝，
+// 不能靠endpoint名字推断或默认为空后开放管理。普通未启用DSGA的spec保持兼容。
+pub const DSG_BOOTSTRAP_SPEC_VERSION: u32 = 2;
 const PG_BLOCK_BYTES: u64 = 8192;
 const PG_MAX_BUFFERS: u64 = (i32::MAX / 2) as u64;
 
@@ -21,6 +23,9 @@ const PG_MAX_BUFFERS: u64 = (i32::MAX / 2) as u64;
 #[serde(deny_unknown_fields)]
 pub struct DynamicSharedBuffersSpec {
     pub protocol_version: u32,
+    /// 由认证控制面提供，在本Postmaster生命周期固定，不能从备份配置继承。
+    pub vm_uid: String,
+    pub compute_instance_id: String,
     pub bootstrap_buffer_bytes: u64,
     pub maximum_buffer_bytes: u64,
     pub minimum_guest_memory_bytes: u64,
@@ -47,6 +52,8 @@ impl DynamicSharedBuffersSpec {
             self.protocol_version == DSG_BOOTSTRAP_SPEC_VERSION,
             "unsupported dynamic shared buffers bootstrap protocol"
         );
+        crate::dsg_control::validate_id(&self.vm_uid, "VM")?;
+        crate::dsg_control::validate_id(&self.compute_instance_id, "Compute")?;
         for (name, bytes) in [
             ("bootstrap", self.bootstrap_buffer_bytes),
             ("maximum", self.maximum_buffer_bytes),
@@ -95,6 +102,11 @@ impl DynamicSharedBuffersSpec {
     pub fn postgres_settings(&self) -> Result<Vec<(&'static str, String)>> {
         self.validate()?;
         Ok(vec![
+            ("neon.dsg_vm_uid", self.vm_uid.clone()),
+            (
+                "neon.dsg_compute_instance_id",
+                self.compute_instance_id.clone(),
+            ),
             ("enable_dynamic_shared_buffers", "on".to_owned()),
             (
                 "shared_buffers",
@@ -119,7 +131,9 @@ mod tests {
 
     fn spec() -> DynamicSharedBuffersSpec {
         DynamicSharedBuffersSpec {
-            protocol_version: 1,
+            protocol_version: DSG_BOOTSTRAP_SPEC_VERSION,
+            vm_uid: "dsg-vm-1".to_owned(),
+            compute_instance_id: "dsg-compute-1".to_owned(),
             bootstrap_buffer_bytes: 8 * 1024 * 1024,
             maximum_buffer_bytes: 64 * 1024 * 1024,
             minimum_guest_memory_bytes: 256 * 1024 * 1024,
@@ -144,7 +158,7 @@ mod tests {
         for change in 0..7 {
             let mut value = spec();
             match change {
-                0 => value.protocol_version = 2,
+                0 => value.protocol_version = 1,
                 1 => value.bootstrap_buffer_bytes += 1,
                 2 => value.maximum_buffer_bytes = value.bootstrap_buffer_bytes - PG_BLOCK_BYTES,
                 3 => value.non_buffer_reserve_bytes = 0,
@@ -187,5 +201,37 @@ mod tests {
         let mut changed = old.clone();
         changed.bootstrap_buffer_bytes *= 2;
         assert!(validate_reconfigure(Some(&old), Some(&changed)).is_err());
+        let mut changed = old.clone();
+        changed.compute_instance_id = "another-instance".to_owned();
+        assert!(validate_reconfigure(Some(&old), Some(&changed)).is_err());
+    }
+
+    #[test]
+    fn managed_identity_is_mandatory_and_cannot_inject_configuration_lines() {
+        for identity in ["", "with space", "x\ny", "x\0y", "实例"] {
+            for change_vm in [false, true] {
+                let mut value = spec();
+                if change_vm {
+                    value.vm_uid = identity.to_owned();
+                } else {
+                    value.compute_instance_id = identity.to_owned();
+                }
+                assert!(value.postgres_settings().is_err());
+            }
+        }
+        let mut value = serde_json::to_value(spec()).unwrap();
+        value.as_object_mut().unwrap().remove("vm_uid");
+        assert!(serde_json::from_value::<DynamicSharedBuffersSpec>(value).is_err());
+        let mut value = spec();
+        value.vm_uid = "x".repeat(129);
+        assert!(value.validate().is_err());
+        value.vm_uid = "x".repeat(128);
+        assert!(value.validate().is_ok());
+        assert!(
+            value
+                .postgres_settings()
+                .unwrap()
+                .contains(&("neon.dsg_compute_instance_id", "dsg-compute-1".to_owned()))
+        );
     }
 }

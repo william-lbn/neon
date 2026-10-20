@@ -4,8 +4,9 @@
 `libs/compute_api/src/dsg_control.rs`，不是另建独立项目。
 
 最初wire提交只交付请求/查询/取消的共享数据类型、格式与结构校验；后续PG17已
-增加内核回执/历史/业务取消，见[内核接入](DSGA-R09-内核回执与取消接入.md)。这
-仍不代表生产SQL/HTTP端点、认证、预算或VM fencing已经完成。普通请求解析
+增加内核回执/历史/业务取消，见[内核接入](DSGA-R09-内核回执与取消接入.md)。
+后续又实现并实际加载[Neon管理SQL](DSGA-Neon管理SQL与实例身份.md)，含管理会话
+边界及C/Rust交叉向量；HTTP/外层完整认证、预算与VM fencing仍未完成。普通解析
 成功不产生任何资源许可；动态模式仍须按V3完成全链路能力协商和发布门槛。
 
 ## 字段与跨语言表示
@@ -49,8 +50,8 @@
 - VM UID、Compute实例ID与预算承诺引用为1–128字节ASCII可见字符，不是用户显示名；
   拒绝NUL、控制字符及空白，避免C截断/日志伪造。boot、issuer epoch、Revision与
   capacity generation必须非零；操作ID允许单半部为0，只拒绝两半同时为0。
-- 所有结构拒绝未知、缺失与重复字段；Rust测试已验证。C/Go消费者必须落实相同
-  规则并做交叉验证，不能先用会丢掉重复键的中间JSON map归一化后就当成已验证。
+- 所有结构拒绝未知、缺失与重复字段；Rust和正式C/SQL已验证并共享高位JSON向量。
+  Go实际消费者仍须落实相同规则。不能先用会丢掉重复键的中间map归一化。
 
 查询/业务取消使用`{ "protocol_version": 1, "key": 完整原操作键 }`。不能只查PID、
 最近Revision或当前PG状态。同key改变kind、target、generation、预算引用或期限，
@@ -66,8 +67,8 @@
 
 生产服务必须把本请求receipt和observed state分开，分别带自身身份。PG保留有界
 本boot结果，外层持久保存历史；淘汰/过期返回STALE/RESULT_EXPIRED及当前事实，
-不能再次执行相同旧key。PG17的内核回执/有界历史已独立实现，仍须接入生产端点
-及外层持久历史；不能由本类型模块或内核测试桥代替。
+不能再次执行相同旧key。PG17内核及Neon正式管理SQL已接入回执/有界历史，
+外层持久历史和实际服务链仍须实现；不能由DTO或内核测试桥代替。
 
 预算ID只是外层承诺引用。服务端须验证管理认证、当前实例/boot、issuer所有权、
 epoch/revision、承诺完整内容及有效约束；VM Controller/Runner仍须在实际写入前
@@ -75,9 +76,13 @@ epoch/revision、承诺完整内容及有效约束；VM Controller/Runner仍须�
 
 本模块协议1是新的DSGA子协议命名空间，与现有Monitor/Agent的旧v1.0握手不是同一
 能力。尚未接入旧消息，也没有把旧Ok=true解释为新缩容许可；后续启用前必须完成
-全链路显式协商。后续内核Buffer ABI5也不代表已经存在这些生产控制端点。
+全链路显式协商。Buffer ABI5和管理SQL不直接授权VM动作。受管启动契约已独立
+升级v2以要求固定VM/Compute身份，不改变本控制请求协议1。
 
 ## Mac 实际验证
+
+最新正式SQL批次：compute_api24项、compute_tools23项通过；完整Neon清理重编/
+实际加载47项通过85.043s、零skip，见管理SQL文档。以下21项为最初wire历史记录。
 
 - `cargo test --locked --offline -p compute_api`：21项通过，零失败/ignored，包含
   9项新增契约测试；原有bootstrap/spec等12项同时通过。
@@ -90,5 +95,5 @@ epoch/revision、承诺完整内容及有效约束；VM Controller/Runner仍须�
   `rustup run 1.88.0 rustfmt --edition 2024`完成格式，不改全局工具链安装。
 
 日志：工作区`build/neon-dsg-control-compute-api{,-clippy,-clippy-local}.log`。
-尚未验证Go/C对同一JSON的交叉编码，也未完成实际生产控制链。这些是代码/集成剩余项，
+C/Rust已共享向量并实际加载验证；Go消费者和完整生产控制链仍是代码/集成剩余项，
 不能归为Linux环境缺失。目标Linux/VM/HugeTLB及性能认证仍按V3另验。

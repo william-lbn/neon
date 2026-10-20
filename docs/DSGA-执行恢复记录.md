@@ -12,8 +12,9 @@
   功能分支并核验GitHub refs；新增内核独立回执、16条历史、epoch/hash绑定、
   业务取消与完整逐数组释放身份，Buffer ABI5。PG原48+新19项67项通过122.538s；
   最后补两项锁序/历史隔离后新增21项通过44.279s，均零skip。
-- Neon HEAD仍`0cbc146405106d71dfeadeb97b08b8dd48504828`，工作树含新21项测试
-  和严格入口；三处index已绑定486338并通过validate，本记录随本批独立提交推送。
+- Neon内核绑定批次`545c4cdbe623ff8640ca6f60d6c36293f9d11d71`已推送并核验；
+  gitlink/ci/distribution.json/vendor/revisions.json均486338。当前SQL/API批次随
+  本记录提交推送，恢复必须用git rev-parse HEAD及gh refs实时核验。
 - 准确SHA唯一顺序流水线**70614已终态退出0**，不能重新poll或启动。实际二进制
   输出完整486338 SHA；69项内核通过127.064s、22项完整Neon扩展通过40.470s，
   均零skip。off/on各基础81组/666项；各48份TAP报告、231报告文件/18410报告
@@ -24,10 +25,31 @@
 - 保留旧缺陷反向证据`build/neon-r09-guard-negative-fixed-fixture.log`：Grow/
   Shrink在Guard未释放时业务取消仍等原期限，两项2秒超时；补绑定轮询后通过。
   更早guard-negative是测试夹具错误，不是生产缺陷证据，详细模块文档有说明。
-- 准确SHA门禁已全部结束；主仓提交推送后继续生产Neon端点/完整预算/控制链。
-  pgxn/neon/dsg_control.{c,h}是下一模块未接入草稿，已做PG17严格语法检查，
-  尚未加入Makefile/_PG_init/SQL升级，未实际加载或完成API测试；不能据此报端点完成。
+- 准确SHA门禁已全部结束；正式Neon SQL入口也已接入/加载验证，见下一节。
   此模块不是全业务完成，Goal保持active。
+
+### Neon正式SQL/API批次（当前已验证）
+
+- pgxn/neon/dsg_control.c/h已加入Makefile/_PG_init，扩展1.6→1.7及反向SQL完整；
+  五个管理SQL函数、superuser会话边界、严格原始JSON、实例绑定/完整意图hash、
+  独立receipt/observed和真实取消均已实际加载，不能再按旧快照称未接线草稿。
+- Compute启动契约v2新增必填VM/Compute身份，既有配置与原生-c路径同时固定；
+  普通静态spec兼容。旧v1必须补身份并受控重启，控制请求协议仍1。
+- 最终严格完整Neon脚本**31469已终态退出0**，47项通过85.043s、零skip，含
+  原22项及新25项正式SQL测试；clean/build/install Rust communicator及全部配套库。
+  Rust compute_api24项、compute_tools23项通过，零ignored；两包--no-deps全目标
+  Clippy -D warnings退出0，依赖remote_storage既有27warnings保留。
+- 最终prepare129项：13通过/116环境skip；真实69+47已另行执行，不能重复混计。
+  PG17/14/15/16头严格-Werror语法、pgindent/Ruff/Bash/diff/锁绑定检查通过；
+  旧头仅为无能力时拒绝路径，不是旧版本功能移植。
+- 新GUC实际发现占位值非法时仅WARNING回退；独立旧候选三项全部错误地启动
+  成功，反向日志neon-r09-api-startup-negative.log保留。补初始化拒绝显式失败后
+  三项及受管CLI覆盖非法备份配置均通过。最初45项失败日志不删除。
+- 日志build/neon-r09-api-{strict-extension-final,compute-tests,clippy,prepare-final}.log。
+  87161/38031/41675/66764/8833/1671/31469/80756等均已终态，不重新poll/启动。
+- 后续继续实际HTTP安全路由/Rust-Go客户端、持久意图与历史、全量预算/quiesce、
+  跨层fencing与真实存储端到端；不是只待Linux实测。API仍production_ready=false、
+  vm_shrink_permit=false；默认关闭，不构建镜像/部署/合并/发布。
 
 ### R09之前的源码与6009门禁快照（历史）
 
@@ -115,8 +137,8 @@ CI本包测试另作中文提交；不改变PG锁/内核，不将DTO当成已实
 
 ## 后续必须继续的完整范围
 
-1. 正式capabilities/request/status/cancel/memory_status、内部管理认证、独立请求
-   receipt/observed state、有界终态/历史和过期拒绝、真实业务取消。
+1. 正式Neon管理SQL及内核receipt/history/cancel已完成本机模块验证；继续HTTP安全
+   路由、Rust/Go实际客户端、外层持久历史/意图与跨进程重连，不把SQL模块当完整链路。
 2. 全部私有/并行/DSM/维护/扩展/后台预算与quiesce、持久承诺；Compute/Monitor/
    Agent/Scheduler/Controller/Runner实际执行fencing和恢复对账。旧Ok不能授权缩容。
 3. Provider平台探测、显式HugeTLB实现/账本等尚未完成部分继续审计编码；缺代码

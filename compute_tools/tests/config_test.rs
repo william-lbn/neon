@@ -112,7 +112,9 @@ mod managed_bootstrap_tests {
         let mut spec: ComputeSpec =
             serde_json::from_str(include_str!("cluster_spec.json")).unwrap();
         spec.dynamic_shared_buffers = Some(DynamicSharedBuffersSpec {
-            protocol_version: 1,
+            protocol_version: 2,
+            vm_uid: "dsg-vm-1".to_owned(),
+            compute_instance_id: "dsg-compute-1".to_owned(),
             bootstrap_buffer_bytes: 2 * 1024 * 1024,
             maximum_buffer_bytes: 64 * 1024 * 1024,
             minimum_guest_memory_bytes: 128 * 1024 * 1024,
@@ -132,6 +134,8 @@ mod managed_bootstrap_tests {
         assert!(managed > contents.find("shared_buffers = '32MB'").unwrap());
         assert!(contents.contains("dynamic_shared_buffers_require_admission='on'"));
         assert!(contents.contains("dynamic_shared_buffers_startup_budget='65536kB'"));
+        assert!(contents.contains("neon.dsg_vm_uid='dsg-vm-1'"));
+        assert!(contents.contains("neon.dsg_compute_instance_id='dsg-compute-1'"));
         // 保留官方末尾include约定；命令行负责固定受管GUC，不改变通用override行为。
         assert!(contents.ends_with("include_if_exists = 'compute_ctl_temp_override.conf'\n"));
     }
@@ -160,5 +164,20 @@ mod managed_bootstrap_tests {
         spec.dynamic_shared_buffers = None;
         fixture.write(&spec).unwrap();
         assert!(!fixture.read().contains("dynamic_shared_buffers"));
+        assert!(!fixture.read().contains("neon.dsg_vm_uid"));
+    }
+
+    #[test]
+    fn invalid_managed_identity_preserves_existing_configuration() {
+        let fixture = Fixture::new();
+        std::fs::write(
+            fixture.0.join("postgresql.conf"),
+            "previous configuration\n",
+        )
+        .unwrap();
+        let mut spec = spec();
+        spec.dynamic_shared_buffers.as_mut().unwrap().vm_uid = "bad\nshared_buffers=1GB".to_owned();
+        assert!(fixture.write(&spec).is_err());
+        assert_eq!(fixture.read(), "previous configuration\n");
     }
 }
