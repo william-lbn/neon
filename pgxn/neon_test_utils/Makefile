@@ -4,6 +4,7 @@
 MODULE_big = neon_test_utils
 OBJS = \
 	$(WIN32RES) \
+	neon_dsg_tests.o \
 	neontest.o
 
 EXTENSION = neon_test_utils

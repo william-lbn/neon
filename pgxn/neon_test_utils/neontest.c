@@ -30,6 +30,10 @@
 #include "utils/wait_event.h"
 #include "../neon/pagestore_client.h"
 
+#if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION >= 4
+#include "utils/injection_point.h"
+#endif
+
 PG_MODULE_MAGIC;
 
 extern void _PG_init(void);
@@ -234,6 +238,18 @@ Datum
 clear_buffer_cache(PG_FUNCTION_ARGS)
 {
 	bool		save_neon_test_evict;
+	int			scan_limit;
+
+#if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION >= 4
+	/*-
+	 * NBuffers 仍表示 bootstrap，扫描须覆盖调用开始时的真实 H。只保存整数
+	 * 上界，不保留数组引用；并发 Grow 不延长本轮 best-effort 扫描，避免活锁。
+	 * 每个 Descriptor 另取短 Guard，不能把整个扫描或写回 IO 放在 accessS 内。
+	 */
+	scan_limit = GetHighNBuffers();
+#else
+	scan_limit = NBuffers;
+#endif
 
 	/*
 	 * Temporarily set the neon_test_evict GUC, so that when we pin and
@@ -246,7 +262,7 @@ clear_buffer_cache(PG_FUNCTION_ARGS)
 	PG_TRY();
 	{
 		/* Scan through all the buffers */
-		for (int i = 0; i < NBuffers; i++)
+		for (int i = 0; i < scan_limit; i++)
 		{
 			BufferDesc *bufHdr;
 			uint32		buf_state;
@@ -255,6 +271,17 @@ clear_buffer_cache(PG_FUNCTION_ARGS)
 			NRelFileInfo rinfo;
 			ForkNumber	forknum;
 			BlockNumber blocknum;
+#if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION >= 4
+			DsgBufferAccess access;
+
+			CHECK_FOR_INTERRUPTS();
+			access = DsgBufferAccessBegin();
+			if (i >= access.count)
+			{
+				DsgBufferAccessEnd(&access);
+				break;
+			}
+#endif
 
 			/* Peek into the buffer header to see what page it holds. */
 			bufHdr = GetBufferDescriptor(i);
@@ -270,6 +297,18 @@ clear_buffer_cache(PG_FUNCTION_ARGS)
 			blocknum = bufHdr->tag.blockNum;
 
 			UnlockBufHdr(bufHdr, buf_state);
+#if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION >= 4
+			/*-
+			 * 至此只持 BufferTag/ID 的值拷贝，不再解引用 bufHdr。先放 Guard，
+			 * 再让 ReadRecentBuffer 用其原生保护复核可能已被 Shrink/重载的提示。
+			 * 成功后 pin 保护对象；ReleaseBuffer 的写回/IO 不阻塞容量发布锁。
+			 * ERROR/FATAL 由 PG 清理 Guard，外层 FINALLY 负责恢复测试 GUC。
+			 */
+			DsgBufferAccessEnd(&access);
+			/* 暂停在真实有效tail提示上，收缩后该ID失效，不能只测试低位前缀。 */
+			if (isvalid && i >= NBuffers)
+				INJECTION_POINT("neon-clear-buffer-cache-after-peek");
+#endif
 
 			/*
 			 * Pin the buffer, and release it again. Because we have

@@ -39,6 +39,7 @@
 #include "neon_perf_counters.h"
 #include "neon_utils.h"
 #include "pagestore_client.h"
+#include "slru_download.h"
 #include "walproposer.h"
 
 #ifdef __linux__
@@ -1649,6 +1650,10 @@ pg_init_libpagestore(void)
 		smgr_hook = smgr_neon;
 		smgr_init_hook = smgr_init_neon;
 		dbsize_hook = neon_dbsize;
+#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION == 2
+		/* SLRU不是relation：新接口单独注册，仍只在真实远端存储模式启用。 */
+		read_slru_segment_hook = neon_download_slru_segment;
+#endif
 	}
 
 	memset(page_servers, 0, sizeof(page_servers));

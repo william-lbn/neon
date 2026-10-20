@@ -31,7 +31,7 @@ typedef struct LwLsnCacheCtl {
 
 	/*
 	* Double linked list to implement LRU replacement policy for last written LSN cache.
-	* Access to this list as well as to last written LSN cache is protected by 'LastWrittenLsnLock'.
+	* Access to this list as well as to last written LSN cache is protected by 'last_written_lsn_lock'.
 	*/
 	dlist_head lastWrittenLsnLRU;
 } LwLsnCacheCtl;
@@ -43,9 +43,17 @@ typedef struct LwLsnCacheCtl {
  * relation metadata update.
  * Size of the cache is limited by GUC variable lastWrittenLsnCacheSize ("lsn_cache_size"),
  * pages are replaced using LRU algorithm, based on L2-list.
- * Access to this cache is protected by 'LastWrittenLsnLock'.
+ * Access to this cache is protected by 'last_written_lsn_lock'.
  */
 static HTAB *lastWrittenLsnCache;
+
+/*-
+ * 最新 Neon PG 不再为扩展缓存保留核心固定锁号。本扩展在 shmem request
+ * 阶段申请命名 tranche，在 startup 阶段绑定共享锁；不得按大版本猜测锁号，
+ * 也不能用每进程私有锁保护共享 hash/LRU。这里只保护缓存，不持锁做页面 IO，
+ * 不调用 Buffer API 或等待 Provider；与调用者的 buffer/content 锁不形成反向依赖。
+ */
+static LWLock *last_written_lsn_lock;
 
 LwLsnCacheCtl* LwLsnCache;
 
@@ -75,9 +83,6 @@ static XLogRecPtr SetLastWrittenLSNForBlockRangeInternal(XLogRecPtr lsn,
 
 
 /* These hold the set_lwlsn_* hooks which were installed before ours, if any */
-static set_lwlsn_block_range_hook_type prev_set_lwlsn_block_range_hook = NULL;
-static set_lwlsn_block_v_hook_type prev_set_lwlsn_block_v_hook = NULL;
-static set_lwlsn_block_hook_type prev_set_lwlsn_block_hook = NULL;
 static set_max_lwlsn_hook_type prev_set_max_lwlsn_hook = NULL;
 static set_lwlsn_relation_hook_type prev_set_lwlsn_relation_hook = NULL;
 static set_lwlsn_db_hook_type prev_set_lwlsn_db_hook = NULL;
@@ -92,12 +97,14 @@ init_lwlsncache(void)
 	
 	lwlc_register_gucs();
 
-	prev_set_lwlsn_block_range_hook = set_lwlsn_block_range_hook;
-	set_lwlsn_block_range_hook = neon_set_lwlsn_block_range;
-	prev_set_lwlsn_block_v_hook = set_lwlsn_block_v_hook;
-	set_lwlsn_block_v_hook = neon_set_lwlsn_block_v;
-	prev_set_lwlsn_block_hook = set_lwlsn_block_hook;
-	set_lwlsn_block_hook = neon_set_lwlsn_block;
+	/*-
+	 * Neon PG17 a42a079b61（以及其他版本对应 backpatch）删除了未使用的三个
+	 * block hook。PG17 的唯一 GiST 调用本已由 smgr_bulk 写入更新 LSN，旧
+	 * PG14–16 也没有调用者。移除旧注册，但保留下面的关系/数据库/max hook
+	 * 以及本文件由 Neon smgr 直接调用的 block/vector/range 缓存更新函数，
+	 * 不能为编译通过关闭实际页 LSN 跟踪或退回未经证明的旧请求 LSN。
+	 */
+
 	prev_set_max_lwlsn_hook = set_max_lwlsn_hook;
 	set_max_lwlsn_hook = neon_set_max_lwlsn;
 	prev_set_lwlsn_relation_hook = set_lwlsn_relation_hook;
@@ -115,6 +122,7 @@ LwLsnCacheShmemRequest(void)
 	requested_size += hash_estimate_size(lwlsn_cache_size, sizeof(LastWrittenLsnCacheEntry));
 
 	RequestAddinShmemSpace(requested_size);
+	RequestNamedLWLockTranche("neon_lwlsn_cache", 1);
 }
 
 void
@@ -122,6 +130,9 @@ LwLsnCacheShmemInit(void)
 {
 	static HASHCTL info;
 	bool found;
+
+	/* startup hook 在 AddinShmemInitLock 下执行；所有后续访问使用同一共享锁。 */
+	last_written_lsn_lock = &GetNamedLWLockTranche("neon_lwlsn_cache")[0].lock;
 	if (lwlsn_cache_size > 0)
 	{
 		info.keysize = sizeof(BufferTag);
@@ -157,7 +168,7 @@ neon_get_lwlsn(NRelFileInfo rlocator, ForkNumber forknum, BlockNumber blkno)
 
 	Assert(LwLsnCache->lastWrittenLsnCacheSize != 0);
 
-	LWLockAcquire(LastWrittenLsnLock, LW_SHARED);
+	LWLockAcquire(last_written_lsn_lock, LW_SHARED);
 
 	/* Maximal last written LSN among all non-cached pages */
 	lsn = LwLsnCache->maxLastWrittenLsn;
@@ -175,8 +186,8 @@ neon_get_lwlsn(NRelFileInfo rlocator, ForkNumber forknum, BlockNumber blkno)
 			lsn = entry->lsn;
 		else
 		{
-			LWLockRelease(LastWrittenLsnLock);
-			LWLockAcquire(LastWrittenLsnLock, LW_EXCLUSIVE);
+			LWLockRelease(last_written_lsn_lock);
+			LWLockAcquire(last_written_lsn_lock, LW_EXCLUSIVE);
 			/*
 			 * In case of statements CREATE TABLE AS SELECT... or INSERT FROM SELECT... we are fetching data from source table
 			 * and storing it in destination table. It cause problems with prefetch last-written-lsn is known for the pages of
@@ -202,15 +213,15 @@ neon_get_lwlsn(NRelFileInfo rlocator, ForkNumber forknum, BlockNumber blkno)
 				lsn = entry->lsn;
 		}
 	}
-	LWLockRelease(LastWrittenLsnLock);
+	LWLockRelease(last_written_lsn_lock);
 
 	return lsn;
 }
 
 static void neon_set_max_lwlsn(XLogRecPtr lsn) {
-	LWLockAcquire(LastWrittenLsnLock, LW_EXCLUSIVE);
+	LWLockAcquire(last_written_lsn_lock, LW_EXCLUSIVE);
 	LwLsnCache->maxLastWrittenLsn = lsn;
-	LWLockRelease(LastWrittenLsnLock);
+	LWLockRelease(last_written_lsn_lock);
 }
 
 /*
@@ -232,7 +243,7 @@ neon_get_lwlsn_v(NRelFileInfo relfilenode, ForkNumber forknum,
 	Assert(nblocks > 0);
 	Assert(PointerIsValid(lsns));
 
-	LWLockAcquire(LastWrittenLsnLock, LW_SHARED);
+	LWLockAcquire(last_written_lsn_lock, LW_SHARED);
 
 	if (NInfoGetRelNumber(relfilenode) != InvalidOid)
 	{
@@ -267,8 +278,8 @@ neon_get_lwlsn_v(NRelFileInfo relfilenode, ForkNumber forknum,
 		 */
 		if (missed_keys)
 		{
-			LWLockRelease(LastWrittenLsnLock);
-			LWLockAcquire(LastWrittenLsnLock, LW_EXCLUSIVE);
+			LWLockRelease(last_written_lsn_lock);
+			LWLockAcquire(last_written_lsn_lock, LW_EXCLUSIVE);
 
 			lsn = LwLsnCache->maxLastWrittenLsn;
 
@@ -297,12 +308,12 @@ neon_get_lwlsn_v(NRelFileInfo relfilenode, ForkNumber forknum,
 		for (int i = 0; i < nblocks; i++)
 			lsns[i] = lsn;
 	}
-	LWLockRelease(LastWrittenLsnLock);
+	LWLockRelease(last_written_lsn_lock);
 }
 
 /*
  * Guts for SetLastWrittenLSNForBlockRange.
- * Caller must ensure LastWrittenLsnLock is held in exclusive mode.
+ * Caller must ensure last_written_lsn_lock is held in exclusive mode.
  */
 static XLogRecPtr
 SetLastWrittenLSNForBlockRangeInternal(XLogRecPtr lsn,
@@ -380,9 +391,9 @@ neon_set_lwlsn_block_range(XLogRecPtr lsn, NRelFileInfo rlocator, ForkNumber for
 		return lsn;
 
 	Assert(lsn >= WalSegMinSize);
-	LWLockAcquire(LastWrittenLsnLock, LW_EXCLUSIVE);
+	LWLockAcquire(last_written_lsn_lock, LW_EXCLUSIVE);
 	lsn = SetLastWrittenLSNForBlockRangeInternal(lsn, rlocator, forknum, from, n_blocks);
-	LWLockRelease(LastWrittenLsnLock);
+	LWLockRelease(last_written_lsn_lock);
 
 	return lsn;
 }
@@ -418,7 +429,7 @@ neon_set_lwlsn_block_v(const XLogRecPtr *lsns, NRelFileInfo relfilenode,
 
 	BufTagInit(key,  relNumber, forknum, blockno, spcOid, dbOid);
 
-	LWLockAcquire(LastWrittenLsnLock, LW_EXCLUSIVE);
+	LWLockAcquire(last_written_lsn_lock, LW_EXCLUSIVE);
 
 	for (int i = 0; i < nblocks; i++)
 	{
@@ -458,7 +469,7 @@ neon_set_lwlsn_block_v(const XLogRecPtr *lsns, NRelFileInfo relfilenode,
 		max = Max(max, lsn);
 	}
 
-	LWLockRelease(LastWrittenLsnLock);
+	LWLockRelease(last_written_lsn_lock);
 
 	return max;
 }

@@ -37,6 +37,7 @@
 #include "neon.h"
 #include "neon_ddl_handler.h"
 #include "neon_lwlsncache.h"
+#include "slru_download.h"
 #include "neon_perf_counters.h"
 #include "logical_replication_monitor.h"
 #include "unstable_extensions.h"
@@ -873,6 +874,8 @@ neon_shmem_startup_hook(void)
 #endif
 
 	LWLockRelease(AddinShmemInitLock);
+	/* 文件清理在共享初始化锁外，且仅由尚未fork Backend的Postmaster执行。 */
+	neon_cleanup_slru_downloads();
 }
 
 /*

@@ -1692,6 +1692,13 @@ nm_unpack_response(StringInfo s)
 				msg_resp->req.hdr = resp_hdr;
 
 				n_blocks = pq_getmsgint(s, 4);
+				/*-
+				 * 远端长度先验证再乘BLCKSZ/复制，保护固定segment缓冲区。
+				 * 负值、超32页或伪造长度必须报协议错误，不能先溢出再由落盘层拒绝。
+				 */
+				if (n_blocks < 0 || n_blocks > SLRU_PAGES_PER_SEGMENT)
+					ereport(ERROR, (errcode(ERRCODE_PROTOCOL_VIOLATION),
+									 errmsg("invalid Neon SLRU response block count: %d", n_blocks)));
 				msg_resp->n_blocks = n_blocks;
 				memcpy(msg_resp->data, pq_getmsgbytes(s, n_blocks * BLCKSZ), n_blocks * BLCKSZ);
 				pq_getmsgend(s);
@@ -2457,6 +2464,10 @@ communicator_read_slru_segment(SlruKind kind, int64 segno, neon_request_lsns *re
 				}
 			}
 			n_blocks = slru_resp->n_blocks;
+			/* 同样保护从其他transport取得的结构，不能仅依赖字节流解析器。 */
+			if (buffer == NULL || n_blocks < 0 || n_blocks > SLRU_PAGES_PER_SEGMENT)
+				ereport(ERROR, (errcode(ERRCODE_PROTOCOL_VIOLATION),
+								errmsg("invalid Neon SLRU response buffer or block count")));
 			memcpy(buffer, slru_resp->data, n_blocks*BLCKSZ);
 			break;
 		}

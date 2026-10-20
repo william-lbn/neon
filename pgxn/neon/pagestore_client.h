@@ -174,7 +174,7 @@ typedef struct
 
 
 extern StringInfoData nm_pack_request(NeonRequest *msg);
-extern NeonResponse *nm_unpack_response(StringInfo s);
+extern PGDLLEXPORT NeonResponse *nm_unpack_response(StringInfo s);
 extern char *nm_to_string(NeonMessage *msg);
 
 /*

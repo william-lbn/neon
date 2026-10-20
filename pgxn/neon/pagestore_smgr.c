@@ -67,6 +67,7 @@
 #include "neon_lwlsncache.h"
 #include "neon_perf_counters.h"
 #include "pagestore_client.h"
+#include "slru_download.h"
 
 #if PG_VERSION_NUM >= 150000
 #include "access/xlogrecovery.h"
@@ -2182,6 +2183,47 @@ neon_read_slru_segment(SMgrRelation reln, const char* path, int segno, void* buf
 	return n_blocks;
 }
 
+#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION == 2
+/*-
+ * v2核心只在文件缺失时调用并在true后重新打开。保持原请求LSN与远端协议，
+ * 下载到私有缓冲区后完整发布；0页/不适用的SLRU返回false，通信/落盘错误
+ * 按原生ERROR处理。不存在用空文件或旧bool强转冒充成功的兼容路径。
+ */
+bool
+neon_download_slru_segment(const char *path, int segno)
+{
+	char	   *buffer;
+	int			nblocks;
+	const char *leaf;
+	char		expected[32];
+
+	if (path == NULL || segno < 0 || (leaf = strrchr(path, '/')) == NULL)
+		ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+						errmsg("invalid Neon SLRU download identity")));
+	/*-
+	 * pg_subtrans等SLRU仍由核心处理；其长segment文件名不是Neon下载错误。
+	 * 先按完整目录拒绝不支持类型，再检查受支持文件身份，不能因长名不同
+	 * 报错而破坏恢复，也不能对pg_xact子目录误发远端CLOG请求。
+	 */
+	if (!((STRPREFIX(path, "pg_xact/") && leaf == path + strlen("pg_xact")) ||
+		  (STRPREFIX(path, "pg_multixact/members/") && leaf == path + strlen("pg_multixact/members")) ||
+		  (STRPREFIX(path, "pg_multixact/offsets/") && leaf == path + strlen("pg_multixact/offsets"))))
+		return false;
+	snprintf(expected, sizeof(expected), "%04X", segno);
+	if (strcmp(leaf + 1, expected) != 0)
+		ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+						errmsg("Neon SLRU filename does not match segment number")));
+	/* 独立hook可能先于任何relation的smgr_open；须幂等建立本进程通信状态。 */
+	communicator_init();
+	buffer = palloc(BLCKSZ * SLRU_PAGES_PER_SEGMENT);
+	nblocks = neon_read_slru_segment(NULL, path, segno, buffer);
+	if (nblocks > 0)
+		neon_publish_slru_segment(path, buffer, nblocks);
+	pfree(buffer);
+	return nblocks > 0;
+}
+#endif
+
 static void
 AtEOXact_neon(XactEvent event, void *arg)
 {
@@ -2251,7 +2293,10 @@ static const struct f_smgr neon_smgr =
 	.smgr_finish_unlogged_build_phase_1 = neon_finish_unlogged_build_phase_1,
 	.smgr_end_unlogged_build = neon_end_unlogged_build,
 
+#if !defined(NEON_SLRU_DOWNLOAD_API_VERSION)
+	/* 旧发行继续由核心落盘；不得向新f_smgr写入已经删除的字段。 */
 	.smgr_read_slru_segment = neon_read_slru_segment,
+#endif
 };
 
 const f_smgr *

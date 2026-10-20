@@ -15,8 +15,9 @@ Monitor/Agent/NeonVM 控制链仍待实施。不能将这些子片通过解释�
 
 ## 分支与维护基线
 
-- PG：`codex/dsga-pg17-v3-20261019`，当前 S3
-  `7a1ff18108b311b6787dc5fb3c6dd9d13de5a462`，包含安全启动/准入 `f563e301…`、Grow清理修复
+- PG：`codex/dsga-pg17-v3-20261019`，当前
+  `864d32d9a8cfb23c71ea73caccc2c80360fb18bb`，包含S3 `7a1ff181…`、独立SLRU能力
+  `76cfb197…`、关机restartpoint持久化修复 `e02a09ad…` 及TAP fixture适配，包含安全启动/准入 `f563e301…`、Grow清理修复
   `36f1ed0fcf003adeba1e7307ad036f3998bcb235`，依赖 S2 `9aebedf…`、M2f `b5785f8…`。
   PG 依赖已推送并核对远程完整 SHA，Neon 再提交/推送引用。
 - Neon：`codex/dsga-neon-v3-20261019`；V3 `2422ce9`、构建身份修复 `9df2ba8`、
@@ -48,6 +49,9 @@ Monitor/Agent/NeonVM 控制链仍待实施。不能将这些子片通过解释�
 | S3 最新维护组合专项 | 45项真实集群通过，86.968s；原生1regress+5isolation通过 | 真实数据/尾部pin与IO/失败读/取消/FATAL/保守预算/regrow |
 | S3 最新维护组合基础全量 | 开/关各81组/666项报告检查通过 | TAP未启用；不证明VM许可或物理能力 |
 | S3 主仓最终身份/集成 | `7a1ff18108…`准确SHA重编、配套库重编后45项通过，84.343s | gitlink/两份锁一致；专项入口零skip |
+| 最新存储接口/内核集成 | `864d32d9a8…`准确SHA重编后45项通过，86.415s | 含真实关机restartpoint修复 |
+| 完整Neon扩展 | 清理旧ABI对象、构建/安装/实际加载后22项通过，41.137s，零skip | 含有效tail提示跨Shrink、SLRU目录/身份边界及网络协议fixture；不是实际Pageserver端到端 |
+| 关机restartpoint反向/正向 | 旧版真实缺表；修复后开/关各4个TAP文件75断言通过 | 核心缺陷已修复，不再归为未定位 |
 | 额外TAP维护基线 | 整体失败，8个文件失败 | 未含DSGA的维护组合；详细清单见下，不包装为通过 |
 | Linux普通页/KVM/HugeTLB/Neon存储端到端/性能 | 未执行 | 后续按T15–T22单独验收 |
 
@@ -94,8 +98,13 @@ S3 保护页探针经反向验证可检出显式引入的不安全读取。仅�
 复现旧版缺陷。正式生产API尚未接入，测试函数不能充当对外管理接口。
 
 额外启用的 TAP 检查发现 Mac 可复现的 rmgr fixture、序列语义及未定位恢复/逻辑槽
-问题，见 [TAP基线验证](DSGA-TAP基线验证-20261020.md)。其中备库重启后缺表问题
-必须继续查明；不能归入“待Linux验证”或宣称已有生产可用完整交付。
+问题，见 [TAP基线验证](DSGA-TAP基线验证-20261020.md)的后续状态。缺表根因为
+关机restartpoint遗漏写回，已经修复；最初8个失败文件中7个已有通过证据，
+`pg_upgrade/003`及首次因失败而未执行的TAP仍须处理/复跑。不能宣称TAP整体全绿。
+
+完整Neon扩展与最新PG的LSN锁、旧hook及SLRU接口兼容已实现并真实加载验证，见
+[存储接口与Mac验证](DSGA-Neon存储接口对齐与Mac验证.md)。其中旧版头的语法兼容
+不代表PG14–16功能已移植；正式API/预算/控制链等原有剩余范围保持不变。
 
 M2f旧备份stash `6f002a31196f2e623e8386c38a649ff87be2ada4` 已apply一次，禁止重复apply；
 旧未完成spec另存 `build/m2f-unpin-before-v3.spec`。不改isolationtester来伪造原生BufferPin等待。
