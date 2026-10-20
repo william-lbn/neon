@@ -10,6 +10,7 @@ use std::str::FromStr;
 
 use anyhow::{Result, ensure};
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 pub const DSG_CONTROL_PROTOCOL_VERSION: u32 = 1;
 /// 对应当前PG17协调器的一次等待上限；不表示可强行中断内核Provider调用。
@@ -178,6 +179,48 @@ impl DsgOperationKey {
 }
 
 impl DsgResizeRequest {
+    /// 仅对已验证的固定请求schema复现PG jsonb_out：ASCII键按字节长度/字节序
+    /// 排序，分隔符有空格，整数无指数；ID均为ASCII graphic，JSON字符串转义
+    /// 与PG一致。不是任意Unicode/浮点JSON的通用canonical实现，也不是签名。
+    pub fn context_sha256(&self) -> Result<String> {
+        self.validate()?;
+        fn write(value: &serde_json::Value, output: &mut String) -> Result<()> {
+            match value {
+                serde_json::Value::Object(fields) => {
+                    let mut keys: Vec<_> = fields.keys().collect();
+                    keys.sort_by(|a, b| {
+                        a.len()
+                            .cmp(&b.len())
+                            .then_with(|| a.as_bytes().cmp(b.as_bytes()))
+                    });
+                    output.push('{');
+                    for (index, key) in keys.iter().enumerate() {
+                        if index != 0 {
+                            output.push_str(", ");
+                        }
+                        output.push_str(&serde_json::to_string(key)?);
+                        output.push_str(": ");
+                        write(&fields[*key], output)?;
+                    }
+                    output.push('}');
+                }
+                serde_json::Value::String(value) => output.push_str(&serde_json::to_string(value)?),
+                serde_json::Value::Number(value) => {
+                    ensure!(
+                        value.as_u64().is_some(),
+                        "context requires unsigned integers"
+                    );
+                    output.push_str(&value.to_string());
+                }
+                _ => anyhow::bail!("unsupported DSGA context value"),
+            }
+            Ok(())
+        }
+        let mut canonical = String::new();
+        write(&serde_json::to_value(self)?, &mut canonical)?;
+        Ok(format!("{:x}", Sha256::digest(canonical.as_bytes())))
+    }
+
     /// 只验证PG17 wire可表示性；实际B_boot/M、方向、generation、总预算、承诺
     /// 和执行者身份必须与当前运行事实核对。调用方在每个服务边界都须再次验证。
     pub fn validate(&self) -> Result<()> {

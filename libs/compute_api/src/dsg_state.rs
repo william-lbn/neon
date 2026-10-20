@@ -531,7 +531,8 @@ impl DsgControlResponse {
                 operation.kind == request.kind
                     && operation.target_buffers == request.target_buffers
                     && operation.expected_capacity_generation
-                        == request.expected_capacity_generation,
+                        == request.expected_capacity_generation
+                    && operation.context_sha256 == request.context_sha256()?,
                 "receipt result changed the original resize intent"
             );
         }

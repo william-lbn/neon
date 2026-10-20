@@ -93,6 +93,21 @@ async fn round_trip_history_and_quoted_schema() -> Result<()> {
     let client = DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, WAIT).await?;
     assert!(!client.capabilities().production_ready);
     let original = request(&client, 1, 1, 1024, DsgResizeKind::Grow);
+    // 不只比较两份手写canonical：在真实PG独立计算jsonb_out+sha256，包含ASCII
+    // 转义/HTML字节和无符号高位。不是通用Unicode/任意浮点JSON的兼容承诺。
+    for budget in ["reservation-1", "quote\"-slash\\-html<>&/"] {
+        let mut variant = original.clone();
+        variant.budget_commitment_id = budget.to_owned();
+        let payload = serde_json::to_string(&variant)?;
+        let row = observer
+            .query_one(
+                "SELECT pg_catalog.encode(pg_catalog.sha256(pg_catalog.convert_to(\
+             ($1::pg_catalog.text)::pg_catalog.jsonb::pg_catalog.text,'UTF8')),'hex')",
+                &[&payload],
+            )
+            .await?;
+        assert_eq!(variant.context_sha256()?, row.get::<_, String>(0));
+    }
     assert_eq!(
         client.request_resize(&original).await?.receipt.disposition,
         DsgDisposition::Accepted

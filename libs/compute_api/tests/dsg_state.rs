@@ -7,6 +7,42 @@ fn request() -> DsgResizeRequest {
     serde_json::from_str(include_str!("../testdata/dsg_request_v1.json")).unwrap()
 }
 
+#[test]
+fn go_and_rust_share_native_pg_context_vectors_and_response_schema() {
+    #[derive(serde::Deserialize)]
+    struct Vector {
+        request: DsgResizeRequest,
+        canonical: String,
+        sha256: String,
+    }
+    use sha2::{Digest, Sha256};
+    let vectors: Vec<Vector> =
+        serde_json::from_str(include_str!("../testdata/dsg_context_v1.json")).unwrap();
+    assert_eq!(vectors.len(), 2);
+    assert_eq!(
+        vectors[0].sha256,
+        "f86603d6547f38a4e0f11e31541a46f748e4407fe248c54659fea6ad92fcd094"
+    );
+    assert_eq!(
+        vectors[1].sha256,
+        "1988dbc848abd74b7a7fca104f308a6e43003c930b756b670d747807315fb949"
+    );
+    for vector in vectors {
+        assert_eq!(vector.request.context_sha256().unwrap(), vector.sha256);
+        assert_eq!(
+            format!("{:x}", Sha256::digest(vector.canonical.as_bytes())),
+            vector.sha256
+        );
+    }
+    // 此响应为人工跨语言协议夹具；不是PG/VM实际执行证明。
+    let response: DsgControlResponse =
+        serde_json::from_str(include_str!("../testdata/dsg_response_v1.json")).unwrap();
+    let request = request();
+    response
+        .validate_resize(&request, &request.key.instance)
+        .unwrap();
+}
+
 fn snapshot(request: &DsgResizeRequest, generation: u64, high: u32) -> DsgSnapshot {
     let arrays = [
         DsgArrayKind::Descriptors,
@@ -53,7 +89,7 @@ fn snapshot(request: &DsgResizeRequest, generation: u64, high: u32) -> DsgSnapsh
             reason: DsgReason::None,
             target_buffers: request.target_buffers,
             expected_capacity_generation: request.expected_capacity_generation,
-            context_sha256: "a".repeat(64),
+            context_sha256: request.context_sha256().unwrap(),
             cancel_requested: false,
             cancel_closed: true,
             replayed: true,
@@ -106,6 +142,28 @@ fn historical_receipt_and_new_observed_state_are_both_valid() {
         serde_json::from_str::<DsgControlResponse>(&encoded).unwrap(),
         response
     );
+}
+
+#[test]
+fn full_context_hash_rejects_changed_budget_vm_target_or_deadline() {
+    let original = request();
+    let result = response();
+    for change in 0..3 {
+        let mut changed = original.clone();
+        match change {
+            0 => changed.budget_commitment_id.push_str("-changed"),
+            1 => {
+                changed.target_vm_memory_bytes =
+                    DsgUint64::new(changed.target_vm_memory_bytes.get() + 1)
+            }
+            _ => changed.deadline_unix_ms = DsgUint64::new(changed.deadline_unix_ms.get() - 1),
+        }
+        assert!(
+            result
+                .validate_resize(&changed, &original.key.instance)
+                .is_err()
+        );
+    }
 }
 
 #[test]
