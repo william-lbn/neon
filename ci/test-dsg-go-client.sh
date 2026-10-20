@@ -36,7 +36,7 @@ export NEON_TEST_DSG_GO_BIN="$task_reports/dsg_go_test"
 git -C "$go_source" rev-parse HEAD
 # 提交前候选可有改动，但必须公开标出参与编译的源码状态，不能只打印旧HEAD
 # 就宣称执行了准确已提交版本。所有者AGENTS.md等非代码修改不混入该记录。
-git -C "$go_source" status --short -- pkg/api/dsga pkg/dsga/compute go.mod go.sum
+git -C "$go_source" status --short -- pkg/api/dsga pkg/dsga go.mod go.sum
 go version
 (
     cd "$go_source"

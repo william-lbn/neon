@@ -4,7 +4,16 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新批次（优先于下文历史证据）
+## 最新接续：PG持久执行适配器
+
+Autoscaling `48f01e2aee8208ba1ab5392a518434e276086066`已推送核验，PG写前派发、
+完整原意图恢复、显式安全重放和四数组Provider单独核验完成。受影响race219事件/
+11测试包、9无测试包分列，0fail/用例skip；lint0issues。真实journal→Compute/JWT→
+SQL→准确PG链路及实际重启已通过，4项实际反向失败后逐字节恢复并全量重验。
+本批未接Agent可信owner循环，全部预算/Monitor/Runner等仍需继续。扩展envtest缺
+etcd的0/2失败单列保留；详见[执行链路](DSGA-PG持久执行链路验证.md)。
+
+## PG接管隔离批次（后续历史证据）
 
 PG17 `6b7c3655ab74062e117eef7400953cd000679a49`已先推送核验，新增独立单调
 issuer floor及原子登记检查；COMMITTED仍在同步Provider时接管只返回Pending。
@@ -30,21 +39,21 @@ PG floor不是租约/VM许可或全预算；可信owner/持久循环/Monitor/受
 - 安全小池启动、共享布局预算核验、同Postmaster恢复换boot、受管新boot默认
   关闭普通准入，保留真正管理员的恢复通道。
 - 内核R09：独立receipt/observed、当前操作外16条终态、epoch/hash绑定、过期
-  拒绝、实际业务取消、FATAL遗留对账、完整逐数组释放身份。Buffer ABI5。
-- **现有Neon扩展1.7的五个正式管理SQL函数**：capabilities、memory_status、
-  request_resize、resize_status、cancel_resize；真正superuser会话检查，严格
+  拒绝、实际业务取消、FATAL遗留对账、完整逐数组释放身份及单调issuer floor。Buffer ABI6。
+- **现有Neon扩展1.8的六个正式管理SQL函数**：capabilities、memory_status、
+  request_resize、resize_status、cancel_resize、fence_issuer；真正superuser会话检查，严格
   原始JSON/唯一键/类型/范围校验，完整意图hash及固定VM/Compute身份绑定。
   这些是已加载验证的函数，不是以C测试桥替代管理端点。
 - Compute启动契约v2：必填VM UID与Compute实例ID，配置/原生启动参数同时固定；
   备份auto.conf/include不覆盖当前绑定，重配不静默改变身份。普通静态spec兼容；
   旧实验v1须补齐身份后受控重启。
 - 共享Rust管理客户端：严格响应类型、真实双SQL会话、可信schema/扩展成员核验、
-  超时/future取消后保留完整原意图、独立状态/业务取消。已实际运行8项原生集群
+  超时/future取消后保留完整原意图、独立状态/业务取消。已实际运行10项原生集群
   用例；已owned接入Compute HTTP，Monitor仍未接入。另拒绝NOINHERIT但可SET ROLE
   管理员的成员关系，保留旧校验漏拒绝的真实负向证据。见[客户端模块](DSGA-Rust双连接管理客户端.md)。
-- Compute五个正式HTTP路由与OnceCell长期双连接：严格专用短期JWT认证，不沿用
+- Compute六个正式HTTP路由与OnceCell长期双连接：严格专用短期JWT认证，不沿用
   Hadron免认证；绑定Compute/VM/实例/epoch，限制原始JSON，禁止缓存；配置期间
-  仍可查询/取消在途操作，后端断连不隐式换客户端。11项实际路由门禁通过，含
+  仍可查询/取消在途操作，后端断连不隐式换客户端。12项实际路由门禁通过，含
   4项原生/TCP链路。见[HTTP模块](DSGA-Compute管理HTTP与运行时接入.md)。
 - Autoscaling自有分支已真实接入Agent固定UID/Runner身份、动作原资源快照、
   UID/resourceVersion条件写入及响应核验；保留同Revision分批批准。另完成Go
@@ -60,7 +69,7 @@ PG floor不是租约/VM许可或全预算；可信owner/持久循环/Monitor/受
 及最终执行约束须继续实现。详见[SQL模块](DSGA-Neon管理SQL与实例身份.md)与
 [R09内核接入](DSGA-R09-内核回执与取消接入.md)。
 
-最新批次补齐Go正式五路由消费者/双连接池/未知意图栅栏及ABI5严格事实类型，
+最新批次补齐Go正式六路由消费者/双连接池/未知意图栅栏及ABI6严格事实类型，
 拒绝null标量补零，并与Rust一起重算完整PG context摘要；不能借用同Key下不同
 VM目标/预算/期限的回执。见[跨语言摘要核验](DSGA-完整意图摘要跨语言核验.md)。
 Go客户端尚未接Agent协调循环；Go→真实Compute→PG同一门禁已另完成，含实际
@@ -71,9 +80,9 @@ Go客户端尚未接Agent协调循环；Go→真实Compute→PG同一门禁已�
 
 | 仓库 | 分支/身份 | 状态 |
 |---|---|---|
-| 实际PG17子模块 | codex/dsga-pg17-v3-20261019 / 48633803b05c1b7bd9a40d749b5278df9aaf01ac | 已先推送并核验GitHub refs，工作树干净 |
-| Neon主仓 | codex/dsga-neon-v3-20261019，gitlink/两份锁均486338 | 管理SQL ad1b26f、SDK 276230c已推送核验；本HTTP接入批次随当前记录提交推送，恢复以Git/refs为准 |
-| Autoscaling | codex/dsga-autoscaling-20261019 / 9f4669f3a2a9990268f52b58d458a568ebf34480 | 日志/HTTP消费者及真实Go联调已推送核验；完整运行链仍未完成 |
+| 实际PG17子模块 | codex/dsga-pg17-v3-20261019 / 6b7c3655ab74062e117eef7400953cd000679a49 | 已先推送并核验GitHub refs，工作树干净 |
+| Neon主仓 | codex/dsga-neon-v3-20261019，gitlink/两份锁均6b7c3655 | API/ABI6集成960551d已推送核验；本轮PG持久链路文档随当前提交，恢复以Git/refs为准 |
+| Autoscaling | codex/dsga-autoscaling-20261019 / 48f01e2aee8208ba1ab5392a518434e276086066 | 日志/HTTP消费者及真实Go联调已推送核验；完整运行链仍未完成 |
 | control-plane | codex/dsga-control-plane-v3-20261020 / 928eec95… | Driver等运行时尚未完成 |
 | Helm | codex/dsga-neon-helm-v3-20261019 / 648488a… | 本业务配置/验收链尚未完成，不准备部署 |
 
@@ -86,7 +95,7 @@ Neon PG17仍56692dfb680281a963c7470fc7f0fec7f65ecfd4，社区PG17仍
 repos/postgres仅为实际repos/neon/vendor/postgres-v17的兼容符号链接。
 主/稳定分支未合入本业务，见[同步规范](上游同步与功能分支规范.md)。
 
-## 当前Mac验证证据
+## Mac验证证据（旧批次保留，最新以顶部两节及模块记录为准）
 
 | 检查 | 真实结果 | 结论边界 |
 |---|---|---|

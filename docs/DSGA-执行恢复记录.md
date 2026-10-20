@@ -6,6 +6,21 @@
 
 ## 当前源码与分支
 
+### 最新PG持久派发适配器（优先于下文历史）
+
+- Autoscaling `48f01e2aee8208ba1ab5392a518434e276086066`已提交/推送并GitHub核验，
+  只余所有者AGENTS.md修改。新pgexec实际接线Start确认→Compute/PG→完整事实Record，
+  原意图查询/业务取消/显式同owner重放与Provider独立证明均实现；不是完整协调循环。
+- 最终race219事件，0fail/用例skip，11测试包/9无测试包；native全范围lint0issues。
+  4个最终反向均实际断言失败，SHA256 b8355b…逐字节恢复，随后完整race通过。
+  日志autoscaling-pgexec-{publish.*,negative-final.log,lint-publish.log}。
+- Neon PG6b7/三处锁/二进制不变，API1.8/ABI6前置960551d已推送。真实Go持久恢复
+  门禁已通过，准确Go依赖再编复验见neon-pgexec-native-pinned.log；主仓仅扩大源码
+  状态记录与中文结论，当前提交推送/远程以Git/refs核验。详见[新链路](DSGA-PG持久执行链路验证.md)。
+- 广泛envtest子目录缺etcd导致0/2启动失败/既有清理panic单列，不伪装Mac限制。
+  17456最终流水线终态0，不重复启动；旧stash绝不再次apply。全部目标保持active，
+  继续可信owner/持久实际循环与完整预算/Monitor/VM链，不构建镜像/准备K8s/合main。
+
 ### 最新issuer floor/ABI6（优先于全部后续历史快照）
 
 - PG17 `6b7c3655ab74062e117eef7400953cd000679a49`已提交/推送且GitHub核验，
