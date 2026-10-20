@@ -5,6 +5,7 @@
 //! 进程内栅栏不能替代外层持久意图、issuer租约和VM最后执行fencing。
 
 use std::fmt;
+use std::ops::Deref;
 use std::sync::Mutex;
 use std::time::Duration;
 
@@ -77,11 +78,11 @@ impl Drop for InFlight<'_> {
     }
 }
 
-/// 调用方拥有两个专用、已认证的连接及其driver task，不记录连接串/密码。
+/// 两个专用、已认证连接可借用或交由SDK拥有；调用方驱动driver，不记录连接串/密码。
 /// bind会固定这两个管理连接的search_path=pg_catalog，再核验扩展函数成员身份。
 pub struct DsgSqlClient<'a> {
-    execution: &'a Client,
-    observer: &'a Client,
+    execution: ManagementConnection<'a>,
+    observer: ManagementConnection<'a>,
     execution_schema: String,
     observer_schema: String,
     instance: DsgInstanceIdentity,
@@ -90,10 +91,65 @@ pub struct DsgSqlClient<'a> {
     execution_state: Mutex<ExecutionState>,
 }
 
+// HTTP运行时须跨请求持有同一个客户端/执行栅栏。Owned避免自引用结构，也不把
+// 每个请求的新连接误当作无在途操作；Borrowed保留嵌入式调用和原生测试接口。
+enum ManagementConnection<'a> {
+    Borrowed(&'a Client),
+    Owned(Client),
+}
+
+impl Deref for ManagementConnection<'_> {
+    type Target = Client;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            Self::Borrowed(client) => client,
+            Self::Owned(client) => client,
+        }
+    }
+}
+
+impl DsgSqlClient<'static> {
+    /// 所有权交给长期运行的服务；连接driver仍由创建连接的调用方驱动。
+    pub async fn bind_owned(
+        execution: Client,
+        observer: Client,
+        vm_uid: &str,
+        compute_instance_id: &str,
+        response_timeout: Duration,
+    ) -> Result<Self> {
+        Self::bind_connections(
+            ManagementConnection::Owned(execution),
+            ManagementConnection::Owned(observer),
+            vm_uid,
+            compute_instance_id,
+            response_timeout,
+        )
+        .await
+    }
+}
+
 impl<'a> DsgSqlClient<'a> {
     pub async fn bind(
         execution: &'a Client,
         observer: &'a Client,
+        vm_uid: &str,
+        compute_instance_id: &str,
+        response_timeout: Duration,
+    ) -> Result<Self> {
+        Self::bind_connections(
+            ManagementConnection::Borrowed(execution),
+            ManagementConnection::Borrowed(observer),
+            vm_uid,
+            compute_instance_id,
+            response_timeout,
+        )
+        .await
+    }
+
+    async fn bind_connections(
+        execution: ManagementConnection<'a>,
+        observer: ManagementConnection<'a>,
         vm_uid: &str,
         compute_instance_id: &str,
         response_timeout: Duration,
@@ -105,21 +161,21 @@ impl<'a> DsgSqlClient<'a> {
         validate_id(vm_uid, "VM")?;
         validate_id(compute_instance_id, "Compute")?;
         // PID来自实际两个会话，不能只比较Arc/Client包装对象的地址。
-        let (execution_schema, execution_pid) = discover(execution, response_timeout).await?;
-        let (observer_schema, observer_pid) = discover(observer, response_timeout).await?;
+        let (execution_schema, execution_pid) = discover(&execution, response_timeout).await?;
+        let (observer_schema, observer_pid) = discover(&observer, response_timeout).await?;
         ensure!(
             execution_pid != observer_pid,
             "DSGA execution and observation require independent sessions"
         );
         let execution_cap: DsgCapabilities = read_json(
-            execution,
+            &execution,
             &sql(&execution_schema, "neon_dsg_capabilities", false),
             None,
             response_timeout,
         )
         .await?;
         let observer_cap: DsgCapabilities = read_json(
-            observer,
+            &observer,
             &sql(&observer_schema, "neon_dsg_capabilities", false),
             None,
             response_timeout,
@@ -169,7 +225,7 @@ impl<'a> DsgSqlClient<'a> {
         let mut flight = self.reserve(request).map_err(DsgCallError::NotSent)?;
         let result = self
             .call(
-                self.execution,
+                &self.execution,
                 &self.execution_schema,
                 "neon_dsg_request_resize",
                 &payload,
@@ -212,7 +268,7 @@ impl<'a> DsgSqlClient<'a> {
 
     pub async fn memory_status(&self) -> Result<DsgMemoryResponse> {
         let response: DsgMemoryResponse = read_json(
-            self.observer,
+            &self.observer,
             &sql(&self.observer_schema, "neon_dsg_memory_status", false),
             None,
             self.response_timeout,
@@ -259,7 +315,7 @@ impl<'a> DsgSqlClient<'a> {
             Action::Resize => unreachable!("resize has its own execution entry point"),
         };
         let response: DsgControlResponse = self
-            .call(self.observer, &self.observer_schema, function, &payload)
+            .call(&self.observer, &self.observer_schema, function, &payload)
             .await
             .map_err(|source| unconfirmed(&query.key, source))?;
         response
@@ -359,14 +415,17 @@ async fn discover(client: &Client, wait: Duration) -> Result<(String, i32)> {
         client.batch_execute("SET search_path = pg_catalog, pg_temp").await?;
         // trusted扩展可由普通用户安装。若扩展由租户所有，或任一非超级角色能
         // CREATE于其schema，首次查验后就可能发生drop/同名替换。专用管理库必须
-        // 由管理员维护；连继承角色的CREATE权限也要检查，而非只看直接ACL。
+        // 由管理员维护；继承CREATE与SET ROLE到超级角色均须检查。PG17成员边的
+        // INHERIT/SET可分别控制，NOINHERIT不能证明不能切换管理员身份替换对象。
         let row = client.query_one("SELECT n.nspname::pg_catalog.text, pg_catalog.pg_backend_pid(), \
             owner.rolsuper AND NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles r \
-                WHERE NOT r.rolsuper AND NOT (r.rolname='pg_database_owner' AND \
+                WHERE NOT r.rolsuper AND (EXISTS (SELECT 1 FROM pg_catalog.pg_roles elevated \
+                    WHERE elevated.rolsuper AND pg_catalog.pg_has_role(r.oid,elevated.oid,'SET')) \
+                OR (NOT (r.rolname='pg_database_owner' AND \
                     (SELECT dbowner.rolsuper FROM pg_catalog.pg_database db \
                      JOIN pg_catalog.pg_roles dbowner ON dbowner.oid=db.datdba \
                      WHERE db.datname=pg_catalog.current_database())) \
-                AND pg_catalog.has_schema_privilege(r.oid,n.oid,'CREATE')) AS trusted \
+                AND pg_catalog.has_schema_privilege(r.oid,n.oid,'CREATE')))) AS trusted \
             FROM pg_catalog.pg_extension e JOIN pg_catalog.pg_namespace n ON n.oid=e.extnamespace \
             JOIN pg_catalog.pg_roles owner ON owner.oid=e.extowner WHERE e.extname='neon'", &[]).await?;
         let schema: String = row.try_get(0)?;
