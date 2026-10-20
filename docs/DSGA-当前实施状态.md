@@ -29,7 +29,9 @@ active**。本页为当前事实入口；阶段性通过不能替代完整交付
   4项原生/TCP链路。见[HTTP模块](DSGA-Compute管理HTTP与运行时接入.md)。
 - Autoscaling自有分支已真实接入Agent固定UID/Runner身份、动作原资源快照、
   UID/resourceVersion条件写入及响应核验；保留同Revision分批批准。另完成Go
-  请求/查询的无损完整身份契约，尚未接入Go实际HTTP消费者和持久owner。
+  请求/查询的无损完整身份契约，以及完整意图/命令的持久执行日志、写前条件提交、
+  未知动作/接管/取消恢复与有界历史；受管标记禁止旧路径回退。尚未接入Go实际
+  HTTP消费者、可信owner分配与日志协调循环，账本不是租约认证或VM许可。
 - 完整Neon扩展的共享LSN锁、独立SLRU接口、安全文件发布与Buffer提示保护；
   原生恢复/逻辑槽/配置样例/资源释放缺陷修复及保留的反向证据。
 
@@ -44,7 +46,7 @@ active**。本页为当前事实入口；阶段性通过不能替代完整交付
 |---|---|---|
 | 实际PG17子模块 | codex/dsga-pg17-v3-20261019 / 48633803b05c1b7bd9a40d749b5278df9aaf01ac | 已先推送并核验GitHub refs，工作树干净 |
 | Neon主仓 | codex/dsga-neon-v3-20261019，gitlink/两份锁均486338 | 管理SQL ad1b26f、SDK 276230c已推送核验；本HTTP接入批次随当前记录提交推送，恢复以Git/refs为准 |
-| Autoscaling | codex/dsga-autoscaling-20261019 / f37811d67cb7d68f58a915e64830342292bf6ed8 | Agent API条件写入0ec15c7、Go请求类型f37811d已推送核验；完整运行链仍未完成 |
+| Autoscaling | codex/dsga-autoscaling-20261019 / c5db379be22fa17ca8763b1b3c3aea90ca12b9da | Agent条件写入、Go请求类型及持久执行日志已推送核验；完整运行链仍未完成 |
 | control-plane | codex/dsga-control-plane-v3-20261020 / 928eec95… | Driver等运行时尚未完成 |
 | Helm | codex/dsga-neon-helm-v3-20261019 / 648488a… | 本业务配置/验收链尚未完成，不准备部署 |
 
@@ -82,6 +84,13 @@ skip；8个有测试包通过，9个无测试文件包不计业务通过。Agent
 通过，本地v2 lint 0issues。见该仓docs/DSGA-执行状态与恢复.md，日志工作区
 build/autoscaling-dsga-cas-{full-final.jsonl,lint-final.log,negative.log}等；不是
 apiserver/etcd、真实QMP或VM认证，没有远程LinuxCI执行证据。
+持久日志c5db379追加最终Mac race组合161个pass事件，0fail/用例skip；9个有测试
+包通过、9个无测试文件包单列；journal17顶层/2子测试及fuzz父/4种子共24pass。
+恢复解码fuzz实际35835次输入、22.873s通过，v2 lint0issues。分别移除RV/UID条件
+的定向HTTP/RFC6902反向均失败，逐字节恢复后最终race通过；UID项明确检查同名
+新VM未被误写。见Autoscaling docs/DSGA-持久执行日志与恢复.md、工作区
+build/autoscaling-dsga-journal-{full-final.jsonl,lint-final.log,fuzz-final.log,negative.log}。
+新模块未自动打标/启用，不验证领导租约、不执行PG/VM动作。不是完整R03验收。
 内核流水线70614、最终SQL流水线31469均终态退出0，不重复启动旧句柄。
 
 原生门禁未覆盖未启用的ICU/readline、额外DNS/encryption/xid_wraparound及
@@ -92,7 +101,7 @@ Safekeeper/RW/RO/branch本机端到端仍未执行，SLRU协议fixture不构成�
 ## 继续实施的完整范围
 
 1. Monitor的实际运行时接入、Go实际客户端、外层持久
-   意图/历史与唯一执行者、跨owner/进程重连/
+   协调循环与可信唯一执行者、跨owner/进程重连/
    不确定结果对账；不能把旧Ok或当前PG状态当新请求结果/缩容许可。
 2. R02全部私有/查询/并行/DSM/维护/扩展/后台预算、硬约束、quiesce和资源承诺
    生命周期；RSS采样、填写预算ID或新boot门禁不能代替完整运行时预算。

@@ -229,3 +229,22 @@ Neon PG17/社区PG17均仍为当前状态页SHA且为功能头祖先。无主分
 quiesce、最终VM fencing、多PG版本和真实Neon存储E2E仍须继续编码集成。下一模块
 从持久操作身份/唯一执行者及完整资源承诺推进，不重复构建未改的PG/C门禁，不把
 剩余业务归到Linux待测。全Goal保持active，依既定边界不构建镜像/部署/合主分支。
+
+## Autoscaling持久执行日志接续（2026-10-20）
+
+已先提交并推送自有Autoscaling功能分支c5db379be22fa17ca8763b1b3c3aea90ca12b9da，
+GitHub refs一致。fresh fetch官方main仍a4bce09e且完整包含。新增完整原意图/owner/
+不可变业务命令、UID/RV条件写前日志、未知动作与接管/取消恢复、有界历史及新VM
+显式初始化。受管标记存在时旧Agent/Controller/QMP内存入口拒绝回退，Webhook
+保护标记；不自动启用，不把持久化票据当作VM许可或领导权证明。
+
+最终Mac受影响race组合161pass事件，0fail/用例skip；9测试包通过、9无测试包
+单列。fuzz实际35835次输入通过，v2lint0issues。RV/UID条件独立反向均失败，
+finally逐字节恢复后完整门禁通过。句柄33634/2260/82192均终态0；65732反向
+脚本终态0表示已观察预期失败并恢复，不是故障版本测试通过。日志见当前状态页。
+
+当前新增Store仍需可信协调器初始化/驱动，Takeover只保存上层已认证决定，不自带
+选主；实际领域事实核验、Go HTTP/Monitor、完整预算、PG issuer fence及最终
+Runner私有QMP/持久串行隔离仍是代码剩余项。不能以模型观察包宣称物理完成。
+下一批继续真实客户端与控制链，不重编未修改的PG；原子模块/两份锁仍486338，
+Autoscaling的所有者AGENTS.md未混入提交。Goal保持active，不因本模块通过结束。
