@@ -4,68 +4,92 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新接续：持久启动屏障、中心消费者与新PG17排序器修复
+## 最新接续：Mac 验证、远程提交与尚未完成的业务
 
-本节是最新事实；以下阶段文字按当时快照保留，旧“未推送/待接Agent/待实现
-屏障核心”不能覆盖本节。**整体仍未完成，Goal active；默认关闭。**
+本节是当前事实入口；以下阶段文字按当时快照保留，旧“未推送/仍在运行/尚无
+持久屏障核心”的快照不能覆盖本节。**已完成模块经过大量 Mac 验证，已按批推送；
+整个 V3 功能仍未完成，不能宣布只剩 Linux 测试。Goal active，默认关闭。**
 
-| 组件 | 当前功能提交 | 已实际完成 |
+| 组件 | 当前已推送并核验的功能提交 | 已完成范围 |
 |---|---|---|
-| Autoscaling | `8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c`，已推送核验 | 持久held/ready API、实际CRD CEL、完整journal初始化/一次释放、原Secret UID/VM owner、Webhook/Controller直接读取及Agent保护 |
-| control-plane | `31e70e7e781b5920b7d4d3f3d2b05015b2bafc6d`，已推送核验 | 中心签发/六路由代理消费固定启动身份；旧create/wait/route拒绝收养DSGA现场 |
-| PG17功能 | `1edefd911885cb4bab5b248ac6da8670b4fc9bb1`，已推送核验 | 完整包含Neon56692dfb与社区2b66c9c8（包括05d073e2），最新两项排序器维护无冲突 |
-| PG17维护 | `5dc4a9610b03dbedc3e99a2547fdc911b87b12af`，已推送核验 | 独立官方维护合并；保留作者/注释，官方6文件逐字节一致 |
-| Neon发行绑定 | 本功能分支当前提交 | gitlink/两份PG锁绑定1edef，Autoscaling发行锁绑定8e；准确PG已重编核对 |
+| Autoscaling | `8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c` | 持久 held/ready API、CRD CEL、完整 journal 初始化/一次释放、原配置 UID/VM owner、Controller 与 Agent 启动保护及实际凭据消费者 |
+| control-plane | `d2afdbc843a09f7927633f8c512f643ca623684b` | 旧创建/等待/路由保护、独立签发与六路由代理、真实 typed 创建执行器、实际 SQL 原 UID/不可变意图绑定；生产者/完整 Renderer/worker 尚未接线 |
+| PG17 功能 | `1edefd911885cb4bab5b248ac6da8670b4fc9bb1` | PG17 参考内核与原生协议；包含 Neon `56692dfb`、社区 `2b66c9c8`（含 `05d073e2`）全部维护提交 |
+| PG17 维护 | `5dc4a9610b03dbedc3e99a2547fdc911b87b12af` | 独立完整维护合并；原作者/注释保留，6 个官方文件逐字节一致 |
+| Neon 发行绑定 | 本功能分支 | PG gitlink/两份锁均为 `1edef`，Autoscaling 发行锁为 `8e`；实际源码和准确构建 SHA 已核对 |
 
-Autoscaling最终受影响Mac race350个pass事件、14测试包/10无测试包，0casefail/
-skip；native标签lint0。发布YAML使用原生Kube0.31.7的CRD/CEL验证及正向/11类
-不安全变化；生成两轮幂等，修复GoDoc空引号改变CEL导致不可重现的问题。5项
-生产反向抓到真实断言失败并精确恢复，源码hash与最终执行相同；协议夹具不是
-实际apiserver/RBAC认证。核心不等于真实Driver已完成，详见自有Autoscaling
-`docs/DSGA-持久创建屏障与启动身份.md`。
+本轮重新获取 Neon/Autoscaling 官方 main、Neon PG17 与社区 PG17，头未变化且
+都在对应功能分支历史内。另发现自有 control-plane main 从 `928eec9` 前进到
+`69c611de9cdb5528c16c19e54d8c099c44f085f8`；独立同步分支
+`codex/sync-control-plane-main-20261021` / `60497e5` 已完整合入并推送，功能分支
+再快进接续，没有修改 main。唯一 go.mod 冲突保留新主线 x/net 直接依赖和自有
+Autoscaling8e 精确绑定；未覆盖创建恢复、失败清理和分支到期等新业务修复。
 
-中心`dbdcb71`锁定自有8e模块后，签发和代理核对完整journal、固定VM/Compute/
-Config Secret UID及唯一controller owner；私钥读取后重验整个bootstrap相同。
-全API race966事件通过，3项生产反向恢复后78个DSGA事件/vet/Linux cmd交叉编译
-通过。后续`31e70e7`保护实际旧Driver入口：受管字段/坏标记/null动态配置不能
-降级；13类入口拒绝场景不读凭据不写资源，2类正常静态兼容，3项实际生产反向
-均由业务断言抓到。最终完整API **983事件（258顶层/725子）、9测试包/10无
-测试包、0用例fail/skip**；真实SCRAM PG、官方Darwin PostgREST16.4和隔离schema
-实际运行后关闭；全仓vet及全部Linux/amd64 cmd交叉编译通过，非Linux运行。
-自有Control-plane `docs/DSGA-凭据签发与Mac验证.md`给出日志与边界。
+### 已实际完成的 Mac 检查
 
-本次fresh fetch Neon/Autoscaling默认头未变，均已完整包含。PG17新增官方两项
-PlaceHolderVar/排序补列lateral修复，后者涉及错误查询结果，已完整维护合并。
-纯维护/功能组合分别全部225核心SQL回归通过；准确1edef重编后，**80内核
-125.087s、52正式SQL81.182s、真实Go8e→TLS→Rust Compute→SQL→PG1edef门禁
-8.86s**全部通过，1 Rust/2 Go race进程，0skip/ignored/filtered。覆盖初始化/
-释放、epoch2持久循环2048→4096、丢回复对账/原意图重放及重启；不能与中心
-协议夹具那条独立链拼成“中心到真实PG全链已经完成”。首次并行安装因生成
-`.deps/hbafuncs.Po`的missing separator失败，原日志保留；串行重试准确安装与
-三类门禁全部通过，没有据中间失败修改官方优化器代码。
+- PG17 准确 `1edef`：纯维护与功能组合各自 225 核心回归通过；准确重编后
+  80 内核/52 正式 SQL 与 Go8e→TLS→Rust Compute→SQL→PG 的原生门禁通过。
+  后者含初始化/释放、持久 PG 循环 2048→4096、丢回复对账和重启，1 Rust/2 Go
+  race 进程，0 skip/ignored/filtered。中心网关那条链仍有协议夹具，不能把
+  两条分别通过的链拼称整个中心→真实 PG 端到端已完成。
+- PG17 准确 `1edef` 的 off/on check-world 与 TAP 均通过：每轮 48 个报告、
+  231 文件、18414 个报告断言，**含平台/可选 skip**；每轮 225 核心及实际逻辑槽
+  升级/Neon 恢复文件已运行。源码 prepare145 是 13 通过/132 环境 skip，不称
+  145 都运行。首次并行安装的 `.deps/hbafuncs.Po` 解析失败保留，串行准确重编后
+  所列门禁通过，没有据失败修改官方优化器。
+- Autoscaling8e 最终受影响 race350 个 pass 事件，14 测试包/10 无测试包，
+  0 用例 fail/skip；native 标签 lint0。原生 Kube0.31.7 对实际发布 CRD/CEL 验证、
+  两轮生成幂等及 11 类非法变化通过；5 项实际生产反向被业务断言抓到并精确恢复。
+  这不是实际 apiserver/RBAC 认证。
+- control-plane 原创建核心 `dc8bf08`：真实 typed API、完整 Store、原 VM/配置
+  UID、immutable 内容读回/最终原 VM 重读，4 阶段丢回复恢复；122 个 DSGA 事件、
+  4 项生产反向及全 API1027 事件通过。Renderer 夹具不是完整可启动的 Neon spec。
+- control-plane 同步 `60497e5`：全 API1250 事件（348 顶层/902 子）、11 测试包/
+  9 无测试包，0 用例 fail/skip。后续 `d2afdbc` 增加真实 SQL 原意图/UID 绑定、
+  行锁等待后当前租约核验、058 迁移；保留 041 失败清理、042 TTL，拒绝旧 action
+  对新协议/null 字段降级。专项134 事件及 4 项实际生产反向通过；恢复后最终
+  **全 API1262 事件（351 顶层/911 子），11 测试包/9 无测试包，0 用例 fail/skip**。
+  一次性真实 SCRAM PG、官方 Darwin PostgREST16.4 实际运行后关闭；最终源码 hash
+  一致，全仓 vet 和全部 Linux/amd64 cmd 交叉编译通过，非 Linux 运行认证。
 
-准确1edef的**off/on两轮check-world+全部TAP均完成通过**，每轮48个TAP报告/
-231文件/18414报告断言，含平台/可选skip；各自全部225核心及实际逻辑槽升级/
-Neon恢复文件均通过，日志hash已保留。此前0806证据仍保留原SHA。源码prepare145
-是13通过/132环境skip，80+52原生专项已另真实执行，不能称145项都跑过。
+可选回卷/加密补验也已结束：XID off4 文件/23 报告断言通过；on 的 001/002/004
+通过，003 首次超时无 TAP plan，该组首次运行失败，日志保留。相同代码/断言/
+期限的 003 在进程级 `caffeinate -i` 下单独重跑 1 文件/1 断言、718 秒通过。
+机器休眠记录与首次超时窗口相关，**没有认定为唯一根因，也不将整组首次改称通过**。
+libpq off/on 各 2 文件/29 报告断言通过，含 DNS 平台 skip。
 
-跳过必须按原因区分：Windows专用cloexec/SSPI不适用于Mac；DNS负载均衡官方
-代码明确只支持Linux/Windows且需准备hosts，不在Mac修改系统hosts。XID回卷/
-libpq加密协商是显式opt-in，现已另启动临时集群开/关两轮补跑，结果尚不计通过。
-ICU排序与readline补全是本次构建选择禁用造成，**不是只能Linux验证**；本机已
-发现ICU/readline/OpenSSL/Krb5依赖，后续可编译独立选项组合补验。Mac开发还有
-代码/测试工作，不应宣称全部Mac任务只余Linux认证。
-根工作区日志为
-`bootstrap-final3-*`、`control-plane-bootstrap-mac-final/`、
-`control-plane-legacy-guard-mac-final/`、`upstream2b66-*`。
+日志入口为根工作区 `build/control-plane-{sync69c-mac,binding058-mac-final}/`、
+`control-binding058-negative/`、`control-binding058-{vet,linux-cli}.log`、
+`upstream2b66-world-summary.json`、`upstream2b66-extra-*.log`。控制面自有仓库
+`docs/DSGA-创建身份元数据绑定与Mac验证.md` 与 `DSGA-控制面主线同步-20261021.md`
+给出锁序、不可变协议、故障/恢复及测试步骤。之前测试夹具缺时间字段的失败
+保留；修的是夹具，没有放宽生产 schema 或修改历史迁移。
 
-**仍须继续编码：** 实际版本化Driver创建顺序/持久可信启动计划/PG版本贯通/
-租户与管理超级用户隔离，完整预算与quiesce、Monitor/Scheduler/最终Runner、
-受控跨owner/boot关闭、中心到真实PG整链、多PG与完整存储E2E。V3补充的6条
-创建约定为后续实施标准。旧Driver把用户密码用于cloud_admin，而原生Compute
-以SUPERUSER创建该角色；当前PG启动准入保留内部SU通道，故不能照旧启用DSGA。
-这些均是业务代码缺口，不能包装成只待Linux测试。Linux/K8s/KVM/HugeTLB/
-物理回收/迁移/性能后验；不构建镜像、不准备或执行部署、不合主分支、不发布。
+### Mac 还有什么没有完成
+
+**业务和集成缺口，不能移交成“仅 Linux 待测”：**
+
+1. 实际版本化创建生产者、冻结的可信启动计划、安全原生 Renderer、VM 模板及
+   worker 调度；PG 版本必须贯通项目/Operation/Timeline/Guest。
+2. 租户与内部管理角色/凭据/路由隔离及真实权限测试。原 Driver 把用户密码用于
+   `cloud_admin`，原生 Compute 以 SUPERUSER 创建它，PG 准入保留内部 SU 通道；
+   不能沿用此路径后宣称租户受内存准入保护。既有角色也不能仅靠 spec 追加
+   NOSUPERUSER 认为已实际执行。
+3. 完整预算/quiesce、Monitor/Scheduler/Controller/最终 Runner fence、跨 owner/
+   boot 受控关闭、其他 PG 大版本和完整 Neon 存储链端到端。
+
+另外，ICU 排序、readline 补全和完整 SSL/GSS 选项组合是当前构建选择未覆盖，
+**不是 Mac 硬件不支持**；本机已有相关依赖。属于可补的选项矩阵，当前优先
+补业务代码；不能把这些未执行项写成 Linux 独占。Windows 专用 cloexec/SSPI
+不适用于 Mac；官方 DNS 测试仅 Linux/Windows 且要 hosts 准备，本轮不改系统 hosts。
+
+### 后续 Linux 集群的验收边界
+
+按项目所有者约定留给目标环境：真实 K8s CRD/admission/RBAC/投影令牌/TokenReview/
+etcd，Linux/KVM/NeonVM/HugeTLB、Host/Guest 物理内存回收与扩缩顺序、迁移/故障
+恢复、完整存储负载和性能长稳。Mac SQL/TLS 协议夹具、CEL 解释器与交叉编译
+不能替代这些证据。已完成模块可以进入 Linux 阶段验收，**完整功能交付仍须先
+补齐上述业务**。不构建镜像、不准备/执行 K8s 部署、不合 main、不发布生产。
 
 ## 阶段记录：Agent实际入口、中心六路由代理与官方升级测试修复
 
