@@ -25,16 +25,20 @@
   5dc与功能1edef。纯维护和功能225各通过；准确1edef安装/80内核125.087s/
   52正式SQL81.182s/Go8e真实链8.86s全部通过，0skip/ignored/filtered。
   首次准确安装并行生成Po解析失败日志保留，串行重试成功，不把失败当通过。
-- 新准确1edef off/on world/TAP句柄**42908**独占`build/neon-integrated/v17`，
-  正在运行，先查真实终态/日志；不能重跑并发make/安装/原生门禁。旧0806的
-  world两轮各48报告/231文件/18414报告断言含可选skip，不能冒称新SHA证据。
-  已终态：50379准确三门禁、41680完整API983、76525vet、74293Linuxcmd、
-  45370三反向、64454PGpush、42743CPpush。旧句柄不再启动。
+- 新准确1edef off/on world/TAP句柄42908已终态0，**两轮各48报告/231文件/
+  18414报告断言（含平台/可选skip）、225核心及逻辑槽/Neon恢复文件均通过**。
+  `build/upstream2b66-world-summary.json`保存实际结果/skip原因和日志hash。
+  另启动官方opt-in XID回卷/libpq加密协商开/关两轮，活跃句柄**99013**独占同
+  build，尚未计通过，不可并发make；DNS官方仅Linux/Windows，不修改系统hosts。
+  本机已有ICU/readline/OpenSSL/Krb5依赖，构建选项未启用引起的skip可以另建Mac
+  组合补验，不能归成Linux限制。应先完成Driver/角色/预算实际代码再完成矩阵，
+  避免每个小变更重复全矩阵。已终态：50379三门禁、41680 API983、76525vet、
+  74293Linuxcmd、45370三反向、64454PGpush、42743CPpush、68968Neonpush。
 - 根`build/dsga-20261021-owner-checkpoint.json`已按实际Git重写，旧文件另存。
   `build/dsga-next-init-barrier-20261021.md`也改为真实剩余入口。当前审批服务已
   恢复，依赖push均已成功，不再报告旧“用量阻断、尚未推送”。
 
-接下来先记录42908真实结果、完成Neon当前事实/恢复文档与版本绑定验证并推送。
+接下来记录99013补验真实结果、提交当前world证据更新并推送。Neon7bd已推送核验。
 再继续**实际Driver创建接线**，不再只写接口：可信模式/版本/镜像/显式预算/
 身份要随Operation先持久化，使用旧worker不会执行的版本化action；需新增migration
 扩展最新生命周期trigger及worker结果标记。旧JSON追加字段会被旧worker忽略。

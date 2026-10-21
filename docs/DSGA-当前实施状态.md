@@ -44,10 +44,17 @@ PlaceHolderVar/排序补列lateral修复，后者涉及错误查询结果，已�
 `.deps/hbafuncs.Po`的missing separator失败，原日志保留；串行重试准确安装与
 三类门禁全部通过，没有据中间失败修改官方优化器代码。
 
-新1edef的off/on check-world+全部TAP正在独占构建目录运行，完成结论另行追加，
-**尚不计通过**。此前准确0806的两轮均48个TAP报告/231文件/18414报告断言，含
-平台/可选skip，该结果保留原SHA，不改写成1edef结果。源码prepare145项是
-13通过/132环境skip；80+52原生专项已另行真实执行，不能把prepare称145项都跑过。
+准确1edef的**off/on两轮check-world+全部TAP均完成通过**，每轮48个TAP报告/
+231文件/18414报告断言，含平台/可选skip；各自全部225核心及实际逻辑槽升级/
+Neon恢复文件均通过，日志hash已保留。此前0806证据仍保留原SHA。源码prepare145
+是13通过/132环境skip，80+52原生专项已另真实执行，不能称145项都跑过。
+
+跳过必须按原因区分：Windows专用cloexec/SSPI不适用于Mac；DNS负载均衡官方
+代码明确只支持Linux/Windows且需准备hosts，不在Mac修改系统hosts。XID回卷/
+libpq加密协商是显式opt-in，现已另启动临时集群开/关两轮补跑，结果尚不计通过。
+ICU排序与readline补全是本次构建选择禁用造成，**不是只能Linux验证**；本机已
+发现ICU/readline/OpenSSL/Krb5依赖，后续可编译独立选项组合补验。Mac开发还有
+代码/测试工作，不应宣称全部Mac任务只余Linux认证。
 根工作区日志为
 `bootstrap-final3-*`、`control-plane-bootstrap-mac-final/`、
 `control-plane-legacy-guard-mac-final/`、`upstream2b66-*`。
