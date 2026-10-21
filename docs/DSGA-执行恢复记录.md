@@ -6,7 +6,49 @@
 
 ## 当前源码与分支
 
-### 最新恢复点：Agent入口、中心六路由代理与官方80da维护
+### 最新恢复点：8e屏障核心、中心31e与PG1edef（优先于下文）
+
+整体未完成、Goal active。本轮有实际模块代码、Mac全量验证与远程推送，不是
+重复受阻，勿标blocked/complete。以下事实替代旧80da未推送/审批故障快照。
+
+- 已远程核验：Autoscaling8e1e0ea、Control-plane31e70e7、PG维护5dc4a961、
+  PG功能1edefd9118。Neon依赖三处锁准确1edef及AS8e；用户Autoscaling AGENTS.md
+  原7行修改保留，不stage；两份旧stash绝不再apply。不创建子代理。
+- AS8e核心包括CRD/CEL、API/Store held与ready、Secret owned身份、Controller/
+  Webhook direct reader及Agent；350 race、lint0、5实际断言变异精确恢复，
+  Go→真实Rust/PG0806 9.80秒。不能把已完成核心重做为下一步任务。
+- 中心dbd消费实际持久身份/原Config UID及key后二次bootstrap比较；966事件。
+  31e保护真实旧create/conflict/wait/route拒绝DSGA降级，13unsafe+2positive，
+  3实际反向断言。最终完整983事件/258顶层/725子、9测试包/10无测试包、0fail/
+  skip；真实SCRAM PG/PostgREST16.4已结束关闭；vet/Linux cmd编译通过。
+- 最新fetch社区PG17到2b66c9c8，含05d073e2，两项官方优化器修复已完整入维护
+  5dc与功能1edef。纯维护和功能225各通过；准确1edef安装/80内核125.087s/
+  52正式SQL81.182s/Go8e真实链8.86s全部通过，0skip/ignored/filtered。
+  首次准确安装并行生成Po解析失败日志保留，串行重试成功，不把失败当通过。
+- 新准确1edef off/on world/TAP句柄**42908**独占`build/neon-integrated/v17`，
+  正在运行，先查真实终态/日志；不能重跑并发make/安装/原生门禁。旧0806的
+  world两轮各48报告/231文件/18414报告断言含可选skip，不能冒称新SHA证据。
+  已终态：50379准确三门禁、41680完整API983、76525vet、74293Linuxcmd、
+  45370三反向、64454PGpush、42743CPpush。旧句柄不再启动。
+- 根`build/dsga-20261021-owner-checkpoint.json`已按实际Git重写，旧文件另存。
+  `build/dsga-next-init-barrier-20261021.md`也改为真实剩余入口。当前审批服务已
+  恢复，依赖push均已成功，不再报告旧“用量阻断、尚未推送”。
+
+接下来先记录42908真实结果、完成Neon当前事实/恢复文档与版本绑定验证并推送。
+再继续**实际Driver创建接线**，不再只写接口：可信模式/版本/镜像/显式预算/
+身份要随Operation先持久化，使用旧worker不会执行的版本化action；需新增migration
+扩展最新生命周期trigger及worker结果标记。旧JSON追加字段会被旧worker忽略。
+
+先处理租户/内部管理角色隔离：legacy adminVerifier其实是租户密码，Compute
+创建SUPERUSER cloud_admin，现有PG准入为内部SU保留通道。`spec_apply`新普通角色
+会授neon_superuser等权限，既有角色只有密码改变才ALTER；单加NOSUPERUSER项不
+证明实际生效。须贯穿endpoint.role_name、路由、复制/删除/密码/catalog消费者并
+用真实SQL验证。PG版本还要贯穿项目/Operation/Timeline/Guest，不能只改env。
+然后CREATEheld→同UID安全nativev2/owned配置/fulljournal→UID/RV释放，不能从
+可变env重试或重建空日志。剩余完整预算/Monitor/Scheduler/最终Runner/受控恢复/
+多PG/存储E2E均是代码工作；不是Linux待测。环境与默认关闭边界不变。
+
+### 历史恢复点：Agent入口、中心六路由代理与官方80da维护
 
 当前整体未完成，Goal active。本轮是实际进展；以下SHA和日志优先于下文历史，
 不要再把已经实现的中心凭据、Agent消费者或操作代理当待办重新开发。

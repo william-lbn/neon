@@ -4,7 +4,63 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新接续：Agent实际入口、中心六路由代理与官方升级测试修复
+## 最新接续：持久启动屏障、中心消费者与新PG17排序器修复
+
+本节是最新事实；以下阶段文字按当时快照保留，旧“未推送/待接Agent/待实现
+屏障核心”不能覆盖本节。**整体仍未完成，Goal active；默认关闭。**
+
+| 组件 | 当前功能提交 | 已实际完成 |
+|---|---|---|
+| Autoscaling | `8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c`，已推送核验 | 持久held/ready API、实际CRD CEL、完整journal初始化/一次释放、原Secret UID/VM owner、Webhook/Controller直接读取及Agent保护 |
+| control-plane | `31e70e7e781b5920b7d4d3f3d2b05015b2bafc6d`，已推送核验 | 中心签发/六路由代理消费固定启动身份；旧create/wait/route拒绝收养DSGA现场 |
+| PG17功能 | `1edefd911885cb4bab5b248ac6da8670b4fc9bb1`，已推送核验 | 完整包含Neon56692dfb与社区2b66c9c8（包括05d073e2），最新两项排序器维护无冲突 |
+| PG17维护 | `5dc4a9610b03dbedc3e99a2547fdc911b87b12af`，已推送核验 | 独立官方维护合并；保留作者/注释，官方6文件逐字节一致 |
+| Neon发行绑定 | 本功能分支当前提交 | gitlink/两份PG锁绑定1edef，Autoscaling发行锁绑定8e；准确PG已重编核对 |
+
+Autoscaling最终受影响Mac race350个pass事件、14测试包/10无测试包，0casefail/
+skip；native标签lint0。发布YAML使用原生Kube0.31.7的CRD/CEL验证及正向/11类
+不安全变化；生成两轮幂等，修复GoDoc空引号改变CEL导致不可重现的问题。5项
+生产反向抓到真实断言失败并精确恢复，源码hash与最终执行相同；协议夹具不是
+实际apiserver/RBAC认证。核心不等于真实Driver已完成，详见自有Autoscaling
+`docs/DSGA-持久创建屏障与启动身份.md`。
+
+中心`dbdcb71`锁定自有8e模块后，签发和代理核对完整journal、固定VM/Compute/
+Config Secret UID及唯一controller owner；私钥读取后重验整个bootstrap相同。
+全API race966事件通过，3项生产反向恢复后78个DSGA事件/vet/Linux cmd交叉编译
+通过。后续`31e70e7`保护实际旧Driver入口：受管字段/坏标记/null动态配置不能
+降级；13类入口拒绝场景不读凭据不写资源，2类正常静态兼容，3项实际生产反向
+均由业务断言抓到。最终完整API **983事件（258顶层/725子）、9测试包/10无
+测试包、0用例fail/skip**；真实SCRAM PG、官方Darwin PostgREST16.4和隔离schema
+实际运行后关闭；全仓vet及全部Linux/amd64 cmd交叉编译通过，非Linux运行。
+自有Control-plane `docs/DSGA-凭据签发与Mac验证.md`给出日志与边界。
+
+本次fresh fetch Neon/Autoscaling默认头未变，均已完整包含。PG17新增官方两项
+PlaceHolderVar/排序补列lateral修复，后者涉及错误查询结果，已完整维护合并。
+纯维护/功能组合分别全部225核心SQL回归通过；准确1edef重编后，**80内核
+125.087s、52正式SQL81.182s、真实Go8e→TLS→Rust Compute→SQL→PG1edef门禁
+8.86s**全部通过，1 Rust/2 Go race进程，0skip/ignored/filtered。覆盖初始化/
+释放、epoch2持久循环2048→4096、丢回复对账/原意图重放及重启；不能与中心
+协议夹具那条独立链拼成“中心到真实PG全链已经完成”。首次并行安装因生成
+`.deps/hbafuncs.Po`的missing separator失败，原日志保留；串行重试准确安装与
+三类门禁全部通过，没有据中间失败修改官方优化器代码。
+
+新1edef的off/on check-world+全部TAP正在独占构建目录运行，完成结论另行追加，
+**尚不计通过**。此前准确0806的两轮均48个TAP报告/231文件/18414报告断言，含
+平台/可选skip，该结果保留原SHA，不改写成1edef结果。源码prepare145项是
+13通过/132环境skip；80+52原生专项已另行真实执行，不能把prepare称145项都跑过。
+根工作区日志为
+`bootstrap-final3-*`、`control-plane-bootstrap-mac-final/`、
+`control-plane-legacy-guard-mac-final/`、`upstream2b66-*`。
+
+**仍须继续编码：** 实际版本化Driver创建顺序/持久可信启动计划/PG版本贯通/
+租户与管理超级用户隔离，完整预算与quiesce、Monitor/Scheduler/最终Runner、
+受控跨owner/boot关闭、中心到真实PG整链、多PG与完整存储E2E。V3补充的6条
+创建约定为后续实施标准。旧Driver把用户密码用于cloud_admin，而原生Compute
+以SUPERUSER创建该角色；当前PG启动准入保留内部SU通道，故不能照旧启用DSGA。
+这些均是业务代码缺口，不能包装成只待Linux测试。Linux/K8s/KVM/HugeTLB/
+物理回收/迁移/性能后验；不构建镜像、不准备或执行部署、不合主分支、不发布。
+
+## 阶段记录：Agent实际入口、中心六路由代理与官方升级测试修复
 
 Autoscaling `f60ff588b4dba403885dcd371caa412079ae87a5`已推送自有功能分支并
 核验远程。模块化中文提交4d21b97/f60ff58完成管理CA/投影SA短凭据消费者、
@@ -170,7 +226,7 @@ Go客户端尚未接Agent协调循环；Go→真实Compute→PG同一门禁已�
 提交丢回复、原意图重放、数据校验及真实PG重启拒绝静默重绑。见
 [真实链路门禁](DSGA-Go客户端真实链路验证.md)，它不等于完整Neon存储/VM端到端。
 
-## 分支、源码与上游
+## 分支、源码与上游（历史快照，以本页最新接续为准）
 
 | 仓库 | 分支/身份 | 状态 |
 |---|---|---|

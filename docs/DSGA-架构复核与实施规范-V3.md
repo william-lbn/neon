@@ -141,8 +141,9 @@ SDK未知原意图的解除须显式、持久且完整核验，不以一次查�
 自己的RBAC客户端读取Lease→完整原journal→Lease，核验固定UID/incarnation/
 当前owner，不另设可漂移的未压缩owner镜像。续约新鲜度只用于保守拒绝，时钟
 不能证明最终执行权；所有检查有独立总期限、不缓存正向授权、不泄露Bearer。
-生产主体核验核心已实现，中心HTTP/私钥与Compute目标绑定、Agent实际消费仍
-须继续接线；详见Autoscaling的《DSGA-远程凭据主体核验》，不据此关闭R03。
+生产主体核验、独立中心HTTP/JWT、六路由代理和Agent实际消费者已分批接线；
+持久启动身份也已在中心复核。各准确提交/边界见[当前实施状态](DSGA-当前实施状态.md)，
+中心到真实Rust/PG全链及最终Runner仍须完成，不据这些子模块通过关闭R03。
 
 Agent的SA令牌只可发给控制面独占TLS身份的签发器。现有每Compute TLS私钥也
 挂载到Guest，不得作为签发服务身份或Agent信任启动链。中心凭据服务采用独立
@@ -156,10 +157,42 @@ RBAC隔离仍需目标环境证明，TokenReview协议夹具不替代该证明�
 UID/RV条件解除屏障。屏障期间Controller不得分配Runner/进入资源执行；失败或
 写成丢回复只重读同UID原事实，不新建身份或初始化空日志兜底。已有Runner、
 Node绑定、重启历史或丢失journal的实例不得在线改造成新的受管VM。Agent看到
-受管标记（包括损坏标记）后不得退回legacy监控/资源写入。屏障/API/Webhook/
-Driver及实际入口仍须实现验证，不能将这一代码缺口称为Linux待验。
+受管标记（包括损坏标记）后不得退回legacy监控/资源写入。截至2026-10-21，自有Autoscaling8e1e0ea已实现API/发布CRD CEL、完整journal
+初始化/释放、直接reader的Webhook/Controller及Agent拒绝保护。详见同仓
+《DSGA-持久创建屏障与启动身份》。**Driver实际创建顺序仍未接通**，不能将核心
+库/准入通过写成完整创建链已交付，也不能将这个代码缺口归成Linux待验。
 
-当前代码进度、实际链路及尚未接线的Agent/凭据/预算/Runner见
+创建协议进一步固定如下约定，后续实现不得只修改VM中的PG_VERSION：
+
+1. 可信平台给出的模式、PG大版本、镜像不可变引用、显式bootstrap/M/最小Guest/
+   non-buffer reserve及随机创建身份，必须先随原始创建Operation持久化。
+   重试不能重读可变env决定是否改走legacy；最低Guest按未来所有合法目标取值，
+   降低bounds低于已固定下限必须拒绝或采用独立受控重建。
+2. DSGA创建采用旧worker无法执行的版本化操作入口；仅在旧JSON中增加可忽略
+   字段不安全。发布/恢复时禁止DSGA意图落入旧PG16 createCompute/wake/route路径。
+   旧入口发现bootstrap、任一journal标记或动态配置（包括空/null/坏值）必须拒绝，
+   不得用labels相同来收养。预读不是跨对象原子fence，最终UID/RV仍不可省略。
+3. PG大版本必须从项目事实贯穿创建Operation、祖先/目标Timeline及实际Guest。
+   恢复/冲突GET要核对原版本与祖先身份，不能只改环境变量而继续创建PG16存储。
+4. CREATE先写held、随机incarnation和固定Compute ID；取得真实VM UID后再生成
+   原生v2 spec、owned且绑定同VM UID的配置Secret、完整初始journal。释放必须
+   测试原UID/RV/原held记录并同时固定VM UID与实际Secret UID。**同Secret UID不
+   等于内容不可变**：DSGA初始配置须冻结安全启动字段（优先使用immutable Secret，
+   catalog变更经独立受限configure投影），恢复启动仍核对原持久计划。不能在同UID
+   下替换预算/关闭dynamic后凭身份检查通过。丢回复只能重读同一事实，禁止重置
+   日志、重复生成身份或收养已有运行历史的实例。
+5. **租户SQL角色与内部超级用户必须隔离。** 旧Driver把租户密码用作cloud_admin
+   verifier；生产Compute明确以SUPERUSER创建该管理角色，而当前PG准入为内部
+   管理超级用户保留通道。DSGA不能沿用这份租户角色/路由/密码语义。内部管理
+   凭据不得下发租户或进入普通可登录路由；应用角色不得继承管理/超级用户权限，
+   并应验证SET ROLE、既有连接新SQL、RO、扩展协议及恢复后仍受准入约束。
+   单独设置NOSUPERUSER仍不证明完整R02：授权关系、后台维护和全部预算继续核验。
+6. Mac要验证实际Driver的丢回复、冲突、崩溃断点、UID/Secret重建、坏日志、旧
+   worker/新协议混部拒绝与角色隔离；native链最终应经过同一中心到真实Rust/PG。
+   CRD/TokenReview/RBAC/etcd及物理效果仍由目标环境独立认证。
+
+当前代码进度、实际链路及剩余创建/预算/Runner见
+[当前实施状态](DSGA-当前实施状态.md)；具体owner核心证据见
 [所有权与持久循环验证](DSGA-所有权与持久循环验证.md)，不据单模块通过关闭R03。
 
 ### R04 / P1 发布阻断：checkpoint 全程 Guard 不满足在线伸缩时效目标
