@@ -6,7 +6,50 @@
 
 ## 当前源码与分支
 
-### 最新中心凭据服务（优先于全部下文历史）
+### 最新恢复点：Agent入口、中心六路由代理与官方80da维护
+
+当前整体未完成，Goal active。本轮是实际进展；以下SHA和日志优先于下文历史，
+不要再把已经实现的中心凭据、Agent消费者或操作代理当待办重新开发。
+
+- Autoscaling `f60ff588b4dba403885dcd371caa412079ae87a5`已推送核验。包含
+  4d21b97凭据/首次发现及f60ff58真实Agent入口两个中文模块提交。最终race303
+  事件/13测试包、9无测试包单列，0用例fail/skip，native lint0；实际Go→Rust
+  Compute→SQL→PGc848门禁9.24秒，1Rust/2Go race进程通过。
+- Control-plane `bbc2a70348793b55dc854f4385db67ea752e1e14`已本地提交、未推送。
+  实际独立TLS mux六路由、严格专用JWT/当前完整journal与Lease/固定Service、
+  执行与观察双池、有限转发和不重试未知POST完成。最终全API race956事件
+  （255顶层/701子）、9测试包/10无测试包，0用例fail/skip；含68个DSGA事件。
+  实际SCRAM PG/PostgREST16.4运行且已关闭；三项安全生产变异抓到行为失败，
+  逐字节恢复/源码hash核对后完整重验，全仓vet和全部Linux cmd交叉编译通过。
+  实际Session→凭据消费者→中心→SDK→生产代理已测，最后native仍是协议夹具；
+  不与另一条原生PG门禁拼成中心到真实PG完整E2E，后者仍须完成。
+- PG17本地功能头`586262aef0ade229ca1067540cca1ecc587775fc`，维护头
+  `bdf0b191733257e5192c60ec9ecc24bf98cd87b9`，均未推送。完整包含社区80da124a
+  及Neon56692dfb；功能仅官方AdjustUpgrade.pm改变，生产C/ABI不变。维护核心225
+  及实际调整模块13项通过；纯维护003缺既有694d751修复失败如实保留。合入功能
+  组合、正确rmgr/显式TAP后，全部pg_upgrade4文件86项通过。第一次未启用TAP
+  的make没有运行测试，不计通过；实际旧PG13二进制跨版本升级未执行。
+- Neon本地三处PG绑定改586、发行Autoscaling改f60，准确586已重编安装成功。
+  validate检查18二进制/4PG版本/39扩展阶段通过；prepare145为13通过/132环境
+  skip。新准确SHA的80内核/52正式SQL/原生门禁尚未运行，不把旧c848报告改名。
+
+推送PG自有维护/功能分支的工具调用被自动审批服务用量故障拦在执行前，提示
+11:43后重试，非不安全判定。push及ls-remote均未执行，不能称新依赖已经发布。
+不绕过审批；后续先推PG/Control-plane依赖，再推Neon引用并核验远程SHA。
+所有本轮启动的测试/构建/交叉编译句柄均终态，无活跃临时PG，不重启旧句柄。
+
+日志：工作区`build/autoscaling-agent-credential-{final.jsonl,lint-final.log,native.log}`、
+`control-plane-proxy-mac-final2/`、`control-proxy-negative/`、
+`upstream80-{core.log,adjust.tap,feature-upgrade-tap.log,exact-local-build.log}`。
+根`build/dsga-20261021-owner-checkpoint.json`记录待推送与审批故障；
+`build/dsga-next-init-barrier-20261021.md`提供下一代码入口。
+
+继续实际Driver/API/Webhook/Controller持久初始化屏障、全预算/quiesce、Monitor/
+Scheduler/最终Runner、跨owner/boot受控关闭、中心到真实PG整链、全部PG版本
+和真实Neon存储E2E。这些是代码缺口，不能归成只待Linux验收。默认关闭，不构建
+镜像/部署/合主分支/发布；保留Autoscaling用户AGENTS.md，不再apply两个旧stash。
+
+### 前期中心凭据服务（历史记录，以以上最新恢复点为准）
 
 - Control-plane d30ab57f1e56ed9d3b4c2ecb1523e0c9c93402b0功能分支已推送并核验；
   工作树干净。ef446e2纯契约移动恢复Mac编译；实际issuer使用自有3eeafd9完整

@@ -4,7 +4,49 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新接续：独立TLS的中心凭据服务已推送
+## 最新接续：Agent实际入口、中心六路由代理与官方升级测试修复
+
+Autoscaling `f60ff588b4dba403885dcd371caa412079ae87a5`已推送自有功能分支并
+核验远程。模块化中文提交4d21b97/f60ff58完成管理CA/投影SA短凭据消费者、
+完整空journal才允许的首次PG boot发现，以及真实Agent受管入口/长期PGWorker。
+固定UID读取失败、标记损坏或缺配置均不回落legacy；凭据刷新不重建SDK、不清
+未知意图。新增协调心跳不等于PG/VM许可。受影响最终race303事件/13测试包，
+9无测试包单列、0用例fail/skip；native标签lint0。真实Go→Rust Compute→SQL→
+PG17 c848门禁9.24秒通过，1Rust/2Go race进程，0skip/ignored/filtered。
+
+Control-plane `bbc2a70348793b55dc854f4385db67ea752e1e14`**已本地提交、尚未
+推送**，固定引用自有f60ff58。在独立:8444实际生产mux接六个DSGA路由，严格
+SNI/专用JWT/VMUID/CIID/完整journal/当前Lease及owned Service，内部原生3080
+仍验签。执行和观察/取消双池、有限期限/大小、不透明重试POST。实际Session→
+credential.Client→中心核验→SDK→生产代理的TLS/HTTP测试通过，最后native仍为
+协议夹具；不可将其与上述另一条原生PG门禁拼称新中心到真实PG完整E2E。
+
+最终完整API race956事件（255顶层/701子），9测试包/10无测试包，0用例fail/
+skip，含68个DSGA事件；实际PostgREST16.4 RLS及一次性SCRAM PG已运行并关闭。
+三项实际生产安全变异被对应业务断言捕获，逐字节恢复/源码hash核对后全量重验；
+全仓vet、全部Linux/amd64 cmd交叉编译和实际Agent交叉编译通过，非Linux运行。
+详情见自有Control-plane `docs/DSGA-凭据签发与Mac验证.md`。
+
+fresh fetch社区PG17前进到官方`80da124a4f338a612550180dac86eb33850e2254`，
+独立维护本地提交bdf0b191、功能合并本地提交
+`586262aef0ade229ca1067540cca1ecc587775fc`完整包含新维护及Neon56692dfb。
+功能组合仅官方AdjustUpgrade.pm一文件变化，生产C/ABI不变，无冲突并保留原作者。
+维护核心225及实际调整模块13项通过；纯维护组合缺既有694d751的Neon slot修复，
+pg_upgrade003失败如实保留。合入功能组合、正确rmgr/显式TAP后4文件86项全通过。
+当前准确586提交已Mac重编安装成功，三处绑定一致；未把此前c848门禁误写成新
+SHA实际执行。新的80内核/52 SQL/原生门禁尚待可用审批环境复验。
+
+**远程状态必须区分：** f60ff58已推送；bdf0b191/586262a/bbc2a70尚未推送。
+推送PG自有分支的工具调用在执行前被自动审批服务用量限制阻断（提示11:43后
+重试，非不安全判定），不绕过审批；主仓新引用不先于依赖发布。最新官方Neon/
+Autoscaling默认分支本次fetch未变。没有镜像/K8s/主分支/生产发布操作。
+
+**整体仍未完成，Goal active。** Driver/API/Webhook/Controller创建初始化屏障、
+完整预算/quiesce、实际Monitor/Scheduler/最终Runner、跨owner/boot受控关闭、
+新中心到真实PG链、多PG版本及完整存储E2E继续编码。这些是代码/集成缺口，
+不能归成只有Linux待测；目标Linux/K8s/NeonVM/HugeTLB/物理及性能另验。
+
+## 阶段记录：独立TLS的中心凭据服务已推送
 
 自有Control-plane `d30ab57f1e56ed9d3b4c2ecb1523e0c9c93402b0`已推送功能分支并核对
 远程SHA；包含独立Mac编译修复ef446e2及实际生产网关凭据服务，固定复用自有
@@ -27,7 +69,7 @@ CI run，不把未运行的Linux CI算通过；不创建/合并生产PR。
 首次boot发现及跨owner/boot关闭、Driver初始化屏障、全部预算/Monitor/Runner、
 多PG版本与完整存储E2E继续编码；真实TokenReview/RBAC/物理回收等目标环境后验。
 
-## 最新接续：远程凭据主体核验与PG17维护同步
+## 阶段记录：远程凭据主体核验与PG17维护同步
 
 Autoscaling `3eeafd997c8cc9079fcf90ffd0df27aa32c13ce5`已推送核验，新增生产PodVerifier：
 专用TokenReview、真实SA/Pod UID、随机进程holder、同Node/生命周期、完整journal/
@@ -44,7 +86,7 @@ Autoscaling发行引用已在工作区更新。准确SHA重编、80内核/52正�
 [本批验证](DSGA-主体核验与20261021上游验证.md)。Control-plane实际凭据路由草稿
 正在本地编译测试，尚未推送，不计完整交付；Agent/Driver/预算/Runner继续。
 
-## 最新接续：所有权选主与持久PG循环
+## 阶段记录：所有权选主与持久PG循环
 
 Autoscaling生产所有权/循环1bf247d及阶段门禁补强
 `75187718d7f4e99ed46924305e89ad83a943b0de`已推送核验。固定Lease/VM绑定、journal
