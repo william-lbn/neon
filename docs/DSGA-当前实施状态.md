@@ -4,6 +4,29 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
+## 最新接续：独立TLS的中心凭据服务已推送
+
+自有Control-plane `d30ab57f1e56ed9d3b4c2ecb1523e0c9c93402b0`已推送功能分支并核对
+远程SHA；包含独立Mac编译修复ef446e2及实际生产网关凭据服务，固定复用自有
+Autoscaling3eeafd9的完整journal/TokenReview。专用JWT不分发签名seed，读取私钥
+后再验当前owner；默认关闭，TLS/SA半配置拒绝启动。
+
+复核发现旧每Compute TLS私钥也挂载给Guest，因此已补**控制面独占证书的独立
+TLS监听:8444**，强制当前管理域wildcard/ServerAuth身份，拒绝旧Guest证书及
+错误SNI；原:8443 configure不受影响。未来Agent必须消费可信管理CA，并拒绝
+Guest身份，不能把私钥分发给Agent或从普通VM请求接受URL/CA。
+
+Mac最终完整API race908事件（248顶层/660子）、9测试包/10无测试包，0casefail/
+skip；同CI版本官方Darwin PostgREST16.4的真实RLS、一次性SCRAM PG均实际运行。
+四项生产反向真实失败后逐字节恢复，20个DSGA事件及全仓vet再次通过；Linux
+全部cmd与Functions测试程序交叉编译通过（非Linux运行），没有镜像/K8s操作。
+详见自有Control-plane docs/DSGA-凭据签发与Mac验证.md。GitHub功能分支未发现
+CI run，不把未运行的Linux CI算通过；不创建/合并生产PR。
+
+**整体仍未完成，Goal active。** Agent凭据客户端/真实入口、管理操作代理、
+首次boot发现及跨owner/boot关闭、Driver初始化屏障、全部预算/Monitor/Runner、
+多PG版本与完整存储E2E继续编码；真实TokenReview/RBAC/物理回收等目标环境后验。
+
 ## 最新接续：远程凭据主体核验与PG17维护同步
 
 Autoscaling `3eeafd997c8cc9079fcf90ffd0df27aa32c13ce5`已推送核验，新增生产PodVerifier：

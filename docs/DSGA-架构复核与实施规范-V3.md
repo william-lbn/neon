@@ -144,6 +144,13 @@ SDK未知原意图的解除须显式、持久且完整核验，不以一次查�
 生产主体核验核心已实现，中心HTTP/私钥与Compute目标绑定、Agent实际消费仍
 须继续接线；详见Autoscaling的《DSGA-远程凭据主体核验》，不据此关闭R03。
 
+Agent的SA令牌只可发给控制面独占TLS身份的签发器。现有每Compute TLS私钥也
+挂载到Guest，不得作为签发服务身份或Agent信任启动链。中心凭据服务采用独立
+监听/管理域证书，Agent只从可信平台配置取得管理CA和固定目标，拒绝Guest
+单Compute身份；普通请求不得自报URL/CA。证书/SA配置不完整时启动失败，不能
+借缺省关闭、旧key或general/admin Token降级继续。证书轮转及实际平台Secret/
+RBAC隔离仍需目标环境证明，TokenReview协议夹具不替代该证明。
+
 受管VM创建还必须有持久初始化屏障：apiserver分配真实VM UID后，Driver先
 持久化同一incarnation/Compute实例身份、安全启动spec与完整journal，再按准确
 UID/RV条件解除屏障。屏障期间Controller不得分配Runner/进入资源执行；失败或

@@ -6,6 +6,28 @@
 
 ## 当前源码与分支
 
+### 最新中心凭据服务（优先于全部下文历史）
+
+- Control-plane d30ab57f1e56ed9d3b4c2ecb1523e0c9c93402b0功能分支已推送并核验；
+  工作树干净。ef446e2纯契约移动恢复Mac编译；实际issuer使用自有3eeafd9完整
+  主体/journal核验，中心只读seed/JWK并再验owner，专用短JWT，不冒充预算/VM许可。
+- 新增独立TLS:8444使用仅控制面持有的当前*.namespace.svc/ServerAuth证书；
+  旧perCompute key在Guest中也可读取，明确不能作为Agent SA签发信任。原:8443
+  configure保留，不提供凭据。握手重读投影文件，不回退Guest或旧key。
+- 最终独立TLS全仓Go908事件、248顶层/660子，9测试包/10无测试包、0casefail/
+  skip；实际官方Darwin PostgREST16.4 SHA校验且真实RLS、SCRAM PG均执行。
+  43357终态0且临时PG已关闭；20个DSGA用例事件、4个真实生产反向后恢复/再验
+  及全仓vet通过；19710 Linux全部cmd交叉编译成功，非目标运行验收。
+- 不能重复36795首轮错误环境（终态1/851pass10fail），环境修正后904/907/908
+  均独立完成。所有工具当前终态，不按旧checkpoint重新启动。新活跃句柄以根
+  build/dsga-20261021-owner-checkpoint.json实际记录为准，先验证再接续。
+- 下一批应立即接**真实Agent凭据客户端/入口和DSGA操作代理**，不继续只做独立
+  库。Agent全局可信管理CA+固定GatewayURL/SNI，拒绝无管理域wildcard的对端，
+  投影SA token专用audience；长期SDK的旧Pending/boot不可静默重绑。中心代码
+  API/出参/证书配置和剩余边界详见Control-plane docs/DSGA-凭据签发与Mac验证.md。
+- 下一批随后Driver的创建前持久屏障、全部预算/quiesce/Monitor/最终Runner，
+  再支持其他PG版本/存储E2E。所有者Mac/不构建镜像/不准备K8s/不合main边界不变。
+
 ### 最新Pod主体核验与PG17维护（优先于下文历史）
 
 - Autoscaling 3eeafd997c8cc9079fcf90ffd0df27aa32c13ce5已推送，工作树仅保留所有者
