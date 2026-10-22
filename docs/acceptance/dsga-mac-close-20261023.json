@@ -1,0 +1,189 @@
+{
+  "verified_at": "2026-10-23T05:34:49.071504+08:00",
+  "scope": "本批已实现模块的Mac arm64验证，不是完整V3或Linux认证",
+  "overall_v3_complete": false,
+  "linux_runtime_validated": false,
+  "production_enabled": false,
+  "pg17_feature": "9cf674a53bcadaef7b3faecacf61af3c1cf59aac",
+  "pg17_maintenance": "d70986fd29d8293058c5780df982fce23e09eecf",
+  "control_plane": "0f929586e1f5db15982a129d0b0e944ae33aeadc",
+  "autoscaling": "8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c",
+  "upstream_snapshot": {
+    "checked_at": "2026-10-23T05:07:52.655402+08:00",
+    "refs": [
+      {
+        "repo": "repos/neon",
+        "ref": "refs/remotes/upstream/main",
+        "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+        "included": true
+      },
+      {
+        "repo": "repos/autoscaling",
+        "ref": "refs/remotes/upstream/main",
+        "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+        "included": true
+      },
+      {
+        "repo": "repos/neon/vendor/postgres-v17",
+        "ref": "refs/remotes/neon-upstream/REL_17_STABLE_neon",
+        "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+        "included": true
+      },
+      {
+        "repo": "repos/neon/vendor/postgres-v17",
+        "ref": "refs/remotes/pg-upstream/REL_17_STABLE",
+        "sha": "e05b7e2a45c7a151ad3f8771ba7f5d8b4ddd8d0c",
+        "included": true
+      },
+      {
+        "repo": "repos/control-plane",
+        "ref": "refs/remotes/origin/main",
+        "sha": "c8767714fa91fb5836d1b7da2d3e5e31f37dc78e",
+        "included": true
+      }
+    ]
+  },
+  "postgres_version": {
+    "build/neon-integrated/v17/src/backend/postgres": "postgres (PostgreSQL) 17.11 (9cf674a53bcadaef7b3faecacf61af3c1cf59aac)",
+    "build/neon-integrated-install/v17/bin/postgres": "postgres (PostgreSQL) 17.11 (9cf674a53bcadaef7b3faecacf61af3c1cf59aac)"
+  },
+  "native_kernel": {
+    "passed": 80,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 145.272
+  },
+  "formal_sql": {
+    "passed": 52,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 95.511
+  },
+  "go_rust_pg": {
+    "rust_passed": 1,
+    "go_race_processes_passed": 2,
+    "skipped": 0,
+    "ignored": 0,
+    "filtered": 0,
+    "persistent_owner_epoch": 2,
+    "final_buffers": 4096
+  },
+  "core_regress_passed": 225,
+  "isolation_passed": 123,
+  "recovery_tap": {
+    "off": {
+      "001": {
+        "passed": 63,
+        "skipped": 0,
+        "failed": 0
+      },
+      "035": {
+        "passed": 83,
+        "skipped": 0,
+        "failed": 0
+      },
+      "062": {
+        "passed": 14,
+        "skipped": 0,
+        "failed": 0
+      }
+    },
+    "on": {
+      "001": {
+        "passed": 63,
+        "skipped": 0,
+        "failed": 0
+      },
+      "035": {
+        "passed": 83,
+        "skipped": 0,
+        "failed": 0
+      },
+      "062": {
+        "passed": 14,
+        "skipped": 0,
+        "failed": 0
+      }
+    }
+  },
+  "prepare": {
+    "total": 145,
+    "passed": 13,
+    "environment_skipped": 132
+  },
+  "creation_plan_contract": {
+    "go_passed": 1,
+    "rust_passed": 1,
+    "valid": 2,
+    "rejected": 9
+  },
+  "control_plane_api": {
+    "pass_events": 1369,
+    "top_level": 380,
+    "subtests": 989,
+    "failed": 0,
+    "skipped": 0,
+    "packages_passed": 11,
+    "packages_without_tests": 9,
+    "actual_pg_sha": "0edff73d4779ee2f26d2394017370008e16ca132"
+  },
+  "auth_service_passed": 13,
+  "web_unit_passed": 43,
+  "web_build": "TypeScript/Vite passed",
+  "browser_e2e": "not run",
+  "full_check_world_this_sha": "not run",
+  "linux_amd64_cli": "cross compiled, not executed",
+  "code_gaps": [
+    "安全Renderer/租户与管理角色隔离/公开创建worker和VM模板",
+    "预算quiesce/Monitor Scheduler最终Runner fence/跨owner boot关闭",
+    "其他PG大版本和完整Neon存储链E2E"
+  ],
+  "evidence_sha256": {
+    "build/upstreame05b7-exact-core.log": "492007eb0699a4f7cbc71ef74139b205911a6dcc6f596ad165427d960fa255df",
+    "build/upstreame05b7-exact-sql.log": "e5109ad89f30d5aadd565edbf97ad1f46e364d425cb1ece872a3cf8c19593f57",
+    "build/upstreame05b7-exact-go-8e.log": "88dac3a56f0610a89823a0a7a8507c65c889e0a74134d6809cfe5d67499ad558",
+    "build/upstreame05b7-exact-regress225.log": "da5d1f232b03e9abff51ed5344ef47d6fb661893b1a7025dc94aa7bd9962ec64",
+    "build/upstreame05b7-exact-isolation123.log": "3556d964895d26b64c48aebebb7be08b2d2fa8c97106bce955e15c2749510769",
+    "build/upstreame05b7-exact-recovery001-off.log": "f9c7f36f0cb2271900bb7d9c31b4507929456a909bda782590ccd1ea706aca13",
+    "build/upstreame05b7-exact-recovery001-on.log": "97f04a02208870d6ee8dbe4f969edb9580117bb6e315fa81daeaa7471aeb490c",
+    "build/upstreame05b7-source-prepare.log": "f15f76e01e5bed16b4902d0060a69a17895dc59146da16699ce9bc75fa6c4cf2"
+  },
+  "dependency_remote_refs_verified": [
+    {
+      "repo": "repos/control-plane",
+      "ref": "refs/heads/codex/sync-control-plane-main-20261022-storage",
+      "sha": "4ece61691e9a31117370bd75d53a0d55d7502dc5",
+      "remote_verified": true
+    },
+    {
+      "repo": "repos/control-plane",
+      "ref": "refs/heads/codex/sync-control-plane-main-20261023",
+      "sha": "0f929586e1f5db15982a129d0b0e944ae33aeadc",
+      "remote_verified": true
+    },
+    {
+      "repo": "repos/control-plane",
+      "ref": "refs/heads/codex/dsga-control-plane-v3-20261020",
+      "sha": "0f929586e1f5db15982a129d0b0e944ae33aeadc",
+      "remote_verified": true
+    },
+    {
+      "repo": "build/pg17-upstream-source",
+      "ref": "refs/heads/codex/upstream-pg17-20261023",
+      "sha": "d70986fd29d8293058c5780df982fce23e09eecf",
+      "remote_verified": true
+    },
+    {
+      "repo": "repos/neon/vendor/postgres-v17",
+      "ref": "refs/heads/codex/dsga-pg17-v3-20261019",
+      "sha": "9cf674a53bcadaef7b3faecacf61af3c1cf59aac",
+      "remote_verified": true
+    },
+    {
+      "repo": "repos/autoscaling",
+      "ref": "refs/heads/codex/dsga-autoscaling-20261019",
+      "sha": "8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c",
+      "remote_verified": true
+    }
+  ]
+}

@@ -1,10 +1,31 @@
 # DSGA 当前实施状态
 
-更新：2026-10-22（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal保持
+更新：2026-10-23（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal保持
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新接续：2026-10-22 创建计划、058前向兼容及PG17维护
+## 最新：2026-10-23 Mac 本批收尾与 Linux 交接
+
+本批权威入口是[Mac收尾与Linux交接](DSGA-Mac收尾与Linux交接-20261023.md)及
+其中机器摘要。下面保留的2026-10-22文字是历史快照，版本/推送状态不能覆盖本节。
+
+本轮fresh fetch完整纳入社区PG17 `e05b7e2a` 和自有控制面main `c8767714`；
+官方Neon/Autoscaling/Neon PG17头未变且已包含。独立PG维护为 `d70986fd`，
+功能组合为 `9cf674a5`；主仓gitlink、ci/distribution与vendor/revisions三处一致。
+控制面 `0f929586` 已推送并核验，Autoscaling仍为已发布的 `8e1e0ea9`，本批未改代码。
+
+Mac完成本批核心/隔离/复制边界、原生内核与正式SQL、真实Go/Rust/PG链路验证；
+逐项数量、准确SHA、跳过/未执行及本批两次失败的修复证据见交接文档。控制面
+最终全API race1369事件、Auth服务13项、Web43项及类型/构建通过，0用例fail/skip；
+控制面这轮实际PG仍为准确0edff，不冒称新9cf运行。新版本prepare145仍为
+13通过/132环境skip，不能称145全部执行。
+
+**完整V3仍未完成。** 安全Renderer/租户角色隔离/公开创建worker、完整预算/
+quiesce/Monitor/Scheduler/最终Runner、跨owner/boot关闭、多PG与完整Neon存储
+E2E仍须编码；不能归为只有Linux待测。Linux/K8s/KVM/HugeTLB物理回收、故障
+迁移和性能长稳后验。默认关闭，不构建镜像、不准备/执行部署、不合main。
+
+## 历史接续：2026-10-22 创建计划、058前向兼容及PG17维护
 
 本节是当前事实；下面阶段文字保留当时快照，不能覆盖本节。**整体V3仍未完成，
 Goal active，默认关闭。已完成代码分批推送，未完成业务不能归为只有Linux待测。**
