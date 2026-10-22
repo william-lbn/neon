@@ -1,0 +1,214 @@
+{
+  "updated_at": "2026-10-23T07:43:16.444517+08:00",
+  "scope": "This role module Mac acceptance only. Full V3 incomplete; coding gaps are not Linux-only tests.",
+  "neon_code_commit": "1b7b2bd144b148eeec3535f500712141b9200f2b",
+  "pg17_commit": "9cf674a53bcadaef7b3faecacf61af3c1cf59aac",
+  "autoscaling_commit": "8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c",
+  "control_plane_commit": "dd6e040961e9df5da3bb4160f0efaa02872bd314",
+  "source_sha256": {
+    "ci/test-dsg-managed-roles.sh": "d95e9042c6ac1b5a4305a5aa5ccf8e8eb9fcea430f72ff3e239fed0df5d617b1",
+    "compute_tools/src/compute.rs": "d58e9bdb04114e139b748588c5419f4613dafafe730a00dcdc9c89dcb5dd38c6",
+    "compute_tools/src/dsg_roles.rs": "fa6f39baa731a3aae2f5c281fc6ae2f94b296d6443017996852e68f2e6aaf213",
+    "compute_tools/src/dsg_roles/tests.rs": "4a2cc506b675f7c4b9e485cbce05264e0e7164aa37e485942b5d8e85190602ef",
+    "compute_tools/src/lib.rs": "28cfbaadab52a3a462837384deb43baace33546d4dff3487ef6b85294b656ee2",
+    "compute_tools/src/spec_apply.rs": "4e1945e19eec113b4e05622cbc065e91d93057ed5d7b78865f5f97558419592d",
+    "compute_tools/tests/support/dsg_http.rs": "99415d6406cee11b6be3a7ac73e56886630d09213537fc1d36cc5b0e1a9f6edb",
+    "libs/compute_api/src/spec.rs": "45f1228955c2ca8bcd96a0b79603c30c50147efc9e8ada74c885a579eb4e2e61",
+    "libs/compute_api/tests/support/dsg_cluster.rs": "14e67282918395385420f96f0298a49053111bd1f0c114e5110a8904368c0fd2",
+    "pgxn/neon/dsg_control.c": "e09adf1b5a7e65565f7dddf5e1bb8c3b18860e75417154834d0bebf52d11c007"
+  },
+  "source_matches_committed_code": true,
+  "upstream_snapshot": {
+    "checked_at": "2026-10-23T07:31:26.052199+08:00",
+    "refs": [
+      {
+        "repo": "repos/neon",
+        "remote": "upstream",
+        "branch": "main",
+        "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+        "included": true,
+        "included_after_sync": true,
+        "feature_head": "1b7b2bd144b148eeec3535f500712141b9200f2b"
+      },
+      {
+        "repo": "repos/autoscaling",
+        "remote": "upstream",
+        "branch": "main",
+        "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+        "included": true,
+        "included_after_sync": true,
+        "feature_head": "8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c"
+      },
+      {
+        "repo": "repos/neon/vendor/postgres-v17",
+        "remote": "neon-upstream",
+        "branch": "REL_17_STABLE_neon",
+        "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+        "included": true,
+        "included_after_sync": true,
+        "feature_head": "9cf674a53bcadaef7b3faecacf61af3c1cf59aac"
+      },
+      {
+        "repo": "repos/neon/vendor/postgres-v17",
+        "remote": "pg-upstream",
+        "branch": "REL_17_STABLE",
+        "sha": "e05b7e2a45c7a151ad3f8771ba7f5d8b4ddd8d0c",
+        "included": true,
+        "included_after_sync": true,
+        "feature_head": "9cf674a53bcadaef7b3faecacf61af3c1cf59aac"
+      },
+      {
+        "repo": "repos/control-plane",
+        "remote": "origin",
+        "branch": "main",
+        "sha": "6db7bd74732d1a8000e210e006ab97226831d7ca",
+        "included": false,
+        "included_after_sync": true,
+        "feature_head": "dd6e040961e9df5da3bb4160f0efaa02872bd314"
+      }
+    ],
+    "resolved_at": "2026-10-23T07:39:05.287446+08:00"
+  },
+  "tests": {
+    "committed_role_lib": [
+      {
+        "passed": 18,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0,
+        "seconds": 7.95
+      }
+    ],
+    "committed_http": [
+      {
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0,
+        "seconds": 7.25
+      }
+    ],
+    "committed_go_bridge": [
+      {
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0,
+        "seconds": 9.36
+      }
+    ],
+    "sdk_and_http_feature_gate": [
+      {
+        "passed": 10,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0,
+        "seconds": 19.64
+      },
+      {
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0,
+        "seconds": 7.37
+      }
+    ],
+    "go_processes": 2,
+    "go_race": true,
+    "cross_language_plan": {
+      "status": "passed",
+      "go_pass_events": 1,
+      "rust_pass_tests": 1,
+      "contract_cases": 11,
+      "valid_cases": 2,
+      "invalid_cases": 9,
+      "contract_sha256": "8c1b5600b7f49726802d564308122b4f657e05e26b53145d0867f5f86f04f72b",
+      "source_unchanged": true
+    },
+    "full_mac_ci": {
+      "passed": 145,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 230.65,
+      "scope": "13 prepare/source + 80 kernel/control + 52 formal extension SQL; actual libraries supplied"
+    },
+    "extension_rebuild_sql": {
+      "passed": 52,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 100.395
+    },
+    "default_rust": {
+      "passed": 73,
+      "ignored": 19,
+      "failed": 0,
+      "note": "All 19 ignored cases explicitly passed in role3, SDK10, HTTP4, Go1, plan1; do not treat default ignored as execution"
+    },
+    "clippy": "passed; existing dependency warnings, no new warnings for changed crates",
+    "control_api": {
+      "pass_events": 1426,
+      "top_level": 409,
+      "subtests": 1017,
+      "fail_events": 0,
+      "skip_events": 0,
+      "source_files": 479,
+      "source_unchanged": true,
+      "actual_pg": "9cf674a",
+      "postgrest": "16.4"
+    },
+    "control_web": {
+      "passed": 47,
+      "failed": 0,
+      "skipped": 0,
+      "typecheck_build": "passed"
+    },
+    "control_vet": "passed",
+    "control_linux_amd64_cross_compile": "passed, not runtime"
+  },
+  "retained_failures": [
+    "Prototype production weak-group test reproduced password catalog exposure; final module uses NULL administrator password and SQL guard; old minimal fixture success is not final proof",
+    "prepare-final used PG_BIN without required libraries and correctly failed four module imports; retained log. Corrected full committed CI145 explicitly executed all cases, zero skip."
+  ],
+  "not_run": [
+    "new PG9cf full check-world and optional ICU/SSL/GSS/readline matrix",
+    "new AI browser E2E",
+    "Linux/K8s/KVM/HugeTLB/physical reclaim/migration/performance"
+  ],
+  "coding_gaps": [
+    "full safe Renderer/public create worker/HBA/proxy routes/original Operation-VM-Config-boot init receipt/mixed-image positive proof",
+    "physical replication command boundary",
+    "complete budgets/quiesce/Monitor/Scheduler/Controller/final Runner fence/owner-boot close",
+    "remaining PG major versions",
+    "full Neon storage end-to-end"
+  ],
+  "release": "disabled; no images, deployment preparation/execution, main merge or production release",
+  "goal": "active/incomplete",
+  "evidence_sha256": {
+    "build/dsga-managed-roles-lib-native-committed.log": "413773ed15785dcad4c068252a244e707a06972dc56b0cecac46f9c6d7a4feed",
+    "build/dsga-managed-roles-http-committed.log": "cf6cc56e482a1acbae4656a95d3534e7271bb8dd304423551fdaddf4dc840570",
+    "build/dsga-managed-roles-go-committed.log": "d739ece066bcea1bf35834b17c7a62caa397db438541e5d9f55505d0ede6a842",
+    "build/dsga-managed-roles-sdk-final.log": "224ce9da1a320f5906d83264694578f1aa0e57067d71403f7f892e7aa00ab550",
+    "build/dsga-managed-roles-extension-sql-final3.log": "2483e013998285afb2d645dc06011491479bf246fc8c925fa66436591d049252",
+    "build/dsga-managed-roles-ci145-committed.log": "36810cd86887470a5e5adb191c6b8fbea8ecafaa4f24ef85c622ff248f3c86c5",
+    "build/dsga-managed-roles-all-final.log": "fd136c6c143a8491f45fb71f7faae84081d4ec39babf0eadb7bd086c68dc8234",
+    "build/dsga-managed-roles-clippy-final.log": "4ac0a719c3328f73a2e7b0cf0e8dff7a1ab8a78e8c7636a9caed931666f811e1",
+    "build/dsga-managed-roles-plan-final.log": "4b5cd07a249fe17f96d9e882c18e54370b1862bd545b21ff9ec143188a16ed2c",
+    "build/dsga-managed-roles-prepare-final.log": "268fc3f9998c8a8e52d76bd39e91e85fc3005f263edfad1fa0e376ebd56ef4e2",
+    "build/dsga-managed-roles-resolved-upstream.json": "f1a4147120bae166d74d2c82ebd5c94bb9adda5366fc26ba57e9c00a96c89533",
+    "build/dsga-managed-roles-production-group-negative.log": "0d51e2809635db3760fb49c34f232971036b9ba6f42d75a2b60fd6a59c1e1388"
+  },
+  "control_evidence": {
+    "build/control-plane-main6db-credits-mac-final/tests.jsonl": "6d3b9809fa981780ba7e2ecd0130ebe3336a21bab22e0c3e2015b67963a7e693",
+    "build/control-plane-main6db-credits-mac-final/source-sha256.json": "8fec47f83f557cb3062d44a60350b3fde31f9cd4cea68df19c88290e5cf1dfcc",
+    "build/control-plane-main6db-credits-mac-final/summary.json": "47f53552767ad8c8ee5a7f5a1b90ee99ed1dc49b567d4bdafbf7cc6452127020",
+    "build/control-main6db-web-test.log": "7dd926f6db7181191c8009b66b73c045736569de777fdf12db1ab357b83a74af",
+    "build/control-main6db-web-build.log": "7a183c7529be765e25fba3904e104caad0471d1e2d01c002de7236ba564b84b9",
+    "build/control-main6db-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/control-main6db-linux-cli.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
