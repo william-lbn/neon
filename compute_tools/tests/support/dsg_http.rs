@@ -125,6 +125,18 @@ pub(crate) fn node(jwks: JwkSet, managed: bool, cluster: Option<&Cluster>) -> Ar
         minimum_guest_memory_bytes: 128 * 1024 * 1024,
         non_buffer_reserve_bytes: 64 * 1024 * 1024,
     });
+    if managed {
+        // 旧示例含postgres超级用户/MD5，只服务旧路径；受管协议夹具显式提供
+        // 普通应用角色，内部cloud_admin不能进入业务配置。这是合成测试值，不冒充实际
+        // Renderer或数据库角色已应用；真实角色/SCRAM由独立原生门禁验证。
+        spec.cluster.roles = serde_json::from_value(serde_json::json!([
+            {"name":"dsg_app","encrypted_password":null,"options":null}
+        ])).unwrap();
+        for db in &mut spec.cluster.databases {
+            db.owner = "dsg_app".into();
+        }
+        spec.delta_operations = None;
+    }
     let compute = ComputeNode::new(
         params,
         ComputeConfig {

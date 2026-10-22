@@ -44,7 +44,21 @@ impl ComputeNode {
         concurrency: usize,
     ) -> Result<()> {
         info!("Applying config with max {} concurrency", concurrency);
-        debug!("Config: {:?}", spec);
+        crate::dsg_roles::validate_spec(&spec)?;
+        crate::dsg_roles::validate_parameters(
+            &spec,
+            &self.params.privileged_role_name,
+            self.params.lakebase_mode,
+        )?;
+        if spec.dynamic_shared_buffers.is_some() {
+            // 受管spec含业务verifier，不能沿用完整Debug输出把凭据写入日志。
+            debug!(
+                "Applying DSGA spec with {} declared roles",
+                spec.cluster.roles.len()
+            );
+        } else {
+            debug!("Config: {:?}", spec);
+        }
 
         let rt = tokio::runtime::Handle::current();
         rt.block_on(async {
@@ -585,6 +599,21 @@ where
     Fut: Future<Output = Result<&'a Client>>,
 {
     debug!("Starting phase {:?}", &apply_spec_phase);
+    crate::dsg_roles::validate_parameters(&spec, &params.privileged_role_name, lakebase_mode)?;
+    if spec.dynamic_shared_buffers.is_some()
+        && matches!(apply_spec_phase, ApplySpecPhase::CreateAndAlterRoles)
+    {
+        // 受管角色不能走下面的流水SQL：权限图、读取和全部DDL必须在同一事务
+        // 中受目录锁保护。仅提交及权威重读成功后替换缓存，网络等待不持ctx锁。
+        let client = client().await?;
+        let roles =
+            crate::dsg_roles::apply(client, &spec, &params.privileged_role_name).await?;
+        ctx.write().await.roles = roles
+            .into_iter()
+            .map(|role| (role.name.clone(), role))
+            .collect();
+        return Ok(());
+    }
     let span = info_span!("db_apply_changes", phase=?apply_spec_phase);
     let span2 = span.clone();
     async move {

@@ -313,6 +313,9 @@ impl TryFrom<ComputeSpec> for ParsedSpec {
         if let Some(dsg) = &spec.dynamic_shared_buffers {
             dsg.validate()?;
         }
+        // 受管角色也必须在PGDATA创建之前验证；旧MD5/管理角色混入租户配置时
+        // 不得先启动、开放连接，再依靠之后的SQL配置补救。
+        crate::dsg_roles::validate_spec(&spec)?;
         // Extract the options from the spec file that are needed to connect to
         // the storage system.
         //
@@ -610,6 +613,11 @@ impl ComputeNode {
         let mut new_state = ComputeState::new();
         if let Some(spec) = config.spec {
             let pspec = ParsedSpec::try_from(spec).map_err(|msg| anyhow::anyhow!(msg))?;
+            crate::dsg_roles::validate_parameters(
+                &pspec.spec,
+                &params.privileged_role_name,
+                params.lakebase_mode,
+            )?;
             if params.lakebase_mode {
                 ComputeNode::set_spec(&params, &mut new_state, pspec);
             } else {
@@ -938,7 +946,11 @@ impl ComputeNode {
         }
 
         // configure local_proxy
-        if let Some(local_proxy) = &pspec.spec.local_proxy_config {
+        // 受管模式等实际角色应用/RO核验后才发布JWT角色映射；不能在PG就绪与
+        // 角色验证之间抢先启动异步配置。旧模式保留原启动顺序和失败策略。
+        if let Some(local_proxy) = pspec.spec.local_proxy_config.as_ref()
+            .filter(|_| pspec.spec.dynamic_shared_buffers.is_none())
+        {
             info!("configuring local_proxy");
 
             // Spawn a background task to do the configuration,
@@ -1022,6 +1034,9 @@ impl ComputeNode {
             tokio::task::spawn(async {
                 let _ = installed_extensions(conf).await;
             });
+        } else {
+            self.attest_dsg_read_only_roles(&pspec.spec)?;
+            self.configure_dsg_local_proxy(&pspec.spec)?;
         }
 
         // All done!
@@ -2109,6 +2124,10 @@ impl ComputeNode {
     #[instrument(skip_all)]
     pub fn reconfigure(&self) -> Result<()> {
         let spec = self.state.lock().unwrap().pspec.clone().unwrap().spec;
+        crate::dsg_roles::validate_spec(&spec)?;
+        crate::dsg_roles::validate_parameters(
+            &spec, &self.params.privileged_role_name, self.params.lakebase_mode,
+        )?;
 
         let tls_config = self.tls_config(&spec);
 
@@ -2130,7 +2149,9 @@ impl ComputeNode {
             });
         }
 
-        if let Some(ref local_proxy) = spec.local_proxy_config {
+        if let Some(local_proxy) = spec.local_proxy_config.as_ref()
+            .filter(|_| spec.dynamic_shared_buffers.is_none())
+        {
             info!("configuring local_proxy");
 
             // Spawn a background task to do the configuration,
@@ -2186,6 +2207,11 @@ impl ComputeNode {
             self.pg_reload_conf()?;
         }
 
+        // 受管重配禁止先异步发布新JWT映射、后检查数据库。RO不能运行角色DDL，
+        // 必须核验自己已回放的目录；主库则已经完成上面的原子角色phase。
+        self.attest_dsg_read_only_roles(&spec)?;
+        self.configure_dsg_local_proxy(&spec)?;
+
         let unknown_op = "unknown".to_string();
         let op_id = spec.operation_uuid.as_ref().unwrap_or(&unknown_op);
         info!(
@@ -2193,6 +2219,41 @@ impl ComputeNode {
             op_id
         );
 
+        Ok(())
+    }
+
+    pub(crate) fn attest_dsg_read_only_roles(&self, spec: &ComputeSpec) -> Result<()> {
+        if spec.dynamic_shared_buffers.is_none() || spec.mode == ComputeMode::Primary {
+            return Ok(());
+        }
+        crate::dsg_roles::validate_parameters(
+            spec, &self.params.privileged_role_name, self.params.lakebase_mode,
+        )?;
+        let conf = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_RO_roles"));
+        // 此函数从启动/重配的blocking控制线程调用，不持state/ctx锁。RO绝不
+        // 进入旧zenith_admin回退创建分支，缺管理身份直接失败，不能尝试修复目录。
+        tokio::runtime::Handle::current().block_on(async {
+            let connection = tokio::time::timeout(Duration::from_secs(5), conf.connect(NoTls))
+                .await;
+            let (client, driver) = match connection {
+                Ok(Ok(pair)) => pair,
+                _ => anyhow::bail!("DSGA replica private role connection unavailable"),
+            };
+            tokio::spawn(async move { let _ = driver.await; });
+            crate::dsg_roles::attest_read_only(&client, spec, &self.params.privileged_role_name).await
+        })
+    }
+
+    fn configure_dsg_local_proxy(&self, spec: &ComputeSpec) -> Result<()> {
+        if spec.dynamic_shared_buffers.is_some() {
+            if let Some(config) = &spec.local_proxy_config {
+                let mut config = config.clone();
+                config.tls = self.tls_config(spec).clone();
+                // 本地文件写入/SIGHUP失败必须阻止新配置就绪；这不是local_proxy
+                // 已完成reload的回执，完整中心公开路由仍须后续版本/身份验收。
+                local_proxy::configure(&config).context("DSGA verified local proxy configuration")?;
+            }
+        }
         Ok(())
     }
 

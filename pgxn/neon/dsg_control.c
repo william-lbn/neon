@@ -8,12 +8,16 @@
  */
 #include "postgres.h"
 
+#include "access/sysattr.h"
+#include "catalog/pg_authid.h"
 #include "common/cryptohash.h"
 #include "common/int.h"
 #include "common/jsonapi.h"
 #include "fmgr.h"
+#include "executor/executor.h"
 #include "lib/stringinfo.h"
 #include "miscadmin.h"
+#include "utils/acl.h"
 #include "utils/builtins.h"
 #include "utils/guc.h"
 #include "utils/json.h"
@@ -48,6 +52,55 @@ static char *dsg_compute_instance_id;
 static bool dsg_initializing_identity;
 static bool dsg_rejected_startup_identity;
 
+#ifdef NEON_DSG_CONTROL_SUPPORTED
+static ExecutorCheckPerms_hook_type dsg_previous_check_perms;
+
+/*-
+ * Neon弱组继承pg_read_all_data，普通NOSUPERUSER仍可能读取pg_authid密码。
+ * 在实际列权限检查处保护verifier，不能只依赖关系ACL或禁止直接表名：
+ * pg_shadow/SECURITY DEFINER的checkAsUser可能是超级用户，但原会话仍是租户。
+ * 同时检查当前身份和session身份。pg_roles使用常量掩码，不引用密码列，保持
+ * 标准角色元数据可读；整行/复合值则包含密码，必须拒绝。只对已启用DSGA生效，
+ * 旧Neon与其他PG版本不改变权限语义；仍调用原hook，不能覆盖其他扩展的限制。
+ * 同时拒绝租户经SQL执行器写认证目录（含错误配置的SQL SECURITY DEFINER）；
+ * 正常ALTER ROLE仍由PG自身的utility权限检查负责。本hook不是物理复制、WAL、
+ * 备份或任意不安全扩展的全通道保护，不能据此免除私有管理/HBA/发布来源门禁。
+ */
+static bool
+NeonDsgCheckAuthenticationSecrets(List *range_table, List *permission_infos,
+								bool report_error)
+{
+	if (enable_dynamic_shared_buffers &&
+		(!superuser() || !superuser_arg(GetSessionUserId())))
+	{
+		ListCell   *cell;
+
+		foreach(cell, permission_infos)
+		{
+			RTEPermissionInfo *info = lfirst_node(RTEPermissionInfo, cell);
+
+			if (info->relid == AuthIdRelationId &&
+				((info->requiredPerms & (ACL_INSERT | ACL_UPDATE | ACL_DELETE | ACL_TRUNCATE)) ||
+				 ((info->requiredPerms & ACL_SELECT) &&
+				 (bms_is_member(Anum_pg_authid_rolpassword - FirstLowInvalidHeapAttributeNumber,
+							   info->selectedCols) ||
+				 bms_is_member(InvalidAttrNumber - FirstLowInvalidHeapAttributeNumber,
+							   info->selectedCols)))))
+			{
+				if (report_error)
+					ereport(ERROR,
+							(errcode(ERRCODE_INSUFFICIENT_PRIVILEGE),
+							 errmsg("permission denied for protected authentication secrets")));
+				return false;
+			}
+		}
+	}
+	if (dsg_previous_check_perms)
+		return dsg_previous_check_perms(range_table, permission_infos, report_error);
+	return true;
+}
+#endif
+
 /*- 所有ID使用相同ASCII字节规则，不能用locale字符分类或截断超长输入。 */
 static bool
 NeonDsgValidId(const char *value, Size length)
@@ -77,6 +130,10 @@ NeonDsgCheckIdentity(char **value, void **extra, GucSource source)
 void
 pg_init_dsg_control(void)
 {
+#ifdef NEON_DSG_CONTROL_SUPPORTED
+	dsg_previous_check_perms = ExecutorCheckPerms_hook;
+	ExecutorCheckPerms_hook = NeonDsgCheckAuthenticationSecrets;
+#endif
 	/*-
 	 * 仅Postmaster配置，不能经普通SET/SIGHUP改变绑定。Compute必须用-c
 	 * 同时覆盖备份auto.conf/include；PG boot由内核随机生成，不能外部指定。

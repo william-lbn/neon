@@ -150,13 +150,76 @@ impl Cluster {
         self.start()
     }
 
+    /// 真实物理备库专项：仅从当前夹具的独占socket做basebackup；创建第二个
+    /// 0700目录及独立socket，不接触用户数据库，不以只读GUC模拟恢复状态。
+    #[allow(dead_code)] // 该共享夹具在多个测试crate编译，只有角色RO门禁调用此方法。
+    pub(crate) fn standby(&self) -> Result<Self> {
+        let directory = tempfile::Builder::new()
+            .prefix("neon-dsg-ro-")
+            .permissions(std::fs::Permissions::from_mode(0o700))
+            .tempdir()?;
+        let root = directory.path();
+        let mut standby = Self {
+            bin: self.bin.clone(),
+            data: root.join("data"),
+            socket: root.join("socket"),
+            log: root.join("postgres.log"),
+            directory: Some(directory),
+            started: false,
+            passed: false,
+        };
+        std::fs::create_dir(&standby.socket)?;
+        standby.command(
+            "pg_basebackup",
+            &[
+                "-h",
+                self.socket.to_str().unwrap(),
+                "-p",
+                "55432",
+                "-U",
+                "dsg_admin",
+                "-D",
+                standby.data.to_str().unwrap(),
+                "-X",
+                "stream",
+                "--no-slot",
+                "-R",
+                "-c",
+                "fast",
+            ],
+        )?;
+        let socket = standby
+            .socket
+            .to_str()
+            .unwrap()
+            .replace('\\', "\\\\")
+            .replace('\'', "''");
+        let config = standby.data.join("postgresql.conf");
+        let previous = std::fs::read_to_string(&config)?;
+        std::fs::write(
+            config,
+            format!("{previous}\nunix_socket_directories='{socket}'\n"),
+        )?;
+        standby.start()?;
+        Ok(standby)
+    }
+
     pub(crate) async fn connect(&self) -> Result<Client> {
+        self.connect_as("dsg_admin", None).await
+    }
+
+    /// 角色隔离门禁复用同一独占socket，允许验证真正的登录身份和SCRAM密码；
+    /// 不通过SET ROLE冒充另一个session_user。既有connect仍使用原测试管理身份。
+    pub(crate) async fn connect_as(&self, user: &str, password: Option<&str>) -> Result<Client> {
         let mut config = tokio_postgres::Config::new();
         config
             .host_path(&self.socket)
             .port(55432)
-            .user("dsg_admin")
+            .user(user)
             .dbname("postgres");
+        if let Some(password) = password {
+            config.password(password);
+        }
         let (client, driver) = config.connect(NoTls).await?;
         tokio::spawn(async move {
             let _ = driver.await;

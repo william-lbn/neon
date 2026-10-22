@@ -548,11 +548,27 @@ pub struct DeltaOp {
 
 /// Rust representation of Postgres role info with only those fields
 /// that matter for us.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[derive(Clone, Deserialize, Serialize, PartialEq, Eq)]
 pub struct Role {
     pub name: PgIdent,
     pub encrypted_password: Option<String>,
     pub options: GenericOptions,
+}
+
+// 业务角色的SCRAM verifier通过Role传递，不能让任意上层
+// ComputeSpec/ParsedSpec的Debug派生重新把它写入日志。只改变调试表示，
+// 不改变配置JSON、Eq或实际密码应用；None仍可区分没有密码的JWT角色。
+impl std::fmt::Debug for Role {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Role")
+            .field("name", &self.name)
+            .field(
+                "encrypted_password",
+                &self.encrypted_password.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field("options", &self.options)
+            .finish()
+    }
 }
 
 /// Rust representation of Postgres database info with only those fields
