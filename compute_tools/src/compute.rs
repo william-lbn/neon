@@ -1614,8 +1614,9 @@ impl ComputeNode {
     pub fn sync_safekeepers(&self, storage_auth_token: Option<String>) -> Result<Lsn> {
         let start_time = Utc::now();
 
-        let mut sync_handle = self
-            .postgres_command()?
+        // 先完成可失败的命令选择，再创建子进程，显式区分尚无Child的错误边界。
+        let mut command = self.postgres_command()?;
+        let mut sync_handle = command
             .args(["--sync-safekeepers"])
             .env("PGDATA", &self.params.pgdata) // we cannot use -D in this mode
             .envs(if let Some(storage_auth_token) = &storage_auth_token {
@@ -1889,8 +1890,8 @@ impl ComputeNode {
 
         // Start postgres
         info!("starting postgres");
-        let mut pg = self
-            .postgres_command()?
+        let mut command = self.postgres_command()?;
+        let mut pg = command
             .args(["-D", pgdata])
             .spawn()
             .expect("cannot start postgres process");
@@ -1965,8 +1966,8 @@ impl ComputeNode {
                 }
             }
         }
-        let mut pg = self
-            .postgres_command()?
+        let mut command = self.postgres_command()?;
+        let mut pg = command
             .args(["-D", &self.params.pgdata])
             .args(dsg_arguments)
             .envs(env_vars)

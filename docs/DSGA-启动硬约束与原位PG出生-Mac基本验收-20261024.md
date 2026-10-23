@@ -41,6 +41,14 @@ Linux已有受管标记但未冻结DSGA spec时也在启动前拒绝，不能绕
 输入摘要另保留`native-start-source-sha256.json`；后补代码只在Linux分支执行，
 Mac实际启动分支未再改变，依所有者要求不重复该用例。两轮unit不重复累计。
 
+最终复核clippy日志发现3个新链式表达式告警：分析器把`.postgres_command()?`
+误计为已spawn之后的提前退出。已将三个入口明确拆成“先可失败地构造Command，
+再spawn”，没有屏蔽lint，未改变命令/参数/启动顺序。最后只做受影响clippy编译，
+exit0，compute_tools无新增告警；原remote_storage的41条依赖告警保留。
+证据`build/dsga-bounded-birth-clippy-separated.log`及
+`build/dsga-bounded-birth-final-compiled-source-sha256.json`。这次等价拆分不重复
+已有功能测试；前述各阶段输入与日志均保留，不将它们说成最终源码一次性全量通过。
+
 仍须接线的**业务代码**：原VM可信sysinit配置/关闭旧根组迁移权限、避免旧
 cgconfigparser重新委派限额、root程序/配置安装权限、原启动额度生产者与独立认证
 root通道、完整预算/独立启动准入/排空/Host与最终VM执行、公开worker及生命周期、
