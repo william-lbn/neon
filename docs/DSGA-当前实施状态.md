@@ -4,7 +4,20 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-23 PG17安全启动Renderer核心与真实解析契约
+## 最新：2026-10-23 原创建凭据来源与真实Renderer回调
+
+控制面`e83946f`新增原Operation/VM绑定→typed immutable凭据GET→安全Renderer→
+来源UID/完整Data域摘要固定/核对的实际Render回调；高位900000060追加迁移保护
+来源事实，恢复不重写、同UID内容漂移拒绝、锁等待后lease过期拒绝。新增race
+4顶层/18pass事件及强化的2场景/3pass事件通过，实际摘要门禁反向确实触发断言，
+恢复原代码后通过。其余函数未变，不重复旧功能测试。详见
+[凭据来源Mac验收](DSGA-PG17创建凭据来源绑定与Mac验收-20261023.md)。
+
+本回调尚未接公开worker；DSGA凭据创建生产者、完整catalog、VM/TLS模板、原实例
+能力回执及预算/quiesce/最终Runner/真实存储E2E继续编码。仅PG17、每仓原汇总
+分支，PG仍fcada、AS仍8e1e。Goal active，不能改记为只有Linux待测。
+
+## 历史：2026-10-23 PG17安全启动Renderer核心与真实解析契约
 
 控制面`7c5da7f`从原冻结计划/真实VM UID及业务verifier/管理公钥生成确定性完整
 Compute配置；Neon`a9ce645`加入本次Go导出→真实ComputeConfig/ParsedSpec门禁。
