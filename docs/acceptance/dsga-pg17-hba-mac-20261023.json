@@ -1,0 +1,288 @@
+{
+  "recorded_at": "2026-10-23T13:04:39.408841+08:00",
+  "overall": "active/incomplete; local HBA/startup module complete, full V3 remains coding/integration work",
+  "scope": "PG17 only; other PG majors deferred; one canonical branch per fork; unchanged tests reused without changing original SHA scope",
+  "neon_code_commit": "1015c804f5863a5189c22079327cad87b32ec6bf",
+  "source_sha256": {
+    "ci/test-dsg-managed-roles.sh": "987edf8a226acc49ad0cd6e0d9d793db152ea439e68ffdd577773d6046d5d3ff",
+    "ci/test-dsg-rust-client.sh": "4b71d5e6a208cb3c38c318ad074e851526008e01febfa74d5aa5724bce6bee70",
+    "compute_tools/Cargo.toml": "0fc455e996adccc55ad9c4bafc28d6d3142b56c4a1eb8fb5bbee358b45687e2a",
+    "compute_tools/src/compute.rs": "53ae573ff361d7a2878f47f93f436463b3e549610e59390ca0d170e62d05dec4",
+    "compute_tools/src/config.rs": "22807a0aca4241253c998e3296e3f172a13a96be9c62c6fcc3771d85e28978a7",
+    "compute_tools/src/dsg.rs": "3c56b293b8373970bccb9ca1a14eb58d87cc46489310a5b2b3cf53069587b272",
+    "compute_tools/src/dsg_hba.rs": "77a5f947d422359fa873ae1c7f7887f8e4936f0493fc05e83d2558fa2304b226",
+    "compute_tools/src/dsg_hba/tests.rs": "f413fd509c371b8d9dabacd620d9e28b136381416995e52308c5de1010225e49",
+    "compute_tools/src/dsg_roles.rs": "16b04ec616139085b384964faabfe90416cba92fea12900bb98ffc5a8fac2d4e",
+    "compute_tools/src/dsg_roles/tests.rs": "72959b164df2159f429debba47bf19f5542eba0c37ec5416e4c59996de21496e",
+    "compute_tools/src/http/routes/dsg.rs": "e80285e30bc6fbdcafe60e89a948cd3b895570c98232b5acc08b038d541ad65d",
+    "compute_tools/src/lib.rs": "60e0fb482b5587611a49c468be9cb79b9fd197daba25ab75576a0b132e8bcf51",
+    "compute_tools/src/monitor.rs": "c7df7bbc1c54619579d06dcecc695f1f63d2839462dfeba34c49ece88071c2ba",
+    "compute_tools/tests/config_test.rs": "d206000e2678e1653982db6fd1cf49f4d0d45a619191ddb414b4d2355c813e73",
+    "compute_tools/tests/dsg_http.rs": "b6762c63e9fd84a5f6983b17c04c14723870a1c44503df68baff1d0cc6fb0e9b",
+    "compute_tools/tests/support/dsg_http.rs": "7c1db70e6ef4565832136cb8ef662f47bb63722f2a6489d45d8d63882d1d2cff",
+    "libs/compute_api/tests/support/dsg_cluster.rs": "a5879cee368b4205666c5e89ceb4671e66b5a6ad5bf624717d187433d83f5fb2"
+  },
+  "pg_commit": "fcada44b67d239aea8e699a721b99c470fc24d65",
+  "cargo_lock_sha256": "1358db1043de34ebdf091c27a76d7b6cbda3ae54319f3d4fb928e4edb9abf389",
+  "canonical_branches": {
+    "neon": {
+      "branch": "codex/dsga-neon-v3-20261019",
+      "code_commit": "1015c804f5863a5189c22079327cad87b32ec6bf"
+    },
+    "postgres": {
+      "branch": "codex/dsga-pg17-v3-20261019",
+      "commit": "fcada44b67d239aea8e699a721b99c470fc24d65",
+      "changed_this_batch": false
+    },
+    "autoscaling": {
+      "branch": "codex/dsga-autoscaling-20261019",
+      "commit": "8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c",
+      "changed_this_batch": false,
+      "owner_AGENTS_md_preserved": true
+    },
+    "control-plane": {
+      "branch": "codex/dsga-control-plane-v3-20261020",
+      "commit": "dd6e040961e9df5da3bb4160f0efaa02872bd314",
+      "changed_this_batch": false
+    }
+  },
+  "upstream_snapshot": {
+    "checked_at": "2026-10-23T13:00:38.597320+08:00",
+    "refs": [
+      {
+        "repo": "repos/neon",
+        "ref": "upstream/main",
+        "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+        "included": true
+      },
+      {
+        "repo": "repos/autoscaling",
+        "ref": "upstream/main",
+        "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+        "included": true
+      },
+      {
+        "repo": "repos/neon/vendor/postgres-v17",
+        "ref": "neon-upstream/REL_17_STABLE_neon",
+        "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+        "included": true
+      },
+      {
+        "repo": "repos/neon/vendor/postgres-v17",
+        "ref": "pg-upstream/REL_17_STABLE",
+        "sha": "e05b7e2a45c7a151ad3f8771ba7f5d8b4ddd8d0c",
+        "included": true
+      },
+      {
+        "repo": "repos/control-plane",
+        "ref": "origin/main",
+        "sha": "6db7bd74732d1a8000e210e006ab97226831d7ca",
+        "included": true
+      }
+    ]
+  },
+  "scoped_executions": {
+    "uri_mode_native": {
+      "log": "build/dsga-hba-uri-mode-affected3.log",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 19,
+      "seconds": 6.71,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "production_start": {
+      "log": "build/dsga-hba-final-contract-native.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 21,
+      "seconds": 7.0,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "bootstrap_socket": {
+      "log": "build/dsga-hba-bootstrap-socket.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 22,
+      "seconds": 0.02,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "frozen_contract_and_observation": {
+      "log": "build/dsga-hba-frozen-final.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 22,
+      "seconds": 0.01,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "port": {
+      "log": "build/dsga-hba-port-unit.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 23,
+      "seconds": 0.0,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "physical_readonly": {
+      "log": "build/dsga-hba-ro-affected.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 23,
+      "seconds": 1.58,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "http_native_affected": {
+      "log": "build/dsga-hba-http-native-affected.log",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 8,
+      "seconds": 4.11,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "http_claims": {
+      "log": "build/dsga-hba-http-claims-affected.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 11,
+      "seconds": 0.01,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "http_fence": {
+      "log": "build/dsga-hba-http-fence-affected.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 11,
+      "seconds": 0.0,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "http_bad_config": {
+      "log": "build/dsga-hba-http-frozen-config-new.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 12,
+      "seconds": 0.92,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "config": {
+      "log": "build/dsga-hba-config-affected.log",
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 0,
+      "seconds": 0.0,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    },
+    "literal_role_prefix": {
+      "log": "build/dsga-hba-literal-role-policy.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "filtered": 23,
+      "seconds": 0.01,
+      "phase": "scoped candidate or affected final source; not aggregate full suite"
+    }
+  },
+  "reused_file_safety_evidence": {
+    "log": "build/dsga-hba-native-new3.log",
+    "case": "owned_auth_files_replace_links_without_touching_targets_and_reject_unsafe_roots",
+    "case_passed": true,
+    "whole_group": "FAILED:2passed/1failed URI options case; do not label group green",
+    "final_safety_logic": "unchanged"
+  },
+  "candidate_to_final": [
+    "native startup passed after startup contract freeze; later canonical port validation, fresh socket cleanup and /prefix role guard do not change that case successful inputs; affected new paths tested separately",
+    "frozen observation/newresize extension covered by final pure contract and new native HTTP bad-config case",
+    "clippy duplicate_mod fixed by reusing existing cfgtest cluster module, no production semantics changed",
+    "code commit has exact17 source SHA256; final artifact bound to clean code1015; documentation-only followup does not require replay"
+  ],
+  "discovery_only": {
+    "lib": 24,
+    "http": 13,
+    "full_execution_claimed": false
+  },
+  "static": {
+    "clippy": "passed; no new compute_tools warning; existing dependency warnings retained",
+    "shell_syntax": "two affected gate scripts passed",
+    "source_locks": "HEAD/index matching fcada and clean actual PG checkout"
+  },
+  "exact_artifact": {
+    "recorded_at": "2026-10-23T12:59:16.583321+08:00",
+    "code_commit": "1015c804f5863a5189c22079327cad87b32ec6bf",
+    "pg_commit": "fcada44b67d239aea8e699a721b99c470fc24d65",
+    "binary": "/Users/williamlee/github/neon-self-dev/repos/neon/target/debug/compute_ctl",
+    "sha256": "64ccd9e2047aff744e5c329ca6b9dc53b0aa98c99aaad287287286ee969fb6c0",
+    "build_tag": "dsga-mac-source-1015c804f5863a5189c22079327cad87b32ec6bf",
+    "embedded_build_tag_verified": true,
+    "git_version_env": "1015c804f5863a5189c22079327cad87b32ec6bf",
+    "note": "compute_ctl uses official BUILD_TAG; GIT_VERSION is not a compute_ctl version interface. --help exited 0 before runtime creation. No functional tests rerun.",
+    "help_sha256": "81ace665600b9e944a8fd30a72b3d9f7c2bffabdac00150675232199994570b6",
+    "source_manifest_sha256": "d2c26145bc6aaa3576a4e9de91cbb4ed56a3572a2175fea5dfb2e67db53d4b58"
+  },
+  "retained_failures": {
+    "old_uri_options": "actual assertion decoded -c+role=... rather than spaces; fixed generated URI + to%20; native URI login and config equality passed",
+    "socket_clone": "real pg_basebackup copied dsg_socket lock from live primary; new fresh-data initializer protects postmaster.pid/unknown files and clears only known owned runtime files; actualRO passed after fix",
+    "query_port": "upstream rust-postgres appends authority default5432 and query55432; old get_ports.first chose wrong. Explicit canonical port validation/freeze fixed; actualRO passed1.58s",
+    "compile": "first libtest compile rejected private PostgresHandle; crate-only type visibility fixed, fields remain private",
+    "permissions": "new fixture initially used default tempdir0755; production correctly rejected; fixture explicitly0700, production rule unchanged",
+    "unsupported_version_flag": "official compute_ctl --version exit2 in tool result; empty output not used as version evidence. Existing BUILD_TAG + --help used instead; no new CLI feature"
+  },
+  "not_repeated": [
+    "old role18/HTTP12/SDK10/Go bridge",
+    "old CI145 belongs to9cf, not151-on-fcada",
+    "control-plane API1426/Web47/vet/build",
+    "old full check-world and SQL52"
+  ],
+  "receipt_boundary": "nonce proves only locally loaded HBA; not original Operation/VM/Config/boot/mixed-image capability initialization receipt",
+  "remaining_pg17_coding": [
+    "full safe Renderer/public creation worker and original authenticated initialization receipt",
+    "full budgets/quiesce including existing sessions/transactions/protocol/COPY",
+    "Monitor/Scheduler/Controller/finalRunner fencing, owner/boot controlled close",
+    "real Neon storage end-to-end"
+  ],
+  "linux_not_run": [
+    "same-release build/regression",
+    "Provider/HugeTLB/real physical reclaim",
+    "K8s RBAC/TokenReview/Lease/UID",
+    "KVM/NeonVM/virtio-mem/HostGuest/migration",
+    "fault recovery/load/performance/long run"
+  ],
+  "release": "default disabled; no images, deployment preparation/execution, main merges or production",
+  "evidence_sha256": {
+    "build/dsga-hba-uri-mode-affected3.log": "020ca427c1745f7dc86538ad151f38591b46e635a499e2710f6717cf7997d8f7",
+    "build/dsga-hba-final-contract-native.log": "e98232bf0a8d27e9678a4fed37a7e90960587893d1634433f7dd16b8001be32f",
+    "build/dsga-hba-bootstrap-socket.log": "8ed47b675631c376407aebfbe7ee9e864cc678d0db244d3a7c06347d802fda02",
+    "build/dsga-hba-frozen-final.log": "f2fdf4e9ad126b1b74806e0ec8f2f26906837e4c86b13135ee10c5a47fe0f9be",
+    "build/dsga-hba-port-unit.log": "b190382289e222a6764a751a87a6710b7c76d945f33f71e94f098c5fd87adfa5",
+    "build/dsga-hba-ro-affected.log": "9364a189d3d36f7d9ed3a9de237c1a36f687b445e901032c75944f3ddbad6018",
+    "build/dsga-hba-http-native-affected.log": "6ef99399e2ee3629a2bc61d728928b45d54e57052bc636bb2280bbc3cdc2bdef",
+    "build/dsga-hba-http-claims-affected.log": "ef45a13d1458de98b8b22cbe146890753a7310c9c4809c06b94adfe155185f9a",
+    "build/dsga-hba-http-fence-affected.log": "eebebaf29640a79ade81a377f2cf508895d78653b25262550fe966a24ce0b21b",
+    "build/dsga-hba-http-frozen-config-new.log": "e0438d4f00a5f46612f596e2669d1cf2b9b0e2d28d56891aa72e777a92fde4ca",
+    "build/dsga-hba-config-affected.log": "496442c6b16161e5989c953e1bfed358b2e444d5079952498481d5ba1f5226e6",
+    "build/dsga-hba-literal-role-policy.log": "5cd56cc6953972eb60f2e43f8420f8a77cc3b776fd8e28a90ddb492d2eace57a",
+    "build/dsga-hba-native-new3.log": "d076597c0e82a8b39d66cebb3a6908f8959b1056606dd9dc476f2aa1779ac381",
+    "build/dsga-hba-unit.log": "d11a1aebcf439bb30c9ac6bf42324c7cb0eb44baf2b4eb07e3c279acd5488d04",
+    "build/dsga-hba-clippy-publish.log": "8aade7f70e89001a79f8821f4e20c0c613a97581acaa58d6b4b94b4c5a8e8886",
+    "build/dsga-hba-lib-list-publish.log": "04487559f8e9ccf44601ca751dc84ae702c43fca4594d1f6e43957ea6a5c153f",
+    "build/dsga-hba-http-list-publish.log": "9cc941a1c4ed3c1afd62a53c2bf34c7efe118bc643e2c8656b063a02fec091f1",
+    "build/dsga-hba-exact-neon-build.log": "0c6e53721b84234d2c373c3084660597a5535dce927f31629c03100a3f96c285",
+    "build/dsga-hba-committed-build.log": "14c07ecd5a1339a2984415c12ccd35fb2b6f05ee64c7628b4122bcb62af4ad5c",
+    "build/dsga-hba-committed-help.txt": "81ace665600b9e944a8fd30a72b3d9f7c2bffabdac00150675232199994570b6",
+    "build/dsga-hba-committed-artifact.json": "2870419aece4d66d2d0469a1612935b187514d3d94db8e9859ab1725196ccb8c",
+    "build/dsga-hba-committed-source.json": "d2c26145bc6aaa3576a4e9de91cbb4ed56a3572a2175fea5dfb2e67db53d4b58",
+    "build/dsga-hba-upstream-publish.json": "8b0343604783a6d6bf95cd43fe4178cae053165dc538dd91e5740769eed33bdd",
+    "build/dsga-hba-failures/fixes.json": "7387ccd98c2b58120f9a20e02689215e2dbe777850a464408442931402e3938f",
+    "build/dsga-hba-failures/initial-untagged-build.log": "bdac722061877da815d1fa196296f17bb9d7375d4fa6d1c2aad720d74aa70a73",
+    "build/dsga-hba-failures/ro-inherited-socket-lock.log": "10e86e6110bdfb9f3d3beca58834416c64f642f7486874358ef0fd544e7b236c",
+    "build/dsga-hba-failures/ro-query-port.log": "80044b874371a817d2c4c9691dfc676ba0e40b5c8918d9525bc3f7f410ba1820"
+  }
+}
