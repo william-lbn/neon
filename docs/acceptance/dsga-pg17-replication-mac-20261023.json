@@ -1,0 +1,147 @@
+{
+  "checked_at": "2026-10-23T10:17:21.042212+08:00",
+  "scope": "current PG17 only; other majors deferred by owner; one canonical branch per fork; no repeated unchanged functional tests",
+  "pg_commit": "fcada44b67d239aea8e699a721b99c470fc24d65",
+  "pg_published_branch": "codex/dsga-pg17-v3-20261019",
+  "pg_remote_verified": "fcada44b67d239aea8e699a721b99c470fc24d65",
+  "neon_canonical_branch": "codex/dsga-neon-v3-20261019",
+  "autoscaling": {
+    "branch": "codex/dsga-autoscaling-20261019",
+    "sha": "8e1e0ea93d5f2775376622a38ed10f39d9d1fc8c",
+    "source_changed": false
+  },
+  "control_plane": {
+    "branch": "codex/dsga-control-plane-v3-20261020",
+    "sha": "dd6e040961e9df5da3bb4160f0efaa02872bd314",
+    "source_changed": false
+  },
+  "upstream_snapshot": {
+    "checked_at": "2026-10-23T07:45:41.717644+08:00",
+    "refs": [
+      {
+        "repo": "repos/neon",
+        "ref": "upstream/main",
+        "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+        "included": true
+      },
+      {
+        "repo": "repos/autoscaling",
+        "ref": "upstream/main",
+        "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+        "included": true
+      },
+      {
+        "repo": "repos/neon/vendor/postgres-v17",
+        "ref": "neon-upstream/REL_17_STABLE_neon",
+        "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+        "included": true
+      },
+      {
+        "repo": "repos/neon/vendor/postgres-v17",
+        "ref": "pg-upstream/REL_17_STABLE",
+        "sha": "e05b7e2a45c7a151ad3f8771ba7f5d8b4ddd8d0c",
+        "included": true
+      }
+    ]
+  },
+  "kernel_source_sha256": {
+    "src/backend/replication/slot.c": "49ffa447fef8f18c73b7449d6594d819e1090fe83fcb408b79b8d2ee1c0bb899",
+    "src/backend/replication/walsender.c": "c9f387c6fc2f44678eb568415a243693115b4f5e24dceda1d418219f885e3562",
+    "src/backend/storage/buffer/dynamic_shared_buffers.c": "b93ae73ab65600508ad5e3d8dc57d4ed393bbda73bd67b454e4c54414a9ddb11",
+    "src/backend/utils/init/postinit.c": "0fd41da2fc0239d348aff328dbab048f5add4bde115028954fe47ce62ff73beb",
+    "src/include/storage/dynamic_shared_buffers.h": "bec47d21008c32f139642d7e2176b7851dd66550aa23002f656102b526d5e398"
+  },
+  "tested_candidate_comparison": {
+    "src/backend/replication/slot.c": "one Chinese comment clarification only, exact reverse substitution SHA verified",
+    "src/backend/replication/walsender.c": "byte-identical to six-case successful candidate",
+    "src/backend/storage/buffer/dynamic_shared_buffers.c": "byte-identical to six-case successful candidate",
+    "src/backend/utils/init/postinit.c": "byte-identical to six-case successful candidate",
+    "src/include/storage/dynamic_shared_buffers.h": "byte-identical to six-case successful candidate"
+  },
+  "test_source_sha256": "45a7dbb9ec30f20371352944e3341937a37d7823c17eea4f620db950d24d1b4e",
+  "test_function_sha256": {
+    "test_physical_startup_and_logical_physical_commands_are_rejected": "470f011f1a1aa7eebc28f5d491e33417181107c91cea147b3343ec983c304e13",
+    "test_physical_slot_sql_protocol_definer_and_error_cleanup": "1eb383ea43484a77285a0a31a5cebd33381cffc621c5aea316d54740dbd5860a",
+    "test_logical_slots_and_actual_stream_are_preserved": "71276b04de2dd474bdbb313d27cc1beea46f5165bbdaa9686af9821fe063586c",
+    "test_internal_physical_stream_and_actual_basebackup_remain_available": "264c1dae63ab9dc3de4a1d9f611a3726aa9c51a84515f83a17c2dfda160662b9",
+    "test_replication_admission_closes_existing_and_new_logical_commands": "931d723319b5dba8578f54cbfcb383f4c8815e75ad73c8b3cef2c6fe08a76b05",
+    "test_disabled_mode_retains_upstream_replication_semantics": "866ec5a2b09a5303697922b56364ecc769cee044c50fb7c43e4631783c73ac86"
+  },
+  "candidate_tests": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 13.172,
+    "version": "17.11 (dsga-replication-candidate)"
+  },
+  "extended_case": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 0.869,
+    "name": "test_physical_startup_and_logical_physical_commands_are_rejected",
+    "note": "extended startup SET ROLE assertions only; five byte-identical cases not rerun"
+  },
+  "reused_unchanged_tests": [
+    "test_physical_slot_sql_protocol_definer_and_error_cleanup",
+    "test_logical_slots_and_actual_stream_are_preserved",
+    "test_internal_physical_stream_and_actual_basebackup_remain_available",
+    "test_replication_admission_closes_existing_and_new_logical_commands",
+    "test_disabled_mode_retains_upstream_replication_semantics"
+  ],
+  "exact_artifact_check": {
+    "status": "passed",
+    "pg_commit": "fcada44b67d239aea8e699a721b99c470fc24d65",
+    "binary_version": "postgres (PostgreSQL) 17.11 (fcada44b67d239aea8e699a721b99c470fc24d65)",
+    "new_guard_exported": true,
+    "actual_bootstrap_sql": {
+      "version": "PostgreSQL 17.11 (fcada44b67d239aea8e699a721b99c470fc24d65) on aarch64-apple-darwin27.0.0, compiled by Apple clang version 15.0.0 (clang-1500.3.9.4), 64-bit",
+      "enabled": "on",
+      "recovery": false,
+      "boot_nonzero": true
+    },
+    "kind": "exact-commit build/install/bootstrap/symbol acceptance; does not rerun the unchanged six functional cases",
+    "source_clean": true
+  },
+  "binding": "gitlink/index and both locks match clean fcada checkout; source-lock validator passed",
+  "discovery": {
+    "count": 151,
+    "executed": false,
+    "note": "discovery only; no claim151 passed. Previous145 evidence is old9cf scope."
+  },
+  "not_repeated": [
+    "old role18/HTTP12/SDK10/Go bridge tests",
+    "old CI145 on9cf",
+    "unchanged control-plane API1426/Web47/vet/build"
+  ],
+  "negative_evidence": "old9cf actual nonSU physical startup accepted; one expected failure retained; no physical data consumed/output",
+  "remaining_pg17_coding": [
+    "full safe Renderer/HBA/public worker/original Operation-VM-Config-boot mixed-image init receipt",
+    "full budgets and quiesce including already-running logical COPY",
+    "Monitor/Scheduler/Controller/finalRunner fencing and owner-boot close",
+    "full Neon storage end-to-end"
+  ],
+  "not_run": [
+    "new full check-world and optional build matrix",
+    "old mode-on replication TAP permission expectations/failover full E2E",
+    "Linux/K8s/KVM/HugeTLB/physical reclaim/migration/performance"
+  ],
+  "release": "default disabled; no image, deployment preparation/execution, main merge or production",
+  "goal": "active/incomplete",
+  "evidence_sha256": {
+    "build/dsga-replication-candidate-source.json": "4d61c12d2f0b75a195d4e35eb08afe5c785c82d69f84b247998815524af2f685",
+    "build/dsga-replication-candidate-native.log": "925e3021022dd868e92971541a66935870cc673b720b4957287c88ac97f94dba",
+    "build/dsga-replication-old9cf-negative.log": "5d40e42369fbfb8023e7453b3de89346e6e85b7a810eaec6ae93670d008b90dc",
+    "build/dsga-replication-startup-role-added.log": "fdfe0b84b1e7d0e3dc4e2e6959b8e8b753f7a0ddec1ab8ce6d7e87b91e0214b1",
+    "build/dsga-replication-exact-configure.log": "3310a0845eb1e58f9fc1c440f9577f7a54d7cb7390f3aa3446fa6a23e195e7bc",
+    "build/dsga-replication-exact-build.log": "941afb7de2c6ef2a4c1399811855f9b27d8ca726175597aeb0730dec38768ea8",
+    "build/dsga-replication-exact-install.log": "e191b925728c8906cf79f77cf2b40c23b17fe5fc063bb5b60190e43268f25e1a",
+    "build/dsga-replication-exact-artifact.json": "672020e480672fe6a89ef8bd8c8ad9b1f6c87eadc1c69634802180ced6ea6fe7"
+  },
+  "neon_source_sha256": {
+    "ci/test_dsg_replication.py": "45a7dbb9ec30f20371352944e3341937a37d7823c17eea4f620db950d24d1b4e",
+    "ci/test-dsg-postgres.sh": "0ad3247faa254efe4909f88a1e5dceb005fcee93c974d6ee662dd17d1a4992b0",
+    "ci/distribution.json": "2b0de619b526f8957d3d9ce17d43214ed8e97605365083b4d4b1ff83c08637ff",
+    "vendor/revisions.json": "52a921e9c67c70b955611d3632363db9d3359a333e01a0bd3747e43dcbc88a19"
+  }
+}

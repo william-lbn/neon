@@ -39,6 +39,9 @@ if f'({expected})' not in actual or not actual.startswith('postgres (PostgreSQL)
 PY
 
 make -C "$pg_build/src/test/modules/test_dsg_region" -j"${BUILD_JOBS:-4}" install
+# 逻辑复制正向用例必须实际解码COPY流，不能只证明物理通道被拒绝。
+# test_decoding只供独占临时集群使用，不加入产品默认扩展或生产部署。
+make -C "$pg_build/contrib/test_decoding" -j"${BUILD_JOBS:-4}" install
 # 主仓扩展的头文件依赖不保证覆盖所有API变化；清理后重编，避免旧ABI库混入。
 make -C "$task_root/pgxn/neon_rmgr" PG_CONFIG="$pg_config" clean
 make -C "$task_root/pgxn/neon_rmgr" PG_CONFIG="$pg_config" all
@@ -51,6 +54,11 @@ import unittest
 
 suite = unittest.defaultTestLoader.discover('.', pattern='test_dsg_postgres.py')
 suite.addTests(unittest.defaultTestLoader.discover('.', pattern='test_dsg_control.py'))
+replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replication.py')
+# 新测试文件遗漏打包时discover会返回空suite，不能让旧80项绿色覆盖本批缺测。
+if replication.countTestCases() < 6:
+    raise SystemExit('DSGA replication boundary suite is missing required cases')
+suite.addTests(replication)
 if suite.countTestCases() == 0:
     raise SystemExit('DSGA lifecycle suite contains zero tests')
 result = unittest.TextTestRunner(verbosity=2).run(suite)
