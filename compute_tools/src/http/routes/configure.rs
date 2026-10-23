@@ -50,6 +50,11 @@ pub(in crate::http) async fn configure(
             ) {
                 return JsonResponse::error(StatusCode::CONFLICT, error);
             }
+            // 存储位置/配置UUID可随官方通知更新；tenant/timeline属于原Compute
+            // 绑定，在修改spec/状态前拒绝改绑，不能等PG运行后再由初始化GET发现。
+            if let Err(error) = compute.verify_dsg_storage(&pspec) {
+                return JsonResponse::error(StatusCode::CONFLICT, error);
+            }
         }
 
         // Pass the tracing span to the main thread that performs the startup,

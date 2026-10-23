@@ -176,6 +176,9 @@ pub struct ComputeNode {
     // 包含身份和全部启动预算，不能只以dynamic开关相同认定运行中可重配。
     dsg_startup_spec:
         OnceLock<Option<compute_api::dynamic_shared_buffers::DynamicSharedBuffersSpec>>,
+    // 创建来源与当前configure操作分离。存储位置通知可更新operation_uuid，
+    // 但不能重写原创建回执的来源，或把同一Compute改绑另一tenant/timeline。
+    pub(crate) dsg_creation: OnceLock<Option<crate::dsg::CreationIdentity>>,
     dsg_pg_port: OnceLock<u16>,
 }
 
@@ -651,6 +654,12 @@ impl ComputeNode {
             }
         }
 
+        let dsg_creation = new_state
+            .pspec
+            .as_ref()
+            .map_or_else(OnceLock::new, |parsed| {
+                OnceLock::from(crate::dsg::CreationIdentity::from_parsed(parsed))
+            });
         Ok(ComputeNode {
             params,
             conn_conf,
@@ -666,6 +675,7 @@ impl ComputeNode {
             dsg_configuration_lock: Mutex::new(()),
             dsg_authentication_receipt: RwLock::new(None),
             dsg_startup_spec,
+            dsg_creation,
             dsg_pg_port,
         })
     }
@@ -879,7 +889,10 @@ impl ComputeNode {
         let pspec = compute_state.pspec.as_ref().expect("spec must be set");
         self.dsg_startup_spec
             .get_or_init(|| pspec.spec.dynamic_shared_buffers.clone());
+        self.dsg_creation
+            .get_or_init(|| crate::dsg::CreationIdentity::from_parsed(pspec));
         self.verify_dsg_startup(&pspec.spec)?;
+        self.verify_dsg_storage(pspec)?;
         if pspec.spec.dynamic_shared_buffers.is_some() {
             let port = crate::dsg_hba::port(&self.params.connstr)?;
             self.dsg_pg_port.get_or_init(|| port);
@@ -1911,6 +1924,7 @@ impl ComputeNode {
         {
             let state = self.state.lock().unwrap();
             self.verify_dsg_startup(&state.pspec.as_ref().unwrap().spec)?;
+            self.verify_dsg_storage(state.pspec.as_ref().unwrap())?;
             if let Some(dsg) = &state.pspec.as_ref().unwrap().spec.dynamic_shared_buffers {
                 for (name, value) in dsg.postgres_settings()? {
                     dsg_arguments.extend(["-c".to_owned(), format!("{name}={value}")]);
@@ -2281,7 +2295,9 @@ impl ComputeNode {
     /// as it's used to reconfigure a previously started and configured Postgres node.
     #[instrument(skip_all)]
     pub fn reconfigure(&self) -> Result<()> {
-        let spec = self.state.lock().unwrap().pspec.clone().unwrap().spec;
+        let parsed = self.state.lock().unwrap().pspec.clone().unwrap();
+        self.verify_dsg_storage(&parsed)?;
+        let spec = parsed.spec;
         self.verify_dsg_startup(&spec)?;
         anyhow::ensure!(
             spec.dynamic_shared_buffers.is_some()

@@ -11,9 +11,83 @@ use tokio::time::timeout;
 use tokio_postgres::{Client, Config, NoTls};
 use tracing::warn;
 
-use crate::compute::ComputeNode;
+use crate::compute::{ComputeNode, ParsedSpec};
+
+/// 本Compute首次接受的创建来源，冻结时使用ParsedSpec兼容官方旧GUC格式。
+/// operation_uuid只作为原创建来源；当前配置UUID仍用于官方配置追踪，不冻结
+/// roles、数据库目录或存储位置，否则合法configure后会错误复用旧认证证明。
+pub(crate) struct CreationIdentity {
+    operation_uuid: Option<String>,
+    tenant_id: String,
+    timeline_id: String,
+}
+
+impl CreationIdentity {
+    pub(crate) fn from_parsed(parsed: &ParsedSpec) -> Option<Self> {
+        parsed.spec.dynamic_shared_buffers.as_ref().map(|_| Self {
+            operation_uuid: parsed.spec.operation_uuid.clone(),
+            tenant_id: parsed.tenant_id.to_string(),
+            timeline_id: parsed.timeline_id.to_string(),
+        })
+    }
+}
+
+#[cfg(test)]
+mod creation_tests {
+    use super::*;
+    use compute_api::responses::{ComputeConfig, ComputeCtlConfig};
+
+    #[test]
+    fn frozen_creation_is_distinct_from_current_configuration() -> Result<()> {
+        let mut spec = crate::dsg_roles::tests::fixture();
+        spec.operation_uuid = Some("original-create".into());
+        let node = ComputeNode::new(
+            crate::dsg_roles::tests::parameters(),
+            ComputeConfig {
+                spec: Some(spec.clone()),
+                compute_ctl_config: ComputeCtlConfig {
+                    jwks: jsonwebtoken::jwk::JwkSet { keys: vec![] },
+                    tls: None,
+                },
+            },
+        )?;
+        spec.operation_uuid = Some("new-storage-notification".into());
+        let mut changed = ParsedSpec::try_from(spec)?;
+        node.verify_dsg_storage(&changed)?;
+        assert_eq!(
+            node.dsg_creation
+                .get()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .operation_uuid
+                .as_deref(),
+            Some("original-create")
+        );
+        changed.timeline_id = "ffffffffffffffffffffffffffffffff".parse()?;
+        assert!(node.verify_dsg_storage(&changed).is_err());
+        Ok(())
+    }
+}
 
 impl ComputeNode {
+    /// 只读比较已冻结存储身份，不持锁/不访问网络。原创建缺UUID的旧配置仍可
+    /// 沿原启动路径处理，但初始化证明必须拒绝补造来源；后续通知不能填补它。
+    pub(crate) fn verify_dsg_storage(&self, parsed: &ParsedSpec) -> Result<()> {
+        if parsed.spec.dynamic_shared_buffers.is_some() {
+            let original = self
+                .dsg_creation
+                .get()
+                .and_then(Option::as_ref)
+                .context("DSGA original creation identity unavailable")?;
+            ensure!(
+                original.tenant_id == parsed.tenant_id.to_string()
+                    && original.timeline_id == parsed.timeline_id.to_string(),
+                "DSGA storage identity cannot change within a Compute"
+            );
+        }
+        Ok(())
+    }
     /// 只在Running/原启动契约下核验真实PG、当前角色和已发布认证策略。状态/认证
     /// 锁只复制快照，不跨网络await；末尾再次比对spec、receipt代次和PG boot，
     /// 并发重配、文件漂移、连接断开或内部恢复都不能拼出成功。此GET不打开准入。
@@ -29,6 +103,7 @@ impl ComputeNode {
                 .lock()
                 .map_err(|_| anyhow::anyhow!("Compute state poisoned"))?;
             let parsed = state.pspec.as_ref().context("Compute spec unavailable")?;
+            self.verify_dsg_storage(parsed)?;
             (
                 parsed.spec.clone(),
                 parsed.tenant_id.to_string(),
@@ -73,7 +148,7 @@ impl ComputeNode {
                 .state
                 .lock()
                 .map_err(|_| anyhow::anyhow!("Compute state poisoned"))?;
-            // 逐字节比较同一类型序列化，覆盖roles/数据库/模式/存储和原operation；
+            // 逐字节比较同一类型序列化，覆盖roles/数据库/模式/存储和本次配置operation；
             // 不把公钥/verifier/目录快照写入回执或日志。
             ensure!(
                 state.status == ComputeStatus::Running
@@ -102,7 +177,11 @@ impl ComputeNode {
         let response = DsgInitializationResponse {
             protocol_version: 1,
             vm_shrink_permit: false,
-            operation_uuid: spec
+            operation_uuid: self
+                .dsg_creation
+                .get()
+                .and_then(Option::as_ref)
+                .context("Original creation identity unavailable")?
                 .operation_uuid
                 .clone()
                 .context("Original creation operation unavailable")?,

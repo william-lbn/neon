@@ -611,6 +611,44 @@ async fn issuer_fence_route_binds_signed_epoch_before_sql() -> Result<()> {
 }
 
 #[tokio::test]
+async fn managed_configure_rejects_storage_rebinding_before_state_change() -> Result<()> {
+    let signer = Signer::new();
+    let compute = node(signer.jwks.clone(), true, None);
+    let original = compute
+        .state
+        .lock()
+        .unwrap()
+        .pspec
+        .as_ref()
+        .unwrap()
+        .spec
+        .clone();
+    let mut changed = original.clone();
+    changed.timeline_id = Some("ffffffffffffffffffffffffffffffff".parse()?);
+    changed.operation_uuid = Some("storage-rebind-must-fail".into());
+    // 此夹具的Hadron一般配置路由免认证，DSGA管理路由仍独立验签；本项只验证
+    // 合法解析后的重配在修改state之前拒绝改绑，不启动PG/后台配置线程。
+    let (code, body) = invoke(
+        router(&compute),
+        Method::POST,
+        "/configure",
+        None,
+        Some(&serde_json::to_string(
+            &json!({"spec":changed,"compute_ctl_config":compute.compute_ctl_config}),
+        )?),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::CONFLICT, "{body}");
+    let state = compute.state.lock().unwrap();
+    assert_eq!(state.status, ComputeStatus::Running);
+    assert_eq!(
+        serde_json::to_value(&state.pspec.as_ref().unwrap().spec)?,
+        serde_json::to_value(original)?
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn admission_routes_require_execution_scope_and_strict_original_intents() -> Result<()> {
     let signer = Signer::new();
     let app = router(&node(signer.jwks.clone(), true, None));

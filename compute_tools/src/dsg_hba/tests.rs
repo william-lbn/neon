@@ -108,6 +108,19 @@ async fn native_initialization_observes_original_boot_roles_and_loaded_policy() 
     let encoded = serde_json::to_string(&good)?;
     assert!(!encoded.contains("SCRAM") && !encoded.contains("dsg_hba.conf"));
     assert_eq!(policy_before, fs::read(pg.data.join(HBA))?);
+    // 官方存储位置通知会产生新的configure operation_uuid。它不是新建Compute；
+    // 初始化GET应核验当前角色/策略和同一PG，却继续回报原创建来源，供原计划对账。
+    n.state
+        .lock()
+        .unwrap()
+        .pspec
+        .as_mut()
+        .unwrap()
+        .spec
+        .operation_uuid = Some("b409ef88-0e20-4f27-97b9-510d8217541d".into());
+    let after_notification = n.dsg_initialization().await?;
+    assert_eq!(after_notification.operation_uuid, good.operation_uuid);
+    assert_eq!(after_notification.observed.instance, good.observed.instance);
     // 再走真实生产Router→专用验签→Compute→正式SDK→原生PG，证明成功不是
     // 手填HTTP事实。只读创建scope不带执行权，返回仍明确保持普通SQL准入关闭。
     let now = std::time::SystemTime::now()
