@@ -4,7 +4,19 @@
 active**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-23 PG17私有认证与冻结启动契约
+## 最新：2026-10-23 PG17安全启动Renderer核心与真实解析契约
+
+控制面`7c5da7f`从原冻结计划/真实VM UID及业务verifier/管理公钥生成确定性完整
+Compute配置；Neon`a9ce645`加入本次Go导出→真实ComputeConfig/ParsedSpec门禁。
+新增Go race4顶层/15pass事件与Rust1实际通过，Go零skip、Rust零ignored/filtered；只验证新增
+路径，未重复旧业务套件。详见
+[Renderer契约验收](DSGA-PG17安全启动Renderer与Mac契约验收-20261023.md)。
+
+这仍是bootstrap核心；完整catalog/凭据来源UID绑定、公开创建worker/VM模板及
+原实例初始化回执未接齐，预算/quiesce/最终Runner与真实存储E2E继续编码。
+本阶段仅PG17，每仓同一汇总分支；Goal active，不改记为只有Linux待测。
+
+## 历史：2026-10-23 PG17私有认证与冻结启动契约
 
 代码`1015c804`实现私有0700 socket/peer、先hold再发布受管业务HBA、随机nonce
 实际加载确认、Postmaster参数覆盖备份认证配置、全部7字段及端口冻结；坏配置
