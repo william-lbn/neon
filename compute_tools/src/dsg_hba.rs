@@ -24,6 +24,8 @@ pub(crate) struct Receipt {
     nonce_database: String,
     hba: PathBuf,
     ident: PathBuf,
+    hba_text: String,
+    ident_text: String,
 }
 
 /// 字段用HBA自己的双引号语法，不用SQL字符串转义。引号也保护all/+/@/逗号等
@@ -287,6 +289,8 @@ pub(crate) fn prepare(
         nonce_database,
         hba: pgdata.join(HBA),
         ident: pgdata.join(IDENT),
+        hba_text: hba,
+        ident_text: ident,
     })
 }
 
@@ -321,6 +325,29 @@ async fn verify_active(config: &Config, receipt: &Receipt) -> Result<()> {
             .get::<_, bool>(0),
         "DSGA authentication reload signal failed"
     );
+    verify_loaded(config, receipt).await
+}
+
+/// 初始化GET只观察已成功发布的同一代认证文件，不发送SIGHUP、不改文件。
+/// 精确文件内容 + 新nonce拒绝 + 新peer连接身份/路径共同证明已加载的原策略；
+/// 外层还须在异步等待后比较同一Arc receipt，防止并发配置更换策略时拼接事实。
+pub(crate) async fn verify_loaded(config: &Config, receipt: &Receipt) -> Result<()> {
+    for (path, expected) in [
+        (&receipt.hba, &receipt.hba_text),
+        (&receipt.ident, &receipt.ident_text),
+    ] {
+        let metadata = fs::symlink_metadata(path)?;
+        ensure!(
+            metadata.is_file()
+                && !metadata.file_type().is_symlink()
+                && metadata.len() <= 1024 * 1024,
+            "DSGA authentication file is unsafe or oversized"
+        );
+        ensure!(
+            fs::read_to_string(path)? == *expected,
+            "DSGA authentication file differs from published policy"
+        );
+    }
     let mut probe = config.clone();
     probe.dbname(&receipt.nonce_database);
     let deadline = tokio::time::Instant::now() + Duration::from_secs(5);

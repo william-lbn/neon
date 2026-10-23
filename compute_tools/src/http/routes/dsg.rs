@@ -26,6 +26,7 @@ use crate::http::{JsonResponse, extract::Json, middleware::dsg_authorize::DsgAut
 pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<ComputeNode>> {
     Router::new()
         .route("/dsg/v1/capabilities", get(capabilities))
+        .route("/dsg/v1/initialization", get(initialization))
         .route("/dsg/v1/memory", get(memory))
         .route("/dsg/v1/resize", post(resize))
         .route("/dsg/v1/resize/status", post(status))
@@ -82,6 +83,27 @@ async fn capabilities(
             ),
         },
         Err(error) => error,
+    }
+}
+
+async fn initialization(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+) -> Response {
+    let spec = match compute.dsg_spec() {
+        Ok(spec) => spec,
+        Err(_) => return failure(StatusCode::PRECONDITION_FAILED, "not_available", None),
+    };
+    if claims.vm_uid != spec.vm_uid || claims.compute_instance_id != spec.compute_instance_id {
+        return failure(StatusCode::FORBIDDEN, "wrong_instance", None);
+    }
+    match compute.dsg_initialization().await {
+        Ok(receipt) => JsonResponse::success(StatusCode::OK, receipt),
+        Err(_) => failure(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "initialization_unconfirmed",
+            None,
+        ),
     }
 }
 

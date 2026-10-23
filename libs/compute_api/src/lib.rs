@@ -4,6 +4,7 @@ pub mod dsg_auth;
 #[cfg(feature = "postgres-client")]
 pub mod dsg_client;
 pub mod dsg_control;
+pub mod dsg_initialization;
 pub mod dsg_state;
 pub mod dynamic_shared_buffers;
 pub mod privilege;

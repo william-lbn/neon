@@ -9,6 +9,20 @@ use std::sync::Arc;
 use crate::dsg_roles::tests::cluster;
 
 fn node(spec: ComputeSpec, data: &Path, pgbin: Option<&Path>) -> Arc<ComputeNode> {
+    node_configured(
+        spec,
+        data,
+        pgbin,
+        jsonwebtoken::jwk::JwkSet { keys: vec![] },
+    )
+}
+
+fn node_configured(
+    spec: ComputeSpec,
+    data: &Path,
+    pgbin: Option<&Path>,
+    jwks: jsonwebtoken::jwk::JwkSet,
+) -> Arc<ComputeNode> {
     let mut params = parameters();
     params.pgdata = data.to_str().unwrap().into();
     params.connstr =
@@ -23,14 +37,154 @@ fn node(spec: ComputeSpec, data: &Path, pgbin: Option<&Path>) -> Arc<ComputeNode
             params,
             ComputeConfig {
                 spec: Some(spec),
-                compute_ctl_config: ComputeCtlConfig {
-                    jwks: jsonwebtoken::jwk::JwkSet { keys: vec![] },
-                    tls: None,
-                },
+                compute_ctl_config: ComputeCtlConfig { jwks, tls: None },
             },
         )
         .unwrap(),
     )
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[ignore = "requires exact PG17 and installed full Neon/test libraries"]
+async fn native_initialization_observes_original_boot_roles_and_loaded_policy() -> Result<()> {
+    use base64::Engine;
+    use http_body_util::BodyExt;
+    use ring::signature::KeyPair;
+    use tower::ServiceExt;
+    let private =
+        ring::signature::Ed25519KeyPair::generate_pkcs8(&ring::rand::SystemRandom::new())?;
+    let pair = ring::signature::Ed25519KeyPair::from_pkcs8(private.as_ref())?;
+    let jwks = serde_json::from_value(serde_json::json!({"keys":[{
+        "kty":"OKP","crv":"Ed25519","alg":"EdDSA","use":"sig","kid":"init-native",
+        "x":base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(pair.public_key().as_ref())
+    }]}))?;
+    let mut pg = cluster::Cluster::new()?;
+    let old = pg.connect().await?;
+    old.batch_execute("CREATE ROLE cloud_admin SUPERUSER LOGIN; CREATE ROLE neon_superuser NOLOGIN IN ROLE pg_read_all_data,pg_write_all_data;").await?;
+    let mut spec = fixture();
+    spec.operation_uuid = Some("04f1f1cd-e7d3-4f0b-a177-baba188d3c45".into());
+    spec.cluster.roles[1].options = Some(vec![compute_api::spec::GenericOption {
+        name: "NOBYPASSRLS".into(),
+        value: None,
+        vartype: "enum".into(),
+    }]);
+    let n = node_configured(spec.clone(), &pg.data, Some(&pg.bin), jwks);
+    let parsed = crate::compute::ParsedSpec::try_from(spec.clone())?;
+    let mut configuration = fs::read_to_string(pg.data.join("postgresql.conf"))?;
+    configuration.push_str(&format!(
+        "\nneon.tenant_id='{}'\nneon.timeline_id='{}'\n",
+        parsed.tenant_id, parsed.timeline_id
+    ));
+    fs::write(pg.data.join("postgresql.conf"), configuration)?;
+    prepare(&pg.data, 55432, &spec, false)?;
+    let stopped = std::process::Command::new(pg.bin.join("pg_ctl"))
+        .args(["-D", pg.data.to_str().unwrap(), "-w", "-m", "fast", "stop"])
+        .output()?;
+    ensure!(stopped.status.success(), "owned original PG did not stop");
+    drop(old);
+    let starting = n.clone();
+    let _postgres = tokio::task::spawn_blocking(move || starting.start_postgres(None)).await??;
+    let bin = pg.bin.clone();
+    let data = pg.data.clone();
+    scopeguard::defer! { let _=std::process::Command::new(bin.join("pg_ctl")).args(["-D",data.to_str().unwrap(),"-w","-m","fast","stop"]).output(); }
+    let config = n.get_tokio_conn_conf(None);
+    let admin = sql_config(&config).await?;
+    crate::dsg_roles::apply(&admin, &spec, "neon_superuser").await?;
+    n.state.lock().unwrap().status = compute_api::responses::ComputeStatus::Running;
+    // Running本身不能证明业务认证已发布。GET不能帮自己补发HBA或修改角色。
+    assert!(n.dsg_initialization().await.is_err());
+    let publish = n.clone();
+    let source = spec.clone();
+    tokio::task::spawn_blocking(move || publish.refresh_dsg_hba(&source, true)).await??;
+    let policy_before = fs::read(pg.data.join(HBA))?;
+    let good = n.dsg_initialization().await?;
+    assert!(!good.vm_shrink_permit && !good.observed.admission_open);
+    good.validate_for(
+        spec.dynamic_shared_buffers.as_ref().unwrap(),
+        spec.operation_uuid.as_deref().unwrap(),
+        &parsed.tenant_id.to_string(),
+        &parsed.timeline_id.to_string(),
+    )?;
+    let encoded = serde_json::to_string(&good)?;
+    assert!(!encoded.contains("SCRAM") && !encoded.contains("dsg_hba.conf"));
+    assert_eq!(policy_before, fs::read(pg.data.join(HBA))?);
+    // 再走真实生产Router→专用验签→Compute→正式SDK→原生PG，证明成功不是
+    // 手填HTTP事实。只读创建scope不带执行权，返回仍明确保持普通SQL准入关闭。
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs();
+    let claims = compute_api::dsg_auth::DsgHttpClaims {
+        aud: compute_api::dsg_auth::DSG_HTTP_AUDIENCE.into(),
+        scope: compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE.into(),
+        compute_id: n.params.compute_id.clone(),
+        vm_uid: cluster::VM.into(),
+        compute_instance_id: cluster::COMPUTE.into(),
+        issuer_epoch: compute_api::dsg_control::DsgUint64::new(1),
+        nbf: now - 1,
+        exp: now + 60,
+    };
+    let mut header = jsonwebtoken::Header::new(jsonwebtoken::Algorithm::EdDSA);
+    header.kid = Some("init-native".into());
+    let token = jsonwebtoken::encode(
+        &header,
+        &claims,
+        &jsonwebtoken::EncodingKey::from_ed_der(private.as_ref()),
+    )?;
+    let app = axum::Router::from(&crate::http::server::Server::External {
+        port: 0,
+        config: n.compute_ctl_config.clone(),
+        compute_id: n.params.compute_id.clone(),
+        instance_id: None,
+    })
+    .with_state(n.clone());
+    let response = app
+        .oneshot(
+            http::Request::builder()
+                .uri("/dsg/v1/initialization")
+                .header("authorization", format!("Bearer {token}"))
+                .body(axum::body::Body::empty())?,
+        )
+        .await?;
+    assert_eq!(response.status(), http::StatusCode::OK);
+    assert_eq!(response.headers()[http::header::CACHE_CONTROL], "no-store");
+    let body = response.into_body().collect().await?.to_bytes();
+    let http_fact: compute_api::dsg_initialization::DsgInitializationResponse =
+        serde_json::from_slice(&body)?;
+    http_fact.validate_for(
+        &good.startup,
+        &good.operation_uuid,
+        &good.tenant_id,
+        &good.timeline_id,
+    )?;
+    assert_eq!(http_fact.observed.instance, good.observed.instance);
+    assert!(!http_fact.observed.admission_open);
+    admin.batch_execute("ALTER ROLE dsg_app BYPASSRLS").await?;
+    assert!(n.dsg_initialization().await.is_err());
+    admin
+        .batch_execute("ALTER ROLE dsg_app NOBYPASSRLS")
+        .await?;
+    // 除显式属性，还须核验成员图中的内部管理身份路径。
+    admin.batch_execute("GRANT cloud_admin TO dsg_app").await?;
+    assert!(n.dsg_initialization().await.is_err());
+    admin
+        .batch_execute("REVOKE cloud_admin FROM dsg_app")
+        .await?;
+    n.dsg_initialization().await?;
+    fs::write(
+        pg.data.join(HBA),
+        format!(
+            "{}\nhost all all all trust\n",
+            String::from_utf8(policy_before.clone())?
+        ),
+    )?;
+    assert!(n.dsg_initialization().await.is_err());
+    fs::write(pg.data.join(HBA), policy_before)?;
+    n.dsg_initialization().await?;
+    // 真实Postmaster重启改变boot；长期SDK连接必须拒绝拼接旧初始化回执。
+    pg.restart()?;
+    assert!(n.dsg_initialization().await.is_err());
+    pg.passed = true;
+    Ok(())
 }
 
 #[test]

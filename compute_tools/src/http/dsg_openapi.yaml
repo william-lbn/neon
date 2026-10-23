@@ -3,6 +3,19 @@ info:
   title: Neon DSGA PG management API
   version: "1"
 paths:
+  /dsg/v1/initialization:
+    get:
+      operationId: getDsgInitialization
+      summary: 观察原实例的PG17、存储身份、角色目录及已加载认证策略
+      description: Running不足以通过；异步核验前后保持同一配置/认证代次/PG boot。只读，不打开普通SQL准入，不产生VM许可。
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 原operation_uuid/tenant/timeline、冻结启动预算与本次真实PG事实；必须与接受计划核对
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/InitializationResponse"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/capabilities:
     get:
       operationId: getDsgCapabilities
@@ -117,6 +130,31 @@ components:
                 required: [error]
                 properties: {error: {type: string}}
   schemas:
+    InitializationResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, operation_uuid, tenant_id, timeline_id, startup, authentication_policy_verified, ordinary_roles_verified, observed]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        operation_uuid: {type: string}
+        tenant_id: {type: string, pattern: '^[0-9a-f]{32}$'}
+        timeline_id: {type: string, pattern: '^[0-9a-f]{32}$'}
+        startup:
+          type: object
+          additionalProperties: false
+          required: [protocol_version, vm_uid, compute_instance_id, bootstrap_buffer_bytes, maximum_buffer_bytes, minimum_guest_memory_bytes, non_buffer_reserve_bytes]
+          properties:
+            protocol_version: {type: integer, enum: [2]}
+            vm_uid: {$ref: "#/components/schemas/ID"}
+            compute_instance_id: {$ref: "#/components/schemas/ID"}
+            bootstrap_buffer_bytes: {type: integer, minimum: 131072}
+            maximum_buffer_bytes: {type: integer, minimum: 131072}
+            minimum_guest_memory_bytes: {type: integer, minimum: 1}
+            non_buffer_reserve_bytes: {type: integer, minimum: 1}
+        authentication_policy_verified: {type: boolean, enum: [true]}
+        ordinary_roles_verified: {type: boolean, enum: [true]}
+        observed: {$ref: "#/components/schemas/Snapshot"}
     FenceRequest:
       type: object
       additionalProperties: false

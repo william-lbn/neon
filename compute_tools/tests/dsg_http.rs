@@ -54,6 +54,93 @@ async fn invoke(
 }
 
 #[tokio::test]
+async fn initialization_route_requires_dedicated_auth_and_published_native_proof() -> Result<()> {
+    let signer = Signer::new();
+    let app = router(&node(signer.jwks.clone(), true, None));
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            "/dsg/v1/initialization",
+            None,
+            None
+        )
+        .await?
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    let mut creation_claims = signer.claims();
+    creation_claims["scope"] = json!(compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE);
+    let creation_token = signer.token(&creation_claims);
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            "/dsg/v1/initialization",
+            Some(&creation_token),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    for (method, path, body) in [
+        (Method::GET, "/dsg/v1/memory", None),
+        (Method::POST, "/dsg/v1/resize", Some("{}")),
+        (Method::POST, "/dsg/v1/issuer/fence", Some("{}")),
+    ] {
+        assert_eq!(
+            invoke(app.clone(), method, path, Some(&creation_token), body)
+                .await?
+                .0,
+            StatusCode::UNAUTHORIZED
+        );
+    }
+    let token = signer.token(&signer.claims());
+    // 合法签名和伪装的Running仍不够：没有真实成功加载的认证策略，不能补发回执。
+    let (code, body) = invoke(
+        app.clone(),
+        Method::GET,
+        "/dsg/v1/initialization",
+        Some(&token),
+        None,
+    )
+    .await?;
+    assert_eq!(code, StatusCode::SERVICE_UNAVAILABLE);
+    assert_eq!(
+        serde_json::from_str::<Value>(&body)?["state"],
+        "initialization_unconfirmed"
+    );
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/initialization",
+            Some(&token),
+            Some("{}")
+        )
+        .await?
+        .0,
+        StatusCode::METHOD_NOT_ALLOWED
+    );
+    let mut wrong = signer.claims();
+    wrong["vm_uid"] = json!("replacement");
+    assert_eq!(
+        invoke(
+            app,
+            Method::GET,
+            "/dsg/v1/initialization",
+            Some(&signer.token(&wrong)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn missing_legacy_and_wrong_signature_never_gain_hadron_bypass() -> Result<()> {
     let signer = Signer::new();
     let app = router(&node(signer.jwks.clone(), false, None));

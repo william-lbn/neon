@@ -425,12 +425,23 @@ pub(crate) async fn attest_read_only(
     spec: &ComputeSpec,
     weak: &str,
 ) -> Result<()> {
-    validate_spec(spec)?;
-    validate_parameters(spec, weak, false)?;
     ensure!(
         spec.mode != ComputeMode::Primary,
         "DSGA read-only attestation requires replica mode"
     );
+    attest(client, spec, weak).await
+}
+
+/// 主库初始化回执与RO回放核验共用只读目录证明，不在健康检查里执行ALTER ROLE。
+/// 权限图/verifier/属性/内部无密码身份在同一MVCC快照内检查；实际恢复状态必须
+/// 匹配冻结的模式。主库不能借RO的回执，RO也不能借主库角色应用成功越过回放。
+pub(crate) async fn attest(client: &Client, spec: &ComputeSpec, weak: &str) -> Result<()> {
+    ensure!(
+        spec.dynamic_shared_buffers.is_some(),
+        "DSGA role attestation requires managed mode"
+    );
+    validate_spec(spec)?;
+    validate_parameters(spec, weak, false)?;
     let planned = plan(spec)?;
     let mut names = planned
         .iter()
@@ -491,7 +502,7 @@ pub(crate) async fn attest_read_only(
         ensure!(
             row.get::<_, String>(4) == ADMIN
                 && row.get::<_, String>(5) == ADMIN
-                && row.get::<_, bool>(6)
+                && row.get::<_, bool>(6) == (spec.mode != ComputeMode::Primary)
                 && !row.get::<_, bool>(9),
             "DSGA replica requires its private administrator and actual recovery mode"
         );

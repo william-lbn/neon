@@ -28,7 +28,7 @@ impl DsgAuthorize {
         Self { compute_id, jwks }
     }
 
-    fn verify(&self, token: &str) -> Result<DsgHttpClaims> {
+    fn verify(&self, token: &str, initialization: bool) -> Result<DsgHttpClaims> {
         ensure!(token.len() <= 8192, "oversized DSGA credential");
         let header = decode_header(token)?;
         let kid = header
@@ -74,7 +74,11 @@ impl DsgAuthorize {
         validation.set_required_spec_claims(&["exp", "nbf", "aud"]);
         let claims =
             decode::<DsgHttpClaims>(token, &DecodingKey::from_jwk(key)?, &validation)?.claims;
-        claims.validate_for_compute(&self.compute_id)?;
+        if initialization && claims.scope == compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE {
+            claims.validate_initialization_for_compute(&self.compute_id)?;
+        } else {
+            claims.validate_for_compute(&self.compute_id)?;
+        }
         Ok(claims)
     }
 }
@@ -96,7 +100,12 @@ impl AsyncAuthorizeRequest<Body> for DsgAuthorize {
                 .extract_parts::<TypedHeader<Authorization<Bearer>>>()
                 .await
                 .map_err(|_| deny())?;
-            let claims = policy.verify(bearer.token()).map_err(|_| deny())?;
+            // 创建只读token仅限唯一GET路径；不能通过POST/路径别名借到执行权。
+            let initialization = request.method() == http::Method::GET
+                && request.uri().path() == "/dsg/v1/initialization";
+            let claims = policy
+                .verify(bearer.token(), initialization)
+                .map_err(|_| deny())?;
             request.extensions_mut().insert(claims);
             Ok(request)
         })

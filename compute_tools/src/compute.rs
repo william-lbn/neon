@@ -169,6 +169,9 @@ pub struct ComputeNode {
     // 串行化受管角色核验、HBA hold/发布和代理配置。与state/ApplyContext锁
     // 分离，网络等待不占用状态API锁；同一配置流程不得再次获取此锁。
     dsg_configuration_lock: Mutex<()>,
+    // 仅成功发布的业务认证策略可产生初始化回执；配置开始即失效。异步检查
+    // 拷贝Arc后释放锁，结束时比较同一代，不能跨await持std锁或用旧策略补成功。
+    pub(crate) dsg_authentication_receipt: RwLock<Option<Arc<crate::dsg_hba::Receipt>>>,
     // 新建空闲Compute在首次启动时冻结；带初始spec的Compute在构造时冻结。
     // 包含身份和全部启动预算，不能只以dynamic开关相同认定运行中可重配。
     dsg_startup_spec:
@@ -661,6 +664,7 @@ impl ComputeNode {
             dsg_client: tokio::sync::OnceCell::new(),
             dsg_private_connections: AtomicBool::new(dsg_private),
             dsg_configuration_lock: Mutex::new(()),
+            dsg_authentication_receipt: RwLock::new(None),
             dsg_startup_spec,
             dsg_pg_port,
         })
@@ -2047,6 +2051,10 @@ impl ComputeNode {
         if spec.dynamic_shared_buffers.is_none() {
             return Ok(());
         }
+        *self
+            .dsg_authentication_receipt
+            .write()
+            .map_err(|_| anyhow::anyhow!("DSGA authentication state poisoned"))? = None;
         let receipt = crate::dsg_hba::prepare(
             Path::new(&self.params.pgdata),
             self.management_pg_port(),
@@ -2055,7 +2063,15 @@ impl ComputeNode {
         )?;
         let config = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_HBA"));
         tokio::runtime::Handle::current()
-            .block_on(crate::dsg_hba::reload_and_verify(&config, &receipt))
+            .block_on(crate::dsg_hba::reload_and_verify(&config, &receipt))?;
+        if publish {
+            *self
+                .dsg_authentication_receipt
+                .write()
+                .map_err(|_| anyhow::anyhow!("DSGA authentication state poisoned"))? =
+                Some(Arc::new(receipt));
+        }
+        Ok(())
     }
 
     pub fn get_tokio_conn_conf(&self, application_name: Option<&str>) -> tokio_postgres::Config {
