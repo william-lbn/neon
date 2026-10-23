@@ -401,6 +401,26 @@ controller模式下与memory.max组成保守聚合上界。该上界不包含外
 HugeTLB/surplus/HVO、SIGKILL恢复和物理行为留目标环境验收。见
 [本模块事实及接线边界](DSGA-Guest资源硬约束与控制链接线边界-20261024.md)。
 
+### 8.3 先约束后出生与PID不变量（2026-10-24）
+
+PG尚不存在时，以独立BootstrapCommand建立真实Guest/cgroup限额，不伪造PG PID。
+写前保留原身份/epoch/承诺与全部额度，准确读回前不能出生；组内必须空闲。未知
+写保留原意图，普通重试只观察，当前floor才能显式原样重放。裸floor并非启动预算。
+
+受管Linux固定帮助程序须root拥有且不可被postgres修改。普通postgres真实UID只
+可使用launch-postgres：同一资源锁内读回当前Held/真实约束，入固定cgroup，清
+能力保留/ambient，全线程降组/降真实/有效/保存UID，NO_NEW_PRIVS后原位exec固定
+PG。不能增加sudo/代理父进程却继续将Child PID当作PG；不得留下root线程或泄漏
+root控制FD。资源写操作另要求真实root及独立认证通道，不能接旧无认证neonvmd。
+
+配置/程序路径不由租户、环境或请求选择。缺少原启动事实、未知命令、约束漂移、
+在用组或Guest身份变化都不能回退旧cgexec。重启采用当前Held而非原较大额度；
+Guest已有受管标记但尚无冻结DSGA spec也必须拒绝启动，不能走非受管fallback。
+受管模式不使用无创建预算的临时512MiB预热池。此出生只启动关闭普通SQL准入的
+Postmaster，不代表预算全结算、普通SQL可用或VM许可。实际sysinit/安装/原预算
+与认证接线仍继续编码；Linux UID/SUID/迁移/PID信号/内核行为须后验，见
+[模块事实](DSGA-启动硬约束与原位PG出生-Mac基本验收-20261024.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

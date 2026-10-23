@@ -596,6 +596,23 @@ impl DatabricksEnvVars {
 }
 
 impl ComputeNode {
+    /// Linux受管模式不能依赖旧root cgroup的全员可写迁移权限。所有实际PG入口
+    /// （含sync-safekeepers）使用原位降权exec，参数/env/stdio仍由官方路径设置。
+    /// Mac保留本地实际PG基础验证路径；这不声称已验证Linux权限/资源隔离。
+    fn postgres_command(&self) -> Result<Command> {
+        if cfg!(target_os = "linux") {
+            let managed = self.frozen_dsg_startup().is_some();
+            crate::dsg_launch::validate_guest_mode(
+                managed,
+                Path::new(crate::dsg_launch::RESOURCE_CONFIG).try_exists()?,
+            )?;
+            if managed {
+                return crate::dsg_launch::linux_postgres_command(&self.params.pgbin);
+            }
+        }
+        Ok(maybe_cgexec(&self.params.pgbin))
+    }
+
     pub fn new(params: ComputeNodeParams, config: ComputeConfig) -> Result<Self> {
         let dsg_private = config
             .spec
@@ -1597,7 +1614,8 @@ impl ComputeNode {
     pub fn sync_safekeepers(&self, storage_auth_token: Option<String>) -> Result<Lsn> {
         let start_time = Utc::now();
 
-        let mut sync_handle = maybe_cgexec(&self.params.pgbin)
+        let mut sync_handle = self
+            .postgres_command()?
             .args(["--sync-safekeepers"])
             .env("PGDATA", &self.params.pgdata) // we cannot use -D in this mode
             .envs(if let Some(storage_auth_token) = &storage_auth_token {
@@ -1828,6 +1846,16 @@ impl ComputeNode {
 
     /// Start and stop a postgres process to warm up the VM for startup.
     pub fn prewarm_postgres_vm_memory(&self) -> Result<()> {
+        // 官方空池预热会另建固定512MiB PG池，既无原创建预算也非最终Postmaster。
+        // 受管模式在原root约束下直接启动安全bootstrap；不得为预热暂时放宽限额。
+        // 已有root标记但尚未拿到spec的池也只跳过预热，不据此授权PG或普通SQL。
+        if self.frozen_dsg_startup().is_some()
+            || (cfg!(target_os = "linux")
+                && Path::new(crate::dsg_launch::RESOURCE_CONFIG).try_exists()?)
+        {
+            info!("Skipping temporary PG prewarming for managed DSGA compute");
+            return Ok(());
+        }
         if self.params.lakebase_mode {
             // We are running in Hadron mode. Disabling this prewarming step for now as it could run
             // into dblet port conflicts and also doesn't add much value with our current infra.
@@ -1861,7 +1889,8 @@ impl ComputeNode {
 
         // Start postgres
         info!("starting postgres");
-        let mut pg = maybe_cgexec(&self.params.pgbin)
+        let mut pg = self
+            .postgres_command()?
             .args(["-D", pgdata])
             .spawn()
             .expect("cannot start postgres process");
@@ -1936,7 +1965,8 @@ impl ComputeNode {
                 }
             }
         }
-        let mut pg = maybe_cgexec(&self.params.pgbin)
+        let mut pg = self
+            .postgres_command()?
             .args(["-D", &self.params.pgdata])
             .args(dsg_arguments)
             .envs(env_vars)
