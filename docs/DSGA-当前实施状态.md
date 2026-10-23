@@ -3,7 +3,19 @@
 更新：2026-10-23（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-23 原根Tenant与创建恢复
+## 最新：2026-10-23 正式存储JWT接线与最新主线维护
+
+控制面481da30为原Tenant接入固定Service/Secret UID、专用HTTPS/EdDSA鉴权，
+冻结原计划引用；旧计划缺引用拒绝执行，SA不代替存储JWT。Mac7顶层/29pass
+事件、0fail/skip；456a4ec独立完整纳入自有主线新两项S3维护，受影响54pass
+事件、0fail/skip，最终OpenAPI3/vet/cmd/Web构建通过，重叠不累加。见
+[基本验收及Linux边界](DSGA-PG17正式存储鉴权-Mac基本验收-20261023.md)。
+
+遵守最新边界：Mac只必要基本与受影响验证；真实RBAC/证书供给/Service/VM/
+内存热插拔/故障留Linux K8s。全分片timeline、公开worker、预算准入、安全
+SQL路由与最终执行链仍须编码，不能称整体完成。当前仅PG17，Goal active。
+
+## 历史：2026-10-23 原根Tenant与创建恢复
 
 控制面4c25b1f补齐原项目typed Tenant创建与独立不可变存在事实，确认后404拒绝
 重建，校验官方完整shard身份。首轮409恢复失败已修，仅定向复验4pass和新增
