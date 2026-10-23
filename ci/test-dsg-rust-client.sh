@@ -55,6 +55,6 @@ print(f'All {count} DSGA suite tests executed successfully; zero ignored/filtere
 PY
 }
 # 完整SDK原生集群，以及Compute真实Router（含普通认证门禁和原生HTTP链路），
-# 分别校验非零/全量。不能只执行普通七项而让四项集成保持ignored。
+# 分别校验非零/全量。不能只执行普通认证项而让原生HTTP/冻结契约集成保持ignored。
 run_suite compute_api dsg_postgres_client
 run_suite compute_tools dsg_http

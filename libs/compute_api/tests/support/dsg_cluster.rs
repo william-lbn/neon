@@ -76,6 +76,11 @@ impl Cluster {
                 "--no-sync",
             ],
         )?;
+        // 生产getter现在只走PGDATA内私有socket。外部socket仍供原生测试管理/
+        // 故障安排；双socket仅为夹具，生产Postmaster固定为唯一私有目录。
+        let private_socket = cluster.data.join("dsg_socket");
+        std::fs::create_dir(&private_socket)?;
+        std::fs::set_permissions(&private_socket, std::fs::Permissions::from_mode(0o700))?;
         let socket = cluster
             .socket
             .to_str()
@@ -90,6 +95,13 @@ impl Cluster {
              neon.last_written_lsn_cache_size=1024\nneon.dsg_vm_uid='{VM}'\n\
              neon.dsg_compute_instance_id='{COMPUTE}'\nenable_dynamic_shared_buffers=on\n\
              shared_buffers='2MB'\nmax_shared_buffers='64MB'\n"
+            ) + &format!(
+                "unix_socket_directories='{socket},{}'\n",
+                private_socket
+                    .to_str()
+                    .unwrap()
+                    .replace('\\', "\\\\")
+                    .replace('\'', "''")
             ),
         )?;
         cluster.start()?;
@@ -153,7 +165,10 @@ impl Cluster {
     /// 真实物理备库专项：仅从当前夹具的独占socket做basebackup；创建第二个
     /// 0700目录及独立socket，不接触用户数据库，不以只读GUC模拟恢复状态。
     #[allow(dead_code)] // 该共享夹具在多个测试crate编译，只有角色RO门禁调用此方法。
-    pub(crate) fn standby(&self) -> Result<Self> {
+    pub(crate) fn standby(
+        &self,
+        prepare: impl FnOnce(&std::path::Path) -> Result<()>,
+    ) -> Result<Self> {
         let directory = tempfile::Builder::new()
             .prefix("neon-dsg-ro-")
             .permissions(std::fs::Permissions::from_mode(0o700))
@@ -195,11 +210,24 @@ impl Cluster {
             .replace('\\', "\\\\")
             .replace('\'', "''");
         let config = standby.data.join("postgresql.conf");
+        let private_socket = standby.data.join("dsg_socket");
+        std::fs::create_dir_all(&private_socket)?;
+        std::fs::set_permissions(&private_socket, std::fs::Permissions::from_mode(0o700))?;
         let previous = std::fs::read_to_string(&config)?;
         std::fs::write(
             config,
-            format!("{previous}\nunix_socket_directories='{socket}'\n"),
+            format!(
+                "{previous}\nunix_socket_directories='{socket},{}'\n",
+                private_socket
+                    .to_str()
+                    .unwrap()
+                    .replace('\\', "\\\\")
+                    .replace('\'', "''")
+            ),
         )?;
+        // 让调用者在真实物理拷贝上执行产品初始化；复制来的socket lock不能
+        // 在夹具中悄悄删除，否则会掩盖生产RO启动失败。
+        prepare(&standby.data)?;
         standby.start()?;
         Ok(standby)
     }

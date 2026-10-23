@@ -96,7 +96,8 @@ pub(crate) fn node(jwks: JwkSet, managed: bool, cluster: Option<&Cluster>) -> Ar
         cgroup: String::new(),
         #[cfg(target_os = "linux")]
         vm_monitor_addr: String::new(),
-        pgdata: String::new(),
+        // 无PG的协议测试不访问此目录；实际链路指向夹具真实私有socket。
+        pgdata: cluster.map(|c| c.data.to_string_lossy().into_owned()).unwrap_or_else(|| "/tmp/dsg-http-unused".into()),
         pgbin: String::new(),
         pgversion: "17".into(),
         external_http_port: 0,

@@ -32,7 +32,14 @@ struct RoleQuery {
 }
 
 fn ordinary_name(name: &str) -> bool {
-    if name.is_empty() || name.len() > 63 || name.chars().any(char::is_control) {
+    // PG17 HBA对以/开头的role token仍编译正则，即使token加了双引号。
+    // 受管角色要进入字面白名单，故拒绝此无法用普通引号表达的前缀，防止
+    // JWT回环trust白名单被/.*扩大为包括管理SU的任意角色。
+    if name.is_empty()
+        || name.len() > 63
+        || name.starts_with('/')
+        || name.chars().any(char::is_control)
+    {
         return false;
     }
     let lower = name.to_ascii_lowercase();
@@ -228,6 +235,7 @@ pub(crate) fn validate_parameters(spec: &ComputeSpec, weak: &str, lakebase: bool
     // 在其执行之前收窄到无转义歧义的内部名字，避免后面的租户门禁来得太晚。
     ensure!(
         !lakebase
+            && spec.databricks_settings.is_none()
             && !weak.is_empty()
             && weak.len() <= 63
             && weak
@@ -558,4 +566,4 @@ async fn execute_and_snapshot(client: &Client, sql: &RoleQuery) -> Result<Vec<Ro
 }
 
 #[cfg(test)]
-mod tests;
+pub(crate) mod tests;

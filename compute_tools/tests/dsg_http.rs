@@ -911,3 +911,39 @@ async fn native_restart_rejects_cached_discovery_and_stale_intent_cannot_bypass_
     cluster.passed = true;
     Ok(())
 }
+
+#[tokio::test]
+#[ignore = "requires exact PG17; verifies frozen identity through actual Router and SQL"]
+async fn native_bad_config_keeps_old_observation_and_blocks_new_resize() -> Result<()> {
+    let signer = Signer::new();
+    let (mut cluster, compute, app) = native(&signer).await?;
+    let token = signer.token(&signer.claims());
+    let initial = memory(&app, &token).await?;
+    let original = resize_request(&initial, 1, 512, DsgResizeKind::Grow);
+    let first = control(&app, &token, "/dsg/v1/resize", &original).await?;
+    assert_eq!(first.receipt.key, original.key);
+    // 模拟已被拒绝configure留下的错误配置。旧观察/取消必须仍按本Postmaster
+    // 原身份认证，不能因为mutable spec指向新VM而把原操作事实藏起来。
+    {
+        let mut state = compute.state.lock().unwrap();
+        state.pspec.as_mut().unwrap().spec.dynamic_shared_buffers.as_mut().unwrap().vm_uid = "recreated-config-vm".into();
+        state.status = ComputeStatus::Failed;
+    }
+    let old = control(&app, &token, "/dsg/v1/resize/status", &query(&original)).await?;
+    assert_eq!(old.receipt.key, original.key);
+    let cancelled = control(&app, &token, "/dsg/v1/resize/cancel", &query(&original)).await?;
+    assert_eq!(cancelled.receipt.key, original.key);
+    let before = memory(&app, &token).await?;
+    assert_eq!(before.observed.instance, initial.observed.instance);
+    // 即使上层状态被误置为Running，新resize仍须验证原启动契约，不能只看状态。
+    compute.state.lock().unwrap().status = ComputeStatus::Running;
+    let next = resize_request(&before, 2, 1024, DsgResizeKind::Grow);
+    let (status, _) = invoke(app.clone(), Method::POST, "/dsg/v1/resize", Some(&token), Some(&serde_json::to_string(&next)?)).await?;
+    assert_eq!(status, StatusCode::PRECONDITION_FAILED);
+    let after = memory(&app, &token).await?;
+    assert_eq!(after.observed.capacity_generation, before.observed.capacity_generation);
+    assert_eq!(after.observed.high_buffers, before.observed.high_buffers);
+    assert_eq!(after.observed.operation.as_ref().map(|o| &o.key), before.observed.operation.as_ref().map(|o| &o.key));
+    cluster.passed = true;
+    Ok(())
+}

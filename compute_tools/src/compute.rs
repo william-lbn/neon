@@ -27,8 +27,8 @@ use std::os::unix::fs::{PermissionsExt, symlink};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::str::FromStr;
-use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
-use std::sync::{Arc, Condvar, Mutex, RwLock};
+use std::sync::atomic::{AtomicBool, AtomicU32, AtomicU64, Ordering};
+use std::sync::{Arc, Condvar, Mutex, OnceLock, RwLock};
 use std::time::{Duration, Instant};
 use std::{env, fs};
 use tokio::{spawn, sync::watch, task::JoinHandle, time};
@@ -163,6 +163,17 @@ pub struct ComputeNode {
     /// DSGA执行栅栏须跨HTTP请求存活。只能初始化一次；连接失效不自动换客户端，
     /// 否则原执行结果未知时会丢掉本地原意图。持久恢复协议另由外层owner负责。
     pub(crate) dsg_client: tokio::sync::OnceCell<compute_api::dsg_client::DsgSqlClient<'static>>,
+    // 标记本Postmaster管理连接路由及端口初始化完成，不发布预算许可。启动前固定，禁止
+    // 在线切换DSGA模式；getter不重新取state锁，避免配置流程中重入锁。
+    dsg_private_connections: AtomicBool,
+    // 串行化受管角色核验、HBA hold/发布和代理配置。与state/ApplyContext锁
+    // 分离，网络等待不占用状态API锁；同一配置流程不得再次获取此锁。
+    dsg_configuration_lock: Mutex<()>,
+    // 新建空闲Compute在首次启动时冻结；带初始spec的Compute在构造时冻结。
+    // 包含身份和全部启动预算，不能只以dynamic开关相同认定运行中可重配。
+    dsg_startup_spec:
+        OnceLock<Option<compute_api::dynamic_shared_buffers::DynamicSharedBuffersSpec>>,
+    dsg_pg_port: OnceLock<u16>,
 }
 
 // store some metrics about download size that might impact startup time
@@ -434,7 +445,8 @@ fn maybe_cgexec(cmd: &str) -> Command {
     }
 }
 
-struct PostgresHandle {
+// crate内原生门禁需要保留实际启动句柄；字段仍私有，不扩大外部控制API。
+pub(crate) struct PostgresHandle {
     postgres: std::process::Child,
     log_collector: JoinHandle<Result<()>>,
 }
@@ -579,6 +591,17 @@ impl DatabricksEnvVars {
 
 impl ComputeNode {
     pub fn new(params: ComputeNodeParams, config: ComputeConfig) -> Result<Self> {
+        let dsg_private = config
+            .spec
+            .as_ref()
+            .is_some_and(|s| s.dynamic_shared_buffers.is_some());
+        let dsg_startup_spec = config.spec.as_ref().map_or_else(OnceLock::new, |spec| {
+            OnceLock::from(spec.dynamic_shared_buffers.clone())
+        });
+        let dsg_pg_port = OnceLock::new();
+        if dsg_private {
+            let _ = dsg_pg_port.set(crate::dsg_hba::port(&params.connstr)?);
+        }
         let connstr = params.connstr.as_str();
         let mut conn_conf = postgres::config::Config::from_str(connstr)
             .context("cannot build postgres config from connstr")?;
@@ -636,6 +659,10 @@ impl ComputeNode {
             extension_stats_task: Mutex::new(None),
             lfc_offload_task: Mutex::new(None),
             dsg_client: tokio::sync::OnceCell::new(),
+            dsg_private_connections: AtomicBool::new(dsg_private),
+            dsg_configuration_lock: Mutex::new(()),
+            dsg_startup_spec,
+            dsg_pg_port,
         })
     }
 
@@ -846,6 +873,17 @@ impl ComputeNode {
         }
 
         let pspec = compute_state.pspec.as_ref().expect("spec must be set");
+        self.dsg_startup_spec
+            .get_or_init(|| pspec.spec.dynamic_shared_buffers.clone());
+        self.verify_dsg_startup(&pspec.spec)?;
+        if pspec.spec.dynamic_shared_buffers.is_some() {
+            let port = crate::dsg_hba::port(&self.params.connstr)?;
+            self.dsg_pg_port.get_or_init(|| port);
+        }
+        self.dsg_private_connections.store(
+            pspec.spec.dynamic_shared_buffers.is_some(),
+            Ordering::Release,
+        );
         info!(
             "starting compute for project {}, operation {}, tenant {}, timeline {}, project {}, branch {}, endpoint {}, features {:?}, spec.remote_extensions {:?}",
             pspec.spec.cluster.cluster_id.as_deref().unwrap_or("None"),
@@ -948,7 +986,10 @@ impl ComputeNode {
         // configure local_proxy
         // 受管模式等实际角色应用/RO核验后才发布JWT角色映射；不能在PG就绪与
         // 角色验证之间抢先启动异步配置。旧模式保留原启动顺序和失败策略。
-        if let Some(local_proxy) = pspec.spec.local_proxy_config.as_ref()
+        if let Some(local_proxy) = pspec
+            .spec
+            .local_proxy_config
+            .as_ref()
             .filter(|_| pspec.spec.dynamic_shared_buffers.is_none())
         {
             info!("configuring local_proxy");
@@ -1035,7 +1076,13 @@ impl ComputeNode {
                 let _ = installed_extensions(conf).await;
             });
         } else {
+            let _configuration = pspec
+                .spec
+                .dynamic_shared_buffers
+                .is_some()
+                .then(|| self.dsg_configuration_lock.lock().unwrap());
             self.attest_dsg_read_only_roles(&pspec.spec)?;
+            self.refresh_dsg_hba(&pspec.spec, true)?;
             self.configure_dsg_local_proxy(&pspec.spec)?;
         }
 
@@ -1124,6 +1171,8 @@ impl ComputeNode {
                 // don't pass postgres connection string to vm-monitor if we don't want it to resize LFC
                 let pgconnstr = if disable_lfc_resizing {
                     None
+                } else if self.dsg_private_connections.load(Ordering::Acquire) {
+                    Some(crate::dsg_hba::private_dsn(Path::new(&self.params.pgdata), self.management_pg_port()))
                 } else {
                     Some(self.params.filecache_connstr.clone())
                 };
@@ -1629,9 +1678,16 @@ impl ComputeNode {
 
         let tls_config = self.tls_config(&pspec.spec);
         let databricks_settings = spec.databricks_settings.as_ref();
-        let postgres_port = self.params.connstr.port();
+        let postgres_port = if spec.dynamic_shared_buffers.is_some() {
+            Some(self.management_pg_port())
+        } else {
+            self.params.connstr.port()
+        };
 
         // Remove/create an empty pgdata directory and put configuration there.
+        if spec.dynamic_shared_buffers.is_some() {
+            crate::dsg_hba::startup_settings(pgdata_path, self.management_pg_port())?;
+        }
         self.create_pgdata()?;
         config::write_postgres_conf(
             pgdata_path,
@@ -1673,7 +1729,12 @@ impl ComputeNode {
         self.get_basebackup(compute_state, lsn)
             .with_context(|| format!("failed to get basebackup@{lsn}"))?;
 
-        if let Some(settings) = databricks_settings {
+        if spec.dynamic_shared_buffers.is_some() {
+            // 备份附带的trust/include不参与受管认证。先只开放peer管理，业务
+            // 白名单必须等主库角色应用或RO实际回放核验完成后再发布。
+            crate::dsg_hba::initialize_socket(pgdata_path, self.management_pg_port())?;
+            crate::dsg_hba::prepare(pgdata_path, self.management_pg_port(), spec, false)?;
+        } else if let Some(settings) = databricks_settings {
             copy_tls_certificates(
                 &settings.pg_compute_tls_settings.key_file,
                 &settings.pg_compute_tls_settings.cert_file,
@@ -1845,8 +1906,14 @@ impl ComputeNode {
         let mut dsg_arguments = Vec::new();
         {
             let state = self.state.lock().unwrap();
+            self.verify_dsg_startup(&state.pspec.as_ref().unwrap().spec)?;
             if let Some(dsg) = &state.pspec.as_ref().unwrap().spec.dynamic_shared_buffers {
                 for (name, value) in dsg.postgres_settings()? {
+                    dsg_arguments.extend(["-c".to_owned(), format!("{name}={value}")]);
+                }
+                for (name, value) in
+                    crate::dsg_hba::startup_settings(pgdata_path, self.management_pg_port())?
+                {
                     dsg_arguments.extend(["-c".to_owned(), format!("{name}={value}")]);
                 }
             }
@@ -1920,6 +1987,14 @@ impl ComputeNode {
     }
 
     pub fn get_conn_conf(&self, application_name: Option<&str>) -> postgres::Config {
+        if self.dsg_private_connections.load(Ordering::Acquire) {
+            return crate::dsg_hba::private_config(
+                Path::new(&self.params.pgdata),
+                self.management_pg_port(),
+                application_name,
+            )
+            .into();
+        }
         let mut conf = self.conn_conf.clone();
         if let Some(application_name) = application_name {
             conf.application_name(application_name);
@@ -1927,7 +2002,70 @@ impl ComputeNode {
         conf
     }
 
+    fn management_pg_port(&self) -> u16 {
+        // 不明确时返回不可用端口，不回退到其他目标；实际启动已验证并冻结。
+        self.dsg_pg_port.get().copied().unwrap_or(0)
+    }
+
+    fn verify_dsg_startup(&self, spec: &ComputeSpec) -> Result<()> {
+        anyhow::ensure!(
+            self.dsg_startup_spec
+                .get()
+                .is_some_and(|original| original == &spec.dynamic_shared_buffers),
+            "DSGA startup contract cannot change within a running Postmaster"
+        );
+        Ok(())
+    }
+
+    pub(crate) fn frozen_dsg_startup(
+        &self,
+    ) -> Option<compute_api::dynamic_shared_buffers::DynamicSharedBuffersSpec> {
+        self.dsg_startup_spec.get().cloned().flatten()
+    }
+
+    pub(crate) fn verify_dsg_running(&self) -> Result<()> {
+        let state = self
+            .state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("Compute state poisoned"))?;
+        anyhow::ensure!(
+            state.status == ComputeStatus::Running,
+            "Compute is not running"
+        );
+        self.verify_dsg_startup(
+            &state
+                .pspec
+                .as_ref()
+                .context("Compute spec unavailable")?
+                .spec,
+        )
+    }
+
+    /// 调用方持dsg_configuration_lock。固定私有身份/单socket，不用旧管理
+    /// URL的host/password/options；实际加载新HBA前不得发布代理映射或Running。
+    pub(crate) fn refresh_dsg_hba(&self, spec: &ComputeSpec, publish: bool) -> Result<()> {
+        if spec.dynamic_shared_buffers.is_none() {
+            return Ok(());
+        }
+        let receipt = crate::dsg_hba::prepare(
+            Path::new(&self.params.pgdata),
+            self.management_pg_port(),
+            spec,
+            publish,
+        )?;
+        let config = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_HBA"));
+        tokio::runtime::Handle::current()
+            .block_on(crate::dsg_hba::reload_and_verify(&config, &receipt))
+    }
+
     pub fn get_tokio_conn_conf(&self, application_name: Option<&str>) -> tokio_postgres::Config {
+        if self.dsg_private_connections.load(Ordering::Acquire) {
+            return crate::dsg_hba::private_config(
+                Path::new(&self.params.pgdata),
+                self.management_pg_port(),
+                application_name,
+            );
+        }
         let mut conf = self.tokio_conn_conf.clone();
         if let Some(application_name) = application_name {
             conf.application_name(application_name);
@@ -2038,7 +2176,11 @@ impl ComputeNode {
         // Merge-apply spec & changes to PostgreSQL state.
         self.apply_spec_sql(spec.clone(), conf.clone(), max_concurrent_connections)?;
 
-        if let Some(local_proxy) = &spec.clone().local_proxy_config {
+        if let Some(local_proxy) = spec
+            .local_proxy_config
+            .as_ref()
+            .filter(|_| spec.dynamic_shared_buffers.is_none())
+        {
             let mut local_proxy = local_proxy.clone();
             local_proxy.tls = tls_config.clone();
 
@@ -2124,10 +2266,23 @@ impl ComputeNode {
     #[instrument(skip_all)]
     pub fn reconfigure(&self) -> Result<()> {
         let spec = self.state.lock().unwrap().pspec.clone().unwrap().spec;
+        self.verify_dsg_startup(&spec)?;
+        anyhow::ensure!(
+            spec.dynamic_shared_buffers.is_some()
+                == self.dsg_private_connections.load(Ordering::Acquire),
+            "DSGA mode cannot change within a running Postmaster"
+        );
+        let _configuration = spec
+            .dynamic_shared_buffers
+            .is_some()
+            .then(|| self.dsg_configuration_lock.lock().unwrap());
         crate::dsg_roles::validate_spec(&spec)?;
         crate::dsg_roles::validate_parameters(
-            &spec, &self.params.privileged_role_name, self.params.lakebase_mode,
+            &spec,
+            &self.params.privileged_role_name,
+            self.params.lakebase_mode,
         )?;
+        self.refresh_dsg_hba(&spec, false)?;
 
         let tls_config = self.tls_config(&spec);
 
@@ -2149,7 +2304,9 @@ impl ComputeNode {
             });
         }
 
-        if let Some(local_proxy) = spec.local_proxy_config.as_ref()
+        if let Some(local_proxy) = spec
+            .local_proxy_config
+            .as_ref()
             .filter(|_| spec.dynamic_shared_buffers.is_none())
         {
             info!("configuring local_proxy");
@@ -2171,7 +2328,11 @@ impl ComputeNode {
 
         // Write new config
         let pgdata_path = Path::new(&self.params.pgdata);
-        let postgres_port = self.params.connstr.port();
+        let postgres_port = if spec.dynamic_shared_buffers.is_some() {
+            Some(self.management_pg_port())
+        } else {
+            self.params.connstr.port()
+        };
         config::write_postgres_conf(
             pgdata_path,
             &self.params,
@@ -2210,6 +2371,7 @@ impl ComputeNode {
         // 受管重配禁止先异步发布新JWT映射、后检查数据库。RO不能运行角色DDL，
         // 必须核验自己已回放的目录；主库则已经完成上面的原子角色phase。
         self.attest_dsg_read_only_roles(&spec)?;
+        self.refresh_dsg_hba(&spec, true)?;
         self.configure_dsg_local_proxy(&spec)?;
 
         let unknown_op = "unknown".to_string();
@@ -2227,20 +2389,25 @@ impl ComputeNode {
             return Ok(());
         }
         crate::dsg_roles::validate_parameters(
-            spec, &self.params.privileged_role_name, self.params.lakebase_mode,
+            spec,
+            &self.params.privileged_role_name,
+            self.params.lakebase_mode,
         )?;
         let conf = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_RO_roles"));
         // 此函数从启动/重配的blocking控制线程调用，不持state/ctx锁。RO绝不
         // 进入旧zenith_admin回退创建分支，缺管理身份直接失败，不能尝试修复目录。
         tokio::runtime::Handle::current().block_on(async {
-            let connection = tokio::time::timeout(Duration::from_secs(5), conf.connect(NoTls))
-                .await;
+            let connection =
+                tokio::time::timeout(Duration::from_secs(5), conf.connect(NoTls)).await;
             let (client, driver) = match connection {
                 Ok(Ok(pair)) => pair,
                 _ => anyhow::bail!("DSGA replica private role connection unavailable"),
             };
-            tokio::spawn(async move { let _ = driver.await; });
-            crate::dsg_roles::attest_read_only(&client, spec, &self.params.privileged_role_name).await
+            tokio::spawn(async move {
+                let _ = driver.await;
+            });
+            crate::dsg_roles::attest_read_only(&client, spec, &self.params.privileged_role_name)
+                .await
         })
     }
 
@@ -2251,7 +2418,8 @@ impl ComputeNode {
                 config.tls = self.tls_config(spec).clone();
                 // 本地文件写入/SIGHUP失败必须阻止新配置就绪；这不是local_proxy
                 // 已完成reload的回执，完整中心公开路由仍须后续版本/身份验收。
-                local_proxy::configure(&config).context("DSGA verified local proxy configuration")?;
+                local_proxy::configure(&config)
+                    .context("DSGA verified local proxy configuration")?;
             }
         }
         Ok(())
@@ -2260,6 +2428,11 @@ impl ComputeNode {
     #[instrument(skip_all)]
     pub fn configure_as_primary(&self, compute_state: &ComputeState) -> Result<()> {
         let pspec = compute_state.pspec.as_ref().expect("spec must be set");
+        let _configuration = pspec
+            .spec
+            .dynamic_shared_buffers
+            .is_some()
+            .then(|| self.dsg_configuration_lock.lock().unwrap());
 
         assert!(pspec.spec.mode == ComputeMode::Primary);
         if !pspec.spec.skip_pg_catalog_updates {
@@ -2287,6 +2460,8 @@ impl ComputeNode {
             self.pg_reload_conf()?;
         }
         self.post_apply_config()?;
+        self.refresh_dsg_hba(&pspec.spec, true)?;
+        self.configure_dsg_local_proxy(&pspec.spec)?;
 
         Ok(())
     }

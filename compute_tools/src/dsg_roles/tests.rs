@@ -7,7 +7,7 @@ use tokio::sync::RwLock;
 #[path = "../../../libs/compute_api/tests/support/dsg_cluster.rs"]
 // 通用夹具的restart由其他原生门禁使用，本角色专项不需要重启该实例。
 #[allow(dead_code)]
-mod cluster;
+pub(crate) mod cluster;
 
 fn verifier() -> String {
     format!(
@@ -26,7 +26,7 @@ fn role(name: &str, password: Option<String>) -> Role {
     }
 }
 
-fn fixture() -> ComputeSpec {
+pub(crate) fn fixture() -> ComputeSpec {
     let mut spec: ComputeSpec =
         serde_json::from_str(include_str!("../../tests/cluster_spec.json")).unwrap();
     spec.dynamic_shared_buffers = Some(DynamicSharedBuffersSpec {
@@ -90,6 +90,7 @@ fn managed_parsing_precedes_pgdata_and_redacts_verifiers() {
 fn reserved_duplicate_and_unbounded_names_are_rejected() {
     for name in [
         "postgres",
+        "/.*",
         "cloud_admin",
         "Cloud_Admin",
         "zenith_admin",
@@ -218,7 +219,7 @@ fn jwt_deltas_database_owners_and_internal_group_are_guarded() {
     assert!(validate_parameters(&spec, "neon_superuser", true).is_err());
 }
 
-fn parameters() -> crate::compute::ComputeNodeParams {
+pub(crate) fn parameters() -> crate::compute::ComputeNodeParams {
     crate::compute::ComputeNodeParams {
         compute_id: "role-native-test".into(),
         connstr: "postgres://cloud_admin@localhost/postgres".parse().unwrap(),
@@ -609,7 +610,7 @@ async fn native_fault_rollback_lock_deadline_and_session_identity() -> Result<()
 async fn native_replica_attests_replayed_roles_without_catalog_writes() -> Result<()> {
     let (mut primary, admin, private, mut spec) = native_setup().await?;
     production_phase(&private, &spec, context()).await?;
-    let mut standby = primary.standby()?;
+    let mut standby = primary.standby(|data| crate::dsg_hba::initialize_socket(data, 55432))?;
     spec.mode = ComputeMode::Replica;
     spec.skip_pg_catalog_updates = true;
     let replica = standby.connect_as(ADMIN, None).await?;
@@ -622,6 +623,7 @@ async fn native_replica_attests_replayed_roles_without_catalog_writes() -> Resul
     attest_read_only(&replica, &spec, "neon_superuser").await?;
     // 真实调用生产Compute的RO入口，包括其专用连接，而不是只测一个未接线函数。
     let mut params = parameters();
+    params.pgdata = standby.data.to_string_lossy().into_owned();
     params
         .connstr
         .query_pairs_mut()

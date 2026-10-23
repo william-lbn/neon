@@ -14,7 +14,6 @@ use compute_api::dsg_control::{
     DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery, DsgResizeRequest,
 };
 use compute_api::dsg_state::DsgControlResponse;
-use compute_api::responses::ComputeStatus;
 use http::{HeaderValue, StatusCode, header::CACHE_CONTROL};
 use jsonwebtoken::jwk::JwkSet;
 use serde::Serialize;
@@ -124,7 +123,7 @@ async fn resize(
     }
     match client(&compute, &claims).await {
         Ok(client) => {
-            if compute.get_status() != ComputeStatus::Running {
+            if compute.verify_dsg_running().is_err() {
                 return failure(
                     StatusCode::PRECONDITION_FAILED,
                     "not_available",

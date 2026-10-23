@@ -31,10 +31,10 @@ impl ComputeNode {
         );
         // 已发操作的观察/取消在配置、失败和终止准备时仍须可达；PG若已退出则连接
         // 自然报未知/不可用。新resize另在HTTP派发前要求Running，不能把状态切换当取消。
-        let spec = state
-            .pspec
-            .as_ref()
-            .and_then(|parsed| parsed.spec.dynamic_shared_buffers.clone())
+        // 运行中错误configure不能替换已发操作的原身份或隐藏旧结果。观察/取消
+        // 始终绑定本Postmaster冻结的启动事实；新resize另核验当前spec未漂移。
+        let spec = self
+            .frozen_dsg_startup()
             .context("DSGA is not enabled for this Compute")?;
         spec.validate()?;
         Ok(spec)

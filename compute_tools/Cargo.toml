@@ -35,7 +35,7 @@ indexmap.workspace = true
 itertools.workspace = true
 jsonwebtoken.workspace = true
 metrics.workspace = true
-nix.workspace = true
+nix = { workspace = true, features = ["user"] }
 notify.workspace = true
 num_cpus.workspace = true
 once_cell.workspace = true

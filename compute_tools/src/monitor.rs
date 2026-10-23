@@ -111,7 +111,6 @@ impl ComputeMonitor {
     #[instrument(skip_all)]
     pub fn run(&mut self) -> anyhow::Result<()> {
         // Suppose that `connstr` doesn't change
-        let connstr = self.compute.params.connstr.clone();
         let conf = self
             .compute
             .get_conn_conf(Some("compute_ctl:compute_monitor"));
@@ -124,7 +123,11 @@ impl ComputeMonitor {
         // Define `client` outside of the loop to reuse existing connection if it's active.
         let mut client = conf.connect(NoTls);
 
-        info!("starting compute monitor for {}", connstr);
+        // 连接URL可能含遗留口令；受管路径已改用peer，也不能把旧URL写入日志。
+        info!(
+            "starting compute monitor for {}",
+            self.compute.params.compute_id
+        );
 
         loop {
             if self.check_interrupts() {

@@ -61,6 +61,11 @@ pub fn write_postgres_conf(
         .as_ref()
         .map(|dsg| dsg.postgres_settings())
         .transpose()?;
+    let dsg_auth_settings = spec
+        .dynamic_shared_buffers
+        .as_ref()
+        .map(|_| crate::dsg_hba::startup_settings(pgdata_path, postgres_port.unwrap_or(5432)))
+        .transpose()?;
     let path = pgdata_path.join("postgresql.conf");
     // File::create() destroys the file content if it exists.
     let mut file = File::create(path)?;
@@ -385,6 +390,11 @@ pub fn write_postgres_conf(
     if let Some(settings) = dsg_settings {
         writeln!(file, "# DSGA受管安全启动：运行时H不得持久化到此配置")?;
         for (name, value) in settings {
+            writeln!(file, "{name}={}", escape_conf_value(&value))?;
+        }
+        // HBA/ident/socket同样由Postmaster -c固定；这里供审阅/重配，不能由
+        // 备份auto.conf/include恢复旧loopback trust。旧模式不改文件语义。
+        for (name, value) in dsg_auth_settings.expect("managed settings validated together") {
             writeln!(file, "{name}={}", escape_conf_value(&value))?;
         }
     }

@@ -61,7 +61,9 @@ mod managed_bootstrap_tests {
 
     impl Fixture {
         fn new() -> Self {
-            let path = std::env::temp_dir().join(format!("neon-config-{}", uuid::Uuid::new_v4()));
+            // Mac AF_UNIX只有104字节；配置现包含真实私有socket路径，短独占
+            // 目录避免把平台路径上限误当作配置生成失败，不放宽产品路径检查。
+            let path = PathBuf::from("/tmp").join(format!("neon-conf-{}", uuid::Uuid::new_v4().simple()));
             std::fs::create_dir(&path).unwrap();
             Self(path)
         }
