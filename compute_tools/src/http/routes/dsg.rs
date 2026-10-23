@@ -8,8 +8,11 @@ use axum::{
     response::Response,
     routing::{get, post},
 };
+use compute_api::dsg_admission::{DsgAdmissionCloseRequest, DsgAdmissionRequest};
 use compute_api::dsg_auth::DsgHttpClaims;
-use compute_api::dsg_client::{DsgCallError, DsgFenceCallError, DsgSqlClient};
+use compute_api::dsg_client::{
+    DsgAdmissionCallError, DsgCallError, DsgFenceCallError, DsgSqlClient,
+};
 use compute_api::dsg_control::{
     DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery, DsgResizeRequest,
 };
@@ -32,6 +35,13 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/resize/status", post(status))
         .route("/dsg/v1/resize/cancel", post(cancel))
         .route("/dsg/v1/issuer/fence", post(fence))
+        .route("/dsg/v1/admission", post(admission))
+        .route("/dsg/v1/admission/status", post(admission_status))
+        .route("/dsg/v1/admission/close-original", post(admission_close))
+        .route(
+            "/dsg/v1/admission/close-original/status",
+            post(admission_close_status),
+        )
         // 原始有类型JSON直接反序列化，不经Value/map去重；不得放入URL query或日志。
         .layer(DefaultBodyLimit::max(16 * 1024))
         .layer(AsyncRequireAuthorizationLayer::new(DsgAuthorize::new(
@@ -223,6 +233,109 @@ async fn query_operation(
             &query.key,
         ),
         Err(error) => error,
+    }
+}
+
+async fn admission(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<DsgAdmissionRequest>,
+) -> Response {
+    admission_operation(&compute, &claims, request, false).await
+}
+
+async fn admission_status(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<DsgAdmissionRequest>,
+) -> Response {
+    admission_operation(&compute, &claims, request, true).await
+}
+
+async fn admission_operation(
+    compute: &ComputeNode,
+    claims: &DsgHttpClaims,
+    request: DsgAdmissionRequest,
+    query: bool,
+) -> Response {
+    if request.validate().is_err() {
+        return failure(StatusCode::BAD_REQUEST, "invalid_request", None);
+    }
+    if claims.authorize_admission(&request, !query).is_err() {
+        return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
+    }
+    // 只读查询和关闭门禁可用于失败收口，不依赖外部Running标志；只有开放普通
+    // SQL必须再次检查当前运行态。检查成功仍不等于持久预算/issuer租约有效。
+    if !query && request.open && compute.verify_dsg_running().is_err() {
+        return failure(StatusCode::PRECONDITION_FAILED, "not_available", None);
+    }
+    match client(compute, claims).await {
+        Ok(client) => admission_result(if query {
+            client.admission_status(&request).await
+        } else {
+            client.set_admission(&request).await
+        }),
+        Err(error) => error,
+    }
+}
+
+async fn admission_close(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<DsgAdmissionCloseRequest>,
+) -> Response {
+    admission_close_operation(&compute, &claims, request, false).await
+}
+
+async fn admission_close_status(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<DsgAdmissionCloseRequest>,
+) -> Response {
+    admission_close_operation(&compute, &claims, request, true).await
+}
+
+async fn admission_close_operation(
+    compute: &ComputeNode,
+    claims: &DsgHttpClaims,
+    request: DsgAdmissionCloseRequest,
+    query: bool,
+) -> Response {
+    if request.validate().is_err() {
+        return failure(StatusCode::BAD_REQUEST, "invalid_request", None);
+    }
+    // 接管者可以引用旧原意图，但任何新关闭写入必须使用当前签名epoch。关闭
+    // 回执查询完全只读，允许新owner读取旧关闭回执，不能偷偷重放其setter。
+    if claims
+        .authorize_admission(&request.original, false)
+        .is_err()
+        || claims.authorize_admission(&request.close, !query).is_err()
+    {
+        return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
+    }
+    match client(compute, claims).await {
+        Ok(client) => admission_result(if query {
+            client
+                .admission_closure_status(&request.original, &request.close)
+                .await
+        } else {
+            client
+                .close_admission_over_original(&request.original, &request.close)
+                .await
+        }),
+        Err(error) => error,
+    }
+}
+
+fn admission_result<T: Serialize>(result: Result<T, DsgAdmissionCallError>) -> Response {
+    match result {
+        Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+        Err(DsgAdmissionCallError::NotSent(_)) => failure(StatusCode::CONFLICT, "not_sent", None),
+        // 请求已发送但未确认、busy或关闭未获完整证明时保留原意图，不能回显内部
+        // SQL错误、凭据或称为NoEffect；即使关闭确认也始终不产生VM缩容许可。
+        Err(DsgAdmissionCallError::Unconfirmed { .. }) => {
+            failure(StatusCode::SERVICE_UNAVAILABLE, "unconfirmed", None)
+        }
     }
 }
 

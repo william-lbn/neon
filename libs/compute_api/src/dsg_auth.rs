@@ -3,6 +3,7 @@
 use anyhow::{Result, ensure};
 use serde::{Deserialize, Serialize};
 
+use crate::dsg_admission::DsgAdmissionRequest;
 use crate::dsg_control::{DsgIssuerFenceRequest, DsgOperationKey, DsgUint64, validate_id};
 
 pub const DSG_HTTP_AUDIENCE: &str = "neon-dsga";
@@ -27,6 +28,27 @@ pub struct DsgHttpClaims {
 }
 
 impl DsgHttpClaims {
+    /// 普通准入执行必须等于已验签的当前epoch；原意图只读对账允许更早epoch。
+    /// boot由绑定实际PG的SDK再次核对；本方法不能把签名当作预算、租约或排空证明。
+    pub fn authorize_admission(
+        &self,
+        request: &DsgAdmissionRequest,
+        execution: bool,
+    ) -> Result<()> {
+        ensure!(self.scope == DSG_HTTP_SCOPE, "DSGA control scope required");
+        request.validate()?;
+        ensure!(
+            request.instance.vm_uid == self.vm_uid
+                && request.instance.compute_instance_id == self.compute_instance_id
+                && if execution {
+                    request.issuer_epoch == self.issuer_epoch
+                } else {
+                    request.issuer_epoch <= self.issuer_epoch
+                },
+            "DSGA admission instance or epoch is not authorized"
+        );
+        Ok(())
+    }
     /// 仅在验签、时间、aud/scope及Compute绑定均由中间件核验之后调用。接管
     /// 必须等于签名中的当前epoch，不像历史查询允许更低epoch；数值本身不是租约。
     pub fn authorize_fence(&self, request: &DsgIssuerFenceRequest) -> Result<()> {

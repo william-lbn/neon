@@ -14,6 +14,8 @@ use serde::de::DeserializeOwned;
 use tokio::time::timeout;
 use tokio_postgres::Client;
 
+use crate::dsg_admission::{DsgAdmissionClosure, DsgAdmissionRequest, DsgAdmissionResponse};
+
 use crate::dsg_control::{
     DsgInstanceIdentity, DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery,
     DsgResizeRequest, validate_id,
@@ -89,6 +91,45 @@ impl std::error::Error for DsgFenceCallError {
 struct ExecutionState {
     pending: Option<DsgResizeRequest>,
     in_flight: bool,
+    admission_pending: Option<DsgAdmissionRequest>,
+    admission_close: Option<DsgAdmissionRequest>,
+    admission_in_flight: bool,
+}
+
+/// 与resize分开保留原准入/关闭意图；错误不回显SQL、凭据或原始响应。
+#[derive(Debug)]
+pub enum DsgAdmissionCallError {
+    NotSent(anyhow::Error),
+    Unconfirmed {
+        request: DsgAdmissionRequest,
+        source: anyhow::Error,
+    },
+}
+
+impl fmt::Display for DsgAdmissionCallError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            Self::NotSent(_) => "DSGA admission request was not sent",
+            Self::Unconfirmed { .. } => "DSGA original admission result remains unconfirmed",
+        })
+    }
+}
+impl std::error::Error for DsgAdmissionCallError {}
+
+struct AdmissionFlight<'a> {
+    state: &'a Mutex<ExecutionState>,
+    resolved: bool,
+}
+impl Drop for AdmissionFlight<'_> {
+    fn drop(&mut self) {
+        if let Ok(mut state) = self.state.lock() {
+            state.admission_in_flight = false;
+            if self.resolved {
+                state.admission_pending = None;
+                state.admission_close = None;
+            }
+        }
+    }
 }
 
 /// 不在await期间持Mutex。future取消/超时/异常默认留下原意图，下一新意图不能穿越。
@@ -344,14 +385,305 @@ impl<'a> DsgSqlClient<'a> {
         Ok(response)
     }
 
+    /// 完整原准入与可选更高关闭意图的值副本；调用方必须另有持久journal。
+    pub fn pending_admission(
+        &self,
+    ) -> Result<(Option<DsgAdmissionRequest>, Option<DsgAdmissionRequest>)> {
+        let state = self
+            .execution_state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("DSGA execution fence is poisoned"))?;
+        Ok((
+            state.admission_pending.clone(),
+            state.admission_close.clone(),
+        ))
+    }
+
+    /// 只供外层从已认证持久journal恢复；不从一次PG查询推导或生成新意图。
+    /// 不能覆盖另一原意图/在途调用，保留并行resize未知栅栏；恢复不产生网络写。
+    pub fn restore_admission_pending(
+        &self,
+        original: &DsgAdmissionRequest,
+        close: Option<&DsgAdmissionRequest>,
+    ) -> Result<()> {
+        self.check_admission_binding(original, false)?;
+        if let Some(close) = close {
+            self.check_admission_binding(close, false)?;
+            close.closes_over(original)?;
+        }
+        let mut state = self
+            .execution_state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("DSGA execution fence is poisoned"))?;
+        ensure!(
+            !state.in_flight && !state.admission_in_flight,
+            "cannot restore over an in-flight call"
+        );
+        ensure!(
+            state.admission_pending.is_none() || state.admission_pending.as_ref() == Some(original),
+            "restore differs from retained admission"
+        );
+        ensure!(
+            state.admission_close.is_none() || state.admission_close.as_ref() == close,
+            "restore differs from retained closure"
+        );
+        state.admission_pending = Some(original.clone());
+        state.admission_close = close.cloned();
+        Ok(())
+    }
+
+    pub async fn set_admission(
+        &self,
+        request: &DsgAdmissionRequest,
+    ) -> Result<DsgAdmissionResponse, DsgAdmissionCallError> {
+        self.check_admission_binding(request, false)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        self.admission_function("neon_dsg_set_admission")
+            .await
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        let payload =
+            serde_json::to_string(request).map_err(|e| DsgAdmissionCallError::NotSent(e.into()))?;
+        let mut guard = self
+            .reserve_admission(request, None)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        // 独立观察连接允许close在resize/Provider阻塞时到达；open在本地与内核
+        // 两层拒绝穿过未知resize。未来取消/超时Drop只退出in_flight，不清原意图。
+        let response: DsgAdmissionResponse = self
+            .call(
+                &self.observer,
+                &self.observer_schema,
+                "neon_dsg_set_admission",
+                &payload,
+            )
+            .await
+            .map_err(|source| admission_unconfirmed(request, source))?;
+        response
+            .validate_for(request, &self.instance, false)
+            .map_err(|source| admission_unconfirmed(request, source))?;
+        guard.resolved = response.confirms();
+        Ok(response)
+    }
+
+    /// 只读查询不重发setter；未见/淘汰/普通memory/fence都不清未知栅栏。仅完整
+    /// 原回执能确认该门禁写入，且不与正在进行的本地请求/关闭协调争用清理权。
+    pub async fn admission_status(
+        &self,
+        request: &DsgAdmissionRequest,
+    ) -> Result<DsgAdmissionResponse, DsgAdmissionCallError> {
+        self.check_admission_binding(request, true)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        self.admission_function("neon_dsg_admission_status")
+            .await
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        let payload =
+            serde_json::to_string(request).map_err(|e| DsgAdmissionCallError::NotSent(e.into()))?;
+        let response: DsgAdmissionResponse = self
+            .call(
+                &self.observer,
+                &self.observer_schema,
+                "neon_dsg_admission_status",
+                &payload,
+            )
+            .await
+            .map_err(|source| admission_unconfirmed(request, source))?;
+        response
+            .validate_for(request, &self.instance, true)
+            .map_err(|source| admission_unconfirmed(request, source))?;
+        if response.confirms() {
+            let mut state = self.execution_state.lock().map_err(|_| {
+                DsgAdmissionCallError::NotSent(anyhow::anyhow!("DSGA execution fence is poisoned"))
+            })?;
+            if !state.admission_in_flight
+                && state.admission_close.is_none()
+                && state.admission_pending.as_ref() == Some(request)
+            {
+                state.admission_pending = None;
+            }
+        }
+        Ok(response)
+    }
+
+    /// 显式受控关闭：原意图来自外层持久账本（允许恢复本进程尚未知的原请求），
+    /// 若已有本地未知则必须逐字匹配。close成功才解除本地未来门禁写栅栏；返回
+    /// prior_may_have_applied恒true，外层仍须实际排空并保留旧预算，不能伪造NoEffect。
+    pub async fn close_admission_over_original(
+        &self,
+        original: &DsgAdmissionRequest,
+        close: &DsgAdmissionRequest,
+    ) -> Result<DsgAdmissionClosure, DsgAdmissionCallError> {
+        self.check_admission_binding(original, false)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        self.check_admission_binding(close, false)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        close
+            .closes_over(original)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        self.admission_function("neon_dsg_set_admission")
+            .await
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        let payload =
+            serde_json::to_string(close).map_err(|e| DsgAdmissionCallError::NotSent(e.into()))?;
+        let mut guard = self
+            .reserve_admission(original, Some(close))
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        let response: DsgAdmissionResponse = self
+            .call(
+                &self.observer,
+                &self.observer_schema,
+                "neon_dsg_set_admission",
+                &payload,
+            )
+            .await
+            .map_err(|source| admission_unconfirmed(close, source))?;
+        response
+            .validate_for(close, &self.instance, false)
+            .map_err(|source| admission_unconfirmed(close, source))?;
+        if !response.confirms() {
+            return Err(admission_unconfirmed(
+                close,
+                anyhow::anyhow!("original admission still needs controlled closure"),
+            ));
+        }
+        guard.resolved = true;
+        Ok(DsgAdmissionClosure {
+            protocol_version: 1,
+            vm_shrink_permit: false,
+            original: original.clone(),
+            closed_by: response,
+            prior_may_have_applied: true,
+        })
+    }
+
+    /// 关闭回复丢失/换owner后，只读核验同一更高完整关闭回执；不得把Memory、
+    /// 不存在、淘汰或floor提升本身当关闭成功。解除的是本地未来写栅栏，旧工作
+    /// 可能已开始这一事实恒保留；实际排空/预算撤销仍由持久协调器决定。
+    pub async fn admission_closure_status(
+        &self,
+        original: &DsgAdmissionRequest,
+        close: &DsgAdmissionRequest,
+    ) -> Result<DsgAdmissionClosure, DsgAdmissionCallError> {
+        self.check_admission_binding(original, false)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        close
+            .closes_over(original)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        let response = self.admission_status(close).await?;
+        if !response.confirms() {
+            return Err(admission_unconfirmed(
+                close,
+                anyhow::anyhow!("complete closing receipt remains unavailable"),
+            ));
+        }
+        let mut state = self.execution_state.lock().map_err(|_| {
+            DsgAdmissionCallError::NotSent(anyhow::anyhow!("DSGA execution fence is poisoned"))
+        })?;
+        if state.admission_in_flight
+            || state
+                .admission_pending
+                .as_ref()
+                .is_some_and(|value| value != original)
+            || state
+                .admission_close
+                .as_ref()
+                .is_some_and(|value| value != close)
+        {
+            return Err(DsgAdmissionCallError::NotSent(anyhow::anyhow!(
+                "local admission differs from verified closure"
+            )));
+        }
+        state.admission_pending = None;
+        state.admission_close = None;
+        Ok(DsgAdmissionClosure {
+            protocol_version: 1,
+            vm_shrink_permit: false,
+            original: original.clone(),
+            closed_by: response,
+            prior_may_have_applied: true,
+        })
+    }
+
+    fn check_admission_binding(&self, request: &DsgAdmissionRequest, query: bool) -> Result<()> {
+        request.validate()?;
+        ensure!(
+            request.instance.vm_uid == self.instance.vm_uid
+                && request.instance.compute_instance_id == self.instance.compute_instance_id
+                && (query || request.instance == self.instance),
+            "admission targets another bound instance"
+        );
+        Ok(())
+    }
+
+    fn reserve_admission(
+        &self,
+        original: &DsgAdmissionRequest,
+        close: Option<&DsgAdmissionRequest>,
+    ) -> Result<AdmissionFlight<'_>> {
+        let mut state = self
+            .execution_state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("DSGA execution fence is poisoned"))?;
+        ensure!(
+            !state.admission_in_flight,
+            "another admission request is in flight"
+        );
+        if let Some(pending) = &state.admission_pending {
+            ensure!(
+                pending == original,
+                "complete original admission must be retained unchanged"
+            );
+        }
+        if let Some(pending_close) = &state.admission_close {
+            ensure!(
+                close == Some(pending_close),
+                "complete original admission closure must be retained unchanged"
+            );
+        }
+        if close.is_none() && original.open {
+            ensure!(
+                !state.in_flight && state.pending.is_none(),
+                "admission cannot open across unresolved resize"
+            );
+        }
+        state.admission_pending = Some(original.clone());
+        state.admission_close = close.cloned();
+        state.admission_in_flight = true;
+        Ok(AdmissionFlight {
+            state: &self.execution_state,
+            resolved: false,
+        })
+    }
+
+    // 基础SDK继续兼容原1.8控制函数；准入调用另核对其真实Neon扩展成员/精确
+    // 签名，不将schema中同名SQL或错误升级当成管理能力，无legacy/任意函数兜底。
+    async fn admission_function(&self, function: &str) -> Result<()> {
+        timeout(self.response_timeout, async {
+            let row = self.observer.query_one("SELECT pg_catalog.count(*)::bigint FROM pg_catalog.pg_extension e \
+                JOIN pg_catalog.pg_depend d ON d.refobjid=e.oid AND d.refclassid='pg_catalog.pg_extension'::pg_catalog.regclass \
+                    AND d.classid='pg_catalog.pg_proc'::pg_catalog.regclass AND d.deptype='e' \
+                JOIN pg_catalog.pg_proc p ON p.oid=d.objid AND p.pronamespace=e.extnamespace \
+                JOIN pg_catalog.pg_language l ON l.oid=p.prolang \
+                WHERE e.extname='neon' AND e.extnamespace=pg_catalog.to_regnamespace($1) \
+                    AND p.proname=$2 AND p.prosrc=p.proname AND p.probin='$libdir/neon' AND l.lanname='c' \
+                    AND p.prorettype='pg_catalog.jsonb'::pg_catalog.regtype AND p.pronargs=1 \
+                    AND p.proargtypes[0]='pg_catalog.text'::pg_catalog.regtype AND p.proisstrict \
+                    AND p.provolatile='v' AND p.proparallel='u' AND NOT p.prosecdef AND NOT p.proretset \
+                    AND p.pronargdefaults=0", &[&self.observer_schema, &function]).await?;
+            ensure!(row.get::<_, i64>(0) == 1, "formal Neon admission function is missing or incompatible");
+            Ok(())
+        }).await.context("admission function discovery deadline elapsed")?
+    }
+
     fn reserve(&self, request: &DsgResizeRequest) -> Result<InFlight<'_>> {
         let mut state = self
             .execution_state
             .lock()
             .map_err(|_| anyhow::anyhow!("DSGA execution fence is poisoned"))?;
         ensure!(
-            !state.in_flight,
-            "another DSGA execution call is in flight; use the observation channel"
+            !state.in_flight
+                && !state.admission_in_flight
+                && state.admission_pending.is_none()
+                && state.admission_close.is_none(),
+            "another DSGA execution or unknown admission needs reconciliation"
         );
         if let Some(pending) = &state.pending {
             ensure!(
@@ -413,6 +745,16 @@ enum Action {
     Resize,
     Status,
     Cancel,
+}
+
+fn admission_unconfirmed(
+    request: &DsgAdmissionRequest,
+    source: anyhow::Error,
+) -> DsgAdmissionCallError {
+    DsgAdmissionCallError::Unconfirmed {
+        request: request.clone(),
+        source,
+    }
 }
 
 fn unconfirmed(key: &DsgOperationKey, source: anyhow::Error) -> DsgCallError {

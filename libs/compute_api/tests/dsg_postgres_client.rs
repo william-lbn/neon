@@ -550,3 +550,203 @@ async fn new_boot_returns_stale_and_cannot_silently_release_old_intent() -> Resu
     cluster.passed = true;
     Ok(())
 }
+
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn admission_native_contract_pending_and_explicit_fenced_closure() -> Result<()> {
+    use compute_api::dsg_admission::{DsgAdmissionDisposition as A, DsgAdmissionRequest};
+    use compute_api::dsg_client::DsgAdmissionCallError;
+    let mut cluster = Cluster::new()?;
+    let execution = cluster.connect().await?;
+    let observer = cluster.connect().await?;
+    let client = DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, WAIT).await?;
+    let original = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: client.instance().clone(),
+        issuer_epoch: DsgUint64::new(2),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: DsgUint64::new(1),
+        open: true,
+        budget_commitment_id: "quote\"-slash\\-html<>&/".into(),
+    };
+    // 基础1.8绑定继续可用；新方法必须发现真实新增成员，缺功能时不得留下假在途。
+    assert!(matches!(
+        client.set_admission(&original).await,
+        Err(DsgAdmissionCallError::NotSent(_))
+    ));
+    assert_eq!(client.pending_admission()?, (None, None));
+    execution
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.10'")
+        .await?;
+    assert_eq!(
+        client.admission_status(&original).await?.disposition,
+        A::NotFound
+    );
+    client
+        .fence_issuer(&DsgIssuerFenceRequest {
+            protocol_version: 1,
+            instance: original.instance.clone(),
+            issuer_epoch: original.issuer_epoch,
+        })
+        .await?;
+    for req in [
+        original.clone(),
+        DsgAdmissionRequest {
+            open: false,
+            ..original.clone()
+        },
+    ] {
+        let body = serde_json::to_string(&req)?;
+        let hash:String=observer.query_one("SELECT pg_catalog.encode(pg_catalog.sha256(pg_catalog.convert_to(($1::pg_catalog.text)::pg_catalog.jsonb::pg_catalog.text,'UTF8')),'hex')",&[&body]).await?.get(0);
+        assert_eq!(req.context_sha256()?, hash);
+    }
+    // 共享canonical重构不得改变旧resize摘要；只比较编码，不重跑旧伸缩功能。
+    let old = request(&client, 1, 1, 512, DsgResizeKind::Grow);
+    let body = serde_json::to_string(&old)?;
+    let hash:String=observer.query_one("SELECT pg_catalog.encode(pg_catalog.sha256(pg_catalog.convert_to(($1::pg_catalog.text)::pg_catalog.jsonb::pg_catalog.text,'UTF8')),'hex')",&[&body]).await?.get(0);
+    assert_eq!(old.context_sha256()?, hash);
+    assert_eq!(
+        client.set_admission(&original).await?.disposition,
+        A::Applied
+    );
+    let unseen = DsgAdmissionRequest {
+        revision: DsgUint64::new(2),
+        ..original.clone()
+    };
+    // 显式从持久意图恢复的场景；状态来自真实PG，不伪造函数成功/快照。
+    client.restore_admission_pending(&unseen, None)?;
+    assert_eq!(
+        client.admission_status(&unseen).await?.disposition,
+        A::NotFound
+    );
+    assert_eq!(client.pending_admission()?.0, Some(unseen.clone()));
+    let _ = client.memory_status().await?;
+    client
+        .fence_issuer(&DsgIssuerFenceRequest {
+            protocol_version: 1,
+            instance: original.instance.clone(),
+            issuer_epoch: DsgUint64::new(3),
+        })
+        .await?;
+    assert_eq!(client.pending_admission()?.0, Some(unseen.clone()));
+    assert!(matches!(
+        client.request_resize(&old).await,
+        Err(DsgCallError::NotSent(_))
+    ));
+    let close = DsgAdmissionRequest {
+        issuer_epoch: DsgUint64::new(3),
+        open: false,
+        budget_commitment_id: "higher-close-budget".into(),
+        ..unseen.clone()
+    };
+    let closed = client
+        .close_admission_over_original(&unseen, &close)
+        .await?;
+    assert!(closed.prior_may_have_applied);
+    assert!(!closed.closed_by.observed.admission_open);
+    assert_eq!(client.pending_admission()?, (None, None));
+    drop(client);
+    // 模拟重启时由真实持久原意图恢复“关闭回复未知”；只读旧冲突/淘汰不能清理。
+    let recovered = DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, WAIT).await?;
+    recovered.restore_admission_pending(&unseen, Some(&close))?;
+    assert_eq!(
+        recovered.admission_status(&unseen).await?.disposition,
+        A::Conflict
+    );
+    assert!(recovered.pending_admission()?.0.is_some());
+    let closed = recovered.admission_closure_status(&unseen, &close).await?;
+    assert!(closed.prior_may_have_applied);
+    recovered.restore_admission_pending(&original, None)?;
+    assert_eq!(
+        recovered.admission_status(&original).await?.disposition,
+        A::ResultExpired
+    );
+    assert!(recovered.pending_admission()?.0.is_some());
+    recovered
+        .admission_closure_status(&original, &close)
+        .await?;
+    assert_eq!(recovered.pending_admission()?, (None, None));
+    cluster.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn admission_close_observer_while_resize_is_inflight() -> Result<()> {
+    use compute_api::dsg_admission::{DsgAdmissionDisposition as A, DsgAdmissionRequest};
+    use compute_api::dsg_client::DsgAdmissionCallError;
+    let mut cluster = Cluster::new()?;
+    let execution = cluster.connect().await?;
+    let observer = cluster.connect().await?;
+    execution
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.10'")
+        .await?;
+    let client = DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, WAIT).await?;
+    client
+        .fence_issuer(&DsgIssuerFenceRequest {
+            protocol_version: 1,
+            instance: client.instance().clone(),
+            issuer_epoch: DsgUint64::new(2),
+        })
+        .await?;
+    let gate = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: client.instance().clone(),
+        issuer_epoch: DsgUint64::new(2),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: DsgUint64::new(1),
+        open: false,
+        budget_commitment_id: "inflight-close-budget".into(),
+    };
+    client.set_admission(&gate).await?;
+    // grow_mode是执行backend的私有变量；设在观察连接上不会暂停真实resize。
+    arm(&execution, "arm_pause").await?;
+    let mut resize_request = request(&client, 1, 1, 1024, DsgResizeKind::Grow);
+    resize_request.key.issuer_epoch = DsgUint64::new(2);
+    let resize = client.request_resize(&resize_request);
+    tokio::pin!(resize);
+    tokio::select! {
+        result=&mut resize => anyhow::bail!("resize returned before actual gate: {result:?}"),
+        ready=wait_gate(&observer) => ready?,
+    }
+    let next = DsgAdmissionRequest {
+        revision: DsgUint64::new(2),
+        ..gate.clone()
+    };
+    let open = DsgAdmissionRequest {
+        open: true,
+        ..next.clone()
+    };
+    assert!(matches!(
+        client.set_admission(&open).await,
+        Err(DsgAdmissionCallError::NotSent(_))
+    ));
+    let closed = timeout(Duration::from_secs(2), client.set_admission(&next)).await??;
+    assert_eq!(closed.disposition, A::Applied);
+    assert_eq!(
+        closed.observed.operation.as_ref().unwrap().phase,
+        DsgPhase::Preparing
+    );
+    assert!(!closed.observed.admission_open);
+    arm(&observer, "release_prepare").await?;
+    assert_eq!(
+        resize
+            .await?
+            .receipt
+            .result
+            .unwrap()
+            .operation
+            .unwrap()
+            .phase,
+        DsgPhase::Committed
+    );
+    let opened = DsgAdmissionRequest {
+        revision: DsgUint64::new(3),
+        expected_capacity_generation: DsgUint64::new(2),
+        open: true,
+        ..gate
+    };
+    assert_eq!(client.set_admission(&opened).await?.disposition, A::Applied);
+    cluster.passed = true;
+    Ok(())
+}

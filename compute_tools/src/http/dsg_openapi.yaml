@@ -98,6 +98,78 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/FenceResponse"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/admission:
+    post:
+      operationId: setDsgAdmission
+      summary: 按完整预算引用设置PG准入，执行epoch必须等于已验签当前owner
+      description: 只返回PG门禁事实，不产生VM许可。关闭不否定旧工作占用；预算/排空由持久协调器另外核验。
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/AdmissionRequest"}
+      responses:
+        "200":
+          description: 完整原意图与实际PG事实，vm_shrink_permit恒false
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/AdmissionResponse"}
+        default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/admission/status:
+    post:
+      operationId: getDsgAdmissionStatus
+      summary: 只读查询原完整准入回执；未见或淘汰不证明未执行
+      description: 只返回PG门禁事实，不产生VM许可。关闭不否定旧工作占用；预算/排空由持久协调器另外核验。
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/AdmissionRequest"}
+      responses:
+        "200":
+          description: 完整原意图与实际PG事实，vm_shrink_permit恒false
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/AdmissionResponse"}
+        default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/admission/close-original:
+    post:
+      operationId: closeDsgAdmissionOriginal
+      summary: 以更高关闭意图封住未知原写入；旧工作仍可能已经开始
+      description: 只返回PG门禁事实，不产生VM许可。关闭不否定旧工作占用；预算/排空由持久协调器另外核验。
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/AdmissionCloseRequest"}
+      responses:
+        "200":
+          description: 完整原意图与实际PG事实，vm_shrink_permit恒false
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/AdmissionClosure"}
+        default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/admission/close-original/status:
+    post:
+      operationId: getDsgAdmissionClosure
+      summary: 只读核验原更高关闭回执；不重放setter或释放预算
+      description: 只返回PG门禁事实，不产生VM许可。关闭不否定旧工作占用；预算/排空由持久协调器另外核验。
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/AdmissionCloseRequest"}
+      responses:
+        "200":
+          description: 完整原意图与实际PG事实，vm_shrink_permit恒false
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/AdmissionClosure"}
+        default: {$ref: "#/components/responses/Failure"}
 components:
   securitySchemes:
     DsgJWT:
@@ -130,6 +202,47 @@ components:
                 required: [error]
                 properties: {error: {type: string}}
   schemas:
+    AdmissionRequest:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, instance, issuer_epoch, revision, expected_capacity_generation, open, budget_commitment_id]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        instance: {$ref: "#/components/schemas/Instance"}
+        issuer_epoch: {$ref: "#/components/schemas/PositiveU64"}
+        revision: {$ref: "#/components/schemas/PositiveU64"}
+        expected_capacity_generation: {$ref: "#/components/schemas/PositiveU64"}
+        open: {type: boolean}
+        budget_commitment_id: {$ref: "#/components/schemas/ID"}
+    AdmissionResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, request, disposition, context_sha256, observed]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        request: {$ref: "#/components/schemas/AdmissionRequest"}
+        disposition: {type: string, enum: [applied, replayed, busy, stale, conflict, not_found, result_expired]}
+        context_sha256: {type: string, pattern: '^[0-9a-f]{64}$'}
+        observed: {$ref: "#/components/schemas/Snapshot"}
+    AdmissionCloseRequest:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, original, close]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        original: {$ref: "#/components/schemas/AdmissionRequest"}
+        close: {$ref: "#/components/schemas/AdmissionRequest"}
+    AdmissionClosure:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, original, closed_by, prior_may_have_applied]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        original: {$ref: "#/components/schemas/AdmissionRequest"}
+        closed_by: {$ref: "#/components/schemas/AdmissionResponse"}
+        prior_may_have_applied: {type: boolean, enum: [true]}
     InitializationResponse:
       type: object
       additionalProperties: false

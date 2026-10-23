@@ -1,5 +1,6 @@
 #![deny(unsafe_code)]
 #![deny(clippy::undocumented_unsafe_blocks)]
+pub mod dsg_admission;
 pub mod dsg_auth;
 #[cfg(feature = "postgres-client")]
 pub mod dsg_client;

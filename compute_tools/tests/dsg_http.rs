@@ -10,6 +10,10 @@ use anyhow::{Result, ensure};
 use axum::{Router, body::Body};
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use compute_api::{
+    dsg_admission::{
+        DsgAdmissionCloseRequest, DsgAdmissionClosure, DsgAdmissionDisposition,
+        DsgAdmissionRequest, DsgAdmissionResponse,
+    },
     dsg_control::{DsgOperationQuery, DsgResizeKind, DsgResizeRequest, DsgUint64},
     dsg_state::{DsgCapabilities, DsgControlResponse, DsgMemoryResponse},
     responses::ComputeStatus,
@@ -606,6 +610,234 @@ async fn issuer_fence_route_binds_signed_epoch_before_sql() -> Result<()> {
     Ok(())
 }
 
+#[tokio::test]
+async fn admission_routes_require_execution_scope_and_strict_original_intents() -> Result<()> {
+    let signer = Signer::new();
+    let app = router(&node(signer.jwks.clone(), true, None));
+    let token = signer.token(&signer.claims());
+    let mut creation = signer.claims();
+    creation["scope"] = json!(compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE);
+    for path in [
+        "/dsg/v1/admission",
+        "/dsg/v1/admission/status",
+        "/dsg/v1/admission/close-original",
+        "/dsg/v1/admission/close-original/status",
+    ] {
+        for credential in [None, Some(signer.token(&creation))] {
+            assert_eq!(
+                invoke(
+                    app.clone(),
+                    Method::POST,
+                    path,
+                    credential.as_deref(),
+                    Some("{}")
+                )
+                .await?
+                .0,
+                StatusCode::UNAUTHORIZED
+            );
+        }
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                path,
+                Some(&token),
+                Some("{\"protocol_version\":1,\"protocol_version\":1}")
+            )
+            .await?
+            .0,
+            StatusCode::UNPROCESSABLE_ENTITY
+        );
+    }
+    let future = json!({"protocol_version":1,"instance":{"vm_uid":VM,"compute_instance_id":COMPUTE,"pg_boot_id":"1"},
+        "issuer_epoch":"2","revision":"1","expected_capacity_generation":"1","open":true,"budget_commitment_id":"budget"});
+    for path in ["/dsg/v1/admission", "/dsg/v1/admission/status"] {
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                path,
+                Some(&token),
+                Some(&future.to_string())
+            )
+            .await?
+            .0,
+            StatusCode::FORBIDDEN
+        );
+    }
+    let body = json!({"protocol_version":1,"original":future,"close":{}});
+    assert_eq!(
+        invoke(
+            app,
+            Method::POST,
+            "/dsg/v1/admission/close-original",
+            Some(&token),
+            Some(&body.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::UNPROCESSABLE_ENTITY
+    );
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn native_admission_http_original_receipts_and_fenced_closure() -> Result<()> {
+    let signer = Signer::new();
+    let (mut cluster, _compute, app) = native(&signer).await?;
+    cluster
+        .connect()
+        .await?
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.10'")
+        .await?;
+    let mut claims = signer.claims();
+    claims["issuer_epoch"] = json!("2");
+    let token = signer.token(&claims);
+    let observed = memory(&app, &token).await?.observed;
+    let fence = json!({"protocol_version":1,"instance":observed.instance,"issuer_epoch":"2"});
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            Some(&token),
+            Some(&fence.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::OK
+    );
+    let request = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: observed.instance,
+        issuer_epoch: DsgUint64::new(2),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: observed.capacity_generation,
+        open: true,
+        budget_commitment_id: "http-budget-1".into(),
+    };
+    let raw = serde_json::to_string(&request)?;
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/admission/status",
+        Some(&token),
+        Some(&raw),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let fact: DsgAdmissionResponse = serde_json::from_str(&body)?;
+    assert_eq!(fact.disposition, DsgAdmissionDisposition::NotFound);
+    // 共享兼容夹具未启用启动强制关闭GUC；查询必须保持其实际门禁，不能假造
+    // 生产初始化状态。真实强制关闭启动已由原生启动门禁单独验证。
+    assert_eq!(fact.observed.admission_open, observed.admission_open);
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/admission",
+        Some(&token),
+        Some(&raw),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let fact: DsgAdmissionResponse = serde_json::from_str(&body)?;
+    fact.validate_for(&request, &request.instance, false)?;
+    assert!(fact.observed.admission_open);
+    // 模拟原发送不确定后外层重放了另一摘要：冲突必须保留未知，不能自动清空。
+    let original = DsgAdmissionRequest {
+        budget_commitment_id: "http-original-unknown".into(),
+        ..request.clone()
+    };
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/admission",
+        Some(&token),
+        Some(&serde_json::to_string(&original)?),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    assert_eq!(
+        serde_json::from_str::<DsgAdmissionResponse>(&body)?.disposition,
+        DsgAdmissionDisposition::Conflict
+    );
+    let close = DsgAdmissionRequest {
+        open: false,
+        revision: DsgUint64::new(2),
+        ..request.clone()
+    };
+    let closure = DsgAdmissionCloseRequest {
+        protocol_version: 1,
+        original: original.clone(),
+        close: close.clone(),
+    };
+    let closure_raw = serde_json::to_string(&closure)?;
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/admission/close-original",
+        Some(&token),
+        Some(&closure_raw),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let fact: DsgAdmissionClosure = serde_json::from_str(&body)?;
+    assert_eq!(fact.protocol_version, 1);
+    assert!(!fact.vm_shrink_permit);
+    assert!(fact.prior_may_have_applied);
+    assert_eq!(fact.original, original);
+    fact.closed_by
+        .validate_for(&close, &close.instance, false)?;
+    assert!(!fact.closed_by.observed.admission_open);
+    claims["issuer_epoch"] = json!("3");
+    let new_token = signer.token(&claims);
+    let fence = json!({"protocol_version":1,"instance":request.instance,"issuer_epoch":"3"});
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            Some(&new_token),
+            Some(&fence.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::OK
+    );
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission/close-original",
+            Some(&new_token),
+            Some(&closure_raw)
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let (code, body) = invoke(
+        app,
+        Method::POST,
+        "/dsg/v1/admission/close-original/status",
+        Some(&new_token),
+        Some(&closure_raw),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let fact: DsgAdmissionClosure = serde_json::from_str(&body)?;
+    fact.closed_by.validate_for(&close, &close.instance, true)?;
+    assert_eq!(
+        fact.closed_by.observed.issuer_floor_epoch,
+        DsgUint64::new(3)
+    );
+    assert!(fact.prior_may_have_applied);
+    cluster.passed = true;
+    Ok(())
+}
+
 async fn memory(app: &Router, token: &str) -> Result<DsgMemoryResponse> {
     let (status, body) = invoke(
         app.clone(),
@@ -1013,7 +1245,15 @@ async fn native_bad_config_keeps_old_observation_and_blocks_new_resize() -> Resu
     // 原身份认证，不能因为mutable spec指向新VM而把原操作事实藏起来。
     {
         let mut state = compute.state.lock().unwrap();
-        state.pspec.as_mut().unwrap().spec.dynamic_shared_buffers.as_mut().unwrap().vm_uid = "recreated-config-vm".into();
+        state
+            .pspec
+            .as_mut()
+            .unwrap()
+            .spec
+            .dynamic_shared_buffers
+            .as_mut()
+            .unwrap()
+            .vm_uid = "recreated-config-vm".into();
         state.status = ComputeStatus::Failed;
     }
     let old = control(&app, &token, "/dsg/v1/resize/status", &query(&original)).await?;
@@ -1025,12 +1265,25 @@ async fn native_bad_config_keeps_old_observation_and_blocks_new_resize() -> Resu
     // 即使上层状态被误置为Running，新resize仍须验证原启动契约，不能只看状态。
     compute.state.lock().unwrap().status = ComputeStatus::Running;
     let next = resize_request(&before, 2, 1024, DsgResizeKind::Grow);
-    let (status, _) = invoke(app.clone(), Method::POST, "/dsg/v1/resize", Some(&token), Some(&serde_json::to_string(&next)?)).await?;
+    let (status, _) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/resize",
+        Some(&token),
+        Some(&serde_json::to_string(&next)?),
+    )
+    .await?;
     assert_eq!(status, StatusCode::PRECONDITION_FAILED);
     let after = memory(&app, &token).await?;
-    assert_eq!(after.observed.capacity_generation, before.observed.capacity_generation);
+    assert_eq!(
+        after.observed.capacity_generation,
+        before.observed.capacity_generation
+    );
     assert_eq!(after.observed.high_buffers, before.observed.high_buffers);
-    assert_eq!(after.observed.operation.as_ref().map(|o| &o.key), before.observed.operation.as_ref().map(|o| &o.key));
+    assert_eq!(
+        after.observed.operation.as_ref().map(|o| &o.key),
+        before.observed.operation.as_ref().map(|o| &o.key)
+    );
     cluster.passed = true;
     Ok(())
 }
