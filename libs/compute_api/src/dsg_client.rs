@@ -22,7 +22,7 @@ use crate::dsg_control::{
 };
 use crate::dsg_state::{
     DsgCapabilities, DsgControlResponse, DsgDisposition, DsgIssuerFenceResponse, DsgMemoryResponse,
-    DsgPhase,
+    DsgPhase, DsgSharedCostResponse,
 };
 
 const MAX_RESPONSE_BYTES: usize = 32 * 1024;
@@ -350,6 +350,21 @@ impl<'a> DsgSqlClient<'a> {
         Ok(response)
     }
 
+    /// 原生成本只读观察，原启动总量已含四数组。完整成本来自同一次native快照，
+    /// 不用两次memory/SHOW拼接，也不因一次成功观察解除任何未知请求栅栏。
+    pub async fn shared_cost(&self) -> Result<DsgSharedCostResponse> {
+        self.formal_function("neon_dsg_shared_cost", 0).await?;
+        let response: DsgSharedCostResponse = read_json(
+            &self.observer,
+            &sql(&self.observer_schema, "neon_dsg_shared_cost", false),
+            None,
+            self.response_timeout,
+        )
+        .await?;
+        response.validate_for(&self.instance)?;
+        Ok(response)
+    }
+
     /// 独立观察连接推进/确认floor，执行连接阻塞时仍可到达PG。成功FENCED也只
     /// 证明PG旧执行者退出，不清本客户端pending，更不清外层原意图/预算。
     pub async fn fence_issuer(
@@ -656,6 +671,11 @@ impl<'a> DsgSqlClient<'a> {
     // 基础SDK继续兼容原1.8控制函数；准入调用另核对其真实Neon扩展成员/精确
     // 签名，不将schema中同名SQL或错误升级当成管理能力，无legacy/任意函数兜底。
     async fn admission_function(&self, function: &str) -> Result<()> {
+        self.formal_function(function, 1).await
+    }
+
+    // 函数名和0/1参数签名仅来自本SDK固定方法，不接受调用方的任意SQL入口。
+    async fn formal_function(&self, function: &str, arguments: i16) -> Result<()> {
         timeout(self.response_timeout, async {
             let row = self.observer.query_one("SELECT pg_catalog.count(*)::bigint FROM pg_catalog.pg_extension e \
                 JOIN pg_catalog.pg_depend d ON d.refobjid=e.oid AND d.refclassid='pg_catalog.pg_extension'::pg_catalog.regclass \
@@ -664,13 +684,13 @@ impl<'a> DsgSqlClient<'a> {
                 JOIN pg_catalog.pg_language l ON l.oid=p.prolang \
                 WHERE e.extname='neon' AND e.extnamespace=pg_catalog.to_regnamespace($1) \
                     AND p.proname=$2 AND p.prosrc=p.proname AND p.probin='$libdir/neon' AND l.lanname='c' \
-                    AND p.prorettype='pg_catalog.jsonb'::pg_catalog.regtype AND p.pronargs=1 \
-                    AND p.proargtypes[0]='pg_catalog.text'::pg_catalog.regtype AND p.proisstrict \
+                    AND p.prorettype='pg_catalog.jsonb'::pg_catalog.regtype AND p.pronargs=$3::smallint \
+                    AND ($3::smallint=0 OR p.proargtypes[0]='pg_catalog.text'::pg_catalog.regtype) AND p.proisstrict \
                     AND p.provolatile='v' AND p.proparallel='u' AND NOT p.prosecdef AND NOT p.proretset \
-                    AND p.pronargdefaults=0", &[&self.observer_schema, &function]).await?;
-            ensure!(row.get::<_, i64>(0) == 1, "formal Neon admission function is missing or incompatible");
+                    AND p.pronargdefaults=0", &[&self.observer_schema, &function, &arguments]).await?;
+            ensure!(row.get::<_, i64>(0) == 1, "formal Neon management function is missing or incompatible");
             Ok(())
-        }).await.context("admission function discovery deadline elapsed")?
+        }).await.context("management function discovery deadline elapsed")?
     }
 
     fn reserve(&self, request: &DsgResizeRequest) -> Result<InFlight<'_>> {

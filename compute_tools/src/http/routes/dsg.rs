@@ -31,6 +31,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/capabilities", get(capabilities))
         .route("/dsg/v1/initialization", get(initialization))
         .route("/dsg/v1/memory", get(memory))
+        .route("/dsg/v1/budget/shared", get(shared_cost))
         .route("/dsg/v1/resize", post(resize))
         .route("/dsg/v1/resize/status", post(status))
         .route("/dsg/v1/resize/cancel", post(cancel))
@@ -127,6 +128,23 @@ async fn memory(
             Err(_) => failure(
                 StatusCode::SERVICE_UNAVAILABLE,
                 "observation_unavailable",
+                None,
+            ),
+        },
+        Err(error) => error,
+    }
+}
+
+async fn shared_cost(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+) -> Response {
+    match client(&compute, &claims).await {
+        Ok(client) => match client.shared_cost().await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(_) => failure(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "shared_cost_unavailable",
                 None,
             ),
         },

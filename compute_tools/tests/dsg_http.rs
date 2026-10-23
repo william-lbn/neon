@@ -876,6 +876,103 @@ async fn native_admission_http_original_receipts_and_fenced_closure() -> Result<
     Ok(())
 }
 
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn native_shared_cost_http_binds_current_pg_and_preserves_control_state() -> Result<()> {
+    use compute_api::dsg_state::DsgSharedCostResponse;
+    let signer = Signer::new();
+    let (mut cluster, _compute, app) = native(&signer).await?;
+    let token = signer.token(&signer.claims());
+    let (code, _) = invoke(
+        app.clone(),
+        Method::GET,
+        "/dsg/v1/budget/shared",
+        Some(&token),
+        None,
+    )
+    .await?;
+    assert_eq!(
+        code,
+        StatusCode::SERVICE_UNAVAILABLE,
+        "1.8不能假报新成本能力"
+    );
+    cluster
+        .connect()
+        .await?
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.11'")
+        .await?;
+    let before = memory(&app, &token).await?.observed;
+    let (code, body) = invoke(
+        app.clone(),
+        Method::GET,
+        "/dsg/v1/budget/shared",
+        Some(&token),
+        None,
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let fact: DsgSharedCostResponse = serde_json::from_str(&body)?;
+    fact.validate_for(&before.instance)?;
+    assert_eq!(fact.observed, before);
+    assert_eq!(
+        fact.current_main_and_arrays_upper_bytes,
+        before.startup_shared_upper_bytes
+    );
+    // 共用formal_function后还需核验1参数签名，避免只让新0参数查询通过。
+    let request = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: before.instance,
+        issuer_epoch: DsgUint64::new(1),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: before.capacity_generation,
+        open: false,
+        budget_commitment_id: "shared-cost-observation-only".into(),
+    };
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/admission/status",
+        Some(&token),
+        Some(&serde_json::to_string(&request)?),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    assert_eq!(
+        serde_json::from_str::<DsgAdmissionResponse>(&body)?.disposition,
+        DsgAdmissionDisposition::NotFound
+    );
+    let mut creation = signer.claims();
+    creation["scope"] = json!(compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE);
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            "/dsg/v1/budget/shared",
+            Some(&signer.token(&creation)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    let mut wrong = signer.claims();
+    wrong["vm_uid"] = json!("replacement");
+    assert_eq!(
+        invoke(
+            app,
+            Method::GET,
+            "/dsg/v1/budget/shared",
+            Some(&signer.token(&wrong)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    cluster.passed = true;
+    Ok(())
+}
+
 async fn memory(app: &Router, token: &str) -> Result<DsgMemoryResponse> {
     let (status, body) = invoke(
         app.clone(),

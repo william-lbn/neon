@@ -28,6 +28,19 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/Capabilities"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/budget/shared:
+    get:
+      operationId: getDsgSharedCost
+      summary: 同一PG快照的固定主段和动态数组去重成本上界
+      description: 启动总量已含bootstrap数组；当前值为固定主段加当前登记的数组最坏占用。DSM、私有、LFC、OS与Guest池另计，不生成VM许可。
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 原生只读成本，无floor/门禁/Provider修改，no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/SharedCostResponse"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/memory:
     get:
       operationId: getDsgMemory
@@ -202,6 +215,17 @@ components:
                 required: [error]
                 properties: {error: {type: string}}
   schemas:
+    SharedCostResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, startup_main_upper_bytes, startup_arrays_upper_bytes, current_main_and_arrays_upper_bytes, observed]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        startup_main_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
+        startup_arrays_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
+        current_main_and_arrays_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
+        observed: {$ref: "#/components/schemas/Snapshot"}
     AdmissionRequest:
       type: object
       additionalProperties: false

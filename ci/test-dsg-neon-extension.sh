@@ -80,6 +80,10 @@ admission_status = unittest.defaultTestLoader.discover('.', pattern='test_dsg_ad
 if admission_status.countTestCases() < 2:
     raise SystemExit('DSGA readonly admission reconciliation suite is missing required cases')
 suite.addTests(admission_status)
+shared_cost = unittest.defaultTestLoader.discover('.', pattern='test_dsg_shared_cost.py')
+if shared_cost.countTestCases() < 2:
+    raise SystemExit('DSGA native shared cost suite is missing required cases')
+suite.addTests(shared_cost)
 if suite.countTestCases() == 0:
     raise SystemExit('Neon extension suite contains zero tests')
 result = unittest.TextTestRunner(verbosity=2).run(suite)

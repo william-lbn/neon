@@ -51,6 +51,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_memory_status);
 PG_FUNCTION_INFO_V1(neon_dsg_fence_issuer);
 PG_FUNCTION_INFO_V1(neon_dsg_set_admission);
 PG_FUNCTION_INFO_V1(neon_dsg_admission_status);
+PG_FUNCTION_INFO_V1(neon_dsg_shared_cost);
 
 static char *dsg_vm_uid;
 static char *dsg_compute_instance_id;
@@ -679,6 +680,35 @@ neon_dsg_capabilities(PG_FUNCTION_ARGS)
 	appendStringInfoString(&output, "\"supported\":false,\"buffer_api_version\":0,\"enabled\":false,\"instance_bound\":false}");
 #endif
 	PG_RETURN_DATUM(NeonDsgJson(&output));
+}
+
+Datum
+neon_dsg_shared_cost(PG_FUNCTION_ARGS)
+{
+	NeonDsgCheckAdministrator();
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_SHARED_COST_API_VERSION) && NEON_DSG_SHARED_COST_API_VERSION == 1
+	{
+		DsgBufferSharedCost cost;
+		StringInfoData output;
+
+		NeonDsgCheckEnabled();
+		DsgBufferGetSharedCost(&cost);
+		initStringInfo(&output);
+		/*- 所有64位成本都用规范字符串；返回PG成本事实而非完整Guest预算/许可。 */
+		appendStringInfo(&output,
+			"{\"protocol_version\":1,\"vm_shrink_permit\":false,"
+			"\"startup_main_upper_bytes\":\"%zu\",\"startup_arrays_upper_bytes\":\"%zu\","
+			"\"current_main_and_arrays_upper_bytes\":\"%zu\",\"observed\":",
+			cost.startup_main_upper_bytes, cost.startup_arrays_upper_bytes,
+			cost.current_main_and_arrays_upper_bytes);
+		NeonDsgAppendSnapshot(&output, &cost.observed);
+		appendStringInfoChar(&output, '}');
+		PG_RETURN_DATUM(NeonDsgJson(&output));
+	}
+#else
+	NeonDsgUnsupported();
+	PG_RETURN_NULL();
+#endif
 }
 
 Datum

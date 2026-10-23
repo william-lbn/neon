@@ -3,7 +3,20 @@
 更新：2026-10-24（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-24 原创建来源与合法配置通知
+## 最新：2026-10-24 原生去重成本与Agent最终准入
+
+PG17 cbabd5de541新增独立共享成本API1，固定主段与动态数组去重，BufferABI6不变；
+Neon1.11/严格Rust与Go消费者/专用GET/固定网关接线。准确PG/Neon产物与新SQL、
+生产Router、契约基本检查通过。Agent现在消费FinalizeBudget后的ResumeAdmission，
+写前持久原意图、丢回复只读对账及当前owner显式原意图重放，分类/聚合互斥去重。
+见[本批验收与范围](DSGA-PG17共享成本与预算接线-Mac基本验收-20261024.md)，
+动作顺序补充入V3第8.1节。
+
+实际预算/Host/Guest约束生产者、独立启动准入、公开worker、完整quiesce/最终VM及
+跨boot/跨owner关闭恢复仍继续编码，不能列成仅Linux待验或全功能完成。Goal active，
+仅PG17，Mac必要基本/受影响检查；Linux K8s/VM/HugeTLB/物理/性能后验。
+
+## 历史：2026-10-24 原创建来源与合法配置通知
 
 Compute冻结首次可信规格的原创建UUID/tenant/timeline；当前配置通知可更新UUID，
 初始化仍核验当前角色/认证及实际PG并回报原创建来源。configure在改状态前拒绝

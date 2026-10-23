@@ -3,7 +3,7 @@
 //! 这些类型不产生VM执行权。即使PG已COMMITTED，Provider事实也可能尚未返回；
 //! 历史result与当前observed可以属于不同操作，不能互相填补或拼接预算证明。
 
-use anyhow::{Result, ensure};
+use anyhow::{Context, Result, ensure};
 use serde::{Deserialize, Serialize};
 
 use crate::dsg_control::{
@@ -161,6 +161,47 @@ pub struct DsgMemoryResponse {
     pub protocol_version: u32,
     pub vm_shrink_permit: bool,
     pub observed: DsgSnapshot,
+}
+
+/// 同一原生快照中的主共享段与四数组上界；startup总量已含bootstrap数组，
+/// 运行期只计一次主段，再加当前最坏数组占用。DSM/私有/LFC/OS/Guest池另计。
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DsgSharedCostResponse {
+    pub protocol_version: u32,
+    pub vm_shrink_permit: bool,
+    pub startup_main_upper_bytes: DsgUint64,
+    pub startup_arrays_upper_bytes: DsgUint64,
+    pub current_main_and_arrays_upper_bytes: DsgUint64,
+    pub observed: DsgSnapshot,
+}
+
+impl DsgSharedCostResponse {
+    pub fn validate_for(&self, bound: &DsgInstanceIdentity) -> Result<()> {
+        self.observed.validate()?;
+        ensure!(
+            self.protocol_version == 1
+                && !self.vm_shrink_permit
+                && self.observed.instance == *bound,
+            "shared cost envelope or instance differs"
+        );
+        let main = self.startup_main_upper_bytes.get();
+        let initial = self.startup_arrays_upper_bytes.get();
+        let current = self.observed.arrays.iter().try_fold(main, |total, array| {
+            total
+                .checked_add(array.committed_upper_bytes.get())
+                .context("shared cost overflow")
+        })?;
+        ensure!(
+            main > 0
+                && initial > 0
+                && main.checked_add(initial)
+                    == Some(self.observed.startup_shared_upper_bytes.get())
+                && current == self.current_main_and_arrays_upper_bytes.get(),
+            "shared cost duplicates bootstrap arrays or contradicts native accounting"
+        );
+        Ok(())
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
