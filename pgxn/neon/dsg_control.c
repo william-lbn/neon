@@ -50,6 +50,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_cancel_resize);
 PG_FUNCTION_INFO_V1(neon_dsg_memory_status);
 PG_FUNCTION_INFO_V1(neon_dsg_fence_issuer);
 PG_FUNCTION_INFO_V1(neon_dsg_set_admission);
+PG_FUNCTION_INFO_V1(neon_dsg_admission_status);
 
 static char *dsg_vm_uid;
 static char *dsg_compute_instance_id;
@@ -757,13 +758,13 @@ neon_dsg_fence_issuer(PG_FUNCTION_ARGS)
  * 原子检查已建立的issuer floor、boot、容量与准入revision及整个意图摘要。
  * 不把开门/关门当作已有工作排空，更不发放物理回收或VM执行许可。
  */
-Datum
-neon_dsg_set_admission(PG_FUNCTION_ARGS)
+static Datum
+NeonDsgAdmission(text *raw, bool query)
 {
 	NeonDsgCheckAdministrator();
 #ifdef NEON_DSG_ADMISSION_SUPPORTED
 	{
-		Jsonb	   *input = NeonDsgParseRaw(PG_GETARG_TEXT_PP(0));
+		Jsonb	   *input = NeonDsgParseRaw(raw);
 		JsonbContainer *root = &input->root;
 		JsonbContainer *instance;
 		char	   *vm_uid;
@@ -772,7 +773,7 @@ neon_dsg_set_admission(PG_FUNCTION_ARGS)
 		DsgBufferAdmissionResponse response;
 		StringInfoData output;
 		int			i;
-		static const char *const dispositions[] = {"applied", "replayed", "busy", "stale", "conflict"};
+		static const char *const dispositions[] = {"applied", "replayed", "busy", "stale", "conflict", "not_found", "result_expired"};
 
 		NeonDsgCheckEnabled();
 		NeonDsgObject(root, 7);
@@ -797,8 +798,16 @@ neon_dsg_set_admission(PG_FUNCTION_ARGS)
 			response.disposition = DSG_ADMISSION_STALE;
 			DsgBufferGetSnapshot(&response.observed);
 		}
-		else
+		else if (!query)
 			DsgBufferControlAdmission(&request, &response);
+		else
+		{
+#if defined(NEON_DSG_ADMISSION_STATUS_API_VERSION) && NEON_DSG_ADMISSION_STATUS_API_VERSION == 1
+			DsgBufferAdmissionStatus(&request, &response);
+#else
+			ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("this Neon build does not support DSGA admission status protocol 1")));
+#endif
+		}
 		initStringInfo(&output);
 		appendStringInfoString(&output, "{\"protocol_version\":1,\"vm_shrink_permit\":false,\"request\":");
 		appendStringInfoString(&output, JsonbToCString(NULL, root, VARSIZE(input)));
@@ -815,4 +824,17 @@ neon_dsg_set_admission(PG_FUNCTION_ARGS)
 	ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("this Neon build does not support DSGA admission protocol 1")));
 	PG_RETURN_NULL();
 #endif
+}
+
+/*- 两个独立SQL入口固定行为，不从请求字段接受“只读/执行”开关。 */
+Datum
+neon_dsg_set_admission(PG_FUNCTION_ARGS)
+{
+	return NeonDsgAdmission(PG_GETARG_TEXT_PP(0), false);
+}
+
+Datum
+neon_dsg_admission_status(PG_FUNCTION_ARGS)
+{
+	return NeonDsgAdmission(PG_GETARG_TEXT_PP(0), true);
 }

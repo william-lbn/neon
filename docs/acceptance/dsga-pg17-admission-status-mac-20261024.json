@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-24",
+  "pg_source": "b144a23b2beae7e6d214c094121bf4bbfe13cd3d",
+  "scope": "side-effect-free original admission status and Neon1.10 SQL",
+  "native_basic": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 4.605,
+    "log": "build/dsga-admission-status-native-mac1/tests.log",
+    "source_diffs": [
+      "build/dsga-admission-status-native-mac1/pg-source.diff",
+      "build/dsga-admission-status-native-mac1/neon-source.diff"
+    ],
+    "new_source_manifest": "build/dsga-admission-status-native-mac1/new-source-sha256.json"
+  },
+  "artifact": {
+    "scope": "artifact-only exactPG/extension/statussymbol smoke, nofunctional suite repeat",
+    "pg_source": "b144a23b2beae7e6d214c094121bf4bbfe13cd3d",
+    "postgres_version": "17.11 (b144a23b2beae7e6d214c094121bf4bbfe13cd3d)",
+    "extension_version": "1.10",
+    "readonly_disposition": "not_found",
+    "gate_open": false,
+    "floor": "0",
+    "vm_shrink_permit": false,
+    "binaries": {
+      "postgres": "eea76285ac09a1eee0d20a03f6ec70fb64c31b32d0442a14cab13ccb0259a8a9",
+      "neon.dylib": "9688815d5284a6664918d72e0556e84194be5245a11a2684171f98b626793368"
+    }
+  },
+  "source_manifest": "build/dsga-admission-status-source-sha256.json",
+  "exact_build_logs": [
+    "build/dsga-admission-status-exact-pg.log",
+    "build/dsga-admission-status-exact-neon-build.log"
+  ],
+  "index_gate": "18binaries4PG39extensions pass",
+  "python_shell_diff": "pass",
+  "not_claimed": [
+    "complete V3",
+    "single final-source full-suite pass",
+    "NoEffect from not_found/expired",
+    "K8s/VM/physical certification"
+  ],
+  "remaining_code": [
+    "Rust/Go contracts/SDK/HTTP/gateway",
+    "actual Agent startup budget/admission and persistent original intents",
+    "public worker and full runtime/finalfence/lifecycle"
+  ],
+  "default_closed": true,
+  "linux_later": [
+    "actual K8s/RBAC/TLS/Service",
+    "NeonVM/KVM/HugeTLB/physical/performance"
+  ]
+}

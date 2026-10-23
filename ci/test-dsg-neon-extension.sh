@@ -76,6 +76,10 @@ admission = unittest.defaultTestLoader.discover('.', pattern='test_dsg_neon_admi
 if admission.countTestCases() < 2:
     raise SystemExit('DSGA formal Neon admission suite is missing required cases')
 suite.addTests(admission)
+admission_status = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission_status.py')
+if admission_status.countTestCases() < 2:
+    raise SystemExit('DSGA readonly admission reconciliation suite is missing required cases')
+suite.addTests(admission_status)
 if suite.countTestCases() == 0:
     raise SystemExit('Neon extension suite contains zero tests')
 result = unittest.TextTestRunner(verbosity=2).run(suite)
