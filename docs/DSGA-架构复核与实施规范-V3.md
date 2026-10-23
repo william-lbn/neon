@@ -382,6 +382,25 @@ PrepareBudget首先持久化目标承诺并保持现行约束，不能在Guest�
 
 约束生产者须认证并持久fence（独立于PG boot），核对真实进程/cgroup/Guest/Host身份、约束写回和持有寿命。kind/SourceID格式、memory.high、采样/估计或PG成本成功均不是完成证据。新PG boot仍受未完成VM目标的旧预算约束，不能清journal/HWM重造“初始空闲”。此处是后续生产者的实现标准，相关生产者尚未全部接齐；仅最终恢复准入消费者及成本API已有Mac基本验收，见[模块记录](DSGA-PG17共享成本与预算接线-Mac基本验收-20261024.md)。
 
+### 8.2 Guest硬约束执行器的生产边界（2026-10-24）
+
+AS的`pkg/dsga/resourceguard`执行固定cgroup memory.max/禁swap及全部hstate池
+约束。资源floor不能随PG boot重置；原日志缺失不能由Fence自动补建。写前保留
+完整原意图与上一份Held约束，跨进程锁覆盖同步内核调用与前后fsync；超时、取消、
+部分写或丢回复保留未知，普通重试只读对账，当前owner才能显式原样重放。
+
+内核适配器必须确认root控制目录和限额文件及实际Postmaster进程归组；不得在
+官方旧postgres可写限额配置下声称约束成立。全部hstate都必须有目标，禁surplus
+overcommit并读回目标池/surplus0；整个池含空闲，只在当前支持的未计入memory
+controller模式下与memory.max组成保守聚合上界。该上界不包含外部系统/过渡/
+安全承诺的认证，也不证明Host释放、VM完成、物理回收或永不OOM。
+
+这个执行器及Mac基本验证已经存在，但受管权限/启动、Compute授权通道及完整
+预算/独立启动准入接线仍是业务工作，不能改成Linux待验。Linux6.12不能假定新
+内核memory.max的O_NONBLOCK语义；同步等待期间不得提前释放锁。真实内核写、
+HugeTLB/surplus/HVO、SIGKILL恢复和物理行为留目标环境验收。见
+[本模块事实及接线边界](DSGA-Guest资源硬约束与控制链接线边界-20261024.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

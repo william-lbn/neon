@@ -3,7 +3,25 @@
 更新：2026-10-24（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-24 原生去重成本与Agent最终准入
+## 最新：2026-10-24 Guest资源硬约束执行器
+
+AS `7ee052a3347132b538723cda98ae7d1ac02fd99e`新增实际Linux固定cgroup硬上限、
+禁swap、全部HugeTLB池约束与准确读回；独立于PG boot的持久原意图/旧Held约束/
+issuer floor和同步写锁，以及不监听网络的root程序。Mac新增7项race通过，
+0fail/skip，vet及Linux amd64/arm64交叉编译通过；不是Linux内核实测。
+依赖已先推送并核对远程，发行锁随后绑定；PG gitlink及两份PG17锁仍cbabd5。
+见[基本验收与业务缺口](DSGA-Guest资源硬约束与控制链接线边界-20261024.md)。
+
+本模块尚未接入完整受管启动/授权/预算控制链，默认不自动运行。旧官方cgroup
+权限会被明确拒绝，不能把可被postgres自行放宽的限额当硬预算。生产权限/启动、
+PrepareBudget/GuestReady/FinalizeBudget及独立启动准入、完整quiesce/Host/VM/
+公开worker和受控跨boot恢复仍继续编码，不能列为仅Linux待测。Goal active，
+仅PG17。Mac必要基本检查；真实Linux/K8s/NeonVM/HugeTLB/物理/性能后验。
+
+控制面同轮独立合入自有主线5ee3bc4（b009b4a），验收记录7773b5b已推送核对。
+受影响Go9项、Auth新增1项、vet/TypeScript/Web构建通过；未重复未变DSGA功能。
+
+## 历史：2026-10-24 原生去重成本与Agent最终准入
 
 PG17 cbabd5de541新增独立共享成本API1，固定主段与动态数组去重，BufferABI6不变；
 Neon1.11/严格Rust与Go消费者/专用GET/固定网关接线。准确PG/Neon产物与新SQL、
