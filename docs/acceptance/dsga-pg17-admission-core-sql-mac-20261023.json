@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-23",
+  "pg_source": "13e109b720d7192e1ca29db0ac878884adaaf831",
+  "scope": "PG17 fenced admission core API1 and formal Neon SQL1.9; BufferABI6 unchanged",
+  "kernel_basic": {
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 7.703,
+    "log": "build/dsga-admission-kernel-mac1/tests.log",
+    "source": "build/dsga-admission-kernel-mac1/source.diff"
+  },
+  "formal_sql_initial": {
+    "passed": 0,
+    "failed": 2,
+    "skipped": 0,
+    "reason": "upgrade SQL omitted from Makefile DATA",
+    "log": "build/dsga-admission-neon-sql-mac1/tests.log"
+  },
+  "formal_sql_fixed": {
+    "passed": 2,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 3.801,
+    "log": "build/dsga-admission-neon-sql-fixed2/tests.log"
+  },
+  "exact_build": {
+    "first": "configure failed missing local PERL5LIB, original log retained",
+    "fixed": "TAP retained with existing local Perl deps; configure/make/install/modules exit0",
+    "logs": [
+      "build/dsga-admission-exact-pg17-build.log",
+      "build/dsga-admission-exact-pg17-build-fixed2.log",
+      "build/dsga-admission-exact-neon-build.log"
+    ]
+  },
+  "artifact_smoke": {
+    "scope": "artifact-only exact source/version/extension/symbol smoke; no repeat functional suites",
+    "postgres_version": "17.11 (13e109b720d7192e1ca29db0ac878884adaaf831)",
+    "extension_version": "1.9",
+    "buffer_api": 6,
+    "admission_without_floor": "stale",
+    "admission_open": false,
+    "vm_shrink_permit": false,
+    "files": {
+      "build/pg17-replication-candidate-install/bin/postgres": "6487124d9f10d6443f65eea661039f8484c8b240d59991bed02b52fb1a27be8f",
+      "build/pg17-replication-candidate-install/lib/postgresql/neon.dylib": "b52e738ab3f1a761d3b383e5225e06a8bc9267064830720ba74d717de399a8b9",
+      "build/pg17-replication-candidate-install/lib/postgresql/test_dsg_region.dylib": "8895169d348c305e1e354d3874e4812e2890fb6253736860750d2428e3447612"
+    }
+  },
+  "source_manifest": "build/dsga-admission-module-source-sha256.json",
+  "gates": {
+    "index_source_lock": "18 binaries / 4PG /39 extensions pass",
+    "source_and_compute_unittests": {
+      "passed": 12,
+      "failed": 0,
+      "skipped": 0
+    },
+    "python_shell_diff": "pass"
+  },
+  "scope_warning": "separate batches, no overlap summation or final-source full-suite claim; first basic binaryfcada+exactpatch beforecommit, exact13e artifact afterward",
+  "remaining_code": [
+    "Rust/Go contract and SDK",
+    "authenticated HTTP and gateway",
+    "actual Agent startup budget+owner admission and worker",
+    "full runtime domains/final fences/lifecycle"
+  ],
+  "linux_pending": [
+    "actual RBAC/certs/Service/native storage cluster",
+    "KVM/NeonVM/hotplug/HugeTLB/physical/performance"
+  ],
+  "default_closed": true,
+  "goal": "active/incomplete"
+}

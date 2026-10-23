@@ -72,6 +72,10 @@ import unittest
 
 suite = unittest.defaultTestLoader.discover('.', pattern='test_dsg_neon_extension.py')
 suite.addTests(unittest.defaultTestLoader.discover('.', pattern='test_dsg_neon_control.py'))
+admission = unittest.defaultTestLoader.discover('.', pattern='test_dsg_neon_admission.py')
+if admission.countTestCases() < 2:
+    raise SystemExit('DSGA formal Neon admission suite is missing required cases')
+suite.addTests(admission)
 if suite.countTestCases() == 0:
     raise SystemExit('Neon extension suite contains zero tests')
 result = unittest.TextTestRunner(verbosity=2).run(suite)

@@ -36,6 +36,9 @@
 #if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION == 6
 #define NEON_DSG_CONTROL_SUPPORTED 1
 #endif
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_ADMISSION_API_VERSION) && NEON_DSG_ADMISSION_API_VERSION == 1
+#define NEON_DSG_ADMISSION_SUPPORTED 1
+#endif
 
 #define NEON_DSG_MAX_ID_BYTES 128
 #define NEON_DSG_MAX_REQUEST_BYTES 16384
@@ -46,6 +49,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_resize_status);
 PG_FUNCTION_INFO_V1(neon_dsg_cancel_resize);
 PG_FUNCTION_INFO_V1(neon_dsg_memory_status);
 PG_FUNCTION_INFO_V1(neon_dsg_fence_issuer);
+PG_FUNCTION_INFO_V1(neon_dsg_set_admission);
 
 static char *dsg_vm_uid;
 static char *dsg_compute_instance_id;
@@ -743,6 +747,72 @@ neon_dsg_fence_issuer(PG_FUNCTION_ARGS)
 	PG_RETURN_DATUM(NeonDsgFence(PG_GETARG_TEXT_PP(0)));
 #else
 	NeonDsgUnsupported();
+	PG_RETURN_NULL();
+#endif
+}
+
+/*-
+ * 正式准入只接受严格完整原意图，预算字段是已认证外层的引用，不是C层自证预算。
+ * 不能用创建只读JWT调用；身份/issuer授权由HTTP与管理连接共同约束。内核还会
+ * 原子检查已建立的issuer floor、boot、容量与准入revision及整个意图摘要。
+ * 不把开门/关门当作已有工作排空，更不发放物理回收或VM执行许可。
+ */
+Datum
+neon_dsg_set_admission(PG_FUNCTION_ARGS)
+{
+	NeonDsgCheckAdministrator();
+#ifdef NEON_DSG_ADMISSION_SUPPORTED
+	{
+		Jsonb	   *input = NeonDsgParseRaw(PG_GETARG_TEXT_PP(0));
+		JsonbContainer *root = &input->root;
+		JsonbContainer *instance;
+		char	   *vm_uid;
+		char	   *compute_instance_id;
+		DsgBufferAdmissionRequest request;
+		DsgBufferAdmissionResponse response;
+		StringInfoData output;
+		int			i;
+		static const char *const dispositions[] = {"applied", "replayed", "busy", "stale", "conflict"};
+
+		NeonDsgCheckEnabled();
+		NeonDsgObject(root, 7);
+		if (NeonDsgInteger(root, "protocol_version") != 1)
+			ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("unsupported DSGA admission protocol version")));
+		instance = NeonDsgChild(root, "instance", 3);
+		vm_uid = NeonDsgId(instance, "vm_uid");
+		compute_instance_id = NeonDsgId(instance, "compute_instance_id");
+		MemSet(&request, 0, sizeof(request));
+		request.boot_id = NeonDsgUint64(instance, "pg_boot_id");
+		request.issuer_epoch = NeonDsgUint64(root, "issuer_epoch");
+		request.revision = NeonDsgUint64(root, "revision");
+		request.expected_generation = NeonDsgUint64(root, "expected_capacity_generation");
+		request.open = NeonDsgField(root, "open", jbvBool)->val.boolean;
+		(void) NeonDsgId(root, "budget_commitment_id");
+		if (request.boot_id == 0 || request.issuer_epoch == 0 || request.revision == 0 || request.expected_generation == 0)
+			ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("DSGA admission identity must be nonzero")));
+		NeonDsgHashIntent(input, request.context_sha256);
+		if (strcmp(vm_uid, dsg_vm_uid) != 0 || strcmp(compute_instance_id, dsg_compute_instance_id) != 0)
+		{
+			MemSet(&response, 0, sizeof(response));
+			response.disposition = DSG_ADMISSION_STALE;
+			DsgBufferGetSnapshot(&response.observed);
+		}
+		else
+			DsgBufferControlAdmission(&request, &response);
+		initStringInfo(&output);
+		appendStringInfoString(&output, "{\"protocol_version\":1,\"vm_shrink_permit\":false,\"request\":");
+		appendStringInfoString(&output, JsonbToCString(NULL, root, VARSIZE(input)));
+		appendStringInfo(&output, ",\"disposition\":\"%s\",\"context_sha256\":\"",
+						 NeonDsgEnumName(response.disposition, dispositions, lengthof(dispositions)));
+		for (i = 0; i < DSG_BUFFER_CONTEXT_BYTES; i++)
+			appendStringInfo(&output, "%02x", request.context_sha256[i]);
+		appendStringInfoString(&output, "\",\"observed\":");
+		NeonDsgAppendSnapshot(&output, &response.observed);
+		appendStringInfoChar(&output, '}');
+		PG_RETURN_DATUM(NeonDsgJson(&output));
+	}
+#else
+	ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("this Neon build does not support DSGA admission protocol 1")));
 	PG_RETURN_NULL();
 #endif
 }

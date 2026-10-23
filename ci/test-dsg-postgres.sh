@@ -54,6 +54,11 @@ import unittest
 
 suite = unittest.defaultTestLoader.discover('.', pattern='test_dsg_postgres.py')
 suite.addTests(unittest.defaultTestLoader.discover('.', pattern='test_dsg_control.py'))
+admission = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission.py')
+# 准入新增范围必须真实打包/执行，不能由旧控制套件绿色掩盖缺失文件。
+if admission.countTestCases() < 3:
+    raise SystemExit('DSGA fenced admission suite is missing required cases')
+suite.addTests(admission)
 replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replication.py')
 # 新测试文件遗漏打包时discover会返回空suite，不能让旧80项绿色覆盖本批缺测。
 if replication.countTestCases() < 6:
