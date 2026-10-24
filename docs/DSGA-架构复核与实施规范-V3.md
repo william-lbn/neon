@@ -502,6 +502,24 @@ GuestReady或配置数字；原未知PG查询保持可达，约束暂态保持un
 预算、准入、排空、Host和最终VM仍须接齐，见
 [实际接线范围](DSGA-Agent原Guest接管与状态转发-Mac基本验收-20261024.md)。
 
+### 8.8 GuestReady独立资源执行（2026-10-24）
+
+同一VM账本的原Completed PrepareBudget必须提供完整Prepared目标承诺，绑定
+原请求/Guest/Runner/原VM与目标可用Guest容量；outside系统/过渡/安全类别去重。
+Grow未来数组上界按ABI6固定前缀保守放大，固定主段只计一次；不得把当前PG成本
+当目标成本。该计算可能保守拒绝，精确quote另行完善，不削减未知或保留尾部。
+Prepared格式和kind不是生产者认证；真实预算生产者未齐时不能启用完整功能。
+
+实际Agent的GuestReady执行器先核对原前驱、当前PG/floor及实际Runner/VM/Guest。
+Grow必须VM已增且Guest可用，再提高限额，后扩PG；Shrink必须原提交和四数组物理
+释放均已确认，再设目标约束，后变VM。完整命令先原UID/RV CAS再Apply，独立资源
+revision来自root原WAL。回复未知普通轮询只Observe原命令；显式恢复入口独立，
+不换epoch/PID/预算、不从not-found生成NoEffect、不自动重发。写后重读PG/root/
+VM/Birth再落审计，任何漂移保留Unconfirmed。GuestReady完成仅属资源约束领域，
+不开放准入、不释放Host、不发最终VM许可。预算/全排空/Host/最终VM/受控恢复仍须
+实现，目标内核物理证明仍由Linux验收。见
+[当前实现范围](DSGA-GuestReady资源执行版本对齐-Mac基本验收-20261024.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

@@ -3,7 +3,28 @@
 更新：2026-10-24（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-24 实际Agent原Guest绑定和资源代次（仍非整体完成）
+## 最新：2026-10-24 GuestReady实际资源执行（仍非整体完成）
+
+AS `d3bd69d246cb40f6116fd1b7c874a9a319004a81` 已在既有功能分支先推送并核验，
+含独立预算合同提交 `cb1fe5b8`。实际 Agent/PGWorker 现在接入 GuestReady 执行器：
+消费原 Completed Prepared，核对 Grow/Shrink 顺序、完整 PG 成本/原释放回执、
+原 Guest/Birth、全部 hstate 和实际 Runner/VM；资源 revision 取 root 原 WAL。
+完整命令先 UID/RV CAS 后派发，普通轮询仅观察；独立显式原重放保留未知，写后
+重读 PG/root/VM 再落审计。不是独立于实际服务的演示代码，也不将资源上限当 VM 完成。
+
+Mac 新模块去重 4 顶层/21 含子项通过，race 无未修复失败/跳过，六包及实际 Agent
+vet 通过，实际 Agent/root guard 双架构 4 目标编译通过；只编译，不是内核验收。
+控制面与 Neon 锁须共同引用已发布 AS 准确 SHA，PG17 三处仍为 cbabd5，无 PG
+源码修改。完整证据和最终远程状态见本批记录与恢复点。
+
+**尚未全部开发完成**：Prepare/Finalize 可信生产者与系统外部上界、首次独立准入/
+完整排空、Host/Scheduler/最终 Controller-Runner-QMP、公开 worker/生命周期和
+受控跨 boot/owner 未知关闭仍需编码。Prepared 合同不替代真实生产者，缺少它时
+执行器拒绝推进。真实 Linux K8s/HugeTLB/物理/性能后验，默认关闭，Goal active；
+不构建镜像、不准备/执行部署、不合 main。见
+[本批接线与验收](DSGA-GuestReady资源执行版本对齐-Mac基本验收-20261024.md)。
+
+## 历史：2026-10-24 实际Agent原Guest绑定和资源代次（仍非整体完成）
 
 AS b9e393f8fa846b19d14c0246c1da46cf0d82a70f已在既有功能分支先推送并核验：
 实际Agent先UID/RV条件持久原Guest，再root fence；未知GuestReady完整命令恢复
