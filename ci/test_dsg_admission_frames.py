@@ -76,9 +76,13 @@ class DsgAdmissionFrameLifecycle(unittest.TestCase):
                 self.assertLessEqual(during, baseline + 512 * 1024,
                                      "关闭期间仍按声明长度扩张了目标backend消息缓冲")
                 self.stream(peer, size - size // 2)
-                if kind in (b"P", b"B"):
+                if kind in (b"P", b"B", b"d"):
                     peer.connection.sendall(b"S" + struct.pack("!I", 4))
-                self.error(peer.receive_ready())
+                received = peer.receive_ready()
+                if kind == b"d":
+                    self.assertFalse(any(k in (b"E", b"D") for k, _ in received), received)
+                else:
+                    self.error(received)
                 self.gate(True)
                 reused = peer.exchange([(b"Q", b"SELECT 42\0")])
                 self.assertTrue(any(k == b"D" and b.endswith(b"42") for k, b in reused), reused)
@@ -146,3 +150,46 @@ class DsgAdmissionFrameLifecycle(unittest.TestCase):
                 self.assertNotIn(b"Z\0\0\0\x05", received,
                                  "非法或半帧不能冒充已经恢复同步的ReadyForQuery")
         self.assertEqual(self.pg.sql("SELECT 1").stdout.strip(), "1")
+
+    def test_real_copy_failure_leftovers_remain_silent_while_admission_closed(self):
+        self.pg.sql("CREATE TABLE copy_cleanup(i int); GRANT INSERT ON copy_cleanup TO dsg_app")
+        self.gate(True)
+        peer, _ = self.peer()
+
+        def frame():
+            kind = peer.receive_exact(1)
+            length = struct.unpack("!I", peer.receive_exact(4))[0]
+            self.assertTrue(4 <= length <= 16 * 1024 * 1024)
+            return kind, peer.receive_exact(length - 4)
+
+        query = b"COPY copy_cleanup FROM STDIN\0"
+        peer.connection.sendall(b"Q" + struct.pack("!I", len(query) + 4) + query)
+        kind, _ = frame()
+        self.assertEqual(kind, b"G", "必须先进入实际COPY IN，不能仅模拟残留帧")
+        bad = b"not-an-integer\n"
+        peer.connection.sendall(b"d" + struct.pack("!I", len(bad) + 4) + bad)
+        kind, body = frame()
+        self.assertEqual(kind, b"E")
+        self.assertIn(b"C22P02\0", body, "必须是实际数据转换失败，不是权限/准入拒绝")
+        peer.receive_ready()
+        self.gate(False)
+        # 先收完原COPY错误和Ready，再在关闭期间发残留数据和清理帧，确保
+        # 这里读到的是本次Sync结果，不能把此前排队的Ready冒充清理成功。
+        received = peer.exchange([(b"d", b"23\n"), (b"c", b""), (b"f", b"cancelled\0"), (b"S", b"")])
+        self.assertFalse(any(k in (b"E", b"D") for k, _ in received), received)
+        self.error(peer.exchange([(b"Q", b"SELECT 42\0")]))
+        self.gate(True)
+        self.assertTrue(any(k == b"D" for k, _ in peer.exchange([(b"Q", b"SELECT 42\0")])))
+        # 真实在途COPY不经过SocketBackend主循环：关闭后仍允许原工作
+        # 正常完成，不能把有界丢弃错误应用到它而静默丢数据；后续SQL仍被关门。
+        peer.connection.sendall(b"Q" + struct.pack("!I", len(query) + 4) + query)
+        self.assertEqual(frame()[0], b"G")
+        self.gate(False)
+        rows = b"1\n2\n"
+        peer.connection.sendall(b"d" + struct.pack("!I", len(rows) + 4) + rows)
+        peer.connection.sendall(b"c" + struct.pack("!I", 4))
+        completed = peer.receive_ready()
+        self.assertFalse(any(k == b"E" for k, _ in completed), completed)
+        self.assertTrue(any(k == b"C" and body == b"COPY 2\0" for k, body in completed), completed)
+        self.assertEqual(self.pg.sql("SELECT count(*),sum(i) FROM copy_cleanup").stdout.strip(), "2|3")
+        self.error(peer.exchange([(b"Q", b"SELECT 42\0")]))
