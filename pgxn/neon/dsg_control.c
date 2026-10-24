@@ -32,6 +32,9 @@
 #if __has_include("storage/dynamic_shared_buffers.h")
 #include "storage/dynamic_shared_buffers.h"
 #endif
+#if __has_include("storage/dsg_work.h")
+#include "storage/dsg_work.h"
+#endif
 #endif
 #if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION == 6
 #define NEON_DSG_CONTROL_SUPPORTED 1
@@ -52,6 +55,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_fence_issuer);
 PG_FUNCTION_INFO_V1(neon_dsg_set_admission);
 PG_FUNCTION_INFO_V1(neon_dsg_admission_status);
 PG_FUNCTION_INFO_V1(neon_dsg_shared_cost);
+PG_FUNCTION_INFO_V1(neon_dsg_work_state);
 
 static char *dsg_vm_uid;
 static char *dsg_compute_instance_id;
@@ -702,6 +706,43 @@ neon_dsg_shared_cost(PG_FUNCTION_ARGS)
 			cost.startup_main_upper_bytes, cost.startup_arrays_upper_bytes,
 			cost.current_main_and_arrays_upper_bytes);
 		NeonDsgAppendSnapshot(&output, &cost.observed);
+		appendStringInfoChar(&output, '}');
+		PG_RETURN_DATUM(NeonDsgJson(&output));
+	}
+#else
+	NeonDsgUnsupported();
+	PG_RETURN_NULL();
+#endif
+}
+
+/*-
+ * 只读固定大小Native登记，同一次锁内包含实例代次和门禁。不接受调用者自报
+ * 的idle/PID/完成，也不把前台空闲提升成完整Quiesce或VM缩容许可。
+ * 与其他内部入口相同，SQL ACL之外仍核验当前及session身份，弱SU不能借函数绕过。
+ */
+Datum
+neon_dsg_work_state(PG_FUNCTION_ARGS)
+{
+	NeonDsgCheckAdministrator();
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 1
+	{
+		DsgWorkSnapshot s;
+		StringInfoData output;
+
+		NeonDsgCheckEnabled();
+		DsgWorkGetSnapshot(&s);
+		initStringInfo(&output);
+		appendStringInfo(&output,
+			"{\"protocol_version\":1,\"work_api_version\":1,\"vm_shrink_permit\":false,"
+			"\"client_processes\":%u,\"startup_clients\":%u,\"idle_clients\":%u,"
+			"\"frontend_reads\":%u,\"frontend_executes\":%u,\"bounded_inputs\":%u,"
+			"\"retained_transactions\":%u,\"background_processes\":%u,\"auxiliary_processes\":%u,"
+			"\"observer_excluded\":%s,\"foreground_idle\":%s,\"observed\":",
+			s.client_processes, s.startup_clients, s.idle_clients, s.frontend_reads,
+			s.frontend_executes, s.bounded_inputs, s.retained_transactions,
+			s.background_processes, s.auxiliary_processes,
+			s.observer_excluded ? "true" : "false", s.foreground_idle ? "true" : "false");
+		NeonDsgAppendSnapshot(&output, &s.observed);
 		appendStringInfoChar(&output, '}');
 		PG_RETURN_DATUM(NeonDsgJson(&output));
 	}

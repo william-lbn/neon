@@ -64,6 +64,11 @@ frames = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission_fr
 if frames.countTestCases() < 5:
     raise SystemExit('DSGA bounded admission frame suite is missing required cases')
 suite.addTests(frames)
+work = unittest.defaultTestLoader.discover('.', pattern='test_dsg_work.py')
+# 真实在途与事务、退出清理不能由旧门禁/消息内存测试代替。
+if work.countTestCases() < 8:
+    raise SystemExit('DSGA native work registry suite is missing required cases')
+suite.addTests(work)
 replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replication.py')
 # 新测试文件遗漏打包时discover会返回空suite，不能让旧80项绿色覆盖本批缺测。
 if replication.countTestCases() < 6:

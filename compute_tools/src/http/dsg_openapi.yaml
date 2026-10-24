@@ -28,6 +28,19 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/Capabilities"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/work/state:
+    get:
+      operationId: getDsgWorkState
+      summary: 同一PG快照的真实进程与前台在途登记
+      description: 固定PGPROC槽登记消息读取、执行、保留事务及有界拒绝输入；前台空闲不是完整Quiesce，后台、认证前连接、DSM和VM仍需独立证明。
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 原生只读在途事实，无floor或门禁修改，no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/WorkResponse"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/budget/shared:
     get:
       operationId: getDsgSharedCost
@@ -215,6 +228,27 @@ components:
                 required: [error]
                 properties: {error: {type: string}}
   schemas:
+    WorkResponse:
+      type: object
+      additionalProperties: false
+      description: 同一原生快照的前台登记与进程生存期；不是完整Quiesce或VM许可。
+      required: [protocol_version, work_api_version, vm_shrink_permit, client_processes, startup_clients, idle_clients, frontend_reads, frontend_executes, bounded_inputs, retained_transactions, background_processes, auxiliary_processes, observer_excluded, foreground_idle, observed]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        work_api_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        client_processes: {type: integer, minimum: 0, maximum: 4294967295}
+        startup_clients: {type: integer, minimum: 0, maximum: 4294967295}
+        idle_clients: {type: integer, minimum: 0, maximum: 4294967295}
+        frontend_reads: {type: integer, minimum: 0, maximum: 4294967295}
+        frontend_executes: {type: integer, minimum: 0, maximum: 4294967295}
+        bounded_inputs: {type: integer, minimum: 0, maximum: 4294967295}
+        retained_transactions: {type: integer, minimum: 0, maximum: 4294967295}
+        background_processes: {type: integer, minimum: 0, maximum: 4294967295}
+        auxiliary_processes: {type: integer, minimum: 0, maximum: 4294967295}
+        observer_excluded: {type: boolean}
+        foreground_idle: {type: boolean}
+        observed: {$ref: "#/components/schemas/Snapshot"}
     SharedCostResponse:
       type: object
       additionalProperties: false

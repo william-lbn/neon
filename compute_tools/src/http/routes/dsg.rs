@@ -33,6 +33,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/initialization", get(initialization))
         .route("/dsg/v1/memory", get(memory))
         .route("/dsg/v1/budget/shared", get(shared_cost))
+        .route("/dsg/v1/work/state", get(work_state))
         .route("/dsg/v1/resource/identity", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/process", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/state", get(super::dsg_resource::proxy))
@@ -156,6 +157,24 @@ async fn shared_cost(
             Err(_) => failure(
                 StatusCode::SERVICE_UNAVAILABLE,
                 "shared_cost_unavailable",
+                None,
+            ),
+        },
+        Err(error) => error,
+    }
+}
+
+// 同一路由认证/实例/current issuer核验，只返回Native事实，不写排空或VM许可。
+async fn work_state(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+) -> Response {
+    match client(&compute, &claims).await {
+        Ok(client) => match client.work_state().await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(_) => failure(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "work_observation_unavailable",
                 None,
             ),
         },

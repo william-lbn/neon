@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-25",
+  "platform": "Mac arm64; debug/cassert PG17",
+  "scope": "真实前台登记及正式只读消费者；整体DSGA未完成",
+  "branches": {
+    "postgres": "codex/dsga-pg17-v3-20261019",
+    "autoscaling": "codex/dsga-autoscaling-20261019",
+    "neon": "codex/dsga-neon-v3-20261019",
+    "control_plane": "codex/dsga-control-plane-v3-20261020"
+  },
+  "dependencies": {
+    "postgres": "1085064d44a47655149c8b7ab94c19d0cfa3a9c7",
+    "autoscaling": "d1f5a9fccf335d565882edac3afbb7e9b21013c1",
+    "control_plane": "f98fce9ff4c2de56dc41e51e7b8514600253a979"
+  },
+  "versions": {
+    "PG": "17.11",
+    "BufferAPI": 6,
+    "WorkAPI": 1,
+    "NeonExtension": "1.12"
+  },
+  "executed": {
+    "native_distinct": {
+      "passed": 9,
+      "skipped": 0,
+      "logs": [
+        "dsga-work-exact-native.log",
+        "dsga-work-extended-native.log"
+      ],
+      "replacement": "认证项由dsga-work-auth-final-native.log替换，不加计数；候选不重复计数"
+    },
+    "official_DSGA_enabled": {
+      "core_passed": 225,
+      "isolation_passed": 123,
+      "logs": [
+        "dsga-work-core.log",
+        "dsga-work-isolation.log"
+      ],
+      "source": "相同已提交PG源码，准确SHA重编仅复核新增/受影响项"
+    },
+    "formal_HTTP": {
+      "passed": 1,
+      "log": "dsga-work-http-native-final.log"
+    },
+    "Go_TLS_Rust_SQL_PG": {
+      "passed": 1,
+      "inner": "Go race TestNativeWorkState",
+      "log": "dsga-work-go-http-native.log"
+    },
+    "Go_new_race": {
+      "passed": 2,
+      "log": "dsga-work-go-new.jsonl"
+    },
+    "CP_routes_race": {
+      "passed": 2,
+      "log": "dsga-work-cp-proxy.jsonl",
+      "binding": "切换AS锁前运行，相同路由源码未再改变；准确锁后readonly vet"
+    },
+    "Rust_contract": {
+      "passed": 1,
+      "log": "dsga-work-rust-contract.log"
+    },
+    "quality": [
+      "dsga-work-final-clippy.log",
+      "dsga-work-go-vet.log",
+      "dsga-work-cp-vet.log",
+      "dsga-work-index-validation.log",
+      "dsga-work-index-tests.log"
+    ],
+    "distribution_index": {
+      "binaries": 18,
+      "pinned_PG_versions": 4,
+      "extension_stages": 39,
+      "test_compute_passed": 5
+    }
+  },
+  "earlier_failures": [
+    "候选jsonb初次未安装libpq，隔离安装后官方jsonb通过",
+    "旧测试桥signed bigint未解释uint64位模式，修正测试断言；生产boot不变",
+    "HTTP扩展协议隐式事务阻止观察排除，固定观察改完整Simple Query；dsga-work-http-native.log保留",
+    "权限夹具关门先触发55000，移至开门时实际触达Native42501，dsga-work-http-native-fixed.log保留"
+  ],
+  "unimplemented": [
+    "PGPROC前连接及完整后台/并行/DSM/预备事务排空生产者",
+    "Prepare/Finalize可信生产者与system outside权威",
+    "首次独立准入、Host/Scheduler/最终Controller-Runner-QMP",
+    "公开worker/生命周期、受控跨boot/owner未知关闭"
+  ],
+  "not_run": [
+    "Linux K8s/RBAC/NeonVM/KVM/cgroup2/HugeTLB",
+    "真实物理释放/迁移、压力/性能/长稳",
+    "镜像构建与部署（用户排除）"
+  ],
+  "artifacts_sha256": {
+    "build/pg17-work-exact-install/bin/postgres": "67441f0c126a31b769c44a625a09a4d999dfb2673fc1d20c3a1466b928641acf",
+    "build/pg17-work-exact-install/lib/postgresql/neon.dylib": "5f64b0d4a94616525b08d7ce68ece3f0e40ad7bcffa99c6b4a8446e6e2b0c662",
+    "build/pg17-work-exact-install/lib/postgresql/test_dsg_region.dylib": "202a563417c01e94a43be0cee5132b11b710c571a3e835153286787b7bf33b31",
+    "build/pg17-work-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+  },
+  "source_sha256": {
+    "neon/ci/test_dsg_work.py": "bc9514a8f8b3fd382a8e9a222a541957c364e43aa8eb4f0fcfacaf382a5c5cf1",
+    "neon/ci/test-dsg-postgres.sh": "fd0bd9c4607420e771785da0ac6a4b6225316b21325949a026fd817e02bbb56f",
+    "neon/ci/distribution.json": "94e75b562bfa2d0f4ba552c14db86e7537d1648468ae85639623e05e8ee2cc25",
+    "neon/vendor/revisions.json": "ba5c398b99870e01abc68be654175af9a437100853c96686c68a04465477dbba",
+    "neon/pgxn/neon/dsg_control.c": "c2bcbef3a5afe9a960fde02965bc0aabd624fe69e0d9cd948bb91a4da005da8b",
+    "neon/pgxn/neon/neon.control": "e5861312d215ccf8b90b468183034522f63f888854e1235432c9b5b2039f6a29",
+    "neon/pgxn/neon/neon--1.11--1.12.sql": "d7e279532349b920d1f6fe895dfabec1703a80463e26039330fd9132ebd635c5",
+    "neon/pgxn/neon/neon--1.12--1.11.sql": "1c57f2897f46e6996f8d82b09253a32f8c6237ed9775f851b8dd14334a39a412",
+    "neon/libs/compute_api/src/dsg_work.rs": "d5107b08e05b7a1b854e3a24667580910cf4564afbe52fce530d4e4aeacd32f1",
+    "neon/libs/compute_api/src/dsg_client.rs": "053f060882f71300815a72226f1aea6e219a631f315670fb1c4b7f8d0e506326",
+    "neon/compute_tools/src/http/routes/dsg.rs": "4b3fbf65ed974b6b2fff8ce57b08c348bb9ce9a5fdf4bbadc9fa59db8ed2e073",
+    "neon/compute_tools/src/http/dsg_openapi.yaml": "16170651c211ce7c7055a92d63c24fed6607b7f425ee882ab6f280a8dec26def",
+    "neon/compute_tools/tests/dsg_http.rs": "86f1ff24bb149904d3a87e38c38f7d802716ce7c59a3e5c4e81fe9cdba63d781",
+    "neon/compute_tools/tests/dsg_go_http.rs": "a787195e17b3df887289ad545b8f2603460bb97d2b5e36ca70edcac37469b2e5",
+    "neon/vendor/postgres-v17/src/backend/storage/buffer/dsg_work.c": "96303f0c0874a60b4c80605c6cb60b0471eb58e921d6ed89085ef4f6df257b3e",
+    "neon/vendor/postgres-v17/src/include/storage/dsg_work.h": "bb31104451c95bebef3611e55f6943e3828f1ef695f60d5064b959aa59ca4f0f",
+    "neon/vendor/postgres-v17/src/backend/tcop/postgres.c": "00d77a59a09e602139d8a97036ef851e85bc017da83c2541bd930a4da0ddde57",
+    "neon/vendor/postgres-v17/src/backend/storage/lmgr/proc.c": "4c58f7b9fd71f387801c74bb914365922603adfee05d390624e5d2044e386b0f",
+    "neon/vendor/postgres-v17/src/backend/storage/ipc/ipci.c": "f51c8658c23a7427d3da8bfba1f8d63e378dc1655d0cdbc36eeadda6efd859fe",
+    "autoscaling/pkg/api/dsga/work.go": "2364098eca9254c4a0b7bf7c6daf68862f7197131f6e933d1fcfe9dc273b1fd6",
+    "autoscaling/pkg/dsga/compute/work.go": "370e00694def65966da8fc08a98a2eff67e4fe1c45139494a4974aa520c4eb87",
+    "autoscaling/pkg/dsga/compute/native_work_test.go": "84c72c04bf3d60215629244e274fd419fc0c1071a6887e0a26f56e99354e52c4",
+    "control-plane/api/go.mod": "9c767d9fe53cf7597f7c1301c3960b489d6dd8a02bef1d84d6285af106e48213",
+    "control-plane/api/go.sum": "4daae1b4485fbb887c1e7e6c4a0ac0bbb52e68125c394cd29a0c90e5a8d696b9",
+    "control-plane/api/internal/control/dsga_proxy.go": "fa90d640413cf4e13a97b253a8daa091387822e91904a247cfa6cfcd0d62d76d"
+  },
+  "vm_shrink_permit": false,
+  "production_ready": false
+}

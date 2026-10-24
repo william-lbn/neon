@@ -25,6 +25,8 @@ use crate::dsg_state::{
     DsgPhase, DsgSharedCostResponse,
 };
 
+use crate::dsg_work::DsgWorkResponse;
+
 const MAX_RESPONSE_BYTES: usize = 32 * 1024;
 
 /// 本地未发送和已发送后结果不确定必须可机器区分；后者需要按原意图对账。
@@ -358,6 +360,23 @@ impl<'a> DsgSqlClient<'a> {
             &self.observer,
             &sql(&self.observer_schema, "neon_dsg_shared_cost", false),
             None,
+            self.response_timeout,
+        )
+        .await?;
+        response.validate_for(&self.instance)?;
+        Ok(response)
+    }
+
+    /// 真实前台登记的独立只读观察；不清pending、不生成Quiesce或预算回执。
+    /// 正式扩展成员检查与API版本独立于PG大版本，旧内核/旧SQL明确拒绝该能力。
+    pub async fn work_state(&self) -> Result<DsgWorkResponse> {
+        self.formal_function("neon_dsg_work_state", 0).await?;
+        // 固定无参数的唯一观察语句用完整Simple Query。扩展协议在Parse/Bind后
+        // 合法保留隐式事务，Native必须保守计数，不能为了观察成功把该事务忽略。
+        // 本SDK专用观察连接只发送已转义schema+固定函数，不拼接任何业务参数。
+        let response: DsgWorkResponse = read_json_simple(
+            &self.observer,
+            &sql(&self.observer_schema, "neon_dsg_work_state", false),
             self.response_timeout,
         )
         .await?;
@@ -834,6 +853,47 @@ async fn read_json<T: DeserializeOwned>(
         "DSGA response exceeds 32 KiB"
     );
     serde_json::from_str(body).context("invalid DSGA response schema")
+}
+
+/// 只供固定无参数只读观察使用，完整消费至ReadyForQuery；不接受动态SQL或载荷。
+/// 限一行一列和32KiB，既不以空结果补零，也不在超时后清任何业务Pending。
+async fn read_json_simple<T: DeserializeOwned>(
+    client: &Client,
+    sql: &str,
+    wait: Duration,
+) -> Result<T> {
+    let messages = timeout(wait, client.simple_query(sql))
+        .await
+        .context("DSGA observation deadline elapsed")??;
+    let mut body = None;
+    let mut commands = 0;
+    for message in &messages {
+        match message {
+            tokio_postgres::SimpleQueryMessage::Row(row) => {
+                ensure!(
+                    body.is_none() && row.len() == 1,
+                    "DSGA observation row shape differs"
+                );
+                let value = row.get(0).context("DSGA observation is null")?;
+                ensure!(
+                    value.len() <= MAX_RESPONSE_BYTES,
+                    "DSGA response exceeds 32 KiB"
+                );
+                body = Some(value);
+            }
+            tokio_postgres::SimpleQueryMessage::CommandComplete(rows) => {
+                ensure!(*rows == 1, "DSGA observation command shape differs");
+                commands += 1;
+            }
+            _ => {}
+        }
+    }
+    ensure!(
+        commands == 1,
+        "DSGA observation did not complete one command"
+    );
+    serde_json::from_str(body.context("DSGA observation returned no row")?)
+        .context("invalid DSGA observation schema")
 }
 
 async fn discover(client: &Client, wait: Duration) -> Result<(String, i32)> {

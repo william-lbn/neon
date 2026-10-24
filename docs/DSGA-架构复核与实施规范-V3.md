@@ -548,6 +548,26 @@ Guest/Host/最终VM证明。完整预算、初始准入/排空与受控关闭继
 消息缓冲上界，不替代Linux cgroup/HugeTLB/Host/物理证明。见
 [本批实现与边界](DSGA-准入大帧读取上界-Mac基本验收-20261025.md)。
 
+### 8.11 真实前台在途与进程生命周期观察（2026-10-25）
+
+按固定PGPROC槽真实注册/注销，目录全部计入主段预算，不改变Buffer ABI6。
+在类型校验后、正文分配前与admission同锁决定拒绝并登记；COPY/WAL流到真实命令
+返回前一直是执行。错误恢复/退出须先完成资源清理再报告idle/注销。保留事务
+独立于消息阶段，拒绝慢帧不能隐藏事务；Describe同Parse/Bind须在门禁内。
+只读观察同锁复制Native boot/floor/generation/门禁与计数，五互斥阶段覆盖client，
+事务为子集，固定有界丢弃仍需连接预算；后台/辅助生存期不能解释为已quiesce。
+
+正式管理Work1为独立增量能力，扩展1.12正式升级及函数成员必须存在；旧版本
+明确拒绝。固定无参数观察用完整Simple Query：普通扩展协议Parse/Bind未Sync
+本来就可能保留事务，不能为使管理观察通过而削弱Native登记。其他会话、显式
+事务、原未Sync事务必须仍阻止idle；观察不解除任何Pending，不产生预算或VM权。
+
+本项是实际前台登记与管理消费者，尚非完整Quiesce。PGPROC前的startup packet/
+SSL/GSS、后台/并行/DSM/预备事务及全部持续约束须有真实覆盖并接入完整生产者，
+不得以foreground_idle替代后续证明。锁内不得扫描/分配/报错；ProcStructLock外
+注册/注销，退出后槽所有权未知须失败关闭。详见
+[源码及Mac证据](DSGA-真实前台在途登记-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

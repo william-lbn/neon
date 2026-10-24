@@ -3,7 +3,34 @@
 更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 关闭准入的大帧分配边界（仍非整体完成）
+## 最新：2026-10-25 真实前台工作登记与正式管理链路（仍非整体完成）
+
+实际Neon PG17 `1085064d44a47655149c8b7ab94c19d0cfa3a9c7` 已在原自有V3
+分支推送并核对；包含独立社区维护合并36d58060（strict jsonpath根字符串GIN）。
+固定PGPROC槽计费入启动主段，读取登记与关门同锁；跟踪STARTUP/read/execute/
+有界拒绝/idle及独立保留事务，ERROR清理与ProcKill资源清理完成后才清状态。
+COPY/WAL流保留执行；Describe补准入。背景/辅助只是实际生存期，不是假排空。
+
+正式Neon扩展1.12/Native Work API1、Rust严格DTO/专用SQL和认证HTTP、Go只读
+SDK及控制面固定GET已接通。HTTP暴露真实问题：扩展协议的Parse/Bind隐式事务
+会保守阻止观察者排除；固定无参数观察改完整Simple Query，Native规则不放宽。
+其他会话事务和未Sync扩展事务仍阻止idle；观察不清Pending、不写任何VM许可。
+
+Mac原生去重9项通过（8新登记场景+1既有COPY兼容），启用DSGA官方core225/
+isolation123通过；准确SHA PG与Neon C/Rust communicator重编。新增正式HTTP
+1项、内层Go race→TLS→生产Router/JWT/SQL/准确PG门禁1项通过，Rust严格协议1项、
+Go协议/SDK race2项、控制面路由race2项通过，相关vet/clippy通过。
+AS `d1f5a9fccf335d565882edac3afbb7e9b21013c1` 已在原分支推送，Neon版本锁与
+控制面准确模块共同绑定；控制面独立主线维护合并cf775bb保留。详细批次、首次
+失败、最终替换证据与未验项目见[本批记录](DSGA-真实前台在途登记-Mac基本验收-20261025.md)。
+
+PGPROC前连接/SSL/GSS窗口、后台/DSM/预备事务全排空及持续预算仍须编码；完整
+可信预算生产者/system outside、首次准入、Host/Scheduler/最终Controller-Runner-
+QMP、公开worker/生命周期及受控跨boot/owner关闭也仍是代码，不是仅待Linux。
+Linux K8s/HugeTLB/物理/性能后验。Goal active，仅PG17，默认关闭；沿既有服务
+分支演进，不构建镜像、不准备/执行部署、不合主分支。
+
+## 历史：2026-10-25 关闭准入的大帧分配边界（仍非整体完成）
 
 本批在Neon实际 `vendor/postgres-v17` 修复协议入口，不是独立普通PG项目：
 原门禁在完整消息体读入后拒绝，关闭期间仍可能先分配大Query/Parse/Bind/
@@ -15,7 +42,7 @@ PG `b48b089f9004a6dd437b075f146fab5fa67711bf` 已在原自有功能分支先推�
 候选Mac新原生5项、受影响准入5项、core225/isolation123通过；旧准确cbabd5
 单Query负向按预期失败，真实backend已分配由1152912增至34707408字节。准确
 SHA重编仅复核改动的2项通过；COPY真实失败/残留与在途写入已补验。Neon
-子模块、两份PG锁和实际源码同步ff1973；AS08161712/控制面48d966b8未改，
+子模块、两份PG锁和实际源码同步b48b089；AS08161712/控制面48d966b8未改，
 没有制造空提交或改变已有服务分支。
 
 这只是关闭/忽略消息的读取预算：**不是完整Quiesce**，仍须追踪已经读入/在途

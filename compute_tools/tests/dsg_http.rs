@@ -1126,6 +1126,133 @@ async fn native_shared_cost_http_binds_current_pg_and_preserves_control_state() 
     Ok(())
 }
 
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn native_work_state_http_requires_formal_upgrade_and_same_instance() -> Result<()> {
+    use compute_api::dsg_work::DsgWorkResponse;
+    let signer = Signer::new();
+    let (mut cluster, _compute, app) = native(&signer).await?;
+    let token = signer.token(&signer.claims());
+    let path = "/dsg/v1/work/state";
+    assert_eq!(
+        invoke(app.clone(), Method::GET, path, Some(&token), None)
+            .await?
+            .0,
+        StatusCode::SERVICE_UNAVAILABLE,
+        "旧1.8不能假报新Native登记"
+    );
+    let sql = cluster.connect().await?;
+    sql.batch_execute("ALTER EXTENSION neon UPDATE TO '1.12'")
+        .await?;
+    // SQL ACL被误授予后，Native入口仍同时检查当前与session SU。
+    let namespace: String = sql.query_one("SELECT pg_catalog.quote_ident(n.nspname) FROM pg_catalog.pg_extension e JOIN pg_catalog.pg_namespace n ON n.oid=e.extnamespace WHERE e.extname='neon'", &[]).await?.get(0);
+    sql.batch_execute(&format!("CREATE ROLE work_observer NOSUPERUSER; GRANT USAGE ON SCHEMA {namespace} TO work_observer; GRANT EXECUTE ON FUNCTION {namespace}.neon_dsg_work_state() TO work_observer")).await?;
+    let denied = sql
+        .batch_execute(&format!(
+            "SET ROLE work_observer; SELECT {namespace}.neon_dsg_work_state()"
+        ))
+        .await;
+    assert_eq!(
+        denied.unwrap_err().code(),
+        Some(&tokio_postgres::error::SqlState::INSUFFICIENT_PRIVILEGE)
+    );
+    sql.batch_execute("RESET ROLE").await?;
+    let initial = memory(&app, &token).await?.observed;
+    let fence = json!({"protocol_version":1,"instance":initial.instance,"issuer_epoch":"1"});
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            Some(&token),
+            Some(&fence.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::OK
+    );
+    // 仅关闭真实Native门禁；测试引用不是完整资源预算，不能用于开门或VM许可。
+    let close = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: initial.instance,
+        issuer_epoch: DsgUint64::new(1),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: initial.capacity_generation,
+        open: false,
+        budget_commitment_id: "work-observation-fixture".into(),
+    };
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission",
+            Some(&token),
+            Some(&serde_json::to_string(&close)?)
+        )
+        .await?
+        .0,
+        StatusCode::OK
+    );
+    let before = memory(&app, &token).await?.observed;
+    let (status, body) = invoke(app.clone(), Method::GET, path, Some(&token), None).await?;
+    assert_eq!(status, StatusCode::OK, "{body}");
+    let fact: DsgWorkResponse = serde_json::from_str(&body)?;
+    fact.validate_for(&before.instance)?;
+    assert_eq!(fact.observed, before, "只读观察不能改floor/门禁/操作历史");
+    assert!(fact.observer_excluded);
+    assert!(
+        fact.foreground_idle,
+        "Simple Query观察不能被自身Parse/Bind隐式事务挡住"
+    );
+    assert!(!fact.vm_shrink_permit);
+    // 只排除当前固定观察；另一个真实SU的长期事务仍必须阻止前台空闲。
+    sql.batch_execute("BEGIN").await?;
+    let (code, retained) = invoke(app.clone(), Method::GET, path, Some(&token), None).await?;
+    assert_eq!(code, StatusCode::OK);
+    let retained: DsgWorkResponse = serde_json::from_str(&retained)?;
+    assert!(retained.observer_excluded && retained.retained_transactions >= 1);
+    assert!(!retained.foreground_idle);
+    sql.batch_execute("ROLLBACK").await?;
+
+    let mut creation = signer.claims();
+    creation["scope"] = json!(compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE);
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            path,
+            Some(&signer.token(&creation)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    let mut wrong = signer.claims();
+    wrong["vm_uid"] = json!("replacement");
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            path,
+            Some(&signer.token(&wrong)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    // 正式降级移除函数后重新拒绝，不能仅缓存升级前/后的能力判断。
+    sql.batch_execute("ALTER EXTENSION neon UPDATE TO '1.11'")
+        .await?;
+    assert_eq!(
+        invoke(app, Method::GET, path, Some(&token), None).await?.0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    cluster.passed = true;
+    Ok(())
+}
+
 async fn memory(app: &Router, token: &str) -> Result<DsgMemoryResponse> {
     let (status, body) = invoke(
         app.clone(),
