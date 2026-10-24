@@ -36,7 +36,11 @@ class PgWireConnection:
         self.connection.connect(str(directory / ".s.PGSQL.55432"))
         body = struct.pack("!I", 196608) + f"user\0{user}\0database\0postgres\0\0".encode()
         self.connection.sendall(struct.pack("!I", len(body) + 4) + body)
-        self.receive_ready()
+        startup = self.receive_ready()
+        # 只保留本次真实连接的PID，不输出BackendKeyData中的取消密钥。
+        # 并发/断连测试不能按pg_stat_activity里“同角色最新会话”猜目标进程。
+        self.backend_pid = next(struct.unpack("!I", body[:4])[0]
+                                for kind, body in startup if kind == b"K")
 
     def receive_exact(self, length):
         chunks = bytearray()

@@ -59,6 +59,11 @@ admission = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission
 if admission.countTestCases() < 3:
     raise SystemExit('DSGA fenced admission suite is missing required cases')
 suite.addTests(admission)
+frames = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission_frames.py')
+# 大帧在完整读取前的内存边界不能由旧准入回执测试替代；漏打包须明确失败。
+if frames.countTestCases() < 4:
+    raise SystemExit('DSGA bounded admission frame suite is missing required cases')
+suite.addTests(frames)
 replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replication.py')
 # 新测试文件遗漏打包时discover会返回空suite，不能让旧80项绿色覆盖本批缺测。
 if replication.countTestCases() < 6:

@@ -533,6 +533,20 @@ VM/准入；之后仍逐域推进。缺历史、过期、非原生拒绝、跨bo
 Guest/Host/最终VM证明。完整预算、初始准入/排空与受控关闭继续实施，见
 [当前模块记录](DSGA-原生终态恢复版本对齐-Mac基本验收-20261025.md)。
 
+### 8.10 协议读入也是准入预算的一部分（2026-10-25）
+
+门禁不能等完整消息体分配/读入后才检查。关闭时的Query/Parse/Bind/FastPath、
+主循环CopyData及ignore-till-Sync大帧须在StringInfo扩张之前决定，固定缓冲流式
+消费被拒/忽略正文；沿用原类型、长度上限和断连规则。完整拒绝帧返回55000并
+保留连接，Sync/Close/Terminate按原协议清理；半帧/非法长度不能伪造Ready。
+丢弃时门禁重开仍拒绝该原帧，不对已消费正文再次检查后当空命令执行。
+
+此修复仅限制新拒绝/忽略消息。关闭前已经开始的读入、认证/新连接、当前COPY、
+后台/并行/DSM工作仍须真实在途注册/排空及持续预算；不得据本项完成Quiesce、
+发VM许可或推断无OOM。真实PG半帧memory-context日志和旧版本负向证明仅覆盖
+消息缓冲上界，不替代Linux cgroup/HugeTLB/Host/物理证明。见
+[本批实现与边界](DSGA-准入大帧读取上界-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
