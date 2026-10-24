@@ -1,4 +1,5 @@
-//! DSGA管理HTTP只承载PG/Provider事实，不发放VM许可，不借通用路由的认证豁免。
+//! DSGA管理HTTP承载PG/Provider及独立Guest资源事实，不发放VM许可，
+//! 不借通用路由的认证豁免；root资源动作经固定UDS重新验签和持久fence。
 
 use std::sync::Arc;
 
@@ -32,6 +33,14 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/initialization", get(initialization))
         .route("/dsg/v1/memory", get(memory))
         .route("/dsg/v1/budget/shared", get(shared_cost))
+        .route("/dsg/v1/resource/identity", get(super::dsg_resource::proxy))
+        .route("/dsg/v1/resource/fence", post(super::dsg_resource::proxy))
+        .route("/dsg/v1/resource/apply", post(super::dsg_resource::proxy))
+        .route("/dsg/v1/resource/observe", post(super::dsg_resource::proxy))
+        .route(
+            "/dsg/v1/resource/replay-original",
+            post(super::dsg_resource::proxy),
+        )
         .route("/dsg/v1/resize", post(resize))
         .route("/dsg/v1/resize/status", post(status))
         .route("/dsg/v1/resize/cancel", post(cancel))

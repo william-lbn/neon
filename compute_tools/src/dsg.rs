@@ -32,44 +32,6 @@ impl CreationIdentity {
     }
 }
 
-#[cfg(test)]
-mod creation_tests {
-    use super::*;
-    use compute_api::responses::{ComputeConfig, ComputeCtlConfig};
-
-    #[test]
-    fn frozen_creation_is_distinct_from_current_configuration() -> Result<()> {
-        let mut spec = crate::dsg_roles::tests::fixture();
-        spec.operation_uuid = Some("original-create".into());
-        let node = ComputeNode::new(
-            crate::dsg_roles::tests::parameters(),
-            ComputeConfig {
-                spec: Some(spec.clone()),
-                compute_ctl_config: ComputeCtlConfig {
-                    jwks: jsonwebtoken::jwk::JwkSet { keys: vec![] },
-                    tls: None,
-                },
-            },
-        )?;
-        spec.operation_uuid = Some("new-storage-notification".into());
-        let mut changed = ParsedSpec::try_from(spec)?;
-        node.verify_dsg_storage(&changed)?;
-        assert_eq!(
-            node.dsg_creation
-                .get()
-                .unwrap()
-                .as_ref()
-                .unwrap()
-                .operation_uuid
-                .as_deref(),
-            Some("original-create")
-        );
-        changed.timeline_id = "ffffffffffffffffffffffffffffffff".parse()?;
-        assert!(node.verify_dsg_storage(&changed).is_err());
-        Ok(())
-    }
-}
-
 impl ComputeNode {
     /// 只读比较已冻结存储身份，不持锁/不访问网络。原创建缺UUID的旧配置仍可
     /// 沿原启动路径处理，但初始化证明必须拒绝补造来源；后续通知不能填补它。
@@ -258,4 +220,43 @@ async fn management_connection(config: &Config) -> Result<Client> {
         }
     });
     Ok(client)
+}
+
+// 测试置于生产项之后，保持all-targets静态门禁；移动不改变运行逻辑。
+#[cfg(test)]
+mod creation_tests {
+    use super::*;
+    use compute_api::responses::{ComputeConfig, ComputeCtlConfig};
+
+    #[test]
+    fn frozen_creation_is_distinct_from_current_configuration() -> Result<()> {
+        let mut spec = crate::dsg_roles::tests::fixture();
+        spec.operation_uuid = Some("original-create".into());
+        let node = ComputeNode::new(
+            crate::dsg_roles::tests::parameters(),
+            ComputeConfig {
+                spec: Some(spec.clone()),
+                compute_ctl_config: ComputeCtlConfig {
+                    jwks: jsonwebtoken::jwk::JwkSet { keys: vec![] },
+                    tls: None,
+                },
+            },
+        )?;
+        spec.operation_uuid = Some("new-storage-notification".into());
+        let mut changed = ParsedSpec::try_from(spec)?;
+        node.verify_dsg_storage(&changed)?;
+        assert_eq!(
+            node.dsg_creation
+                .get()
+                .unwrap()
+                .as_ref()
+                .unwrap()
+                .operation_uuid
+                .as_deref(),
+            Some("original-create")
+        );
+        changed.timeline_id = "ffffffffffffffffffffffffffffffff".parse()?;
+        assert!(node.verify_dsg_storage(&changed).is_err());
+        Ok(())
+    }
 }

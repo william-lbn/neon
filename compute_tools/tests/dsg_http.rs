@@ -57,6 +57,69 @@ async fn invoke(
     ))
 }
 
+/// 本批只检查新增资源路由的正式认证/spec绑定。valid+query在连接固定UDS前
+/// 拒绝，不依赖本机特权socket；实际UDS转发由同批独立单元测试覆盖。
+#[tokio::test]
+async fn resource_routes_require_control_scope_and_frozen_instance_before_uds() -> Result<()> {
+    let signer = Signer::new();
+    let app = router(&node(signer.jwks.clone(), true, None));
+    for (method, path) in [
+        (Method::GET, "/dsg/v1/resource/identity"),
+        (Method::POST, "/dsg/v1/resource/fence"),
+        (Method::POST, "/dsg/v1/resource/apply"),
+        (Method::POST, "/dsg/v1/resource/observe"),
+        (Method::POST, "/dsg/v1/resource/replay-original"),
+    ] {
+        assert_eq!(
+            invoke(app.clone(), method.clone(), path, None, None)
+                .await?
+                .0,
+            StatusCode::UNAUTHORIZED
+        );
+        let mut claims = signer.claims();
+        claims["scope"] = json!("compute_ctl:dsga_initialization");
+        assert_eq!(
+            invoke(
+                app.clone(),
+                method.clone(),
+                path,
+                Some(&signer.token(&claims)),
+                None
+            )
+            .await?
+            .0,
+            StatusCode::UNAUTHORIZED
+        );
+        claims = signer.claims();
+        claims["vm_uid"] = json!("foreign-vm");
+        assert_eq!(
+            invoke(
+                app.clone(),
+                method.clone(),
+                path,
+                Some(&signer.token(&claims)),
+                None
+            )
+            .await?
+            .0,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            invoke(
+                app.clone(),
+                method,
+                &format!("{path}?override=1"),
+                Some(&signer.token(&signer.claims())),
+                None
+            )
+            .await?
+            .0,
+            StatusCode::BAD_REQUEST
+        );
+    }
+    Ok(())
+}
+
 #[tokio::test]
 async fn initialization_route_requires_dedicated_auth_and_published_native_proof() -> Result<()> {
     let signer = Signer::new();

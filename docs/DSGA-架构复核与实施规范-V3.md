@@ -445,6 +445,31 @@ TLS三键有界供给，资源写另由认证/fence通道执行，不开放任�
 Linux验收。完整运行期控制链与受控跨boot恢复仍是业务工作，见
 [本批证据](DSGA-原资源来源与Guest启动接线-Mac基本验收-20261024.md)。
 
+### 8.5 认证root资源通道与独立生命周期（2026-10-24）
+
+原公钥来源延续8.4，不让普通Compute通过SUID调用资源写；SUID仅允许原位PG
+出生。root服务由Guest init以真实root启动，固定UDS、root不可委派目录、服务
+独占锁先于socket清理。每请求重新校验原Ed25519短JWT、准确aud/control scope、
+VM/CI、epoch、时间和唯一JSON字段；Compute已验签不替代root验签。可连接socket
+不是授权，凭据也不是租约/完整预算/VM许可，网关current owner和最终资源floor
+各自保留职责，不向旧无认证TCP入口回退。
+
+五个固定identity/fence/apply/observe/replay-original接口独立于SQL连接和PG boot。
+资源Fence必须在同一锁中比较完整Guest boot/cgroup身份再落盘floor，不能在
+Inspect后另行无身份接管。新owner只读旧epoch原意图，旧代次不得重放；接管保留
+Original/Held/未知结果。网络不提供initialize/bootstrap或清空Pending动作。
+
+调用方先写外层完整原意图，再发送；消费者保留未知栅栏、独立观察连接和显式
+原重放，不因超时/丢回复或新PG boot抹除资源承诺。回复必须完整严格解码，核对
+所有实际限额、整池、占用和准确身份，vm_shrink_permit必须false。原资源身份
+首次发现后须持久固定，跨Guest/PG重启不能自动重绑。PG死亡仍须受控关闭旧资源
+效果，不能以旧PID查询失败推导NoEffect。
+
+产品服务、正式Compute代理和中心固定网关源码已接线；Agent资源领域执行器/
+持久恢复及完整预算/排空/Host/最终VM仍继续实施。Mac签名/TLS/真实UDS及分段
+协议检查不是Linux root/cgroup/HugeTLB或K8s/物理端到端认证，详见
+[本批事实与边界](DSGA-认证Guest资源转发-Mac基本验收-20261024.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
