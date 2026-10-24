@@ -26,10 +26,14 @@ impl Drop for HttpTask {
 }
 
 async fn run_go(binary: &str, input: &[u8]) -> Result<()> {
+    run_go_test(binary, input, "TestNativeComputeHTTPChain").await
+}
+
+async fn run_go_test(binary: &str, input: &[u8], name: &str) -> Result<()> {
     let mut child = tokio::process::Command::new(binary)
         .args([
             "-test.run",
-            "^TestNativeComputeHTTPChain$",
+            &format!("^{name}$"),
             "-test.v",
             "-test.timeout",
             "40s",
@@ -51,13 +55,64 @@ async fn run_go(binary: &str, input: &[u8]) -> Result<()> {
         "Go native gate failed: {stdout}\n{stderr}"
     );
     ensure!(
-        stdout.contains("--- PASS: TestNativeComputeHTTPChain")
+        stdout.contains(&format!("--- PASS: {name}"))
             && !stdout.contains("--- SKIP:")
             && !stdout.contains("--- FAIL:"),
         "Go gate did not execute required test"
     );
     println!("{stdout}");
 
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "strict cross-repository gate requires exact PG and precompiled Go race test binary"]
+async fn native_go_terminal_reconcile_without_resize_replay() -> Result<()> {
+    let binary = std::env::var("NEON_TEST_DSG_GO_BIN")?;
+    ensure!(
+        std::path::Path::new(&binary).is_file(),
+        "Go test binary is missing"
+    );
+    let signer = Signer::new();
+    let (mut cluster, _compute, app) = native(&signer).await?;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
+    let address = listener.local_addr()?;
+    let _server = HttpTask(tokio::spawn(async move {
+        axum::serve(listener, app).await.unwrap();
+    }));
+    let token = signer.token(&signer.claims());
+    let initial = reqwest::Client::builder()
+        .no_proxy()
+        .build()?
+        .get(format!("http://{address}/dsg/v1/memory"))
+        .bearer_auth(&token)
+        .send()
+        .await?
+        .error_for_status()?
+        .json::<DsgMemoryResponse>()
+        .await?;
+    let mut original: DsgResizeRequest = serde_json::from_str(include_str!(
+        "../../libs/compute_api/testdata/dsg_request_v1.json"
+    ))?;
+    original.key.instance = initial.observed.instance.clone();
+    original.key.issuer_epoch = DsgUint64::new(1);
+    original.key.revision = DsgUint64::new(1);
+    original.expected_capacity_generation = initial.observed.capacity_generation;
+    original.validate()?;
+    let mut next = signer.claims();
+    next["issuer_epoch"] = json!("2");
+    let input = json!({"http_base_url":format!("http://{address}"),
+        "instance":initial.observed.instance,"issuer_epoch":"1","token":token,
+        "next_token":signer.token(&next),"original":original});
+    // 仅执行本批新增Go用例，不重复原全链路/重启/业务数据门禁。TLS为本机
+    // 测试终结，Router/JWT/SQL/PG均为实际实现，私密输入只走匿名stdin。
+    run_go_test(
+        &binary,
+        &serde_json::to_vec(&input)?,
+        "TestNativeTerminalReconcile",
+    )
+    .await?;
+    cluster.passed = true;
     Ok(())
 }
 

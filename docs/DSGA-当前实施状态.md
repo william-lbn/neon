@@ -1,9 +1,31 @@
 # DSGA 当前实施状态
 
-更新：2026-10-24（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
+更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-24 GuestReady实际资源执行（仍非整体完成）
+## 最新：2026-10-25 原生终态只读恢复（仍非整体完成）
+
+AS `081617124ac265226c92e602d293b416e45118cd` 已在既有分支先推送并核验。
+修复已落账原生终态在 worker 重建后仍恢复 Pending、从而挡住后续准入的问题：
+完整原请求/审计/当前 fence/同一逻辑终态及本地栅栏逐项核对，只查询、不重发
+resize、不从缺历史造 NoEffect、不改原 WAL；实际 Agent 循环接入。普通 Status
+仍不清 Pending，Busy/Rejected 无原生终态者及跨 boot 仍需受控恢复。
+
+Mac 去重 39 顶层/129 含子项 race 通过；更强严格跨仓门禁 1 项通过，内层 Go
+实际经 TLS/Neon Router/JWT/管理 SQL/准确 PG17 验证重建及更高 owner 下历史
+原终态，核对未增加 Resize POST。相关 vet、Agent 双架构目标编译及新 Rust
+门禁 clippy 通过，目标编译不等于 Linux 运行。控制面完整合入 main028
+`0aa0230c78a0f31a091e32fc49c8c4b0919a6ac7`，独立维护提交 `7c02b199`；
+受影响 Go4/Node8 与 Auth/Web 类型检查通过。Neon/控制面准确版本锁共同对齐
+已发布 AS，PG17 三处仍 cbabd5，本批未改 PG 或其他 PG 版本。
+
+完整预算生产/系统 outside、首次准入/完整排空、Host/最终 Controller-Runner-
+QMP、公开 worker/生命周期及受控跨 boot/owner 关闭仍是代码，不是平台待验。
+真实 Linux K8s/HugeTLB/物理/性能后验。Goal active，默认关闭，不构建镜像、
+不准备/执行部署、不合 main。见
+[本批实现与证据](DSGA-原生终态恢复版本对齐-Mac基本验收-20261025.md)。
+
+## 历史：2026-10-24 GuestReady实际资源执行（仍非整体完成）
 
 AS `d3bd69d246cb40f6116fd1b7c874a9a319004a81` 已在既有功能分支先推送并核验，
 含独立预算合同提交 `cb1fe5b8`。实际 Agent/PGWorker 现在接入 GuestReady 执行器：

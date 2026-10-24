@@ -520,6 +520,19 @@ VM/Birth再落审计，任何漂移保留Unconfirmed。GuestReady完成仅属资
 实现，目标内核物理证明仍由Linux验收。见
 [当前实现范围](DSGA-GuestReady资源执行版本对齐-Mac基本验收-20261024.md)。
 
+### 8.9 已落账原生终态的只读恢复（2026-10-25）
+
+重建worker仍从完整已派发WAL恢复Pending，不能仅看Settled省略栅栏。已有完整
+原生COMMITTED/DENIED并已由原审计核验时，实际PG循环可先确认当前floor，再只读
+查询同原终态：完整请求context、历史回执与当前观察、逻辑不变量及本地同一
+Pending均须一致。网络前后拒绝执行在途，不能借旧回执清另一个请求；普通Status
+不改变此规则。成功只返回SDK reconciled，不重写WAL、不重发Resize、不授权预算/
+VM/准入；之后仍逐域推进。缺历史、过期、非原生拒绝、跨boot或矛盾结果保持未知。
+
+严格Mac跨仓门禁已验证实际Router/JWT/SQL/PG及更高owner下历史原终态，仍不是
+Guest/Host/最终VM证明。完整预算、初始准入/排空与受控关闭继续实施，见
+[当前模块记录](DSGA-原生终态恢复版本对齐-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
