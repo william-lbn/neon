@@ -3,7 +3,22 @@
 更新：2026-10-24（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-24 认证Guest资源通道（仍非整体完成）
+## 最新：2026-10-24 原Postmaster出生来源（仍非整体完成）
+
+AS `a57bed0cd9b9b24f8447447681b9ffbfda2ec779`已在既有功能分支先推送并核对：
+root原位exec前同锁持久Birth，实际UID/exe/cgroup/starttime核验，资源写不再收养
+请求PID；固定只读进程来源及客户端接线。Mac新增和受影响4项race通过，最终
+参数收紧仅复验受改1项，vet和Linux双架构编译通过。真实内核/exec仍未实测。
+Neon/控制面新增GET process只读路由各1项检查通过，clippy/vet通过；实际PG17
+产品构建源补PG程序及父目录root保护，未构建镜像，最终权限及扩展兼容待Linux。
+两消费者版本绑定已发布AS来源，PG17三处仍cbabd5，其他PG功能暂缓。
+见[本批源码/验证/边界](DSGA-原Postmaster身份转发-Mac基本验收-20261024.md)。
+
+Agent资源领域持久协调、完整预算/首次准入/全排空、Host/最终VM、公开worker和
+跨boot/owner受控关闭仍需编码，不是Linux待测；Goal active，默认关闭，不部署、
+不构建镜像、不合main。各仓最终提交/远程状态以实际Git及工作区恢复点为准。
+
+## 历史：2026-10-24 认证Guest资源通道（仍非整体完成）
 
 AS `a6d191af172fc9fb109b648145cbe6ba484ac94d`已在既有功能分支提交、推送并核对
 远程SHA：固定root认证UDS、原Ed25519短JWT二次验证、完整Guest身份同锁fence、

@@ -470,6 +470,20 @@ Original/Held/未知结果。网络不提供initialize/bootstrap或清空Pending
 协议检查不是Linux root/cgroup/HugeTLB或K8s/物理端到端认证，详见
 [本批事实与边界](DSGA-认证Guest资源转发-Mac基本验收-20261024.md)。
 
+### 8.6 原Postmaster出生事实与不可收养（2026-10-24）
+
+资源命令不能仅以请求PID/starttime及同组进程当作Postmaster。原位root出生路径
+先在同一资源锁内持久Birth，再入组/全线程降权/exec；PID和starttime来自实际
+启动程序自身，不由普通请求填补。临时存储同步不能冒充普通Postmaster出生。
+Birth记录本身只是启动意图，真实程序/UID/固定cgroup和启动时间仍须独立读回。
+PG程序及可替换它的父目录须root保护，产品构建源必须与检查约定一致。
+
+运行期写必须匹配原Birth，固定GET process只读来源不接受自选PID。缺旧记录、
+exe不匹配或进程死亡都不能收养另一进程或清除旧资源承诺/未知动作；新PG不改
+旧命令、Held及floor。计划者读取后先持久冻结完整进程事实及原命令，再发送。
+PG17原位exec与UID/exe/cgroup/文件系统语义仍须Linux真实验收，Mac协议及源码
+核对不可替代。详见[出生来源接线](DSGA-原Postmaster身份转发-Mac基本验收-20261024.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

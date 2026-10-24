@@ -121,6 +121,58 @@ async fn resource_routes_require_control_scope_and_frozen_instance_before_uds() 
 }
 
 #[tokio::test]
+async fn process_birth_route_requires_control_scope_before_root_query() -> Result<()> {
+    let signer = Signer::new();
+    let app = router(&node(signer.jwks.clone(), true, None));
+    let path = "/dsg/v1/resource/process";
+    assert_eq!(
+        invoke(app.clone(), Method::GET, path, None, None).await?.0,
+        StatusCode::UNAUTHORIZED
+    );
+    let mut claims = signer.claims();
+    claims["scope"] = json!("compute_ctl:dsga_initialization");
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            path,
+            Some(&signer.token(&claims)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    claims = signer.claims();
+    claims["vm_uid"] = json!("foreign-vm");
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            path,
+            Some(&signer.token(&claims)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    assert_eq!(
+        invoke(
+            app,
+            Method::GET,
+            &format!("{path}?override=1"),
+            Some(&signer.token(&signer.claims())),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::BAD_REQUEST
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn initialization_route_requires_dedicated_auth_and_published_native_proof() -> Result<()> {
     let signer = Signer::new();
     let app = router(&node(signer.jwks.clone(), true, None));

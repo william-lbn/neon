@@ -34,6 +34,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/memory", get(memory))
         .route("/dsg/v1/budget/shared", get(shared_cost))
         .route("/dsg/v1/resource/identity", get(super::dsg_resource::proxy))
+        .route("/dsg/v1/resource/process", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/fence", post(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/apply", post(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/observe", post(super::dsg_resource::proxy))
