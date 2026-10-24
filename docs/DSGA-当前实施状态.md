@@ -3,7 +3,35 @@
 更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 真实前台工作登记与正式管理链路（仍非整体完成）
+## 最新：2026-10-25 Postmaster启动包前窗口（仍非整体完成）
+
+PG `9db3b91d3caff9f674786252f0104de75ed8e709` 已在既有功能分支推送核验。
+Work2在Postmaster fork前登记，覆盖尚无startup包、SSL/GSS、DNS等PGPROC前
+窗口；交接至PGPROC与原计数同status_lock，退出/fork失败由原父进程回收路径
+原子清理。Postmaster不取得backend锁，早期child保留官方直接_exit行为。
+受管容量/恢复拒绝在fork前关闭，避免未登记无界dead-end；非DSGA保持原路径。
+
+Mac新增6项真实窗口全部通过，旧准确108版RAW漏计负向预期失败。实际将持
+status_lock的测试backend停止并杀死，Postmaster仍能回收、重建关闭新boot。
+准确SHA重编仅替换验证RAW及持锁崩溃2项；相同项不加计数。官方启用DSGA
+core225/isolation123在登记/交接候选通过，最终回收接线由新6项覆盖，不重复
+未变全套。首轮漏回收接线的7个失败与修正明载记录，未用普通套通过掩盖。
+
+Neon正式SQL/HTTP及Rust/Go严格消费Work2，拒绝旧Work1；Buffer ABI6和Work
+结构字段不改，扩展仍1.12。新实际Go race/TLS/Router/JWT/SQL/准确PG门禁保持
+一条已GSS协商但未startup的连接，读到恰好一个startup；Pending保留、零写入。
+正式HTTP受影响1项、Rust协议1项、Go协议/SDK race2项及相关clippy/vet通过。
+AS `e539f2f336b5d63e58556a38447c32e5dc8ea0a9` 已先推送，消费者版本共同锁定。
+控制面完整维护合并5ba50b8纳入main4d86357，Mac24顶层/40含子项race及Web
+tsc通过，原AS依赖更新独立；没有运行随主线附带Linux部署/浏览器收据。
+
+这仍是实际观察，不是禁止关门后新fork的确认或完整Quiesce：持续连接门禁、
+后台/并行/DSM/预备事务及预算/Host/最终VM/公开worker/受控恢复仍须编码。
+Linux原子/调度/cgroup2/HugeTLB/物理/性能后验。Goal active，仅PG17，沿原
+服务分支演进，不构建镜像、不准备/执行部署、不合主分支。详见
+[本批证据与边界](DSGA-Postmaster启动前登记-Mac基本验收-20261025.md)。
+
+## 历史：2026-10-25 真实前台工作登记与正式管理链路（仍非整体完成）
 
 实际Neon PG17 `1085064d44a47655149c8b7ab94c19d0cfa3a9c7` 已在原自有V3
 分支推送并核对；包含独立社区维护合并36d58060（strict jsonpath根字符串GIN）。

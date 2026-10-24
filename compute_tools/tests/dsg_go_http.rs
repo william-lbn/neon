@@ -11,7 +11,7 @@ use compute_api::{
     dsg_state::DsgMemoryResponse,
 };
 use serde_json::json;
-use tokio::io::AsyncWriteExt;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::time::timeout;
 
 #[path = "support/dsg_http.rs"]
@@ -76,6 +76,14 @@ async fn native_go_work_state_reads_actual_sql_without_clearing_pending() -> Res
         .await?
         .batch_execute("ALTER EXTENSION neon UPDATE TO '1.12'")
         .await?;
+    // 真实GSS协商已得到N但尚无startup包/PGPROC，Go必须读到该在途启动。
+    let mut raw = tokio::net::UnixStream::connect(cluster.socket.join(".s.PGSQL.55432")).await?;
+    let mut request = 8u32.to_be_bytes().to_vec();
+    request.extend_from_slice(&80877104u32.to_be_bytes());
+    raw.write_all(&request).await?;
+    let mut answer = [0u8; 1];
+    timeout(Duration::from_secs(3), raw.read_exact(&mut answer)).await??;
+    ensure!(answer == *b"N", "raw GSS negotiation did not reach backend");
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
     let address = listener.local_addr()?;
     let _server = HttpTask(tokio::spawn(async move {

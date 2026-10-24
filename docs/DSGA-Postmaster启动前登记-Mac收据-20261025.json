@@ -1,0 +1,77 @@
+{
+  "date": "2026-10-25",
+  "scope": "PG17 Postmaster启动前登记及Work2；整体未完成",
+  "platform": "Mac arm64 PG debug/cassert",
+  "commits": {
+    "PG": "9db3b91d3caff9f674786252f0104de75ed8e709",
+    "AS": "e539f2f336b5d63e58556a38447c32e5dc8ea0a9",
+    "CP": "b2782193f13646d892c5a74c3eef16c97a2e33d3"
+  },
+  "versions": {
+    "BufferAPI": 6,
+    "WorkAPI": 2,
+    "NeonExtension": "1.12"
+  },
+  "passed": {
+    "native_distinct": 6,
+    "native_skip": 0,
+    "candidate": "dsga-prestart-native-fixed.log",
+    "accurate_replacement": "dsga-prestart-exact-native.log关键2项替换，不加计数",
+    "official_candidate": "core225/isolation123 -core.log/-isolation.log；最终只接入原子forget，新增6项覆盖，不重复未变全套",
+    "formal_HTTP": 1,
+    "actual_Go_race_TLS_Router_JWT_SQL_PG": 1,
+    "Go_protocol_SDK_race": 2,
+    "Rust_protocol": 1,
+    "clippy": "dsga-prestart-clippy.log exit0",
+    "Go_vet": "dsga-prestart-go-vet.log exit0",
+    "CP_pinned_readonly_vet": "dsga-prestart-cp-vet.log exit0",
+    "distribution": "18程序/4PG/39扩展阶段，5项索引单测通过；语法及新6项收集0",
+    "maintenance": "CP5ba50b8完整合入main4d86357，Mac24top/40incl race0fail0skip，Webtsc0；571输入未变"
+  },
+  "failure_records": {
+    "old_exact108": "dsga-prestart-old-negative.log，RAW已收到且无PGPROC但旧startup0，预期失败，不计业务通过",
+    "first_candidate": "dsga-prestart-native.log，漏接父进程forget导致7失败含子项；补齐后完整6通过"
+  },
+  "actual_fault": "Native私有SU测试函数持status_lock并SIGSTOP自身，OS确认本次PID/PPID/T状态后SIGKILL；真实Postmaster回收和关闭的新boot均验证",
+  "Go_scope": "真实GSS请求回复N，未发startup仍恰好startup1；Pending保留、零写POST；TLS本机终结不模拟PGbody",
+  "remaining_CODE": [
+    "禁止后续新fork的持续连接门禁/确认",
+    "完整后台/并行/DSM/预备事务和允许有界回收工作Quiesce生产者",
+    "可信Prepare/Finalize/system outside、首次独立准入",
+    "Host/Scheduler/最终Controller-Runner-QMP、公开worker/生命周期、受控跨boot/owner未知关闭"
+  ],
+  "not_run": [
+    "Linux原子/调度/进程限制/压力",
+    "K8s/RBAC/NeonVM/KVM/cgroup2/HugeTLB/真实释放迁移/性能长稳",
+    "镜像构建或部署（用户排除）"
+  ],
+  "production_ready": false,
+  "vm_shrink_permit": false,
+  "source_sha256": {
+    "neon/vendor/postgres-v17/src/backend/postmaster/postmaster.c": "987e0e3adef4608886b268da2f23e2690f361a1e18d79a08f3bfa727072ff297",
+    "neon/vendor/postgres-v17/src/backend/storage/buffer/dsg_work.c": "62c119d974529828db23e925642e7b1c1abd0986045b81dc35f76cf18a108b9e",
+    "neon/vendor/postgres-v17/src/backend/storage/ipc/pmsignal.c": "b7f9abd685c87a9ae52640996eecfb648304145935588bd57caed93a4347b4f1",
+    "neon/vendor/postgres-v17/src/include/storage/dsg_work.h": "efe78fb51224db0e69b996718d3de7fdc8c3c180407fbd0495c2dbdca2d7b394",
+    "neon/vendor/postgres-v17/src/test/modules/test_dsg_region/test_dsg_region.c": "7d9907410efdbefadb0319d0d3073bd8602866687b340b6979e91889ffcfabfb",
+    "neon/ci/test_dsg_prestart.py": "bd3046ced386aac7bce0cfcd6aa75786ab86d07b1b771ddbe9ff5ae3747a91b5",
+    "neon/ci/test-dsg-postgres.sh": "5c2cf8b2a67a20bdd443c4bd3f65a00bc35ff70425d0f05ca07e083fa7b3f2ff",
+    "neon/ci/distribution.json": "50abe80904fd13281f1a2d13c77905c1ca22930060a4d5be6015b366d5dff1c6",
+    "neon/vendor/revisions.json": "1ceec03447c6036fc68554da1830a45ebba8e7c9bd17c3ac80b2ed6195f8b6af",
+    "neon/pgxn/neon/dsg_control.c": "3ce68e98ab525483d1f15716753dac3afeadcbb8d7511070289263f79fd69a48",
+    "neon/libs/compute_api/src/dsg_work.rs": "bf7bddcfabebaa1a3fc733566bce929dc4c41619e3c291fa275325c8b3fe2d3c",
+    "neon/libs/compute_api/tests/dsg_work.rs": "64b530787b634910c157d734c682d29424d2dcff736973145169a275394fda8d",
+    "neon/compute_tools/src/http/dsg_openapi.yaml": "da8be604bce5ee746934826ef82e73429d0554faca958c08833afb72be6f8038",
+    "neon/compute_tools/tests/dsg_go_http.rs": "e24234e0ddcc607491d0d3ae87705533b60c45a02140254507929f5839553ebc",
+    "autoscaling/pkg/api/dsga/work.go": "1137b57c117f4a8079669213688721f14f51855ab1df647fdaae9470560158fe",
+    "autoscaling/pkg/api/dsga/work_test.go": "750b5a318bf12108ab697547eb406ac40b3efaaf5fba9e0a80d946fb2a248e4b",
+    "autoscaling/pkg/dsga/compute/native_work_test.go": "f683bab8db0eefc23f72d877b111811d7fdc80ff3faf6031bf885a299e61124b",
+    "control-plane/api/go.mod": "49d6086a8e52fe9eb6ef1befab3f2e1b993450e75777f8c9d638e17d549ff9be",
+    "control-plane/api/go.sum": "c6ac97331cf2d89d30b8e6e05e62b3f9eb2215c4309ac176e668d37d7ca56e70"
+  },
+  "artifacts_sha256": {
+    "build/pg17-prestart-exact-install/bin/postgres": "5eee49783f1f2355a6e8de57cfa1a9c8756248de0371177e64a0853c7025622b",
+    "build/pg17-prestart-exact-install/lib/postgresql/neon.dylib": "ed62b71d8f0b04b4d522a54ed6889d50dd9a3b907769ba742601f07da04e080b",
+    "build/pg17-prestart-exact-install/lib/postgresql/test_dsg_region.dylib": "24cc838c731cd838683cd37211f16c3163a3ad0f64ea6df6c995059f625ebcfd",
+    "build/pg17-prestart-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+  }
+}

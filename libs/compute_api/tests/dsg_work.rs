@@ -6,7 +6,7 @@ fn work_snapshot_requires_complete_counts_same_boot_and_closed_idle() {
         serde_json::from_str(include_str!("../testdata/dsg_response_v1.json")).unwrap();
     let mut fact = DsgWorkResponse {
         protocol_version: 1,
-        work_api_version: 1,
+        work_api_version: 2,
         vm_shrink_permit: false,
         client_processes: 2,
         startup_clients: 0,
@@ -26,7 +26,8 @@ fn work_snapshot_requires_complete_counts_same_boot_and_closed_idle() {
     fact.validate_for(&bound).unwrap();
     for mutate in [
         |r: &mut DsgWorkResponse| r.vm_shrink_permit = true,
-        |r: &mut DsgWorkResponse| r.work_api_version = 2,
+        |r: &mut DsgWorkResponse| r.work_api_version = 3,
+        |r: &mut DsgWorkResponse| r.work_api_version = 1,
         |r: &mut DsgWorkResponse| r.client_processes = 0,
         |r: &mut DsgWorkResponse| r.startup_clients = u32::MAX,
         |r: &mut DsgWorkResponse| r.retained_transactions = 3,
@@ -54,8 +55,8 @@ fn work_snapshot_requires_complete_counts_same_boot_and_closed_idle() {
     }
     let mut duplicate = serde_json::to_string(&fact).unwrap();
     duplicate = duplicate.replacen(
-        "\"work_api_version\":1",
-        "\"work_api_version\":1,\"work_api_version\":1",
+        "\"work_api_version\":2",
+        "\"work_api_version\":2,\"work_api_version\":2",
         1,
     );
     assert!(serde_json::from_str::<DsgWorkResponse>(&duplicate).is_err());

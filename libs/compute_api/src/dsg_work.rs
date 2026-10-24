@@ -1,4 +1,4 @@
-//! 同一Native快照的进程和前台工作事实。不是完整Quiesce或VM执行权。
+//! Work2含Postmaster fork前至PGPROC交接的启动工作。不是完整Quiesce或VM执行权。
 use anyhow::{Result, ensure};
 use serde::{Deserialize, Serialize};
 
@@ -29,7 +29,7 @@ impl DsgWorkResponse {
         self.observed.validate()?;
         ensure!(
             self.protocol_version == 1
-                && self.work_api_version == 1
+                && self.work_api_version == 2
                 && !self.vm_shrink_permit
                 && self.observed.instance == *bound,
             "work observation envelope or native instance differs"

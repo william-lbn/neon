@@ -724,7 +724,7 @@ Datum
 neon_dsg_work_state(PG_FUNCTION_ARGS)
 {
 	NeonDsgCheckAdministrator();
-#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 1
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 2
 	{
 		DsgWorkSnapshot s;
 		StringInfoData output;
@@ -733,7 +733,7 @@ neon_dsg_work_state(PG_FUNCTION_ARGS)
 		DsgWorkGetSnapshot(&s);
 		initStringInfo(&output);
 		appendStringInfo(&output,
-			"{\"protocol_version\":1,\"work_api_version\":1,\"vm_shrink_permit\":false,"
+			"{\"protocol_version\":1,\"work_api_version\":2,\"vm_shrink_permit\":false,"
 			"\"client_processes\":%u,\"startup_clients\":%u,\"idle_clients\":%u,"
 			"\"frontend_reads\":%u,\"frontend_executes\":%u,\"bounded_inputs\":%u,"
 			"\"retained_transactions\":%u,\"background_processes\":%u,\"auxiliary_processes\":%u,"

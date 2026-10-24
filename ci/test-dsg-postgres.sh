@@ -69,6 +69,11 @@ work = unittest.defaultTestLoader.discover('.', pattern='test_dsg_work.py')
 if work.countTestCases() < 8:
     raise SystemExit('DSGA native work registry suite is missing required cases')
 suite.addTests(work)
+prestart = unittest.defaultTestLoader.discover('.', pattern='test_dsg_prestart.py')
+# PGPROC前窗口由Postmaster实际跟踪，不能只跑已建立PGPROC的旧8项。
+if prestart.countTestCases() < 6:
+    raise SystemExit('DSGA Postmaster prestart suite is missing required cases')
+suite.addTests(prestart)
 replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replication.py')
 # 新测试文件遗漏打包时discover会返回空suite，不能让旧80项绿色覆盖本批缺测。
 if replication.countTestCases() < 6:

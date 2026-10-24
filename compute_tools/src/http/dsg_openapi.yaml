@@ -235,7 +235,7 @@ components:
       required: [protocol_version, work_api_version, vm_shrink_permit, client_processes, startup_clients, idle_clients, frontend_reads, frontend_executes, bounded_inputs, retained_transactions, background_processes, auxiliary_processes, observer_excluded, foreground_idle, observed]
       properties:
         protocol_version: {type: integer, enum: [1]}
-        work_api_version: {type: integer, enum: [1]}
+        work_api_version: {type: integer, enum: [2]}
         vm_shrink_permit: {type: boolean, enum: [false]}
         client_processes: {type: integer, minimum: 0, maximum: 4294967295}
         startup_clients: {type: integer, minimum: 0, maximum: 4294967295}

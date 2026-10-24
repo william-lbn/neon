@@ -568,6 +568,24 @@ SSL/GSS、后台/并行/DSM/预备事务及全部持续约束须有真实覆盖�
 注册/注销，退出后槽所有权未知须失败关闭。详见
 [源码及Mac证据](DSGA-真实前台在途登记-Mac基本验收-20261025.md)。
 
+### 8.12 Postmaster启动包前登记的无锁边界（2026-10-25）
+
+Work2必须覆盖fork前到PGPROC建立，不能只看pg_stat_activity或InitProcess后的
+STARTUP。Postmaster先登记固定子槽；PGPROC在同status_lock内交接；确认退出或
+fork失败由父进程回收，重复回收幂等。早期child沿用官方直接_exit，不安装依赖
+共享内存清理；Postmaster不得等待任何backend锁，不从共享长度决定寻址范围。
+原生32位原子及内存屏障不支持则拒绝启用，不能退化到共享锁模拟拖死恢复。
+元数据全计入主段预算。受管容量/恢复拒绝必须在fork前结束，不能产生未登记的
+无界dead-end子进程；临时连接可直接EOF，既有连接和非DSGA路径保留。
+
+真实验收含慢/半startup、SSL/GSS、超时/取消/畸形早退、PGPROC交接、容量满及
+持status_lock所有者SIGKILL后Postmaster仍重建；发送信号不等于退出，必须观察
+实际reap结果。旧Work1不提供此覆盖，正式消费者须明确要求Work2，不能仅因字段
+形状相同而接受。此版本仍不提供禁止后续新fork的持续门禁确认；完整Quiesce须
+继续覆盖允许的有界管理/检查点回收工作、后台/并行/DSM/预备事务及持续预算，
+不能全停检查点造成回收死锁，也不能将一张idle快照升级为VM许可。见
+[本批源码与Mac验收](DSGA-Postmaster启动前登记-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
