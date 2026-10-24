@@ -3,7 +3,27 @@
 更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 Postmaster启动包前窗口（仍非整体完成）
+## 最新：2026-10-25 持续连接门禁和同点Postmaster确认（仍非整体完成）
+
+沿用四个既有服务功能分支，PG17 d42638e、AS 4460da5 已先推送核验。
+新增原生Connection API1及Neon1.13正式SQL/认证HTTP/Rust/Go观察，受管实际启动
+显式要求门禁。公共Unix/TCP在fork前关闭，固定0700私有管理端点仍可用；不用
+startup用户名猜管理身份。Postmaster主循环独立ack，不等待backend锁；ack与
+Work2同点采样，启动/崩溃新boot关闭，序号饱和不能复用旧开放许可。
+
+Mac新真实原生6项全部通过、受影响Work8项、core225/isolation123、Go协议/SDK
+race2项、Rust协议1项、实际启动设置6项及控制面路由race2项通过。准确PG重编
+关键2项替换通过；严格NeonHTTP1项和实际Go race/TLS/Router/JWT/SQL/PG1项
+通过，均不是结构mock。先前夹具走旧公共管理socket被正确拒绝的失败保留，
+只修正夹具私有路径后通过。相同功能不重复加计数。相关clippy/vet及版本绑定检查
+按机器收据记录。见[实现与Mac事实](DSGA-持续连接门禁-Mac基本验收-20261025.md)。
+
+这只是持续新连接屏障。完整后台/并行/DSM/预备事务及会话保留内存排空、关门时
+已有事务受控结束、可信Prepare/Finalize/system outside/首次准入、Host/最终VM/
+公开worker和受控恢复仍需编码；不包装成Linux待测。Linux/K8s/HugeTLB物理和
+性能另验。默认关闭、所有VM许可false，整体Goal继续。
+
+## 历史：2026-10-25 Postmaster启动包前窗口（仍非整体完成）
 
 PG `9db3b91d3caff9f674786252f0104de75ed8e709` 已在既有功能分支推送核验。
 Work2在Postmaster fork前登记，覆盖尚无startup包、SSL/GSS、DNS等PGPROC前

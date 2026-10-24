@@ -74,6 +74,10 @@ prestart = unittest.defaultTestLoader.discover('.', pattern='test_dsg_prestart.p
 if prestart.countTestCases() < 6:
     raise SystemExit('DSGA Postmaster prestart suite is missing required cases')
 suite.addTests(prestart)
+connections = unittest.defaultTestLoader.discover('.', pattern='test_dsg_connection_gate.py')
+if connections.countTestCases() < 6:
+    raise SystemExit('DSGA continuous connection gate suite is missing required cases')
+suite.addTests(connections)
 replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replication.py')
 # 新测试文件遗漏打包时discover会返回空suite，不能让旧80项绿色覆盖本批缺测。
 if replication.countTestCases() < 6:

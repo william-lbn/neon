@@ -175,3 +175,20 @@ pub(crate) async fn native(signer: &Signer) -> Result<(Cluster, Arc<ComputeNode>
     let app = router(&compute);
     Ok((cluster, compute, app))
 }
+
+/// 新模块专用：实际启动require-connection-gate与0700端点，创建新的Compute绑定。
+/// 旧partial夹具不因字段形状相同就当作有持续门禁；不加载用户PGDATA。
+pub(crate) async fn native_connections(signer: &Signer) -> Result<(Cluster, Arc<ComputeNode>, Router)> {
+    use std::io::Write;
+    let (mut cluster, _, _) = native(signer).await?;
+    cluster.connect().await?.batch_execute("ALTER EXTENSION neon UPDATE TO '1.13'").await?;
+    let mut conf = std::fs::OpenOptions::new().append(true).open(cluster.data.join("postgresql.conf"))?;
+    writeln!(conf, "dynamic_shared_buffers_require_admission=on\ndynamic_shared_buffers_startup_budget='64MB'\ndynamic_shared_buffers_require_connection_gate=on\nunix_socket_permissions=0700")?;
+    drop(conf);
+    cluster.restart()?;
+    // 管理夹具也切换私有端点；不能为了沿用旧公共管理socket而绕开真实门禁。
+    cluster.socket = cluster.data.join("dsg_socket");
+    let compute = node(signer.jwks.clone(), true, Some(&cluster));
+    let app = router(&compute);
+    Ok((cluster, compute, app))
+}

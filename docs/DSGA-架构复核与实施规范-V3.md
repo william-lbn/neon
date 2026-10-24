@@ -586,6 +586,32 @@ fork失败由父进程回收，重复回收幂等。早期child沿用官方直�
 不能全停检查点造成回收死锁，也不能将一张idle快照升级为VM许可。见
 [本批源码与Mac验收](DSGA-Postmaster启动前登记-Mac基本验收-20261025.md)。
 
+### 8.13 持续连接门禁和Postmaster同点确认（2026-10-25）
+
+Work2的瞬时空闲不禁止下一次fork。受管Neon必须显式设置postmaster-only
+require_connection_gate，要求Connection API1和正式扩展1.13；旧能力enabled=false
+不可发完整Quiesce。固定PGDATA/dsg_socket由当前PG UID拥有、目录/Unix端点0700、
+非符号链接、无共享group；运行期以getsockname实际端点判定，不能信任未认证
+startup用户名。关闭在BackendStartup分配/fork前持续拒绝公共Unix/TCP，既有连接
+留存；权限漂移拒绝新私有连接并撤销ready，不能用旧文件检查作永久许可。
+
+status_lock内与准入一起发布原生32位wanted，锁外通知；Postmaster主循环才能
+写applied，信号处理器或此前launch中途不得ack，绝不取backend锁。更早launch
+必须已经登记或回收。wanted冻结期间先读applied、读屏障后采prestart/PGPROC；
+Postmaster ack发布前有写屏障。不得先采旧空闲后取新ack。31位串号连同开闭位
+比较，饱和仍可最后关闭但禁止再开放，启动/崩溃新boot全部关闭、ack不继承。
+全部固定元数据计入主段预算，不改变Buffer ABI6/Work2布局。
+
+固定GET /dsg/v1/connections/state只读同一Native快照的ack和Work2，私有文件
+检查在锁外；Rust/Go必须核验实例、版本、串号范围、开闭位及ack/block公式。
+缺失/null/重复/未知字段拒绝，观察保留原Pending，不生成预算或VM权。
+
+后续Quiesce必须区分允许的有界管理/检查点回收与阻止的新工作，覆盖后台/并行/
+DSM/预备事务及保留会话内存。已有事务被全Query门禁阻断则无法配合排空，须
+实现有界、严格分类的受控结束；COMMIT可能执行延迟触发器/扩展回调，不可当作
+无内存清理，执行和原预算须持续登记至实际完成。禁止以断连/停检查点伪造排空。
+当前源实现及Mac证据见[本批记录](DSGA-持续连接门禁-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

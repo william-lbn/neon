@@ -118,6 +118,10 @@ impl DynamicSharedBuffersSpec {
             ),
             ("dynamic_shared_buffers_require_admission", "on".to_owned()),
             (
+                "dynamic_shared_buffers_require_connection_gate",
+                "on".to_owned(),
+            ),
+            (
                 "dynamic_shared_buffers_startup_budget",
                 format!("{}kB", self.shared_memory_budget_kb()?),
             ),
@@ -147,6 +151,10 @@ mod tests {
         assert!(settings.contains(&("shared_buffers", "8192kB".to_owned())));
         assert!(settings.contains(&("max_shared_buffers", "65536kB".to_owned())));
         assert!(settings.contains(&("dynamic_shared_buffers_require_admission", "on".to_owned())));
+        assert!(settings.contains(&(
+            "dynamic_shared_buffers_require_connection_gate",
+            "on".to_owned()
+        )));
         assert!(settings.contains(&(
             "dynamic_shared_buffers_startup_budget",
             "131072kB".to_owned()

@@ -28,6 +28,19 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/Capabilities"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/connections/state:
+    get:
+      operationId: getDsgConnectionState
+      summary: Postmaster持续连接门禁确认及同点Work2
+      description: 关闭后在fork前拒绝公共连接，仅保留固定私有管理；请求已接受不等于Postmaster已确认。不是完整Quiesce或VM许可。
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 原生只读在途事实，无floor或门禁修改，no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/ConnectionResponse"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/work/state:
     get:
       operationId: getDsgWorkState
@@ -228,6 +241,23 @@ components:
                 required: [error]
                 properties: {error: {type: string}}
   schemas:
+    ConnectionResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, connection_api_version, vm_shrink_permit, enabled, requested_serial, applied_serial, requested_open, applied_open, acknowledged, private_management_ready, public_connections_blocked, work]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        connection_api_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        enabled: {type: boolean}
+        requested_serial: {type: integer, minimum: 0, maximum: 2147483647}
+        applied_serial: {type: integer, minimum: 0, maximum: 2147483647}
+        requested_open: {type: boolean}
+        applied_open: {type: boolean}
+        acknowledged: {type: boolean}
+        private_management_ready: {type: boolean}
+        public_connections_blocked: {type: boolean}
+        work: {$ref: "#/components/schemas/WorkResponse"}
     WorkResponse:
       type: object
       additionalProperties: false

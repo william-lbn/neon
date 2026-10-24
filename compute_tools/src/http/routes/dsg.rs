@@ -34,6 +34,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/memory", get(memory))
         .route("/dsg/v1/budget/shared", get(shared_cost))
         .route("/dsg/v1/work/state", get(work_state))
+        .route("/dsg/v1/connections/state", get(connection_state))
         .route("/dsg/v1/resource/identity", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/process", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/state", get(super::dsg_resource::proxy))
@@ -175,6 +176,24 @@ async fn work_state(
             Err(_) => failure(
                 StatusCode::SERVICE_UNAVAILABLE,
                 "work_observation_unavailable",
+                None,
+            ),
+        },
+        Err(error) => error,
+    }
+}
+
+// 原认证/current issuer/实例检查及独立观察连接；同点work禁止从两个GET拼成证明。
+async fn connection_state(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+) -> Response {
+    match client(&compute, &claims).await {
+        Ok(client) => match client.connection_state().await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(_) => failure(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "connection_observation_unavailable",
                 None,
             ),
         },

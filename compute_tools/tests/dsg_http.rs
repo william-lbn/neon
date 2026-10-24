@@ -1253,6 +1253,77 @@ async fn native_work_state_http_requires_formal_upgrade_and_same_instance() -> R
     Ok(())
 }
 
+#[tokio::test]
+#[ignore = "strict gate requires isolated exact PG and installed Neon"]
+async fn native_connection_state_requires_formal_upgrade_and_real_postmaster_ack() -> Result<()> {
+    use compute_api::dsg_connection::DsgConnectionResponse;
+    let signer = Signer::new();
+    let (mut old, _, app) = native(&signer).await?;
+    let token = signer.token(&signer.claims());
+    let path = "/dsg/v1/connections/state";
+    assert_eq!(
+        invoke(app.clone(), Method::GET, path, Some(&token), None)
+            .await?
+            .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    old.passed = true;
+    drop(app);
+    drop(old);
+    let (mut cluster, _, app) = support::native_connections(&signer).await?;
+    let (code, body) = invoke(app.clone(), Method::GET, path, Some(&token), None).await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let fact: DsgConnectionResponse = serde_json::from_str(&body)?;
+    fact.validate_for(&fact.work.observed.instance)?;
+    assert!(
+        fact.enabled
+            && fact.acknowledged
+            && fact.public_connections_blocked
+            && fact.private_management_ready
+    );
+    assert!(!fact.requested_open && fact.work.foreground_idle && !fact.vm_shrink_permit);
+    let mut wrong = signer.claims();
+    wrong["vm_uid"] = json!("replacement");
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            path,
+            Some(&signer.token(&wrong)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let mut creation = signer.claims();
+    creation["scope"] = json!(compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE);
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            path,
+            Some(&signer.token(&creation)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    // 正式降级移除新函数，不能依靠缓存旧成功继续报ack。
+    cluster
+        .connect()
+        .await?
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.12'")
+        .await?;
+    assert_eq!(
+        invoke(app, Method::GET, path, Some(&token), None).await?.0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    cluster.passed = true;
+    Ok(())
+}
+
 async fn memory(app: &Router, token: &str) -> Result<DsgMemoryResponse> {
     let (status, body) = invoke(
         app.clone(),

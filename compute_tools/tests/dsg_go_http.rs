@@ -66,6 +66,54 @@ async fn run_go_test(binary: &str, input: &[u8], name: &str) -> Result<()> {
 }
 
 #[tokio::test]
+#[ignore = "strict gate requires exact PG, Neon and precompiled Go race binary"]
+async fn native_go_connection_ack_keeps_raw_management_and_original_pending() -> Result<()> {
+    let binary = std::env::var("NEON_TEST_DSG_GO_BIN")?;
+    let signer = Signer::new();
+    let (mut cluster, _, app) = support::native_connections(&signer).await?;
+    let mut raw =
+        tokio::net::UnixStream::connect(cluster.data.join("dsg_socket/.s.PGSQL.55432")).await?;
+    let mut request = 8u32.to_be_bytes().to_vec();
+    request.extend_from_slice(&80877104u32.to_be_bytes());
+    raw.write_all(&request).await?;
+    let mut answer = [0u8; 1];
+    timeout(Duration::from_secs(3), raw.read_exact(&mut answer)).await??;
+    ensure!(answer == *b"N", "raw private GSS did not reach backend");
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
+    let address = listener.local_addr()?;
+    let _server = HttpTask(tokio::spawn(async move {
+        axum::serve(listener, app).await.unwrap();
+    }));
+    let token = signer.token(&signer.claims());
+    let initial = reqwest::Client::builder()
+        .no_proxy()
+        .build()?
+        .get(format!("http://{address}/dsg/v1/memory"))
+        .bearer_auth(&token)
+        .send()
+        .await?
+        .error_for_status()?
+        .json::<DsgMemoryResponse>()
+        .await?;
+    let mut original: DsgResizeRequest = serde_json::from_str(include_str!(
+        "../../libs/compute_api/testdata/dsg_request_v1.json"
+    ))?;
+    original.key.instance = initial.observed.instance.clone();
+    original.key.issuer_epoch = DsgUint64::new(1);
+    original.expected_capacity_generation = initial.observed.capacity_generation;
+    let input = json!({"http_base_url":format!("http://{address}"),"instance":initial.observed.instance,
+        "issuer_epoch":"1","token":token,"original":original});
+    run_go_test(
+        &binary,
+        &serde_json::to_vec(&input)?,
+        "TestNativeConnectionState",
+    )
+    .await?;
+    cluster.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
 #[ignore = "strict cross-repository work gate requires exact PG and Go race binary"]
 async fn native_go_work_state_reads_actual_sql_without_clearing_pending() -> Result<()> {
     let binary = std::env::var("NEON_TEST_DSG_GO_BIN")?;

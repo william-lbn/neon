@@ -25,6 +25,7 @@ use crate::dsg_state::{
     DsgPhase, DsgSharedCostResponse,
 };
 
+use crate::dsg_connection::DsgConnectionResponse;
 use crate::dsg_work::DsgWorkResponse;
 
 const MAX_RESPONSE_BYTES: usize = 32 * 1024;
@@ -377,6 +378,20 @@ impl<'a> DsgSqlClient<'a> {
         let response: DsgWorkResponse = read_json_simple(
             &self.observer,
             &sql(&self.observer_schema, "neon_dsg_work_state", false),
+            self.response_timeout,
+        )
+        .await?;
+        response.validate_for(&self.instance)?;
+        Ok(response)
+    }
+
+    /// 固定只读查询消费Postmaster ack与同点Work2；不清未知原意图，不发完整排空证书。
+    /// 使用完整Simple Query，避免观察自身Parse/Bind留下隐式事务；旧SQL成员明确拒绝。
+    pub async fn connection_state(&self) -> Result<DsgConnectionResponse> {
+        self.formal_function("neon_dsg_connection_state", 0).await?;
+        let response: DsgConnectionResponse = read_json_simple(
+            &self.observer,
+            &sql(&self.observer_schema, "neon_dsg_connection_state", false),
             self.response_timeout,
         )
         .await?;

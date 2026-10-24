@@ -56,6 +56,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_set_admission);
 PG_FUNCTION_INFO_V1(neon_dsg_admission_status);
 PG_FUNCTION_INFO_V1(neon_dsg_shared_cost);
 PG_FUNCTION_INFO_V1(neon_dsg_work_state);
+PG_FUNCTION_INFO_V1(neon_dsg_connection_state);
 
 static char *dsg_vm_uid;
 static char *dsg_compute_instance_id;
@@ -720,6 +721,26 @@ neon_dsg_shared_cost(PG_FUNCTION_ARGS)
  * 的idle/PID/完成，也不把前台空闲提升成完整Quiesce或VM缩容许可。
  * 与其他内部入口相同，SQL ACL之外仍核验当前及session身份，弱SU不能借函数绕过。
  */
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 2
+/* 同一快照序列化共用路径，连接ack不得另采样一份work拼接。 */
+static void
+NeonDsgAppendWork(StringInfo output, const DsgWorkSnapshot *s)
+{
+	appendStringInfo(output,
+		"{\"protocol_version\":1,\"work_api_version\":2,\"vm_shrink_permit\":false,"
+		"\"client_processes\":%u,\"startup_clients\":%u,\"idle_clients\":%u,"
+		"\"frontend_reads\":%u,\"frontend_executes\":%u,\"bounded_inputs\":%u,"
+		"\"retained_transactions\":%u,\"background_processes\":%u,\"auxiliary_processes\":%u,"
+		"\"observer_excluded\":%s,\"foreground_idle\":%s,\"observed\":",
+		s->client_processes, s->startup_clients, s->idle_clients, s->frontend_reads,
+		s->frontend_executes, s->bounded_inputs, s->retained_transactions,
+		s->background_processes, s->auxiliary_processes,
+		s->observer_excluded ? "true" : "false", s->foreground_idle ? "true" : "false");
+	NeonDsgAppendSnapshot(output, &s->observed);
+	appendStringInfoChar(output, '}');
+}
+#endif
+
 Datum
 neon_dsg_work_state(PG_FUNCTION_ARGS)
 {
@@ -732,17 +753,38 @@ neon_dsg_work_state(PG_FUNCTION_ARGS)
 		NeonDsgCheckEnabled();
 		DsgWorkGetSnapshot(&s);
 		initStringInfo(&output);
+		NeonDsgAppendWork(&output, &s);
+		PG_RETURN_DATUM(NeonDsgJson(&output));
+	}
+#else
+	NeonDsgUnsupported();
+	PG_RETURN_NULL();
+#endif
+}
+
+/* 只读观察请求/已应用串号、私有通道及同点Work2；绝不写准入或发VM许可。 */
+Datum
+neon_dsg_connection_state(PG_FUNCTION_ARGS)
+{
+	NeonDsgCheckAdministrator();
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_CONNECTION_API_VERSION) && NEON_DSG_CONNECTION_API_VERSION == 1 && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 2
+	{
+		DsgConnectionSnapshot s;
+		StringInfoData output;
+
+		NeonDsgCheckEnabled();
+		DsgConnectionGetSnapshot(&s);
+		initStringInfo(&output);
 		appendStringInfo(&output,
-			"{\"protocol_version\":1,\"work_api_version\":2,\"vm_shrink_permit\":false,"
-			"\"client_processes\":%u,\"startup_clients\":%u,\"idle_clients\":%u,"
-			"\"frontend_reads\":%u,\"frontend_executes\":%u,\"bounded_inputs\":%u,"
-			"\"retained_transactions\":%u,\"background_processes\":%u,\"auxiliary_processes\":%u,"
-			"\"observer_excluded\":%s,\"foreground_idle\":%s,\"observed\":",
-			s.client_processes, s.startup_clients, s.idle_clients, s.frontend_reads,
-			s.frontend_executes, s.bounded_inputs, s.retained_transactions,
-			s.background_processes, s.auxiliary_processes,
-			s.observer_excluded ? "true" : "false", s.foreground_idle ? "true" : "false");
-		NeonDsgAppendSnapshot(&output, &s.observed);
+			"{\"protocol_version\":1,\"connection_api_version\":1,\"vm_shrink_permit\":false,"
+			"\"enabled\":%s,\"requested_serial\":%u,\"applied_serial\":%u,"
+			"\"requested_open\":%s,\"applied_open\":%s,\"acknowledged\":%s,"
+			"\"private_management_ready\":%s,\"public_connections_blocked\":%s,\"work\":",
+			s.enabled ? "true" : "false", s.requested_serial, s.applied_serial,
+			s.requested_open ? "true" : "false", s.applied_open ? "true" : "false",
+			s.acknowledged ? "true" : "false", s.private_management_ready ? "true" : "false",
+			s.public_connections_blocked ? "true" : "false");
+		NeonDsgAppendWork(&output, &s.work);
 		appendStringInfoChar(&output, '}');
 		PG_RETURN_DATUM(NeonDsgJson(&output));
 	}

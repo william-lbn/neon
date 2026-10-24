@@ -30,17 +30,22 @@ class PgWireConnection:
     错误后等到ReadyForQuery，再在同一连接继续，验证没有把SQL拒绝变成断连。
     """
 
-    def __init__(self, directory, user):
+    def __init__(self, directory, user, port=55432):
         self.connection = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self.connection.settimeout(10)
-        self.connection.connect(str(directory / ".s.PGSQL.55432"))
-        body = struct.pack("!I", 196608) + f"user\0{user}\0database\0postgres\0\0".encode()
-        self.connection.sendall(struct.pack("!I", len(body) + 4) + body)
-        startup = self.receive_ready()
-        # 只保留本次真实连接的PID，不输出BackendKeyData中的取消密钥。
-        # 并发/断连测试不能按pg_stat_activity里“同角色最新会话”猜目标进程。
-        self.backend_pid = next(struct.unpack("!I", body[:4])[0]
-                                for kind, body in startup if kind == b"K")
+        try:
+            self.connection.settimeout(10)
+            self.connection.connect(str(directory / f".s.PGSQL.{port}"))
+            body = struct.pack("!I", 196608) + f"user\0{user}\0database\0postgres\0\0".encode()
+            self.connection.sendall(struct.pack("!I", len(body) + 4) + body)
+            startup = self.receive_ready()
+            # 只保留本次真实连接的PID，不输出BackendKeyData中的取消密钥。
+            # 并发/断连测试不能按pg_stat_activity里“同角色最新会话”猜目标进程。
+            self.backend_pid = next(struct.unpack("!I", body[:4])[0]
+                                    for kind, body in startup if kind == b"K")
+        except BaseException:
+            # 恢复期间连接/启动协议可失败；构造未完成时也必须关闭本次独占FD。
+            self.connection.close()
+            raise
 
     def receive_exact(self, length):
         chunks = bytearray()
@@ -143,7 +148,7 @@ class DsgPostgresLifecycle(unittest.TestCase):
             "-h",
             self.socket,
             "-p",
-            "55432",
+            str(getattr(self, "port", 55432)),
             "-d",
             "postgres",
             "-X",
