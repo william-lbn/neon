@@ -421,6 +421,30 @@ Postmaster，不代表预算全结算、普通SQL可用或VM许可。实际sysin
 与认证接线仍继续编码；Linux UID/SUID/迁移/PID信号/内核行为须后验，见
 [模块事实](DSGA-启动硬约束与原位PG出生-Mac基本验收-20261024.md)。
 
+### 8.4 原资源来源与产品sysinit（2026-10-24）
+
+平台VM profile v2显式保留normal硬限、OS/过渡/安全上界及全部hstate池；禁止
+worker以RSS/比例/当前env给旧计划补额度。资源来源与Compute配置由原Renderer
+一次成功生成，同存原owned immutable Secret并绑定UID。资源数据只含管理公钥，
+不含签名seed/TLS私钥或业务verifier；原计划深拷贝所有可变额度/池数组。
+
+Controller直接重读原VM/完整Spec和原Secret，核验原UID/owner、immutable、原
+pristine日志、native预算/公钥与资源来源一致，再给Runner只读ISO输入。Runner
+有界解压并复核完整启动身份；来源字节/SHA不因重序列化丢失。手工flag不是Kube
+授权，该投影不能替代最终Runner/QMP的持久fence。已有history的重启走受控恢复。
+
+Guest封存准确原来源，固定root目录/cgroup与实际限额；任何已有不同来源不覆盖。
+vmstart和每次PG出生重读ISO/封存/固定配置及原Bootstrap，核验当前Held，不能让
+provision失败后旧Applied代另一来源放行。Kernel/残留模式只收紧旧入口，不是
+预算授权。根迁移权限关闭后不得由旧cgconfigparser再次委派；受管Compute不启动
+旧WS Monitor并发修改memory.high/LFC。旧Guest daemon只保留CPU只读和固定管理
+TLS三键有界供给，资源写另由认证/fence通道执行，不开放任意文件写。
+
+此段产品源码已接入，未构建镜像/安装SUID/执行Guest。Mac只证明相关输入/恢复/
+路由逻辑和编译，实际只读ISO、root权限/迁移、TLS正向供给及内核/物理行为必须
+Linux验收。完整运行期控制链与受控跨boot恢复仍是业务工作，见
+[本批证据](DSGA-原资源来源与Guest启动接线-Mac基本验收-20261024.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

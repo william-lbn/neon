@@ -1211,7 +1211,10 @@ impl ComputeNode {
                     Some(self.params.filecache_connstr.clone())
                 };
 
-                let vm_monitor = if env::var_os("AUTOSCALING").is_some() {
+                // 受管资源由独立认证/fence通道协调，旧WS Monitor没有此身份，
+                // 不能并行改变memory.high/LFC扰动已承诺预算；legacy保持官方行为。
+                let vm_monitor = if env::var_os("AUTOSCALING").is_some()
+                    && self.frozen_dsg_startup().is_none() {
                     let vm_monitor = tokio::spawn(vm_monitor::start(
                         Box::leak(Box::new(vm_monitor::Args {
                             cgroup: Some(self.params.cgroup.clone()),

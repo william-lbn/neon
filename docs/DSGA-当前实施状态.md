@@ -3,7 +3,26 @@
 更新：2026-10-24（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-24 启动硬约束与原位PG出生
+## 最新：2026-10-24 原资源来源到Guest启动的产品接线
+
+AS `818ca7713f22a026868973a43897a7d1bdf941c0`已先推并核对：原immutable Secret准确
+来源/公钥/额度→Controller直接重读→有界Runner→只读ISO→Guest封存/root cgroup/
+实际Bootstrap→vmstart/PG重读，产品程序/模板安装源码接入，未构建镜像或安装
+特权文件。旧未认证CPU写/任意路径关闭，保留固定管理TLS供给。最终Mac定向
+7顶层/28含子项pass、vet及8个Linux目标编译/模板语法通过，不是目标环境实测。
+
+控制面cedabd5生成同一immutable Secret的config/resource两文件，v2显式平台
+额度、原计划深拷贝、缺额度拒绝执行；Mac6顶层/24含子项pass、vet通过。
+Neon两套补充脚本不再将受管cgroup委派回postgres，受管模式停止旧无认证WS
+Monitor/LFC调整，发行AS锁绑定818ca771。PG17 gitlink/两份PG锁仍cbabd5。
+见[完整本批事实与边界](DSGA-原资源来源与Guest启动接线-Mac基本验收-20261024.md)。
+
+独立认证root通道、完整运行期预算/首次准入/排空/Host/最终VM执行、公开worker/
+生命周期及跨boot/owner受控恢复仍继续编码；这些不是仅Linux待测。Goal active，
+仅PG17，默认关闭。真实Linux/K8s/SUID/整个HugeTLB池/物理与性能后验，不重复
+未变内核/SDK/Web/实际PG功能，不部署或合main。
+
+## 历史：2026-10-24 启动硬约束与原位PG出生
 
 AS `c5f5f7eb24827a81b067c5bb964604bc1fcc8590`先推送并核对远程：新增PG不存在时的
 真实启动限额/持久原意图、空组核验、原查询及显式重放；固定程序原位入组、全线程

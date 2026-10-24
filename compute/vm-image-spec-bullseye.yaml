@@ -4,7 +4,14 @@ commands:
   - name: cgconfigparser
     user: root
     sysvInitAction: sysinit
-    shell: 'cgconfigparser -l /etc/cgconfig.conf -s 1664'
+    # 受管Guest已在vminit建立root硬约束；不能再由旧parser把限额管理权委派给
+    # postgres。输入/限额不明即失败，由vmstart独立读回阻止PG出生，不回退legacy。
+    shell: |
+      if test -f /neonvm/runtime/dsga-resource.json || test -e /etc/neon-dsga || test -L /etc/neon-dsga || /neonvm/bin/grep -Fq 'neonvm.dsga=1' /proc/cmdline; then
+        /neonvm/bin/dsga-resource-guard check-guest
+      else
+        cgconfigparser -l /etc/cgconfig.conf -s 1664
+      fi
   # restrict permissions on /neonvm/bin/resize-swap, because we grant access to compute_ctl for
   # running it as root.
   - name: chmod-resize-swap
