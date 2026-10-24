@@ -484,6 +484,24 @@ exe不匹配或进程死亡都不能收养另一进程或清除旧资源承诺/�
 PG17原位exec与UID/exe/cgroup/文件系统语义仍须Linux真实验收，Mac协议及源码
 核对不可替代。详见[出生来源接线](DSGA-原Postmaster身份转发-Mac基本验收-20261024.md)。
 
+### 8.7 实际Agent原Guest绑定与资源floor（2026-10-24）
+
+实际Agent先确认长期owner Session，以原VM/Compute绑定做一次只读Guest发现。
+没有HWM/任何历史/原操作才允许首次冻结；root已有孤立运行期命令时拒绝收养。
+完整资源身份先经原VM UID/RV CAS写前持久化，再root fence。丢回复不能派发，
+恢复只能读取原身份；接管、PG boot和历史淘汰都不得清除或重发现替换。
+
+新字段为原账本optional ResourceIdentity，旧未启用数据可读，已写新字段须用
+对齐版本reader，不能无条件降级。原pristine bootstrap不允许夹带运行期绑定。
+同一资源客户端随Session持有，未知完整GuestReady命令从原步骤恢复Pending。
+新PG POST及显式重放前仍须检查当前资源floor和已确认持续约束，不能仅凭旧
+GuestReady或配置数字；原未知PG查询保持可达，约束暂态保持unknown而不换owner。
+
+固定资源状态接口是原日志和当前约束的观察，不是NoEffect/预算/VM许可。独立
+资源revision不能借Native PG revision或淘汰历史后猜测。完整资源步骤生产/执行、
+预算、准入、排空、Host和最终VM仍须接齐，见
+[实际接线范围](DSGA-Agent原Guest接管与状态转发-Mac基本验收-20261024.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

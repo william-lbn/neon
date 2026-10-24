@@ -173,6 +173,44 @@ async fn process_birth_route_requires_control_scope_before_root_query() -> Resul
 }
 
 #[tokio::test]
+async fn resource_state_route_has_separate_control_scope() -> Result<()> {
+    let signer = Signer::new();
+    let app = router(&node(signer.jwks.clone(), true, None));
+    let path = "/dsg/v1/resource/state";
+    assert_eq!(
+        invoke(app.clone(), Method::GET, path, None, None).await?.0,
+        StatusCode::UNAUTHORIZED
+    );
+    let mut claims = signer.claims();
+    claims["scope"] = json!("compute_ctl:dsga_initialization");
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::GET,
+            path,
+            Some(&signer.token(&claims)),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    assert_eq!(
+        invoke(
+            app,
+            Method::GET,
+            &format!("{path}?override=1"),
+            Some(&signer.token(&signer.claims())),
+            None
+        )
+        .await?
+        .0,
+        StatusCode::BAD_REQUEST
+    );
+    Ok(())
+}
+
+#[tokio::test]
 async fn initialization_route_requires_dedicated_auth_and_published_native_proof() -> Result<()> {
     let signer = Signer::new();
     let app = router(&node(signer.jwks.clone(), true, None));

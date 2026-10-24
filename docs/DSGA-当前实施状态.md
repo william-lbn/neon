@@ -3,7 +3,24 @@
 更新：2026-10-24（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-24 原Postmaster出生来源（仍非整体完成）
+## 最新：2026-10-24 实际Agent原Guest绑定和资源代次（仍非整体完成）
+
+AS b9e393f8fa846b19d14c0246c1da46cf0d82a70f已在既有功能分支先推送并核验：
+实际Agent先UID/RV条件持久原Guest，再root fence；未知GuestReady完整命令恢复
+Pending；新PG POST/显式重放核对持续约束，原未知PG查询可达。资源视图同锁保留
+Original/Held/floor和当前限额，不能按PG revision或历史淘汰猜资源代次。
+必要Mac race去重8项通过，相关vet及实际Agent/Controller/Runner/root双架构
+8次目标编译通过，不是目标内核实测。Neon状态路由1项及clippy通过，控制面
+新字段实际Store写入后的TLS路由1项race和准确依赖vet通过；两消费者绑定同一
+已发布AS版本，PG17三处仍cbabd5。见
+[当前接线与证据](DSGA-Agent原Guest接管与状态转发-Mac基本验收-20261024.md)。
+
+仍缺GuestReady真实资源派发/原观察执行器、完整预算/系统上界、首次准入/全排空、
+Host/最终VM、公开worker/生命周期和受控跨boot/owner关闭；这些是代码缺口，
+继续实施，不能称为只待Linux。Goal active，仅PG17，默认关闭，不构建镜像、
+不准备或执行K8s部署、不合main。最终提交/远程状态以实际Git及恢复点为准。
+
+## 历史：2026-10-24 原Postmaster出生来源（仍非整体完成）
 
 AS `a57bed0cd9b9b24f8447447681b9ffbfda2ec779`已在既有功能分支先推送并核对：
 root原位exec前同锁持久Birth，实际UID/exe/cgroup/starttime核验，资源写不再收养
