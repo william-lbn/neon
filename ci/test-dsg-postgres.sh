@@ -86,6 +86,15 @@ prepared = unittest.defaultTestLoader.discover('.', pattern='test_dsg_prepared.p
 if prepared.countTestCases() < 6:
     raise SystemExit('DSGA native prepared registry suite is missing required cases')
 suite.addTests(prepared)
+dsm = unittest.defaultTestLoader.discover('.', pattern='test_dsg_dsm.py')
+# 必须实际打包并执行分配前额度/真实pin/失败保留/主段去重，不由旧prepared代替。
+if dsm.countTestCases() < 8:
+    raise SystemExit('DSGA native DSM reservation suite is missing required cases')
+suite.addTests(dsm)
+partition_lock = unittest.defaultTestLoader.discover('.', pattern='test_dsg_upstream_partition_index.py')
+if partition_lock.countTestCases() != 1:
+    raise SystemExit('PG17 upstream partition index lock regression is missing')
+suite.addTests(partition_lock)
 replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replication.py')
 # 新测试文件遗漏打包时discover会返回空suite，不能让旧80项绿色覆盖本批缺测。
 if replication.countTestCases() < 6:

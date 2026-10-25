@@ -3,7 +3,29 @@
 更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 两阶段保留槽及正式管理消费者（仍非整体完成）
+## 最新：2026-10-25 外部DSM分配前预算原生模块（仍非整体完成）
+
+PG17 `5462f1de54a97b9a9235c69d64d31cb0825dcea5` 已在原分支先推送核验，包含
+独立官方锁维护bfd84a98。Native DSM1在真实OS创建前预留，pin/多mapping不重计，
+实际DESTROY成功前/未知失败仍保留账；main-region去重、控制段独立、元数据计入
+固定主段。postmaster-only可选payload额度，默认0明确未限制，不停必要后台工作。
+旧Buffer6/Work2/Connection1/Prepared1及DSM控制格式保留，同点观察不反取DSM锁。
+
+Mac新增8不同场景0skip：首轮5过/2 SQLSTATE断言误期望53200、真实53000，单项
+替换及新增默认兼容1后通过；未重跑原5。新入口官方DSGA core225及相关隔离5
+通过，收口关键2和准确SHA关键3属替换，不加计数。语法/静态分析通过；正式Neon
+DSM消费者仍待编码，不把Native API/关门/idle当完整证书。详见
+[原生实现与证据](DSGA-DSM分配前预算-Mac基本验收-20261025.md)。
+
+本批控制面完整main577bb3b经b9f9be7维护合入原分支，新增/受影响真实PG race19、
+vet及本地内存渲染3通过；缺yaml/旧Helm默认版本的失败保留，负向错误原因已固定。
+两维护分支已推核验；没有构建镜像、准备或执行部署。其他PG版本暂缓。
+
+正式DSM管理消费者、完整后台/私有预算与可信Prepare/Finalize/systemoutside/
+首次准入、Host最终VM/公开worker/受控跨boot仍须代码。Linux内核/物理/性能另验。
+Goal active/incomplete，默认关闭，所有服务继续沿原既有分支，不合main。
+
+## 历史：2026-10-25 两阶段保留槽及正式管理消费者（仍非整体完成）
 
 PG26e80ac6a3ad02fd149d272302d5bf9b4cbaa7ea、AS5b49d343c6223ffc18b40a150c0ea0a2c7f81c6b
 已先推送核验。新独立Prepared1保留Work2/Connection1/Buffer6 ABI，原生计数包含

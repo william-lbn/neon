@@ -655,6 +655,32 @@ SU/后台也禁止关门之后新保留。统一RemoveGXact回收，未知/失�
 预备语句缓存、后台/DSM及会话私有保留内存仍独立覆盖，不能因本项完成而漏算。
 详见[实现及Mac原生证据](DSGA-两阶段保留槽-Mac基本验收-20261025.md)。
 
+### 8.16 外部 DSM 分配前承诺与原生生命周期（2026-10-25）
+
+独立Native DSM1保持Buffer6/Work2/Connection1/Prepared1 ABI及原生DSM控制段
+格式/magic。固定登记表纳入PG主段成本；同一boot每次外部OS CREATE前必须按
+实读页粒度预留，发布前CREATING也算，原生控制表成功发布后才转RESIDENT。
+主段内preallocated DSM只使用既有主段成本，不重复叠加外部payload；外部
+DSM控制段另计固定页对齐上界。附加/固定多个mapping只算一份共享backing。
+
+锁序DynamicSharedMemoryControlLock→status_lock；同点观察复制汇总而不反取
+DSM控制锁。Postmaster/早期控制段原有无backend锁路径保持。候选随机handle
+在O_EXCL成功前不具所有权，不得提前写入可清理列表后于撞名重启误删他人段。
+CREATE异常可能有部分效果时保留UNKNOWN；已证明本次创建的未发布映射仍须
+由实际ResourceOwner清理。引用归1、unpin或backend退出不等于销毁成功，只有
+真实DESTROY成功且无先前映射未知才扣账；失败、metadata失配不得归零伪空闲。
+
+`dynamic_shared_buffers_dsm_budget`为postmaster-only外部普通页payload承诺，
+默认0明确未约束；正数包括SU/后台都在分配前执行，不在关门时一概停统计/
+检查点/回收。这个持续payload上界可参与后续预算，但不包含PTE/内核/THP/
+HugeTLB/Host，不是物理释放回执。直接绕过dsm.c的扩展须在生产支持清单及
+外部聚合约束内覆盖。更改固定cap须新boot与全层重新确认，不能普通SET降低。
+
+新boot表为0不能证明旧OS段已消失：原root Held/Original及未知栅栏继续保持，
+跨boot关闭必须由真实资源来源证明，本模块不代做结案。完整预算生产者仍须
+核对控制段、主段去重和外部持续约束；正式SQL/HTTP消费者须继续实现，不把
+Native能力当已有生产证书。见[本批原生证据与未完代码](DSGA-DSM分配前预算-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
