@@ -20,7 +20,9 @@
     "failures_retained": "testJSONmacrorecursion compilefixedfixture layering;CPactual16routes stale15count fixedtestlenonly;HTTPweakpermission got earlier55000 gate, explicitfixtureopen3/close4 then42501 proof; onlyfailedchecksreplaced",
     "as_module": "explicitselfForkpseudo OriginSHA fullmatch minimal2sum readonlyvet0",
     "vcs": "GoNative binarybuiltbeforeAScommit, 5nativeGo source files byte-equal publishedAScommit; no releaseartifactVCSclaim",
-    "bindings": "index18binaries/4PG/41extensionstages +actual5PASS0skip; OpenAPI uniqueYAML fixedroute14mandatoryfields/nestedref valid"
+    "bindings": "index18binaries/4PG/39extensionstages +actual5PASS0skip; OpenAPI uniqueYAML fixedroute14mandatoryfields/nestedref valid",
+    "binding_actual_output": "Validated 18 binaries, 4 pinned PG versions, 39 extension stages",
+    "documentation_correction": "Initial doc/commit text assumed two SQL upgrades added build stages, wrote41; actual validator says39. Corrected from raw log; SQLmigration file count is not Docker extension buildstage count. No code/test change."
   },
   "source_sha256": {
     "repos/neon/ci/distribution.json": "84e06309087140da1dbd2cfd635eee2b7ff63bccbf9492cc807efa3e1c6be550",

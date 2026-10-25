@@ -48,7 +48,7 @@ main-region DSM已计固定main，不再算外部payload；control独立。当�
   冒充发布镜像VCS标签。参数/token仅经匿名stdin，未访问用户数据库或集群。
 - 目标api/http clippy使用`--no-deps -D warnings`通过；依赖原27条remote_storage
   告警保留，不宣称全依赖零告警。新原生源未改，不重复Native8/core225/iso5或旧全套。
-- index核对18二进制/4PG/41扩展阶段、实际5项绑定检查通过0skip；OpenAPI唯一键/
+- index核对18二进制/4PG/39扩展阶段、实际5项绑定检查通过0skip；OpenAPI唯一键/
   固定路由/14强制字段与嵌套引用有效。
 
 机器收据见[源码、产物和日志](DSGA-DSM正式管理链-Mac收据-20261025.json)。
@@ -68,3 +68,7 @@ Linux/SDK/集群回执保留原文，不算本轮执行；Chart仅版本元数�
 首次准入、Host/Scheduler最终Controller-Runner-QMP、公开worker和受控跨boot/
 owner未知关闭代码。不能把这些代码缺口称为仅待Linux。Linux K8s/NeonVM/
 HugeTLB/内核记账/物理/性能验收独立后置，默认关闭，无VM许可。
+
+绑定阶段计数更正：本批初稿将新增两份SQL升级文件误加到构建阶段，写成41。
+校验器实际输出始终为39，现以原日志为准；SQL迁移文件不增加Docker扩展构建阶段。
+仅更正验收文字/收据，不重复已通过检查。
