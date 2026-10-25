@@ -758,6 +758,24 @@ Mac新增首次、Grow后logger重建、同Postmaster内部恢复且logger同PID
 替换不重复计数。此模块不授权物理释放或VM缩容，也不补全后台/私有上界。
 Linux映射/物理/内核另验；详见[实际验收及收据](DSGA-非共享子进程映射-Mac基本验收-20261026.md)。
 
+### 8.21 最终开放须持续重核原聚合，历史确认不等于永久许可（2026-10-26）
+
+实际ResumeAdmission复用已认证原root客户端，当前生产开放要求账本持久资源
+身份及Finalized.Aggregate引用与真实RootAggregate.Bound完全一致。floor/完整
+限额/Guest/出生读回须真实，SDK及root部分未知均阻断；同数值新Held也换源。
+Outside三项之和须匹配原root预留，此检查只证明一致性，不认证SystemOutsidePG。
+分类旧格式可读，但没有原聚合不能新开放/显式重放或补Completed。
+
+发送前直接GET同VM并核RV，写前完整原命令UID/RV CAS；写后重新核root/VM，
+新成功审计v2保存原聚合和资源epoch，旧v1不回写。历史Unconfirmed先查原
+准入，再核其他事实；资源/PG/VM问题不能隐藏原查询，原生确认也不等于完整
+预算结案。原预算和WAL持续保留，不补发、不换epoch/revision或收养新来源。
+跨域不是原子采样，完整生命周期的可信预算生产者/最终VM仍不可省略。
+
+Mac真实执行Owner/Lease/Store/CAS/SDK/TLS，Kube/root/PG为协议夹具，旧源码
+负向证明及去重17场景范围见[本批实际证据](DSGA-最终准入原资源复核-Mac基本验收-20261026.md)。
+本项不是首次准入或完整Prepare/Finalize实现，不授权VM/物理释放。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

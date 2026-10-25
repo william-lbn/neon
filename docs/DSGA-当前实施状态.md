@@ -3,7 +3,28 @@
 更新：2026-10-26（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-26 非共享子进程的真实DSG映射修复（仍非整体完成）
+## 最新：2026-10-26 最终开放准入的原资源持续复核（仍非整体完成）
+
+AS d6979c068866b310e0cfc1dd04a075081b1684a9已先推自有原分支并核验远程。
+实际Agent/PGWorker的最终ResumeAdmission现在复用同一认证root，开放/显式
+重放及写后完成前核原资源来源、floor、限额、Guest、真实Postmaster出生和
+Outside一致性，重读VM/RV；同额度新Held也不收养。新成功审计v2保留来源，
+历史v1不补写。未知原准入先查，资源/VM漂移仍保留WAL/预算，不重发或提前完成。
+
+Mac受影响去重1顶层/18含子项（17不同场景）race通过0skip，readonly vet与
+实际Agent Linux双架构仅交叉编译通过。旧准确源码overlay负向复现同额换源
+仍发送1次；原日志保留。Kube/root/PG为协议夹具，不冒充目标内核或集群E2E。
+控制面完整mainf7df93a经独立f4d3fc8维护先合入并推送，Catalog定向1PASS；
+随后准确自有模块Origin同d697、最小2sum及readonly vet通过。Neon AS来源
+同锁，PG三处b812及扩展1.15不变，不重复未变PG/DSM/nativeHTTP或发行单测5。
+见[本批代码、验证与未完成项](DSGA-最终准入原资源复核-Mac基本验收-20261026.md)。
+
+本项是最终恢复准入，首次开放仍须单独实现。完整可信Prepare/Finalize/
+SystemOutsidePG、安全降normal与后台/私有可执行上界、首次准入、Host最终VM/
+公开worker/受控跨boot仍是代码缺口。Goal active/incomplete；只PG17、原分支、
+默认关闭，不构建镜像、不准备/执行部署、不合main。Linux内核/物理/性能另验。
+
+## 历史：2026-10-26 非共享子进程的真实DSG映射修复（仍非整体完成）
 
 旧准确PG5462实测logger仍持四个DSG共享映射；新增局部副本detach修复
 b812536cd983595ba233a7fad418d9bae448b2f3已先推既有PG17分支并核验远程。
