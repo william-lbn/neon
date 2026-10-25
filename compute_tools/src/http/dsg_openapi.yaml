@@ -41,6 +41,19 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/ConnectionResponse"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/work/dsm:
+    get:
+      operationId: getDsgDsmState
+      summary: 同一PG boot外部DSM分配前payload预留及同点保留工作
+      description: 创建中和未知均保留预算，主段DSM去重、控制段独立；0额度明确未限制。不是PTE/THP/Host或跨boot清理证书，不生成VM许可。
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 原生只读承诺，全部64位字节量为规范字符串，no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/DsmResponse"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/work/prepared:
     get:
       operationId: getDsgPreparedState
@@ -254,6 +267,25 @@ components:
                 required: [error]
                 properties: {error: {type: string}}
   schemas:
+    DsmResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, dsm_api_version, vm_shrink_permit, current_boot_only, reserved_upper_bytes, control_upper_bytes, external_budget_bytes, external_segments, pending_creations, unknown_segments, page_bytes, limit_enforced, accounting_valid, prepared]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        dsm_api_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        current_boot_only: {type: boolean, enum: [true]}
+        reserved_upper_bytes: {$ref: "#/components/schemas/U64"}
+        control_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
+        external_budget_bytes: {$ref: "#/components/schemas/U64"}
+        external_segments: {type: integer, minimum: 0, maximum: 2147483647}
+        pending_creations: {type: integer, minimum: 0, maximum: 2147483647}
+        unknown_segments: {type: integer, minimum: 0, maximum: 2147483647}
+        page_bytes: {type: integer, minimum: 1, maximum: 2147483648}
+        limit_enforced: {type: boolean}
+        accounting_valid: {type: boolean, enum: [true]}
+        prepared: {$ref: "#/components/schemas/PreparedResponse"}
     PreparedResponse:
       type: object
       additionalProperties: false

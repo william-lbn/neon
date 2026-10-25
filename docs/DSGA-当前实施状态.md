@@ -3,7 +3,26 @@
 更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 外部DSM分配前预算原生模块（仍非整体完成）
+## 最新：2026-10-25 DSM正式SQL/HTTP与严格消费者（仍非整体完成）
+
+NativePG5462不变；Neon1.15新增正式DSM只读成员和认证固定GET，原生同点嵌套
+Prepared/Connection/Work，复用序列化helper不补读。C双SU/原session拒绝误授权，
+Rust/Go严格全字段、实际页/成本/cap/范围/实例，默认0明确未约束；无VM许可，
+不清Pending或跨boot旧预算。ASd8c1f2ea已先推核验，控制面准确自有伪版本Origin
+同SHA、最小2sum和readonly vet通过，固定GET及独立观察已接。
+
+Mac Rust协议1、Go协议/SDK race2、CP代理race去重2、准确PG+Neon1.15正式HTTP1
+及真实Go race/TLS/Router/JWT/SQL1均通过；目标clippy通过、依赖27原告警保留。
+初轮fixture JSON宏、路径计数15/16、权限在关门先55000均如实保留并只替换失败
+检查；产品准入/权限未放宽。原Native8/core225/iso5未重复。见
+[正式链与验收](DSGA-DSM正式管理链-Mac基本验收-20261025.md)。
+
+控制面完整主线af5e70432文件经eb6829b独立维护推送，实际19顶层/26含子项
+PG/race及vet通过0skip，不把附带Linux收据计本轮。下一项仍为完整后台/私有约束、
+可信预算生产者/systemoutside/首次准入及Host最终VM/公开worker/受控跨boot代码。
+Linux目标内核/物理/性能另验，Goal active，默认关闭，沿既有分支不合main。
+
+## 历史：2026-10-25 外部DSM分配前预算原生模块（仍非整体完成）
 
 PG17 `5462f1de54a97b9a9235c69d64d31cb0825dcea5` 已在原分支先推送核验，包含
 独立官方锁维护bfd84a98。Native DSM1在真实OS创建前预留，pin/多mapping不重计，

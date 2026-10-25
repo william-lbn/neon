@@ -2005,3 +2005,114 @@ async fn native_bad_config_keeps_old_observation_and_blocks_new_resize() -> Resu
     cluster.passed = true;
     Ok(())
 }
+
+#[tokio::test]
+#[ignore = "strict DSM gate requires exact PG5462 and installed Neon1.15"]
+async fn native_dsm_state_requires_formal_member_and_retains_payload_budget() -> Result<()> {
+    use compute_api::{dsg_dsm::DsgDsmResponse, dsg_prepared::DsgPreparedResponse};
+    let signer = Signer::new();
+    let token = signer.token(&signer.claims());
+    let path = "/dsg/v1/work/dsm";
+    let (mut old, _, old_app) = support::native_prepared(&signer).await?;
+    assert_eq!(
+        invoke(old_app, Method::GET, path, Some(&token), None)
+            .await?
+            .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    old.passed = true;
+    drop(old);
+    let (mut cluster, _, app) = support::native_dsm(&signer).await?;
+    assert_eq!(
+        invoke(app.clone(), Method::GET, path, None, None).await?.0,
+        StatusCode::UNAUTHORIZED
+    );
+    let (code, body) = invoke(app.clone(), Method::GET, path, Some(&token), None).await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let fact: DsgDsmResponse = serde_json::from_str(&body)?;
+    let bound = fact.prepared.connections.work.observed.instance.clone();
+    fact.validate_for(&bound)?;
+    assert!(
+        fact.limit_enforced
+            && fact.accounting_valid
+            && fact.current_boot_only
+            && !fact.vm_shrink_permit
+    );
+    assert_eq!(fact.external_budget_bytes.get(), 4194304);
+    assert!(fact.reserved_upper_bytes.get() >= 2097152 && fact.external_segments > 0);
+    assert_eq!(fact.pending_creations, 0);
+    assert_eq!(fact.unknown_segments, 0);
+    assert!(fact.prepared.connections.work.foreground_idle);
+    assert_eq!(fact.prepared.prepared_slots, 1);
+    let sql = cluster.connect().await?;
+    let namespace: String = sql.query_one("SELECT quote_ident(n.nspname) FROM pg_extension e JOIN pg_namespace n ON n.oid=e.extnamespace WHERE e.extname='neon'", &[]).await?.get(0);
+    // 普通角色在关门时先被55000拒绝；权限专项须在本隔离夹具明确开门，才能
+    // 证明SQL ACL/C体的42501，而非把前置准入拒绝误当权限证据。检查后原位关门。
+    sql.simple_query("SELECT public.prepared_test_gate(public.prepared_test_boot(),3,1,true)")
+        .await?;
+    // 先证明ACL拒绝；再故意授予/经SU definer包装，仍由C体的原session检查拒绝。
+    sql.batch_execute("SET ROLE dsg_app").await?;
+    let denied = sql
+        .query_one(&format!("SELECT {namespace}.neon_dsg_dsm_state()"), &[])
+        .await
+        .unwrap_err();
+    assert_eq!(
+        denied.code(),
+        Some(&tokio_postgres::error::SqlState::INSUFFICIENT_PRIVILEGE)
+    );
+    sql.batch_execute("RESET ROLE").await?;
+    sql.batch_execute(&format!("GRANT USAGE ON SCHEMA {namespace} TO dsg_app; GRANT EXECUTE ON FUNCTION {namespace}.neon_dsg_dsm_state() TO dsg_app; CREATE FUNCTION public.dsm_test_definer() RETURNS jsonb LANGUAGE SQL SECURITY DEFINER AS 'SELECT {namespace}.neon_dsg_dsm_state()'; GRANT EXECUTE ON FUNCTION public.dsm_test_definer() TO dsg_app; SET SESSION AUTHORIZATION dsg_app")).await?;
+    let denied = sql
+        .query_one("SELECT public.dsm_test_definer()", &[])
+        .await
+        .unwrap_err();
+    assert_eq!(
+        denied.code(),
+        Some(&tokio_postgres::error::SqlState::INSUFFICIENT_PRIVILEGE)
+    );
+    sql.batch_execute("RESET SESSION AUTHORIZATION").await?;
+    sql.simple_query("SELECT public.prepared_test_gate(public.prepared_test_boot(),4,1,false)")
+        .await?;
+    sql.simple_query("SELECT public.dsm_native_unpin(handle) FROM public.dsm_native_handle")
+        .await?;
+    let exists: bool = sql
+        .query_one(
+            "SELECT public.dsm_native_probe(handle) FROM public.dsm_native_handle",
+            &[],
+        )
+        .await?
+        .get(0);
+    assert!(!exists);
+    let (code, body) = invoke(app.clone(), Method::GET, path, Some(&token), None).await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let released: DsgDsmResponse = serde_json::from_str(&body)?;
+    released.validate_for(&bound)?;
+    assert_eq!(
+        released.reserved_upper_bytes.get() + 2097152,
+        fact.reserved_upper_bytes.get()
+    );
+    assert_eq!(released.external_segments + 1, fact.external_segments);
+    // 新序列化helper复用后，原Prepared1直接路由依然能保留实际2PC槽。
+    let (code, body) = invoke(
+        app.clone(),
+        Method::GET,
+        "/dsg/v1/work/prepared",
+        Some(&token),
+        None,
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let previous: DsgPreparedResponse = serde_json::from_str(&body)?;
+    previous.validate_for(&bound)?;
+    assert_eq!(previous.prepared_slots, 1);
+    sql.batch_execute(
+        "DROP FUNCTION public.dsm_test_definer(); ALTER EXTENSION neon UPDATE TO '1.14'",
+    )
+    .await?;
+    assert_eq!(
+        invoke(app, Method::GET, path, Some(&token), None).await?.0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    cluster.passed = true;
+    Ok(())
+}

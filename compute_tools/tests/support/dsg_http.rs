@@ -196,11 +196,22 @@ pub(crate) async fn native_connections(signer: &Signer) -> Result<(Cluster, Arc<
 /// Prepared1专用真实保留槽：旧原生API开门→真正PREPARE→关门，不伪造响应body。
 /// 合成平台管理事务仅供隔离测试，不授权伸缩器替客户选择提交或回滚。
 pub(crate) async fn native_prepared(signer: &Signer) -> Result<(Cluster, Arc<ComputeNode>, Router)> {
+    native_retained(signer, false).await
+}
+
+/// DSM1实际固定payload，沿同一PGAPI创建/退出，不伪造HTTP或账本。
+pub(crate) async fn native_dsm(signer: &Signer) -> Result<(Cluster, Arc<ComputeNode>, Router)> {
+    native_retained(signer, true).await
+}
+
+async fn native_retained(signer: &Signer, with_dsm: bool) -> Result<(Cluster, Arc<ComputeNode>, Router)> {
     use std::io::Write;
     let (mut cluster, _, _) = native_connections(signer).await?;
-    cluster.connect().await?.batch_execute("ALTER EXTENSION neon UPDATE TO '1.14'").await?;
+    let version = if with_dsm { "1.15" } else { "1.14" };
+    cluster.connect().await?.batch_execute(&format!("ALTER EXTENSION neon UPDATE TO '{version}'")).await?;
     let mut conf = std::fs::OpenOptions::new().append(true).open(cluster.data.join("postgresql.conf"))?;
     writeln!(conf, "max_prepared_transactions=4")?;
+    if with_dsm { writeln!(conf, "dynamic_shared_buffers_dsm_budget='4MB'")?; }
     drop(conf);
     cluster.restart()?;
     let sql = cluster.connect().await?;
@@ -210,6 +221,12 @@ pub(crate) async fn native_prepared(signer: &Signer) -> Result<(Cluster, Arc<Com
     sql.simple_query("SELECT public.prepared_test_gate(public.prepared_test_boot(),1,1,true)").await?;
     sql.simple_query("BEGIN; INSERT INTO public.prepared_native VALUES(42); PREPARE TRANSACTION 'native_retained'").await?;
     sql.simple_query("SELECT public.prepared_test_gate(public.prepared_test_boot(),2,1,false)").await?;
+    if with_dsm {
+        sql.batch_execute("CREATE FUNCTION public.dsm_native_allocate(bigint,boolean,boolean) RETURNS bigint AS '$libdir/test_dsg_region', 'test_dsg_dsm_allocate' LANGUAGE C STRICT; \
+            CREATE FUNCTION public.dsm_native_unpin(bigint) RETURNS boolean AS '$libdir/test_dsg_region', 'test_dsg_dsm_unpin' LANGUAGE C STRICT; \
+            CREATE FUNCTION public.dsm_native_probe(bigint) RETURNS boolean AS '$libdir/test_dsg_region', 'test_dsg_dsm_probe' LANGUAGE C STRICT; \
+            CREATE TABLE public.dsm_native_handle(handle bigint); INSERT INTO public.dsm_native_handle SELECT public.dsm_native_allocate(2097152,false,true)").await?;
+    }
     let compute = node(signer.jwks.clone(), true, Some(&cluster));
     let app = router(&compute);
     Ok((cluster, compute, app))

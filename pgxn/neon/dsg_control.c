@@ -35,6 +35,9 @@
 #if __has_include("storage/dsg_work.h")
 #include "storage/dsg_work.h"
 #endif
+#if __has_include("storage/dsg_dsm.h")
+#include "storage/dsg_dsm.h"
+#endif
 #endif
 #if defined(NEON_DSG_BUFFER_API_VERSION) && NEON_DSG_BUFFER_API_VERSION == 6
 #define NEON_DSG_CONTROL_SUPPORTED 1
@@ -58,6 +61,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_shared_cost);
 PG_FUNCTION_INFO_V1(neon_dsg_work_state);
 PG_FUNCTION_INFO_V1(neon_dsg_connection_state);
 PG_FUNCTION_INFO_V1(neon_dsg_prepared_state);
+PG_FUNCTION_INFO_V1(neon_dsg_dsm_state);
 
 static char *dsg_vm_uid;
 static char *dsg_compute_instance_id;
@@ -804,6 +808,21 @@ neon_dsg_connection_state(PG_FUNCTION_ARGS)
 #endif
 }
 
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_PREPARED_API_VERSION) && NEON_DSG_PREPARED_API_VERSION == 1 && defined(NEON_DSG_CONNECTION_API_VERSION) && NEON_DSG_CONNECTION_API_VERSION == 1 && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 2
+/* 仅序列化已捕获的同点槽；DSM内嵌与原Prepared1不允许再读原生状态拼接。 */
+static void
+NeonDsgAppendPrepared(StringInfo output, const DsgPreparedSnapshot *s)
+{
+	appendStringInfo(output,
+		"{\"protocol_version\":1,\"prepared_api_version\":1,\"vm_shrink_permit\":false,"
+		"\"prepared_slots\":%u,\"maximum_prepared_slots\":%u,\"runtime_prepares_blocked\":%s,\"connections\":",
+		s->prepared_slots, s->maximum_prepared_slots,
+		s->connections.work.observed.admission_open ? "false" : "true");
+	NeonDsgAppendConnection(output, &s->connections);
+	appendStringInfoChar(output, '}');
+}
+#endif
+
 /* 独立Prepared1：保留槽可在backend退出/前台idle后存活，不能省略或由客户端报数。 */
 Datum
 neon_dsg_prepared_state(PG_FUNCTION_ARGS)
@@ -817,12 +836,42 @@ neon_dsg_prepared_state(PG_FUNCTION_ARGS)
 		NeonDsgCheckEnabled();
 		DsgPreparedGetSnapshot(&s);
 		initStringInfo(&output);
+		NeonDsgAppendPrepared(&output, &s);
+		PG_RETURN_DATUM(NeonDsgJson(&output));
+	}
+#else
+	NeonDsgUnsupported();
+	PG_RETURN_NULL();
+#endif
+}
+
+/*-
+ * DSM1只是同一boot高层dsm.c的payload预留，不是RSS/THP/PTE/Host预算或跨boot
+ * 清理证书。默认0必须报告未限制；正式消费者不得由前台idle/引用数补零。
+ * 固定无参数观察，权限先验；不改floor/Pending/准入，不发任何VM许可。
+ */
+Datum
+neon_dsg_dsm_state(PG_FUNCTION_ARGS)
+{
+	NeonDsgCheckAdministrator();
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_DSM_API_VERSION) && NEON_DSG_DSM_API_VERSION == 1 && defined(NEON_DSG_PREPARED_API_VERSION) && NEON_DSG_PREPARED_API_VERSION == 1 && defined(NEON_DSG_CONNECTION_API_VERSION) && NEON_DSG_CONNECTION_API_VERSION == 1 && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 2
+	{
+		DsgDsmSnapshot s;
+		DsgDsmCounters *c = &s.dsm;
+		StringInfoData output;
+
+		NeonDsgCheckEnabled();
+		DsgDsmGetSnapshot(&s);
+		initStringInfo(&output);
 		appendStringInfo(&output,
-			"{\"protocol_version\":1,\"prepared_api_version\":1,\"vm_shrink_permit\":false,"
-			"\"prepared_slots\":%u,\"maximum_prepared_slots\":%u,\"runtime_prepares_blocked\":%s,\"connections\":",
-			s.prepared_slots, s.maximum_prepared_slots,
-			s.connections.work.observed.admission_open ? "false" : "true");
-		NeonDsgAppendConnection(&output, &s.connections);
+			"{\"protocol_version\":1,\"dsm_api_version\":1,\"vm_shrink_permit\":false,\"current_boot_only\":true,"
+			"\"reserved_upper_bytes\":\"" UINT64_FORMAT "\",\"control_upper_bytes\":\"" UINT64_FORMAT "\","
+			"\"external_budget_bytes\":\"" UINT64_FORMAT "\",\"external_segments\":%u,\"pending_creations\":%u,"
+			"\"unknown_segments\":%u,\"page_bytes\":%u,\"limit_enforced\":%s,\"accounting_valid\":%s,\"prepared\":",
+			c->reserved_upper_bytes, c->control_upper_bytes, c->external_budget_bytes,
+			c->external_segments, c->pending_creations, c->unknown_segments, c->page_bytes,
+			c->limit_enforced ? "true" : "false", c->accounting_valid ? "true" : "false");
+		NeonDsgAppendPrepared(&output, &s.prepared);
 		appendStringInfoChar(&output, '}');
 		PG_RETURN_DATUM(NeonDsgJson(&output));
 	}

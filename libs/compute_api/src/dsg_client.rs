@@ -26,6 +26,7 @@ use crate::dsg_state::{
 };
 
 use crate::dsg_connection::DsgConnectionResponse;
+use crate::dsg_dsm::DsgDsmResponse;
 use crate::dsg_prepared::DsgPreparedResponse;
 use crate::dsg_work::DsgWorkResponse;
 
@@ -407,6 +408,20 @@ impl<'a> DsgSqlClient<'a> {
         let response: DsgPreparedResponse = read_json_simple(
             &self.observer,
             &sql(&self.observer_schema, "neon_dsg_prepared_state", false),
+            self.response_timeout,
+        )
+        .await?;
+        response.validate_for(&self.instance)?;
+        Ok(response)
+    }
+
+    /// DSM1只读同点payload预留，不推断物理释放、不清Pending或代替root跨boot结案。
+    /// 正式零参数SQL成员与完整Simple Query保证身份和观察者排除语义不变。
+    pub async fn dsm_state(&self) -> Result<DsgDsmResponse> {
+        self.formal_function("neon_dsg_dsm_state", 0).await?;
+        let response: DsgDsmResponse = read_json_simple(
+            &self.observer,
+            &sql(&self.observer_schema, "neon_dsg_dsm_state", false),
             self.response_timeout,
         )
         .await?;

@@ -681,6 +681,23 @@ HugeTLB/Host，不是物理释放回执。直接绕过dsm.c的扩展须在生产
 核对控制段、主段去重和外部持续约束；正式SQL/HTTP消费者须继续实现，不把
 Native能力当已有生产证书。见[本批原生证据与未完代码](DSGA-DSM分配前预算-Mac基本验收-20261025.md)。
 
+### 8.17 DSM正式消费者不能由payload观察冒充完整预算（2026-10-25）
+
+Native DSM1经Neon1.15正式零参数成员与固定认证GET /dsg/v1/work/dsm读取，
+原生一次采样内嵌Prepared1/Connection1/Work2。旧成员或能力缺失必须拒绝，
+降级后不能缓存成功；C双SU覆盖原session，误授或definer不越权。新增API保留
+旧ABI与原getter同点语义，不由序列化补读拼接。
+
+Rust/Go强制全字段/规范u64字符串，校验实际页幂/对齐、control独立成本、
+创建中/未知子集、占用和KB GUC范围、cap与本实例/boot。默认0可如实观察但
+不构成持续约束；ledger失效必须拒绝。未知继续占原额度；idle不能补零，
+main-region不叠加外部payload。任何读取不清Pending或原root Held/Original。
+
+本bootpayload不包含PTE/THP/Host，也不证明旧boot段清理；完整生产者必须另
+核验相同原意图的持续资源与system outside、首次准入、后台/私有和最终VM。
+Native/SDK成功不给VM许可。具体代码及Mac真实TLS/Router/SQL证据见
+[本批正式管理链](DSGA-DSM正式管理链-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

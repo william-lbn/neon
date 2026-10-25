@@ -6,6 +6,7 @@ pub mod dsg_auth;
 pub mod dsg_client;
 pub mod dsg_connection;
 pub mod dsg_control;
+pub mod dsg_dsm;
 pub mod dsg_initialization;
 pub mod dsg_prepared;
 pub mod dsg_state;

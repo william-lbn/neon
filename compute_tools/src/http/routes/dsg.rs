@@ -36,6 +36,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/work/state", get(work_state))
         .route("/dsg/v1/connections/state", get(connection_state))
         .route("/dsg/v1/work/prepared", get(prepared_state))
+        .route("/dsg/v1/work/dsm", get(dsm_state))
         .route("/dsg/v1/resource/identity", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/process", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/state", get(super::dsg_resource::proxy))
@@ -213,6 +214,24 @@ async fn prepared_state(
             Err(_) => failure(
                 StatusCode::SERVICE_UNAVAILABLE,
                 "prepared_observation_unavailable",
+                None,
+            ),
+        },
+        Err(error) => error,
+    }
+}
+
+// 固定只读DSM路径；原JWT/current issuer/实例检查后才取独立观察池，不接受调用方报数。
+async fn dsm_state(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+) -> Response {
+    match client(&compute, &claims).await {
+        Ok(client) => match client.dsm_state().await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(_) => failure(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "dsm_observation_unavailable",
                 None,
             ),
         },
