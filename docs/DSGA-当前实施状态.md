@@ -3,7 +3,28 @@
 更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 持续连接门禁和同点Postmaster确认（仍非整体完成）
+## 最新：2026-10-25 既有分支维护及原VM2数据库约定修复
+
+四个既有分支继续演进，PG17 d42638e、AS 4460da5 已锁定，控制面
+1a5ea539ada53e282728e82cc187fafd57c1db1d 已推送核验。新fetch的Neon/AS及
+双PG官方线missing0；控制面main b1fbd5c全部维护经6898ec4独立纳入，未重建、
+rebase或强推分支。新增策略/计划及OpenAPI/迁移注册9顶层/17含子项race通过，
+Webtsc通过；未重复既有业务全套。
+
+附带真实入口检查发现此前GoVM2与reservation SQL只认1的组合缺陷，原两项
+失败保留。独立新增900000066前向迁移对齐真实VM2及显式资源对象，完整保留
+旧不可变/锁序/凭据/原资源图约束；不UPDATE旧行或改已发布迁移。实际Go仍
+核验完整额度/总量/来源，数据库格式接受不授予Guest预算或VM动作。
+
+Mac准确PG17/Go race共13顶层/27含子项受影响创建/权限/配额/凭据/并发/迁移
+通过0skip；其中旧回退夹具遗漏撤销依赖标记，修正后只替换该1项，其余未重跑。
+旧v1整行/xmin保留、新v2接受、部分/未知版本直接SQL拒绝及readonly vet通过。
+见自有控制面原分支的
+[中文验证记录](https://github.com/william-lbn/control-plane/blob/codex/dsga-control-plane-v3-20261020/docs/DSGA-原VM资源计划v2守卫-Mac验证-20261025.md)。
+这是实际缺陷修复，不是完整伸缩验收。下项仍是关门事务受控结束及完整Quiesce/
+预算/最终VM等代码，Linux目标环境边界保留，Goal active/incomplete。
+
+## 历史：2026-10-25 持续连接门禁和同点Postmaster确认（仍非整体完成）
 
 沿用四个既有服务功能分支，PG17 d42638e、AS 4460da5 已先推送核验。
 新增原生Connection API1及Neon1.13正式SQL/认证HTTP/Rust/Go观察，受管实际启动
