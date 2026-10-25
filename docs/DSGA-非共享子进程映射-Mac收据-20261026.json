@@ -1,0 +1,180 @@
+{
+  "created_at": "2026-10-25T18:39:32.609771+00:00",
+  "scope": "PG17非共享子进程四数组映射寿命；不是完整预算、物理回收或VM许可",
+  "branches": {
+    "Neon": "codex/dsga-neon-v3-20261019",
+    "PG17": "codex/dsga-pg17-v3-20261019",
+    "AS": "codex/dsga-autoscaling-20261019",
+    "CP": "codex/dsga-control-plane-v3-20261020"
+  },
+  "pg_commit": "b812536cd983595ba233a7fad418d9bae448b2f3",
+  "pg_remote_verified": true,
+  "parent_before_commit": "0fc235e7a98acd72bc5e413095e2f483728acdd0",
+  "as_commit_unchanged": "2c9a26abac1df37207e32525fde6c94ae4b4c402",
+  "cp_maintenance_commit": "19a1e56b1b0bee1b014aedf0bd8b35bbae07569e",
+  "maintenance_freshfetch": [
+    {
+      "repo": "neon",
+      "ref": "upstream/main",
+      "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+      "missing_before_maintenance": 0
+    },
+    {
+      "repo": "autoscaling",
+      "ref": "upstream/main",
+      "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+      "missing_before_maintenance": 0
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "ref": "neon-upstream/REL_17_STABLE_neon",
+      "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+      "missing_before_maintenance": 0
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "ref": "pg-upstream/REL_17_STABLE",
+      "sha": "bd807012669ed8573317562b78c1221e4fabe373",
+      "missing_before_maintenance": 0
+    },
+    {
+      "repo": "control-plane",
+      "ref": "origin/main",
+      "sha": "1b0e8121ce54b52910c5d66f7f1dea6842d7451f",
+      "missing_before_maintenance": 1
+    }
+  ],
+  "pg_bindings": {
+    "gitlink_index": "160000 b812536cd983595ba233a7fad418d9bae448b2f3 0\tvendor/postgres-v17",
+    "locks": "两份版本锁各一次相同fullSHA；实际checkout干净同SHA"
+  },
+  "neon_extension": "1.15 rebuilt/installed against exactPG; publicstructures unchanged; formalHTTPnotrerun as no changedprotocol",
+  "validation": {
+    "old_real_negative": {
+      "result": "expected_old_bug_observed",
+      "old_pg": "5462f1de54a97b9a9235c69d64d31cb0825dcea5",
+      "arrays": 4,
+      "parent_shared": 4,
+      "backend_shared": 4,
+      "logger_unexpected_shared": 4,
+      "fixed_va_bytes": 67928064,
+      "raw_observation_sha256": "690621e9b476afda613d5b225c74c82fb81cf9def42f49aea8e897d0f2dcaca0",
+      "kind": "real oldprocess vmmap evidence, not productcertification"
+    },
+    "new_distinct_tests": 3,
+    "new_failed": 0,
+    "new_skipped": 0,
+    "exact_replacement_tests": 2,
+    "exact_replacement_note": "首启与同Postmaster崩溃恢复；替换非另加unique，准确新rmgr/testlib",
+    "candidate": "nonshmem-candidate-dirty; candidateonly rmgrreused oldABIcompatible5462",
+    "data": "真实表count/sum/hash保持，父/backend正向四数组共享覆盖；logger负向拒绝共享重叠，非RSS推断",
+    "index": "18binaries/4PG/39extensionstages + test_compute5 PASS0skip",
+    "not_repeated": [
+      "DSM8",
+      "core225",
+      "isolation123",
+      "unchangedGo33",
+      "unchangedformalHTTP"
+    ],
+    "cp_maintenance": "全41文件，22top/36含sub race0skip、readonlyvet、Webtsc、新模板2PASS；受保护Linux账单E2E未执行"
+  },
+  "still_code": [
+    "可信Prepare/Finalize/SystemOutsidePG来源",
+    "安全降normal及后台/私有可执行上界",
+    "首次准入",
+    "Host最终VM/公开worker/受控跨boot"
+  ],
+  "linux_later": [
+    "procfs映射读取分支真实执行",
+    "cgroup/HugeTLB/内核和物理释放",
+    "目标集群E2E/性能长稳"
+  ],
+  "old_exact_5462_artifacts_preserved": {
+    "build/pg17-dsm-exact-install/bin/postgres": "1c34349dae3db9e9c7d8d46089e221666902632b758c5b9d7ff5f0d2b6dcd40e",
+    "build/pg17-dsm-exact-install/lib/postgresql/neon.dylib": "7d3d6778f48c83690a72e66ef6491f88f925c3ffe2308b4816011189c7f560e0",
+    "build/pg17-dsm-exact-install/lib/postgresql/test_dsg_region.dylib": "ae99177417e3c134e4b23c8592a39cbea18e1c2b68518e62d9a7482bba4be57b",
+    "build/pg17-dsm-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+  },
+  "owner_AGENTS_SHA256_preserved": "5c61959674c362ecc4c3709930121304595e8b0bca1ff70ae401f0cf8f2803c1",
+  "source_sha256": {
+    "repos/neon/vendor/postgres-v17/src/backend/storage/buffer/buf_init.c": "8877d6bbc60e42643a11164f1ed870692e6bf3012c4c0236a1eb377808a41e40",
+    "repos/neon/vendor/postgres-v17/src/backend/postmaster/launch_backend.c": "45582e1a0212570a255f32b136a237315eae54a1105dc5ff5d2158c0881fd895",
+    "repos/neon/vendor/postgres-v17/src/include/storage/dynamic_shared_buffers.h": "9b3cc5fe08bed5f0b2f7d87c80d14596140fb51c8fe6ad7ccb6b4b8a5cfb2f3c",
+    "repos/neon/vendor/postgres-v17/src/test/modules/test_dsg_region/test_dsg_region.c": "bc310e59cace6490c9760734f75fee10eccf1d74e7cc3d87412dc1a58262d506",
+    "repos/neon/ci/test_dsg_nonshmem_child.py": "fdf21e080cf3530947a5cf068b278796c9b795e246e388ffda130357ffac5f71",
+    "repos/neon/ci/distribution.json": "77d514523919a4df9de2c8f09cde00c3d7a8c307a4dad96b81fc4d39d6a465ee",
+    "repos/neon/vendor/revisions.json": "b6e214c9ec8ae2c194099aa23d7d0f288a5ae901b4f7eb983f116b4b2c35feb1",
+    "repos/neon/docs/DSGA-当前实施状态.md": "5193db168bd36b564dd5f3f3b46d69c86c423577789c37881e1e2b4b0c5f06f3",
+    "repos/neon/docs/DSGA-架构复核与实施规范-V3.md": "c6313b00696f78cce6a638238a3b1723b90e23bf89eec7f582381dba8ecf71b2",
+    "repos/neon/docs/DSGA-非共享子进程映射-Mac基本验收-20261026.md": "faf55500a521031c7291756078d9baf0a399c79b6088b6bafdf7021f695afd3f",
+    "repos/control-plane/docs/DSGA-上游账单维护-Mac验收-20261026.md": "0f3548b59c9760217a165a00b487a07b78ad1b54f51656a0f5a148080f369d27",
+    "repos/control-plane/docs/DSGA-上游账单维护-Mac收据-20261026.json": "117759287afe2469a6ba1a692fd879294538c121a3ab4e295d5d8090086aa974"
+  },
+  "artifact_sha256": {
+    "build/pg17-nonshmem-exact-install/bin/postgres": "58bd131d09d24ad5590ebe87e9dd2ec96c9f1061017ba56aa44ff3089e56958c",
+    "build/pg17-nonshmem-exact-install/lib/postgresql/test_dsg_region.dylib": "2c20e0152aee45d875ed0bb96c66a7d0a5b126ee5710cdc7ee8ce67333374bbe",
+    "build/pg17-nonshmem-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e",
+    "build/pg17-nonshmem-exact-install/lib/postgresql/neon.dylib": "73de874036aeb13e718be346257540fa8170eb3e46d6a612cef39e6be3b589ae"
+  },
+  "log_and_recipe_sha256": {
+    "build/dsga-nonshmem-candidate-build.log": "43d62da4df43184ee2d2c93d683dc7d7a0c1894aef4f92be419534a4ca9246b9",
+    "build/dsga-nonshmem-candidate-configure.log": "3310a0845eb1e58f9fc1c440f9577f7a54d7cb7390f3aa3446fa6a23e195e7bc",
+    "build/dsga-nonshmem-candidate-install.log": "da1739971d19070bc10aed16dd582ba6e463fd335c0465bc7e5ecdc2fac0cb43",
+    "build/dsga-nonshmem-candidate-tests.log": "4bbe1dd1c1bdcf11aaa425154370f16895d2ec00a64e992654c3792b602d516f",
+    "build/dsga-nonshmem-diff-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-nonshmem-exact-build.log": "a9290fa7a67823a76280a61b058410dee76961d4e728ec017c91558e618ad28c",
+    "build/dsga-nonshmem-exact-configure.log": "3310a0845eb1e58f9fc1c440f9577f7a54d7cb7390f3aa3446fa6a23e195e7bc",
+    "build/dsga-nonshmem-exact-install.log": "c1b3a310d04c6a41eedfd6e26719ec9f19053f9117821eb854f3a9117c62ac5b",
+    "build/dsga-nonshmem-exact-neon-build.log": "dbfb7b1a0bae64f37b69a02dc3f9b9140ba2a830c7464c1b0943b81ca82a84e6",
+    "build/dsga-nonshmem-exact-tests.log": "3f8bb14f3c75e372305cf06b6b39ebe065f6399f6f7d9078666810ca7ad01228",
+    "build/dsga-nonshmem-exact-version.log": "b1070877713ac2b64fd9956c0418ceef6846d925f15326fc1e166d23667e3dec",
+    "build/dsga-nonshmem-index-tests.log": "2e96c20d902885902b871650ec9b1a622713f607f4a0f4aadbf9429fd1fb8c67",
+    "build/dsga-nonshmem-index.log": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "build/dsga-nonshmem-old-backend.vmmap.txt": "b4f156878b9134ad63a92eb0b294856fd6ac42dc688aa31d9fdeadd5dd79c062",
+    "build/dsga-nonshmem-old-logger.vmmap.txt": "5651cacfc5c27270a9a87a187d44b87ed5c183b3c1adf7833656b2c157c1ac28",
+    "build/dsga-nonshmem-old-negative-check.json": "63ce4cd8f8f51d5bb3190dd365a749b1a0da4caa326fba90e59561dd7be3dee8",
+    "build/dsga-nonshmem-old-observation.json": "690621e9b476afda613d5b225c74c82fb81cf9def42f49aea8e897d0f2dcaca0",
+    "build/dsga-nonshmem-old-parent.vmmap.txt": "21c81b9bba25ed70ebdd8aa34fba3a43c126ad1bf82a6813820629203589edda",
+    "build/dsga-nonshmem-old-pg.log": "c9b67f1141bbe9c57bd559703033aee9b40142dd751c74254a864384bf71ea81",
+    "build/dsga-nonshmem-old-probe.log": "ce5f5e9c3d09beace8b4c30801cf690d1b946506b10c907609d94242a8c04292",
+    "build/dsga-nonshmem-testlib.log": "d5002f4cf043b75b32e85486864c67a6f4727df579383d1647bd3d89c19f5677",
+    "build/probe-dsga-nonshmem-old.py": "621a81568a4cd45cc43b9efee9bb7c7f6952d96c0bd48321799c0939e4bce1e4",
+    "build/run-dsga-nonshmem-candidate-build.sh": "4312a64079cda396c6aa6eb229220c788fa8da3ba5a8c4a4ab5588699062f10f",
+    "build/run-dsga-nonshmem-candidate-tests.sh": "f1c2acc8c58310347dfb8cdd4245673179f8f8e6bdd4612a3a65fa0c6c9724e8",
+    "build/run-dsga-nonshmem-exact-neon-build.sh": "a32eb7d05cf9f133454701b6d0b0236b8a36d16435093d619243ae786264e692",
+    "build/run-dsga-nonshmem-exact-tests.sh": "60bed441be448bdf8acf51d638354faad211d7b197a7f895be0555d5b9b727a6",
+    "build/run-dsga-nonshmem-exact.sh": "1b98d3e67d38a2e2daeee41e4372ec979aad66ec6623487a78c525396d76079b",
+    "build/run-dsga-nonshmem-testlib.sh": "4ed34419cfba9d8ff1aa36db12b7ba12ad6d32e6bb00825ebb0b6567c07b593a",
+    "build/dsga-nonshmem-candidate-maps/test_initial_logger_detaches_only_its_arrays/initial-backend-15050.maps.txt": "fbb6fd7b9749d30e98c0d610d3645961310729e26fc7904ba009aa69bb351a9b",
+    "build/dsga-nonshmem-candidate-maps/test_initial_logger_detaches_only_its_arrays/initial-directory.json": "8a94617d09e49a4df7a9ef9c7a537ea67a49c7e08418237f6647d08303cd9970",
+    "build/dsga-nonshmem-candidate-maps/test_initial_logger_detaches_only_its_arrays/initial-logger-15041.maps.txt": "a12c54901dce805be1a6153504040dfa880b26ec58eda4a07b530439d0e5bd14",
+    "build/dsga-nonshmem-candidate-maps/test_initial_logger_detaches_only_its_arrays/initial-parent-15040.maps.txt": "c1349e77615b02ae2b01062b4f25bdf5fa8c1c1f311e57bb5b97fa8630ad3753",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/after-crash-backend-15099.maps.txt": "8a556d6baa6330c489cc68f63a5d3d4d21f2767a3771d9cc199f90eace3b4738",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/after-crash-directory.json": "f172f39b0fcef92e1ea15b40b4771591db0fe0b0671557e309c471fafd4669df",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/after-crash-logger-15074.maps.txt": "848e8c3d433023dda39637e252a0783b96e95bcf73ecf865f39b0e533bec3b51",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/after-crash-parent-15073.maps.txt": "5bca0f1260d544a2abf07d99ce17445025d5280adddf14eec8b2e8b7c9c358c2",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/before-crash-backend-15083.maps.txt": "4dea13eb9cfc7c2b7be66753339c1d460e5d47b36ec114e2c955ef63ac6bb8c6",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/before-crash-directory.json": "d7771fa463755ec239d3845de0a7147be88318587aa1575a46800c9602e105a4",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/before-crash-logger-15074.maps.txt": "867827e8cfa07b9e87afd39da5e21139ed29177294b63d4137e9c3cb1556af10",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/before-crash-parent-15073.maps.txt": "56f4cb58518f02c7e0ddfe6bb76c630c19166609d0ebfe325f9b909bda97fb36",
+    "build/dsga-nonshmem-candidate-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/surviving-logger-old-source-15074.maps.txt": "a7b62d11e8908865f167b6e3c007d3e6f231c451d4272ef2bd89e33bdd381c93",
+    "build/dsga-nonshmem-candidate-maps/test_restarted_logger_after_real_grow_does_not_inherit_arrays/logger-restarted-backend-15131.maps.txt": "2c34780a34fa213585ba5669be44009e8beb8eb0d6dcda77ae63fa0e428c9b4e",
+    "build/dsga-nonshmem-candidate-maps/test_restarted_logger_after_real_grow_does_not_inherit_arrays/logger-restarted-directory.json": "1941f4a8dacdf39f850fd68304bcaa79f81fd22034493f5258a2f17aa56b2698",
+    "build/dsga-nonshmem-candidate-maps/test_restarted_logger_after_real_grow_does_not_inherit_arrays/logger-restarted-logger-15139.maps.txt": "16a9d641cb06cb0777dfc16df4527384e8b2428cbf311abf240f9c0bdf942d67",
+    "build/dsga-nonshmem-candidate-maps/test_restarted_logger_after_real_grow_does_not_inherit_arrays/logger-restarted-parent-15121.maps.txt": "ddeebf5e343df44ca93d113c15ea28eb4b90aa714474bf42ebc921bd1f8daf8e",
+    "build/dsga-nonshmem-exact-maps/test_initial_logger_detaches_only_its_arrays/initial-backend-28270.maps.txt": "b3199b1bffbe5d93807febb6c8b1fa46d23c32f0f58fbc06734abaf1401d7ff7",
+    "build/dsga-nonshmem-exact-maps/test_initial_logger_detaches_only_its_arrays/initial-directory.json": "0d13f3cda91f65afb68f06bfd4f1190a14be53fb2e40b3cf46e65d62aa31b01e",
+    "build/dsga-nonshmem-exact-maps/test_initial_logger_detaches_only_its_arrays/initial-logger-28180.maps.txt": "ed4e57e8a5f474023f060f4a5fb790abfdc8260b8c432591b40ade2eba93294f",
+    "build/dsga-nonshmem-exact-maps/test_initial_logger_detaches_only_its_arrays/initial-parent-28056.maps.txt": "2afe1f30de9fa89d9daf1664324d907eca4d1bb909fd37e7ec725728463806f9",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/after-crash-backend-29345.maps.txt": "254090e22c860750092f4421119f0b7b5e7285a21ce6265592d47126d97df889",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/after-crash-directory.json": "2c608dc5f6db8226a7596d05df4fe0c4fc26a5f1218df0aa50e1002944768fdd",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/after-crash-logger-28718.maps.txt": "e563204906138d35ea03b2d6c75278bab67cf1f181b3bed44312658e1f9e9c4b",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/after-crash-parent-28715.maps.txt": "70dacd4f2202ff2cecf30567fd39a619deecce549a06ecc09df36551fdccf136",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/before-crash-backend-28739.maps.txt": "0e36373f9f7dd0885b7b9c0025faf90b9638fcfec96bb4b123ad3f336ea3bf62",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/before-crash-directory.json": "d199b5c68f2cf40386800087b043a55b2cba1ca6b2187a053a8ff0849b9d480f",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/before-crash-logger-28718.maps.txt": "7d677d2b1eb3eea5e7a33f52839cc88e851a25a07d2e44e71b9df7a2cb391af8",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/before-crash-parent-28715.maps.txt": "d2a62dac1c1bb5545e31fbd8cf8e5560e57b860011523b5545517fb01073f8df",
+    "build/dsga-nonshmem-exact-maps/test_logger_survives_internal_pg_boot_without_stale_array_backing/surviving-logger-old-source-28718.maps.txt": "b7dec1fa8844566423853c2f5499df90c684d1a28e0e702c903da5ca3aded84e"
+  },
+  "goal": "active/incomplete; noimages/nodeploy/mainmerge/release"
+}

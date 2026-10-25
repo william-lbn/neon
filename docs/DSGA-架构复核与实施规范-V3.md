@@ -743,6 +743,21 @@ normal或缩VM。新的Quiesce及GuestReady派发/显式重放均拒绝无证明
 Mac真实关闭/同点消费门禁不等于完整Linux预算或集群E2E；root/外部模型与实际
 TLS/Router/JWT/SQL/PG、WAL/CAS的验证范围必须分开记录。
 
+### 8.20 非共享子进程必须独立脱离DSG映射（2026-10-26）
+
+独立四数组不属于官方主段或DSM。非共享内存子进程不得因调用原detach就继续
+持有它们；PG17当前只有B_LOGGER进入该路径。父进程重建前等待共享子进程
+退出，仍不能排除跨boot存活的logger引用。真实旧版4/4共享映射已复现，RSS0
+不能证明引用消失。新child在主段detach前读不可变几何，销毁每个DsgRegion的
+局部副本并清本地别名；不能Destroy共享目录字段，以免MemSet所有进程状态。
+父进程回调复用同一函数，无backend锁/PGPROC前提，错误不能被吞掉后继续Main。
+此不变量也必须约束后续新增非共享子进程/独立映射和预算生命周期证明。
+
+Mac新增首次、Grow后logger重建、同Postmaster内部恢复且logger同PID存活三
+场景，均先证父/backend全覆盖再接受logger负证据，数据保持；准确SHA关键
+替换不重复计数。此模块不授权物理释放或VM缩容，也不补全后台/私有上界。
+Linux映射/物理/内核另验；详见[实际验收及收据](DSGA-非共享子进程映射-Mac基本验收-20261026.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

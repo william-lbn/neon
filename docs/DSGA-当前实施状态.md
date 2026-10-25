@@ -3,7 +3,25 @@
 更新：2026-10-26（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-26 持续聚合Quiesce与实际Shrink前复核（仍非整体完成）
+## 最新：2026-10-26 非共享子进程的真实DSG映射修复（仍非整体完成）
+
+旧准确PG5462实测logger仍持四个DSG共享映射；新增局部副本detach修复
+b812536cd983595ba233a7fad418d9bae448b2f3已先推既有PG17分支并核验远程。
+Neon三处版本绑定同SHA；Buffer6/Work2/Connection1/Prepared1/DSM1和扩展1.15
+不变，避免子进程Destroy误清共享目录。Mac三个新增真实映射/数据生命周期
+场景通过0skip，准确SHA重建后关键两个场景替换通过，不叠加计为五项；Linux
+procfs分支、物理回收和内核效果尚未执行。见[代码与实际证据](DSGA-非共享子进程映射-Mac基本验收-20261026.md)。
+
+本批控制面完整main1b0e8121经独立维护19a1e56b合入原分支并推送核验，41文件
+全部纳入。新增/受影响22顶层/36含子项race、vet、Webtsc与新增本地模板2项
+通过；受保护Linux账单E2E未执行。AS2c9不变，不制造空提交。
+
+完整可信Prepare/Finalize/SystemOutsidePG、安全降normal与后台/私有可执行
+上界、首次准入、Host最终VM/公开worker/受控跨boot仍须代码，不能写成仅待
+Linux验证。Goal active/incomplete；只PG17、原分支、小批验证、默认关闭，不
+构建镜像、不准备/执行部署、不合main。
+
+## 历史：2026-10-26 持续聚合Quiesce与实际Shrink前复核（仍非整体完成）
 
 AS合同568e5645/执行9740ec96及后续来源绑定修复沿原分支演进，精确SHA见收据。
 实际Agent/PGWorker消费原Prepared，
