@@ -612,6 +612,28 @@ DSM/预备事务及保留会话内存。已有事务被全Query门禁阻断则�
 无内存清理，执行和原预算须持续登记至实际完成。禁止以断连/停检查点伪造排空。
 当前源实现及Mac证据见[本批记录](DSGA-持续连接门禁-Mac基本验收-20261025.md)。
 
+### 8.14 关门后已有事务必须能受控结束（2026-10-25）
+
+全部Query门禁会使显式/失败事务无法协作结束，不能用临时重开准入掩盖活性
+缺口。只为已有事务接受完整wire正文至多512字节的ASCII结束命令，以官方
+raw_parser核验单条COMMIT/ROLLBACK且chain=false，支持官方END/ABORT及NO CHAIN
+等语法；拒绝多语句、PREPARE/PREPARED、ROLLBACK TO、CHAIN和嵌入NUL。超界固定
+流式丢弃，不能在门禁重开后执行已丢掉的原命令；半帧/非法长度保持EOF语义。
+
+扩展协议同样必须可协作：只新增唯一unnamed语句/portal，零参数、0或1个合法
+格式；旧named语句/portal须检查真实已有结束AST及有界源文本，不能由body声明
+语义。Describe只对应结束对象；Execute必须完整结束且禁止借普通已有计划执行。
+错误后直到Sync仍忽略后续消息，不能因其中Q写着ROLLBACK而逃逸。实际简单执行
+使用的AST须再核验，禁止跨ERROR保留进程全局allow标志。SU管理及walsender边界
+沿原权限/协议；分类不持共享锁、不提前执行目录分析或计划。
+
+允许结束只解决可协作性，不证明内存已释放。COMMIT可运行延迟触发器、FDW/
+扩展回调或同步复制等待，ROLLBACK也可运行回调；原READ/EXEC/retained及旧预算
+须持续至实际清理和输出完成。已有命名缓存、临时/会话分配、后台/DSM/预备事务
+另有上界与排空要求，foreground_idle仍不可单独授权VM缩容。超长/非ASCII控制
+文本在关闭期间明确拒绝，客户端可用标准小型结束命令恢复；正常开放路径不受
+该分类上限影响。详见[真实Mac证据](DSGA-关门事务结束-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

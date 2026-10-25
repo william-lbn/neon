@@ -94,9 +94,8 @@ class DsgWorkLifecycle(unittest.TestCase):
         peer.connection.sendall(body[64:])
         self.error(peer.receive_ready(), "55000")
         self.wait(idle_clients=1, retained_transactions=1, foreground_idle=False)
-        self.gate(True)
+        # 旧事务必须在关门期间协作结束；先重开会掩盖真实排空的活性缺陷。
         peer.exchange([(b"Q", b"ROLLBACK\0")])
-        self.gate(False)
         self.wait(retained_transactions=0, foreground_idle=True)
         # 显式事务可与观察同在一个Query；不能仅凭上一轮slot的retained=false排除。
         admin = self.peer(os.environ.get("USER", "williamlee"))

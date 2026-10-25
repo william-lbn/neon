@@ -1324,6 +1324,166 @@ async fn native_connection_state_requires_formal_upgrade_and_real_postmaster_ack
     Ok(())
 }
 
+// 真正的正式HTTP准入→普通应用事务→提交回调→正式同点观察，不能由body fixture
+// 或pg_stat_activity空闲拼许可。只使用准确PG/已安装Neon及本次独占目录。
+#[tokio::test]
+#[ignore = "strict gate requires isolated exact PG and installed Neon"]
+async fn native_transaction_finish_keeps_commit_callback_inflight_until_done() -> Result<()> {
+    use compute_api::dsg_connection::DsgConnectionResponse;
+
+    async fn observation(app: &Router, token: &str) -> Result<DsgConnectionResponse> {
+        let (status, body) = invoke(
+            app.clone(),
+            Method::GET,
+            "/dsg/v1/connections/state",
+            Some(token),
+            None,
+        )
+        .await?;
+        ensure!(
+            status == StatusCode::OK,
+            "connection observation {status}: {body}"
+        );
+        let fact: DsgConnectionResponse = serde_json::from_str(&body)?;
+        fact.validate_for(&fact.work.observed.instance)?;
+        Ok(fact)
+    }
+
+    async fn admission(app: &Router, token: &str, request: &DsgAdmissionRequest) -> Result<()> {
+        let raw = serde_json::to_string(request)?;
+        let (status, body) = invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission",
+            Some(token),
+            Some(&raw),
+        )
+        .await?;
+        ensure!(status == StatusCode::OK, "admission {status}: {body}");
+        let fact: DsgAdmissionResponse = serde_json::from_str(&body)?;
+        fact.validate_for(request, &request.instance, false)?;
+        ensure!(
+            fact.disposition == DsgAdmissionDisposition::Applied,
+            "admission was not applied"
+        );
+        Ok(())
+    }
+
+    let signer = Signer::new();
+    let (mut cluster, _, app) = support::native_connections(&signer).await?;
+    let token = signer.token(&signer.claims());
+    let native = memory(&app, &token).await?.observed;
+    let fence = json!({"protocol_version":1,"instance":native.instance,"issuer_epoch":"1"});
+    let (status, body) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/issuer/fence",
+        Some(&token),
+        Some(&fence.to_string()),
+    )
+    .await?;
+    ensure!(status == StatusCode::OK, "fence {status}: {body}");
+    let mut request = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: native.instance,
+        issuer_epoch: DsgUint64::new(1),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: native.capacity_generation,
+        open: true,
+        budget_commitment_id: "isolated-native-transaction-fixture".into(),
+    };
+    // 这是测试管理者显式原意图，不把合成预算引用当真实Prepare/Finalize生产证书。
+    admission(&app, &token, &request).await?;
+    let admin = cluster.connect().await?;
+    admin
+        .batch_execute(
+            "CREATE ROLE finish_app LOGIN; CREATE TABLE public.finish_http(i int); \
+        GRANT INSERT ON public.finish_http TO finish_app; \
+        CREATE FUNCTION public.finish_http_wait() RETURNS trigger LANGUAGE plpgsql AS $$BEGIN \
+          PERFORM pg_advisory_xact_lock(1945013); RETURN NEW; END$$; \
+        CREATE CONSTRAINT TRIGGER finish_http_wait AFTER INSERT ON public.finish_http \
+          DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.finish_http_wait()",
+        )
+        .await?;
+    admin
+        .simple_query("SELECT pg_advisory_lock(1945013)")
+        .await?;
+    // 应用通过原公共socket连接；受管私有管理socket不能被用作业务旁路。
+    let public = cluster.data.parent().unwrap().join("socket");
+    let (client, connection) = tokio_postgres::Config::new()
+        .host_path(public)
+        .port(55432)
+        .user("finish_app")
+        .dbname("postgres")
+        .connect(tokio_postgres::NoTls)
+        .await?;
+    let connection_task = tokio::spawn(connection);
+    let client = std::sync::Arc::new(client);
+    let pid: i32 = client
+        .query_one("SELECT pg_backend_pid()", &[])
+        .await?
+        .get(0);
+    client
+        .simple_query("BEGIN; INSERT INTO public.finish_http VALUES(42)")
+        .await?;
+    request.revision = DsgUint64::new(2);
+    request.open = false;
+    admission(&app, &token, &request).await?;
+    let commit_client = client.clone();
+    let commit = tokio::spawn(async move { commit_client.simple_query("COMMIT").await });
+    timeout(LIMIT, async {
+        loop {
+            let waiting = admin.query_one("SELECT COALESCE(wait_event='advisory',false) FROM pg_stat_activity WHERE pid=$1", &[&pid]).await?.get::<_, bool>(0);
+            let fact = observation(&app, &token).await?;
+            if waiting && fact.acknowledged && fact.public_connections_blocked
+                && fact.work.frontend_executes == 1 && fact.work.retained_transactions == 1 {
+                ensure!(!fact.work.foreground_idle && !fact.vm_shrink_permit, "inflight commit became idle");
+                break;
+            }
+            sleep(Duration::from_millis(10)).await;
+        }
+        Ok::<_, anyhow::Error>(())
+    }).await??;
+    admin
+        .simple_query("SELECT pg_advisory_unlock(1945013)")
+        .await?;
+    timeout(LIMIT, commit).await???;
+    timeout(LIMIT, async {
+        loop {
+            let fact = observation(&app, &token).await?;
+            if fact.work.foreground_idle {
+                ensure!(
+                    fact.public_connections_blocked
+                        && fact.work.retained_transactions == 0
+                        && fact.work.frontend_executes == 0
+                        && !fact.vm_shrink_permit,
+                    "invalid completion fact"
+                );
+                break;
+            }
+            sleep(Duration::from_millis(10)).await;
+        }
+        Ok::<_, anyhow::Error>(())
+    })
+    .await??;
+    let rows = admin
+        .simple_query("SELECT i FROM public.finish_http")
+        .await?;
+    ensure!(rows.iter().any(|m| matches!(m, tokio_postgres::SimpleQueryMessage::Row(row) if row.get(0) == Some("42"))), "committed data missing");
+    let error = client.simple_query("SELECT 42").await.unwrap_err();
+    ensure!(
+        error.code() == Some(&tokio_postgres::error::SqlState::OBJECT_NOT_IN_PREREQUISITE_STATE)
+    );
+    request.revision = DsgUint64::new(3);
+    request.open = true;
+    admission(&app, &token, &request).await?;
+    client.simple_query("SELECT 42").await?;
+    drop(client);
+    timeout(LIMIT, connection_task).await???;
+    cluster.passed = true;
+    Ok(())
+}
+
 async fn memory(app: &Router, token: &str) -> Result<DsgMemoryResponse> {
     let (status, body) = invoke(
         app.clone(),

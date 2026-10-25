@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-25",
+  "scope": "PG17已有事务在持续关门期间有界结束；整体未完成",
+  "platform": "Mac arm64 SDK14.4 PG debug/cassert/injection-points",
+  "commits": {
+    "PG": "dfd989817b0afbce19caf4c8bec73857b3d7a5a8",
+    "AS_unchanged": "4460da5a69f11f09ec795fce5de04dd6797e2db6",
+    "CP_unchanged": "1a5ea539ada53e282728e82cc187fafd57c1db1d"
+  },
+  "versions": {
+    "BufferAPI": 6,
+    "WorkAPI": 2,
+    "ConnectionAPI": 1,
+    "NeonExtension": "1.13"
+  },
+  "passed": {
+    "new_native_distinct": 9,
+    "new_native_skip": 0,
+    "new_native": "dsga-transaction-native-fixed.log",
+    "affected": "dsga-transaction-affected.log Work1+frames5=6PASS",
+    "official": "dsga-transaction-core.log225PASS/-isolation.log123PASS；DSGon SB2MB/max64MB/rmgr，gateoff；gateon新9覆盖",
+    "exact_replacement": "dsga-transaction-exact-native.log 2PASS，替换扩展和回调2项不加计数",
+    "formal_HTTP_SQL_application_callback_observation": 1,
+    "clippy_target": "dsga-transaction-final-clippy.log --no-deps target-Dwarnings exit0；未改依赖27warning保留",
+    "index": "18程序/4PG/39扩展阶段/5索引单测通过；shell/Python语法及新9收集通过，收集不计执行"
+  },
+  "actual_assertions": [
+    "已有事务COMMIT/ROLLBACK及官方别名、失败事务在持续关门期间结束；结束后普通工作仍拒绝，显式重开同连接复用",
+    "扩展P/B/D/E及已有named结束语句/portal；新named、参数及普通已有portal拒绝；ERROR后直到Sync的Q结束命令也忽略",
+    "实际延迟触发器等待advisory锁时EXEC1/retained1/idlefalse；提交可见和取消后未提交、真实清理",
+    "16MB半帧目标backend memory contexts1182608→1182608；保留事务计数、期间重开不执行丢掉的COMMIT/DDL",
+    "完整单条有界ASCII/真实唯一末尾NUL；多语句/CHAIN/PREPARE/TO/嵌入NUL拒绝，半帧不假Ready且最终reap清理",
+    "准确PG/Neon1.13、正式Router/JWT/准入SQL→公共应用socket事务→真实提交回调→正式同点观察1PASS"
+  ],
+  "failure_records": {
+    "first_native": "dsga-transaction-native.log 3fail26error，测试桥缺Work字段；补同点真实s.work字段后9PASS，不弱化产品",
+    "negative_old": "dsga-transaction-old-negative.log准确旧d426新Work单项预期失败，关门ROLLBACK仍retained1/idlefalse，不计业务通过",
+    "clippy": "clippy.log首轮误将未改依赖纳入-Dwarnings41fail；target-clippy.log检查修改目标有1多余async包装，修正后final通过"
+  },
+  "compatibility": "仅关门且已有事务；512完整ASCII正文、无新增named对象；超界/非ASCII拒绝，可用标准小型结束命令恢复；开放路径正常。结束可能分配/等待/失败，原预算保持；不发Quiesce/VM许可。",
+  "reproduce": {
+    "native": "cd repos/neon/ci；设置NEON_TEST_PG_BIN=<prefix>/bin、NEON_TEST_DSG_LIBRARY=<prefix>/lib/postgresql/test_dsg_region、NEON_TEST_RMGR_LIBRARY=<prefix>/lib/postgresql/neon_rmgr；python3 -m unittest test_dsg_transaction_finish -v",
+    "official": "Mac SDK14.4；make -C <build>/src/test/regress check TEMP_CONFIG=<dsga-transaction-regress.conf>；make -C <build>/src/test/isolation check TEMP_CONFIG=<same>",
+    "formal": "准确PG expectedSHA环境；cargo test --locked --offline -p compute_tools --features compute_api/postgres-client --test dsg_http native_transaction_finish_keeps_commit_callback_inflight_until_done -- --ignored --exact --nocapture",
+    "index": "python3 ci/compute.py validate --source-ref index --require-pg-checkout v17；python3 -m unittest discover -s ci -p test_compute.py -v"
+  },
+  "remaining_CODE": [
+    "后台/并行/DSM/预备事务、命名缓存/临时/会话/扩展保留内存完整Quiesce或可执行持续上界；检查点回收不能全停",
+    "可信Prepare/Finalize/system outside、首次独立准入",
+    "Host/Scheduler/最终Controller-Runner-QMP、公开worker/生命周期、受控跨boot/owner未知关闭"
+  ],
+  "not_run": [
+    "Linux弱内存序/调度/进程压力",
+    "K8s/RBAC/NeonVM/KVM/cgroup2/HugeTLB/真实物理释放迁移/性能长稳",
+    "镜像构建、K8s准备/部署（用户排除）"
+  ],
+  "production_ready": false,
+  "vm_shrink_permit": false,
+  "source_sha256": {
+    "neon/ci/distribution.json": "077384cb88b0839aef4570beb1f95cc67441123eb7ac86e17f3bbbb524904736",
+    "neon/ci/test-dsg-postgres.sh": "5a893f88927a675092ba279408c984877a10a647254ba30e2bbb98a5856c683d",
+    "neon/ci/test_dsg_transaction_finish.py": "83c0d644137211eb67b7a3a4c80ca542fcd7a33493726cfa7ff1f3596a8053f8",
+    "neon/ci/test_dsg_work.py": "3a3c0db8e824fc5f5cc1aa91fdc89ae5235ffab56acc1dd520b6359f56f907f3",
+    "neon/compute_tools/tests/dsg_http.rs": "c58c876dab45686e3826fc3305c5d40fde1f338dc67e5023a6de5a3597e46bfd",
+    "neon/vendor/revisions.json": "fd85b042e340af15988544258941a96896e4acb0ebd93a07a78a20ecae4286af",
+    "neon/vendor/postgres-v17/src/backend/libpq/pqcomm.c": "150ddfc44c3656b4a961a3e017a014ed1774920fe103d08e8640e46b6e6bf8df",
+    "neon/vendor/postgres-v17/src/backend/tcop/postgres.c": "841bde6d9a01cb8d10277dc30f83dbe301d9f846deae51b6e7dcc623723c2a74",
+    "neon/vendor/postgres-v17/src/include/libpq/libpq.h": "fca86e6b7954e43e3dd0251f400b359e7d27b3497e05cb1211aaac0cda614732",
+    "neon/vendor/postgres-v17/src/test/modules/test_dsg_region/test_dsg_region.c": "78edfe97ab0a7d7cfa30b81e0ac7d9f2a380aaa9d2940ffc19c02b5449ba9f90"
+  },
+  "artifacts_sha256": {
+    "build/pg17-transaction-exact-install/bin/postgres": "883a50c5099b5b0dd6c40fe7b42b3eafeb818efdef564ccf6513c04e56a83f4d",
+    "build/pg17-transaction-exact-install/lib/postgresql/neon.dylib": "233a0ce62e797c5dd51d369ca3860cf0582f2c32e5cfa455bff006cc3ce8fbf3",
+    "build/pg17-transaction-exact-install/lib/postgresql/test_dsg_region.dylib": "9fd1709db9c76252e627766805545316f5acb3ea028b5ab8dd82722ec4677f07",
+    "build/pg17-transaction-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+  },
+  "logs_sha256": {
+    "build/dsga-transaction-native.log": "3a05ca624a793275f29cfbeb45e3c13bd7767964ff63a749988e1ce3c5c17194",
+    "build/dsga-transaction-native-fixed.log": "0814269bc794d6099c600fcc3298dd00f751dd1322f8c7640459939810889fa0",
+    "build/dsga-transaction-affected.log": "51ef76d86eba585ca09fb9203e30c2f2274cd1888a5914c32af7ea419436d500",
+    "build/dsga-transaction-old-negative.log": "9622419e42adf552acb8e6ecb5900e8c1780d4bb814b76308a7b2e7e59eb9c48",
+    "build/dsga-transaction-core.log": "8e2a3ae5ac8b1c87e772b759a954f9d8699828d6959fa7155d74c2488a02ecc2",
+    "build/dsga-transaction-isolation.log": "901c0e50ea59243792a748ca5d63dcdef60c77793619c39d3786559606414ca4",
+    "build/dsga-transaction-exact-native.log": "a39a3982e1b321bc5ce5cd55f2230a8bfc3f9b3601c4c10f45d01331252e20eb",
+    "build/dsga-transaction-http-native.log": "eaffa883f70be38eaf3c86f9432bb2d5e8029775fd385bf3b3fad7c7d40238ee",
+    "build/dsga-transaction-final-clippy.log": "032278d9c948300c5e8696c72ed21f2234ead7b4f534b63fcbf8f0afb427d0e4",
+    "build/dsga-transaction-clippy.log": "670b04704965f5560115a5ce6f8b137393b45a5f21b77cec22c3c8a759ace370",
+    "build/dsga-transaction-target-clippy.log": "cd290d83d5b1c558e9c3a4d9d3ee5c61abe796902a9915ffc76c3d50631948cb",
+    "build/dsga-transaction-index.log": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "build/dsga-transaction-index-tests.log": "2e96c20d902885902b871650ec9b1a622713f607f4a0f4aadbf9429fd1fb8c67",
+    "build/dsga-transaction-exact-version.log": "21a782e61ab807d09a0be98c67fa67d0cd365be0b4162436e8f2bf3b8084ddda",
+    "build/dsga-transaction-neon-build.log": "8b88f142f0695291ec3493cc7dfdacf080f35b1dbcd2d3ce2ece33d299d8bd67"
+  }
+}

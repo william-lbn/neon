@@ -78,6 +78,10 @@ connections = unittest.defaultTestLoader.discover('.', pattern='test_dsg_connect
 if connections.countTestCases() < 6:
     raise SystemExit('DSGA continuous connection gate suite is missing required cases')
 suite.addTests(connections)
+finishes = unittest.defaultTestLoader.discover('.', pattern='test_dsg_transaction_finish.py')
+if finishes.countTestCases() < 9:
+    raise SystemExit('DSGA retained transaction finish suite is missing required cases')
+suite.addTests(finishes)
 replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replication.py')
 # 新测试文件遗漏打包时discover会返回空suite，不能让旧80项绿色覆盖本批缺测。
 if replication.countTestCases() < 6:
