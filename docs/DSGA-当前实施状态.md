@@ -3,7 +3,25 @@
 更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 DSM正式SQL/HTTP与严格消费者（仍非整体完成）
+## 最新：2026-10-25 Root聚合来源接入GuestReady审计v2（仍非整体完成）
+
+AS a3d91b8a已先推送核验，原root认证View的已确认Bootstrap/Held、PG出生及
+populated域生产不可变PG计费域+整个Guest HugeTLB池来源；实际Agent/PGWorker
+GuestReady写新审计v2，旧v1不回写。Outside声明明确排除，摘要不认证来源，
+后续动作须Match最新认证View，Unknown保留原承诺，不给VM许可。
+
+Mac初组Go race5顶层/14含子项通过，新增root-empty恢复仅单测通过，去重5/15，
+无测试跳过；无test文件resourceexec的1包级skip如实记录，执行器由owner覆盖。
+readonly vet通过，实际Agent Linux双架构仅交叉编译通过；不冒充真实Linux资源。
+控制面自有准确模块Origin同SHA、最小2sum及readonly vet通过，Neon AS来源同锁；
+PG三处仍5462、扩展1.15不变，不重复DSM8/core225/iso5/未改HTTP。
+见[本批实际代码和证据](DSGA-Root聚合来源-Mac基本验收-20261025.md)。
+
+完整可信Prepare/Finalize与系统外部来源、后台/私有持续上界及降限活性、首次
+准入、Host最终VM/公开worker/受控跨boot仍是缺代码；Linux目标内核/物理/性能
+后验。Goal active/incomplete，沿既有分支，小批推进、默认关闭、不合main。
+
+## 历史：2026-10-25 DSM正式SQL/HTTP与严格消费者（仍非整体完成）
 
 NativePG5462不变；Neon1.15新增正式DSM只读成员和认证固定GET，原生同点嵌套
 Prepared/Connection/Work，复用序列化helper不补读。C双SU/原session拒绝误授权，

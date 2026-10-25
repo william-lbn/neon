@@ -1,0 +1,123 @@
+{
+  "created_at": "2026-10-25T14:34:08.391866+00:00",
+  "scope": "原root PG计费域+整GuestHugeTLB池来源生产，实际GuestReady审计v2；非完整预算/VM许可，整体Goal active/incomplete",
+  "pg_commit": "5462f1de54a97b9a9235c69d64d31cb0825dcea5",
+  "as_commit": "a3d91b8a10bbd7e20b6a3710ae220bf9018d1621",
+  "cp_commit": "9cbad8659b5931c5e999fc90c67fd97978b61c91",
+  "cp_module": {
+    "pseudo": "v0.0.0-20261025142910-a3d91b8a10bb",
+    "sha": "a3d91b8a10bbd7e20b6a3710ae220bf9018d1621",
+    "go_sum_added": 2,
+    "readonly_vet_exit": 0
+  },
+  "maintenance_freshfetch_this_batch": [
+    {
+      "repo": "repos/neon",
+      "ref": "upstream/main",
+      "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+      "missing": 0
+    },
+    {
+      "repo": "repos/autoscaling",
+      "ref": "upstream/main",
+      "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+      "missing": 0
+    },
+    {
+      "repo": "repos/neon/vendor/postgres-v17",
+      "ref": "neon-upstream/REL_17_STABLE_neon",
+      "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+      "missing": 0
+    },
+    {
+      "repo": "repos/neon/vendor/postgres-v17",
+      "ref": "pg-upstream/REL_17_STABLE",
+      "sha": "bd807012669ed8573317562b78c1221e4fabe373",
+      "missing": 0
+    },
+    {
+      "repo": "repos/control-plane",
+      "ref": "origin/main",
+      "sha": "af5e7044167c96faa71d74548d9ae87034cc6833",
+      "missing": 0
+    }
+  ],
+  "tests": {
+    "race_initial": {
+      "top_level_pass": 5,
+      "test_events_pass": 14,
+      "test_skipped": 0,
+      "failed": 0,
+      "no_test_files_package_skip": 1,
+      "note": "resourceexec无test文件，实际执行器由owner测试调用"
+    },
+    "new_root_empty_only": {
+      "pass_events": 2,
+      "new_unique_subcase": 1,
+      "skipped": 0,
+      "failed": 0,
+      "post_count_after_recovery": 1,
+      "observe_count_after_recovery": 1
+    },
+    "distinct_total": {
+      "top_level": 5,
+      "including_subcases": 15
+    },
+    "vet_exit": 0,
+    "agent_linux_build": {
+      "amd64": 0,
+      "arm64": 0,
+      "entrypoint": "./autoscaler-agent/cmd",
+      "CGO_ENABLED": 0,
+      "runtime": "未执行ELF；非Linux运行、镜像或发布制品认证，提交前工作树交叉编译"
+    },
+    "binding": "Validated 18 binaries, 4 pinned PG versions, 39 extension stages; test_compute5 PASS0skip",
+    "not_repeated": "PG/DSM/正式HTTP未改，Native8/core225/iso5及原正式链未重复",
+    "model_scope": "真实Go客户端/TLS/Session/typedStore/UIDRV-CAS；root内核/PG成本/Kube服务为协议模型，非目标集群E2E"
+  },
+  "still_code": [
+    "完整可信Prepare/Finalize与SystemOutsidePG来源",
+    "后台/私有持续上界或Quiesce及降低上限前活性/免OOM保证",
+    "首次准入/Host最终VM/公开worker/受控跨boot"
+  ],
+  "linux_later": [
+    "实际cgroup/HugeTLB/计费迁移/内核PTE与THP",
+    "物理回收/KVM/NeonVM/目标集群端到端和性能长稳"
+  ],
+  "source_sha256": {
+    "repos/autoscaling/pkg/dsga/budget/root_aggregate.go": "f32d141fd0449b66b90401847f0019d7a7ef795875ad7734d79d927d08e1eaa9",
+    "repos/autoscaling/pkg/dsga/budget/root_aggregate_test.go": "a4c05344afc445d9eca19534b09a8e4260bf024d046fb463ff044bbbc729bf3f",
+    "repos/autoscaling/pkg/dsga/budget/finalized.go": "f5e3939a8579ff0da94c55a24cf1ac176c1fd96d558c8cf9c2a5fb9721eaaf24",
+    "repos/autoscaling/pkg/dsga/owner/guest_ready_test.go": "0ff9990ed8a97bcfe8bfdc15cb1b9ff2c28ea5fb1a457880a71b3e5812f890f4",
+    "repos/autoscaling/pkg/dsga/resourceexec/executor.go": "c56c061dae275228409edf58dea0b5a5b86d3993f0817f21a121f5990accd801",
+    "repos/autoscaling/docs/DSGA-Root聚合上界生产-Mac验收-20261025.md": "f27c77b4c889579d26c5d3ea800c679e7c6bc3781abb690be76cc2b5bbd924ed",
+    "repos/control-plane/api/go.mod": "1d54efac45e915736fcc17c973aba9aef29833b3520153841c2b4717ccb3b6f1",
+    "repos/control-plane/api/go.sum": "1225ca2d5ca5b4ecb0b5e83162791f85549140dcc4d3c43ad73558df721eddd1",
+    "repos/control-plane/docs/DSGA-Root聚合来源依赖-Mac验收-20261025.md": "a7140c117807de57cbe75dd978a5042cc6bfd3f734b65802d325e0eea3c55081",
+    "repos/neon/ci/distribution.json": "94a176a96ef51160a5a209bab784f0d29c53e64c2d6e1aed98d0661b375cd373",
+    "repos/neon/docs/DSGA-架构复核与实施规范-V3.md": "d44d02b7656f78bbe1e93f2727fee16834af13d771ee62273b9decce3228a21a",
+    "repos/neon/docs/DSGA-当前实施状态.md": "677bbc0be77339a70a4191ae1637f1285a7441be792e9560c834d4860ae81b05",
+    "repos/neon/docs/DSGA-Root聚合来源-Mac基本验收-20261025.md": "6957506fcb6f710e16ce51b9bc0b0f4e4631153bc826b9732bb906db4b3370fa"
+  },
+  "artifact_sha256": {
+    "build/dsga-root-aggregate-agent-linux-amd64": "104ee3bc14ff4d2773312ff226c36d395dd3ef8720f1ea420997ea45b6bf55b4",
+    "build/dsga-root-aggregate-agent-linux-arm64": "e86bfbed718e34a4e98698e00d1726d88eb8426d2b6d57c025b871d011fb34b3"
+  },
+  "log_and_recipe_sha256": {
+    "build/dsga-root-aggregate-go.jsonl": "d282e50b28bee7f16ef7a39a3d9633ec7fa358e18a66130902ea8d2064b305cd",
+    "build/dsga-root-aggregate-go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-root-aggregate-empty-go.jsonl": "bca2ddcad8c8ba47cbcb12246e0d6232f1aab12e272424c445692612c849f41f",
+    "build/dsga-root-aggregate-empty-go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-root-aggregate-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-root-aggregate-agent-linux-amd64.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-root-aggregate-agent-linux-arm64.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-root-aggregate-cp-module.json": "9483ad73af2a3f71b21ffada594a0f2adb11a054413dab22cd84d9c21afaf5ac",
+    "build/dsga-root-aggregate-cp-module.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-root-aggregate-cp-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-root-aggregate-index.log": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "build/dsga-root-aggregate-index-tests.log": "53fa8eef99540e18264d881a6c347f55dbcd2482da1fbdcf9185bffda191479c",
+    "build/run-dsga-root-aggregate-go.sh": "94b4eca2a06fdffa0dec7050e03e999516a2b72735d1cbd49a54e934058d9bb4",
+    "build/run-dsga-root-aggregate-agent-compile.sh": "5efc052b6d0e8938951cdadee212c8d18ae096fe4bc1291a0ad519a8be0edc12",
+    "build/run-dsga-root-aggregate-cp-dependency.py": "3996d504602f921c083668c3c3337d765f988cd7b1ea66e499b3091f086f5883"
+  }
+}

@@ -698,6 +698,25 @@ main-region不叠加外部payload。任何读取不清Pending或原root Held/Ori
 Native/SDK成功不给VM许可。具体代码及Mac真实TLS/Router/SQL证据见
 [本批正式管理链](DSGA-DSM正式管理链-Mac基本验收-20261025.md)。
 
+### 8.18 聚合预算来源必须绑定原计费域并持续复核（2026-10-25）
+
+实际Agent的GuestReady现从认证root View生产聚合来源，记录到新审计v2。
+仅接受原Bootstrap/Held完成、内核限额吻合、原Postmaster出生和populated域；
+源绑定Guest boot/cgroup设备inode/出生/完整原命令。换owner不重造来源，Unknown
+不能借旧Held结案；后续动作须Match新的认证View，不能把一次审计当永久许可。
+摘要验证只查结构，不认证自报来源，旧审计v1不补写成新证书。
+
+聚合金额只加PG计费域memory.max及整个Guest HugeTLB池，不叠加Shared/DSM/
+私有/LFC或池的已用/空闲/预留。Outside声明不是已认证SystemOutsidePG，本源
+排除它；互补来源必须覆盖其他计费域与系统成本。进程迁入不会迁移既有页收费，
+memory.max也不保证无瞬时超额或免OOM，不能把它单独升级成严格物理释放许可。
+依据[Linux官方计费域说明](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory-ownership)。
+
+PG/root/Kube不是一个锁内的原子快照。最终Prepare/Finalize与首次准入仍须接上
+真实外部承诺、后台/私有持续上界或Quiesce、降限前可容纳和必要后台活性证明、
+Host和最终VM等生产者；上述缺代码不能包装成Linux待测。Mac来源及GuestReady
+验证通过仅证明本模块，Linux内核/物理/目标集群另验。所有VM许可仍为false。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
