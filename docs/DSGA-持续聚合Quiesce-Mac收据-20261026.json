@@ -1,0 +1,171 @@
+{
+  "created_at": "2026-10-25T17:27:54.099878+00:00",
+  "scope": "持续聚合策略实际Quiesce/WAL原来源绑定/恢复和新Shrink前复核；不是完整预算或VM许可，整体Goal active/incomplete",
+  "branches": {
+    "AS": "codex/dsga-autoscaling-20261019",
+    "Neon": "codex/dsga-neon-v3-20261019",
+    "PG17": "codex/dsga-pg17-v3-20261019",
+    "CP": "codex/dsga-control-plane-v3-20261020"
+  },
+  "as_commits": {
+    "contract": "568e5645cd78385b2b0c34f96b3cc53ba605a6cf",
+    "integration": "9740ec965291b2a1c50fba98201836bd8f95d24c",
+    "final_source_binding_fix": "2c9a26abac1df37207e32525fde6c94ae4b4c402"
+  },
+  "cp_commit": "efc2200c7201831f642b39f28baa6dd6bb0ffe6f",
+  "pg_commit": "5462f1de54a97b9a9235c69d64d31cb0825dcea5",
+  "neon_extension_version": "1.15 unchanged",
+  "pg_bindings": {
+    "gitlink_index": "160000 5462f1de54a97b9a9235c69d64d31cb0825dcea5 0\tvendor/postgres-v17",
+    "two_locks": "ci/distribution.json/vendor/revisions.json each contains exactly one same PG fullSHA"
+  },
+  "maintenance_freshfetch": [
+    {
+      "repo": "neon",
+      "ref": "upstream/main",
+      "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+      "missing": 0
+    },
+    {
+      "repo": "autoscaling",
+      "ref": "upstream/main",
+      "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+      "missing": 0
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "ref": "neon-upstream/REL_17_STABLE_neon",
+      "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+      "missing": 0
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "ref": "pg-upstream/REL_17_STABLE",
+      "sha": "bd807012669ed8573317562b78c1221e4fabe373",
+      "missing": 0
+    },
+    {
+      "repo": "control-plane",
+      "ref": "origin/main",
+      "sha": "af5e7044167c96faa71d74548d9ae87034cc6833",
+      "missing": 0
+    }
+  ],
+  "cp_module": {
+    "pseudo": "v0.0.0-20261025172233-2c9a26abac1d",
+    "OriginHash": "2c9a26abac1df37207e32525fde6c94ae4b4c402",
+    "go_sum_added": 2,
+    "readonly_vet_exit": 0,
+    "interim": "9740 verified but nevercommitted; exact assertion restored only own interim2sum/mod before final2c9"
+  },
+  "validation": {
+    "final_race": {
+      "top_level": 5,
+      "including_subcases": 33,
+      "failed": 0,
+      "test_skip": 0,
+      "package_no_test_files_skip": 1,
+      "package_skip_note": "quiesceexec由owner实际调用，无独立test文件"
+    },
+    "initial_race": "31distinct pass after targeted replacements; final format/recovery semantics changed then33affected retested, notadd64",
+    "native_final": "1 PASS0ignored: Go race/TLS/productionRouter/JWT/SQL/PG5462+Neon1.15 truefence+close1, Postmasterack/idle,real2PC1+DSMpin2MiB/4MiBcap, typedQuiesced valid, lowernormaldenied, zeroResize; root/outside explicitMODEL, notfullnativeexecutor/KubeVM",
+    "native_initial": "firstfixture lacked actualexecutor existingFence→nativeStale; correctedTESTonly replacementpass. contractsourcebindingchanged then finalbinary/native1rerun replaces priorpass notcountanotherunique",
+    "source_binding": "complete WAL commandRequest+Close+originalAggregate; unknownclose then same-numeric newroot source rejected afterrestart/query/replay; originalimmutable command retained. oldclose-only WAL canreadonlyquery, remainsUnconfirmed, noComplete/Replay/Sourceupgrade. PGResize receipt equals originalcommandSource",
+    "source_review": "gap found afterpublishing9740; separate followup2c9, no historyrewrite/mainmerge; parent/CP finalpins onlyfixed2c9",
+    "failure_retention": "newexecutor localerrshadow503→nil FIXED product, WALalwaysUnconfirmed; unitmodelnormal512 withGuest256 correctedfixture; onlyfailed/changedcases replaced, allrawlogs retained",
+    "vet": "freshdefault affectedall0; earlierfinalnative-tag/newtests supplemental0; nativeGo source unchanged bysourcefix, contractfreshdefaultvet0",
+    "clippy": "changedRusttest --no-deps-Dwarnings0;27dependencybaselinewarnings; Rustnotchanged bysourcefix no repeatlint",
+    "agent_build": "actual autoscaler-agent/cmd Linuxamd64/arm64 CGO0 finalsourceboth0,noELFruntime",
+    "index": "18binaries/4PG/39extensionstages; actualtest_compute5 PASS0skip",
+    "not_repeated": "PG/DSMsource unchanged noNative8/core225/iso5; sourceWALchange justifiedaffected33+nativeconsumer1/dualAgent recompile only",
+    "source_artifact_provenance": "FinalGo test/Agent binaries built before2c9commit fromsame finalbusiness source, source bytes verified equal published2c9; not releaseVCS/tag claim"
+  },
+  "still_code": [
+    "完整可信Prepare/Finalize/SystemOutsidePG来源",
+    "可执行后台私有预算及安全降低normal",
+    "首次准入/Host最终VM/公开worker/受控跨boot"
+  ],
+  "linux_later": [
+    "cgroup/HugeTLB/内核暂态/PTE/THP/物理释放",
+    "KVM/NeonVM/目标集群E2E/性能长稳"
+  ],
+  "owner_AGENTS_SHA256_preserved": "5c61959674c362ecc4c3709930121304595e8b0bca1ff70ae401f0cf8f2803c1",
+  "source_sha256": {
+    "repos/autoscaling/docs/DSGA-持续聚合Quiesce-Mac验收-20261025.md": "14a9192187d3148ca494ead63a5662a097186c1d744608ddc7c3d94fb5723e0e",
+    "repos/autoscaling/pkg/dsga/budget/native_quiesce_test.go": "24d4c1908442cf8cefcc886c5ddfb08c8005d7a882c97e4301c0c858015e72b1",
+    "repos/autoscaling/pkg/dsga/budget/quiesced.go": "7e4c2cdbf323cf3f8f56373b3c8bd64c0032ccaf398f557a306bdf88dce27184",
+    "repos/autoscaling/pkg/dsga/budget/quiesced_test.go": "38c9d487f629ab6af54ee2991d38169cef4c51d77c27d555b5102227b153f51d",
+    "repos/autoscaling/pkg/dsga/owner/guest_ready_test.go": "e97a9c746680e053d8605988d545f09f783f4dec7bf10d37e329a63a16b14efd",
+    "repos/autoscaling/pkg/dsga/owner/pg.go": "a09ecf5eacfc51b3458fcd02bdb838ceb1407f972d4be3a7ac830ddd360fe73b",
+    "repos/autoscaling/pkg/dsga/owner/quiesce_test.go": "11f9e8199190a73482e868ea95963fb3d5e14b62640c584df3286e9aaee39d41",
+    "repos/autoscaling/pkg/dsga/pgexec/executor.go": "34969d7c668e01c51e14c28cc1f497446a2c0929672df4fb2081145525b3e62f",
+    "repos/autoscaling/pkg/dsga/quiesceexec/executor.go": "97be4d73978d89475cce7bdac3523c4b89cee26fd553ea6582842605517414c4",
+    "repos/autoscaling/pkg/dsga/resourceexec/executor.go": "b5a7815d5df71f77b1a1469c307252de8a6f59b7d4e3408c8d81ee59933f3e7d",
+    "repos/control-plane/api/go.mod": "414c749780688c333ee2fb37f37137d642711511f2414d62d6640652c88d3dbd",
+    "repos/control-plane/api/go.sum": "8f07d5ef77e43cddb54057b1ef3cc09f42f055777f1e8d306fc831eebdfadcd2",
+    "repos/control-plane/docs/DSGA-持续聚合Quiesce准确依赖-Mac验收-20261026.md": "ac64b5c3055aee712c24b9e46af324b473152a51d983939410c7b8f3543deccf",
+    "repos/neon/ci/distribution.json": "d56652286601e2aa8941616165a2275bfe63661aa21f434bc90229f722cd568c",
+    "repos/neon/compute_tools/tests/dsg_go_http.rs": "0e648b1b239836188607ec4c929bdd74a5636dbede88e6a0bb8f2852a5448618",
+    "repos/neon/docs/DSGA-当前实施状态.md": "f26c58bba880616c624411d1cb3f09ecf94da5ee17b2d2d271e82f816ad6ced4",
+    "repos/neon/docs/DSGA-持续聚合Quiesce-Mac基本验收-20261026.md": "61cbec605292a19c6beee939d247d95a00ea5749699e66ded1355944c8bb4f69",
+    "repos/neon/docs/DSGA-架构复核与实施规范-V3.md": "eee1e6d5a27f45a2006e6d995e912a9e5fe2e98a776c651e2e753bbbfa56f637",
+    "repos/neon/vendor/revisions.json": "b020eee74f2fb03a34aadbd23ff47fce7b9ebd795079eb3095b4ee3fa944ddbb"
+  },
+  "artifact_sha256": {
+    "build/dsga-quiesce-source-binding-native-go.test": "6efa81b3e8a221bb3bdb972b501dc382e5a4441ff2654ba8bb6911cb2e4ebd4a",
+    "build/dsga-quiesce-source-binding-agent-linux-amd64": "d8eeae48455a5d86aae19b5cae30aee04bcf8fcacfaa8115c09f813945a914d5",
+    "build/dsga-quiesce-source-binding-agent-linux-arm64": "6a013ed4b1dd506edbff2584967cbf7d58cc8db3f5c32b10627b97ba5ce06e93",
+    "build/pg17-dsm-exact-install/bin/postgres": "1c34349dae3db9e9c7d8d46089e221666902632b758c5b9d7ff5f0d2b6dcd40e",
+    "build/pg17-dsm-exact-install/lib/postgresql/neon.dylib": "7d3d6778f48c83690a72e66ef6491f88f925c3ffe2308b4816011189c7f560e0",
+    "build/pg17-dsm-exact-install/lib/postgresql/test_dsg_region.dylib": "ae99177417e3c134e4b23c8592a39cbea18e1c2b68518e62d9a7482bba4be57b",
+    "build/pg17-dsm-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+  },
+  "log_and_recipe_sha256": {
+    "build/dsga-quiesce-agent-linux-amd64.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-agent-linux-arm64.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-clippy.log": "1d8ba55fbe94953d4a631fe9c6774305c8456b376e7b7d4d34ad7a3fb9497491",
+    "build/dsga-quiesce-cp-module.json": "114cd3088bfabee802659b3d548684997720e77a50a40ac388c696b9f35f35cc",
+    "build/dsga-quiesce-cp-module.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-cp-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-final-test-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-go-concurrent.jsonl": "14d7a8aeefaab12c19a55606ed971421eab3fbf4b27882009154c4d64006f84b",
+    "build/dsga-quiesce-go-concurrent.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-go-final-cases.jsonl": "232cfd44721aa7c599dd6e215a12fea5df897e0f2d3a0f93857bd4ddf84adff9",
+    "build/dsga-quiesce-go-final-cases.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-go-replacement.jsonl": "77656c85dcdcde6437b3a1df508e49664aa14e5bbfed76c0c677dd740e8a4f61",
+    "build/dsga-quiesce-go-replacement.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-go.jsonl": "ea2b161daf320b0a5de17460c92aa45485bd3410948cc6d13336c8873471725f",
+    "build/dsga-quiesce-go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-native-go-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-native-go-http-replacement.log": "9529c20ca2a2c2e67fecb4853ab25284af709c215ba1cbeb133cfdae2539939a",
+    "build/dsga-quiesce-native-go-http.log": "3e1d74af0269eb2c783d91f42fdbd8786cfac48fa151e93676574a8fd70c1e54",
+    "build/dsga-quiesce-source-binding-agent-linux-amd64.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-source-binding-agent-linux-arm64.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-source-binding-cp-module.json": "0014217f3ab722f074a0db87a9241ecba7ed1d2cac91a1188d9850fd2e14af14",
+    "build/dsga-quiesce-source-binding-cp-module.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-source-binding-cp-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-source-binding-go.jsonl": "d5044e155bc34e7bc08df443b62dbfa8c9b0233ab459ab31c97e68d6d37e6681",
+    "build/dsga-quiesce-source-binding-go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-source-binding-index-tests.log": "a05d95260f63112d6ecba6d6b61f1b692618553ca23127a88be55415d3dee3ab",
+    "build/dsga-quiesce-source-binding-index.log": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "build/dsga-quiesce-source-binding-native-go-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-source-binding-native-go-http.log": "81f080fbd0ffd8ea5d27deae252d25e36f7f1f9d0c22809ce39bb21baa1a3d48",
+    "build/dsga-quiesce-source-binding-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-quiesce-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/run-dsga-quiesce-agent-compile.sh": "6aee10da47d6f6f088da5e691c41d4879d203ac63ced1251808e5cec17d848f3",
+    "build/run-dsga-quiesce-cp-dependency.py": "366842602b51d6964247c7aa51676c69610aa674f0e2c676647396655f9ae4c2",
+    "build/run-dsga-quiesce-final-test-vet.sh": "1d17460646e93718572cb5223e1331682975aa31f300aa4130d89f1e162c69c8",
+    "build/run-dsga-quiesce-go-concurrent.sh": "47c390cee1d5c8405726dc37093530a4d2340b7d0cfc9113154ef5acf66722e9",
+    "build/run-dsga-quiesce-go-final-cases.sh": "4ad2e98145b5fc5f20c8fa674f50054e1dc6414bc45ab4da4c74d53b9d45731e",
+    "build/run-dsga-quiesce-go-replacement.sh": "e9cbfc1cfac1cc630dceaa093a1f42dc38206fc1bc6347e1620c69fc58968809",
+    "build/run-dsga-quiesce-go.sh": "ce73b84fa1f2a7f1f4c42ce19da924334dbc68436167933a4be1a50741171dcb",
+    "build/run-dsga-quiesce-native-go-build.sh": "b73becbdb652ac77cbf293a9fafe87aff66fd00ec90a1870a789dfc0ddc149d0",
+    "build/run-dsga-quiesce-native-replacement.sh": "e1b81d298ea178e200ff720072c6e12e8cad77161a4e3771721a3d48ded93411",
+    "build/run-dsga-quiesce-native.sh": "d44b0c02348ed50b3cf9c15e5dd98cc5dba8dab4d4e04405c30e4c6d031a5c3f",
+    "build/run-dsga-quiesce-source-binding-agent-compile.sh": "6a34210e0608f7cadc400dbbe53829a258fa9bfc155842ee2809b281681c15ca",
+    "build/run-dsga-quiesce-source-binding-cp-dependency.py": "f022afd80d3ddfa0dbea33c90fe8c3b371c31776df246f6c742aa56290f58506",
+    "build/run-dsga-quiesce-source-binding-go.sh": "f88aae9bbe3984e4bd25015220d610ae74e63af6e7753fff6babbb8d19414462",
+    "build/run-dsga-quiesce-source-binding-native-go-build.sh": "941cc22824e29e42bdff43608f458871ba8e9c45a3f462c27c9ed60ac118c42f",
+    "build/run-dsga-quiesce-source-binding-native.sh": "9b78d6b41b72df44553a0eedd9f397abc2882126dddd0c68976d9b06a05a74a9"
+  }
+}

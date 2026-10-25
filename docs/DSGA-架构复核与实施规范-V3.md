@@ -717,6 +717,32 @@ PG/root/Kube不是一个锁内的原子快照。最终Prepare/Finalize与首次�
 Host和最终VM等生产者；上述缺代码不能包装成Linux待测。Mac来源及GuestReady
 验证通过仅证明本模块，Linux内核/物理/目标集群另验。所有VM许可仍为false。
 
+### 8.19 实际Quiesce采用持续聚合策略，不冒认可降低normal（2026-10-26）
+
+实际Agent/PGWorker现接入Quiesce：原Completed Prepared校验后，核root原聚合
+来源/出生和PG fence；完整QuiesceCommand同时保留原请求、关闭及当时原聚合
+来源，经原VM UID/RV CAS取得派发票据才执行。恢复/重放不能重新选当前来源，
+即使新Held数值相同也拒绝。旧仅关闭格式只读查询、不补源或结案/重放，需要
+受控恢复；ResizePG还必须核验回执来源与完整原命令一致。
+普通重试只查询原命令，写前/写后丢回复均保留Unconfirmed；NotFound不重发。
+关闭方向也从原日志恢复SDK Pending，显式重放与资源/Resize/最终开放分域。
+
+完成依据是正式DSM成员内嵌同点的Prepared1/Connection1/Work2：原关闭revision、
+当前floor/容量、私有管理入口及Postmaster持续公共门禁ack，加前台在途排空。
+2PC/后台/DSM/会话私有不是0，也不暂停必要后台；它们保留在原持续聚合约束内。
+其他计费域与系统成本仍须完整可信预算生产者覆盖，不能从此事实补出外部额度。
+
+该策略当前要求保留或提高normal memory.max；它只推进PG数组排水，不授权降低
+normal或缩VM。新的Quiesce及GuestReady派发/显式重放均拒绝无证明降normal，
+旧未知只读查询仍可达。降低normal必须继续实现可执行后台/私有上界及安全降限，
+不能用RSS低、前台idle或内核OOM代替，也不能用这个有限策略替代V3最终要求。
+
+新Shrink/可能形成新效果的显式重放在ResizePG前重核原Quiesced、当前原root
+来源/出生及新的同点门禁/工作状态；历史Completed不能跨来源替换或重开放行。
+逻辑PG提交后仍保留物理ReleasePG及所有Guest/VM/Host/预算步骤，无VM许可。
+Mac真实关闭/同点消费门禁不等于完整Linux预算或集群E2E；root/外部模型与实际
+TLS/Router/JWT/SQL/PG、WAL/CAS的验证范围必须分开记录。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

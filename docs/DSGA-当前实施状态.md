@@ -1,9 +1,33 @@
 # DSGA 当前实施状态
 
-更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
+更新：2026-10-26（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 Root聚合来源接入GuestReady审计v2（仍非整体完成）
+## 最新：2026-10-26 持续聚合Quiesce与实际Shrink前复核（仍非整体完成）
+
+AS合同568e5645/执行9740ec96及后续来源绑定修复沿原分支演进，精确SHA见收据。
+实际Agent/PGWorker消费原Prepared，
+原root出生/聚合及PG fence后，完整关闭命令CAS写前才发；同点DSM嵌套事实
+核原关闭/连接ack与前台排空。2PC/后台/DSM/私有不清零，保留原约束。关闭
+Pending恢复、丢回复原查询、显式分域重放；关闭写前必须持久完整原来源，重建
+不能采用同数值的新Held。旧仅关闭格式只读保留，不补证/结案/重放；新Shrink
+前核完整原命令与回执来源一致，再核当前门禁。
+GuestReady也禁止无证明降低normal。逻辑PG完成仍不跳过物理ReleasePG/VM。
+
+Mac新增/受影响Go race最终5顶层/33含子项PASS，0测试skip，1无test包skip
+如实记录；readonly及最终tag vet通过，实际Agent双Linux架构仅编译通过。
+新真实Go race/TLS/生产Router/JWT/SQL/PG5462+Neon1.15关闭与新消费者1项通过，
+2PC槽1/DSM2MiB真实保留；root/外部为模型，WAL/CAS另由owner实际调用验证。
+首轮err遮蔽产品修复、容量/漏fence fixture失败保留，仅替换失败及新增场景；
+目标clippy通过、依赖27原告警保留，不重复Native8/core225/iso5。见
+[本批代码、命令和实际证据](DSGA-持续聚合Quiesce-Mac基本验收-20261026.md)。
+
+持续策略只保留/提高normal，安全降normal及后台私有可执行上界、完整可信
+Prepare/Finalize/systemoutside、首次准入、Host最终VM/公开worker/受控跨boot
+仍缺代码，不能以有限模式替代V3最终要求。Linux内核/物理/性能后验，Goal
+active/incomplete、默认关闭、沿既有分支，不构建镜像/部署或合main。
+
+## 历史：2026-10-25 Root聚合来源接入GuestReady审计v2（仍非整体完成）
 
 AS a3d91b8a已先推送核验，原root认证View的已确认Bootstrap/Held、PG出生及
 populated域生产不可变PG计费域+整个Guest HugeTLB池来源；实际Agent/PGWorker
