@@ -57,6 +57,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_admission_status);
 PG_FUNCTION_INFO_V1(neon_dsg_shared_cost);
 PG_FUNCTION_INFO_V1(neon_dsg_work_state);
 PG_FUNCTION_INFO_V1(neon_dsg_connection_state);
+PG_FUNCTION_INFO_V1(neon_dsg_prepared_state);
 
 static char *dsg_vm_uid;
 static char *dsg_compute_instance_id;
@@ -762,6 +763,25 @@ neon_dsg_work_state(PG_FUNCTION_ARGS)
 #endif
 }
 
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_CONNECTION_API_VERSION) && NEON_DSG_CONNECTION_API_VERSION == 1 && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 2
+/* 两阶段槽与连接/Work必须共用原生同点，不允许序列化时再读一次。 */
+static void
+NeonDsgAppendConnection(StringInfo output, const DsgConnectionSnapshot *s)
+{
+	appendStringInfo(output,
+		"{\"protocol_version\":1,\"connection_api_version\":1,\"vm_shrink_permit\":false,"
+		"\"enabled\":%s,\"requested_serial\":%u,\"applied_serial\":%u,"
+		"\"requested_open\":%s,\"applied_open\":%s,\"acknowledged\":%s,"
+		"\"private_management_ready\":%s,\"public_connections_blocked\":%s,\"work\":",
+		s->enabled ? "true" : "false", s->requested_serial, s->applied_serial,
+		s->requested_open ? "true" : "false", s->applied_open ? "true" : "false",
+		s->acknowledged ? "true" : "false", s->private_management_ready ? "true" : "false",
+		s->public_connections_blocked ? "true" : "false");
+	NeonDsgAppendWork(output, &s->work);
+	appendStringInfoChar(output, '}');
+}
+#endif
+
 /* 只读观察请求/已应用串号、私有通道及同点Work2；绝不写准入或发VM许可。 */
 Datum
 neon_dsg_connection_state(PG_FUNCTION_ARGS)
@@ -775,16 +795,34 @@ neon_dsg_connection_state(PG_FUNCTION_ARGS)
 		NeonDsgCheckEnabled();
 		DsgConnectionGetSnapshot(&s);
 		initStringInfo(&output);
+		NeonDsgAppendConnection(&output, &s);
+		PG_RETURN_DATUM(NeonDsgJson(&output));
+	}
+#else
+	NeonDsgUnsupported();
+	PG_RETURN_NULL();
+#endif
+}
+
+/* 独立Prepared1：保留槽可在backend退出/前台idle后存活，不能省略或由客户端报数。 */
+Datum
+neon_dsg_prepared_state(PG_FUNCTION_ARGS)
+{
+	NeonDsgCheckAdministrator();
+#if defined(NEON_DSG_CONTROL_SUPPORTED) && defined(NEON_DSG_PREPARED_API_VERSION) && NEON_DSG_PREPARED_API_VERSION == 1 && defined(NEON_DSG_CONNECTION_API_VERSION) && NEON_DSG_CONNECTION_API_VERSION == 1 && defined(NEON_DSG_WORK_API_VERSION) && NEON_DSG_WORK_API_VERSION == 2
+	{
+		DsgPreparedSnapshot s;
+		StringInfoData output;
+
+		NeonDsgCheckEnabled();
+		DsgPreparedGetSnapshot(&s);
+		initStringInfo(&output);
 		appendStringInfo(&output,
-			"{\"protocol_version\":1,\"connection_api_version\":1,\"vm_shrink_permit\":false,"
-			"\"enabled\":%s,\"requested_serial\":%u,\"applied_serial\":%u,"
-			"\"requested_open\":%s,\"applied_open\":%s,\"acknowledged\":%s,"
-			"\"private_management_ready\":%s,\"public_connections_blocked\":%s,\"work\":",
-			s.enabled ? "true" : "false", s.requested_serial, s.applied_serial,
-			s.requested_open ? "true" : "false", s.applied_open ? "true" : "false",
-			s.acknowledged ? "true" : "false", s.private_management_ready ? "true" : "false",
-			s.public_connections_blocked ? "true" : "false");
-		NeonDsgAppendWork(&output, &s.work);
+			"{\"protocol_version\":1,\"prepared_api_version\":1,\"vm_shrink_permit\":false,"
+			"\"prepared_slots\":%u,\"maximum_prepared_slots\":%u,\"runtime_prepares_blocked\":%s,\"connections\":",
+			s.prepared_slots, s.maximum_prepared_slots,
+			s.connections.work.observed.admission_open ? "false" : "true");
+		NeonDsgAppendConnection(&output, &s.connections);
 		appendStringInfoChar(&output, '}');
 		PG_RETURN_DATUM(NeonDsgJson(&output));
 	}

@@ -634,6 +634,27 @@ raw_parser核验单条COMMIT/ROLLBACK且chain=false，支持官方END/ABORT及NO
 文本在关闭期间明确拒绝，客户端可用标准小型结束命令恢复；正常开放路径不受
 该分类上限影响。详见[真实Mac证据](DSGA-关门事务结束-Mac基本验收-20261025.md)。
 
+### 8.15 两阶段保留槽不能由前台空闲补零（2026-10-25）
+
+PREPARE TRANSACTION不同于SQL PREPARE语句缓存：前者在backend退出后仍持有
+原生dummy PGPROC/锁等资源。Prepared1须覆盖尚未valid的保留槽、正常完成/失败
+回收及WAL/磁盘恢复，不能只数pg_prepared_xacts的可见行或活进程。独立API保留
+既有Work2/Connection1布局；固定计数及对齐开销全部纳入实际主段预算，不重复
+叠加已由共享成本覆盖的PGPROC/两阶段固定元数据。
+
+固定锁序TwoPhaseStateLock→status_lock，新运行期取槽前与关门串行登记；包括
+SU/后台也禁止关门之后新保留。统一RemoveGXact回收，未知/失配不得清零假空闲。
+恢复必须重建已持久意图，即使新boot关闭；因此runtime_prepares_blocked只描述
+运行期门禁，不能宣称WAL replay停止或承诺以后无旧槽。检查点/回收不能全停。
+
+正式SQL及GET /dsg/v1/work/prepared同点复制原生最大槽、当前保留槽与连接/Work，
+缺成员/能力明确拒绝，Rust/Go须严格核验版本、实例、容量及门禁公式，不从idle
+补计数。0槽仍不是完整Quiesce/预算/VM许可。首版无法界定已有保留资源时拒绝
+本轮缩VM并保持原预算，不擅自提交或回滚客户事务；仅在确定VM动作未派发或
+已通过真实闭合协议取消后才可按原预算恢复准入。原协调者随后完成事务可重试。
+预备语句缓存、后台/DSM及会话私有保留内存仍独立覆盖，不能因本项完成而漏算。
+详见[实现及Mac原生证据](DSGA-两阶段保留槽-Mac基本验收-20261025.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

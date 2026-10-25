@@ -26,6 +26,7 @@ use crate::dsg_state::{
 };
 
 use crate::dsg_connection::DsgConnectionResponse;
+use crate::dsg_prepared::DsgPreparedResponse;
 use crate::dsg_work::DsgWorkResponse;
 
 const MAX_RESPONSE_BYTES: usize = 32 * 1024;
@@ -392,6 +393,20 @@ impl<'a> DsgSqlClient<'a> {
         let response: DsgConnectionResponse = read_json_simple(
             &self.observer,
             &sql(&self.observer_schema, "neon_dsg_connection_state", false),
+            self.response_timeout,
+        )
+        .await?;
+        response.validate_for(&self.instance)?;
+        Ok(response)
+    }
+
+    /// Prepared1读取同点原生槽与连接/Work，不清Pending，不从前台idle推断2PC为空。
+    /// 缺正式SQL成员或旧内核明确拒绝；完整Simple Query不留下观察者隐式事务。
+    pub async fn prepared_state(&self) -> Result<DsgPreparedResponse> {
+        self.formal_function("neon_dsg_prepared_state", 0).await?;
+        let response: DsgPreparedResponse = read_json_simple(
+            &self.observer,
+            &sql(&self.observer_schema, "neon_dsg_prepared_state", false),
             self.response_timeout,
         )
         .await?;

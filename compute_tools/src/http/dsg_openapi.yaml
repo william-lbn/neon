@@ -41,6 +41,19 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/ConnectionResponse"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/work/prepared:
+    get:
+      operationId: getDsgPreparedState
+      summary: 原生两阶段保留槽及同点连接和Work2
+      description: 包括未valid和backend退出后槽；运行期PREPARE关门不阻止恢复旧意图。前台idle不能补零，不产生完整Quiesce或VM许可。
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 固定容量与实际槽数，无写入，no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/PreparedResponse"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/work/state:
     get:
       operationId: getDsgWorkState
@@ -241,6 +254,18 @@ components:
                 required: [error]
                 properties: {error: {type: string}}
   schemas:
+    PreparedResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, prepared_api_version, vm_shrink_permit, prepared_slots, maximum_prepared_slots, runtime_prepares_blocked, connections]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        prepared_api_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        prepared_slots: {type: integer, minimum: 0, maximum: 2147483647}
+        maximum_prepared_slots: {type: integer, minimum: 0, maximum: 2147483647}
+        runtime_prepares_blocked: {type: boolean}
+        connections: {$ref: "#/components/schemas/ConnectionResponse"}
     ConnectionResponse:
       type: object
       additionalProperties: false

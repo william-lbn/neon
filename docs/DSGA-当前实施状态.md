@@ -3,7 +3,30 @@
 更新：2026-10-25（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-25 关门期间已有事务的有界结束（仍非整体完成）
+## 最新：2026-10-25 两阶段保留槽及正式管理消费者（仍非整体完成）
+
+PG26e80ac6a3ad02fd149d272302d5bf9b4cbaa7ea、AS5b49d343c6223ffc18b40a150c0ea0a2c7f81c6b
+已先推送核验。新独立Prepared1保留Work2/Connection1/Buffer6 ABI，原生计数包含
+未valid准备、backend退出后的PREPARED及真实恢复槽，与关门和连接/Work同点。
+新运行期PREPARE TRANSACTION包括SU/后台均受门禁，WAL/磁盘恢复保留旧意图；
+不暂停检查点/回收，不替客户决定提交或回滚。Neon1.14正式SQL、认证固定HTTP、
+Rust/Go及控制面消费者严格接线，读取不清Pending或给VM许可。
+
+Mac新增6场景0skip：首轮5过，余1仅C ERROR默认SQLSTATE断言错，修正后单项
+替换通过；真实持TwoPhaseStateLock backend SIGKILL、WAL/磁盘恢复均验证。
+官方两阶段回归1项（实际303行输出）/专门隔离2项通过，未重复未变225/123。
+准确SHA重编关键2项为替换；正式NeonHTTP1及真实Go race/TLS/Router/JWT/SQL1
+通过，均读到前台idle与prepared槽1共存，原Pending保留、零写POST。
+Rust协议1、Go协议/SDK race2、代理race2及目标clippy/vet通过，依赖原警告保留。
+见[本批实际证据](DSGA-两阶段保留槽-Mac基本验收-20261025.md)。
+
+本轮还完整合入控制面main76a7699客户端维护，cf8e387独立提交已推核验；仅
+新增CLI/MCP本机HTTP/stdio15项0skip，不重复未改Go/数据库业务。后台/并行/DSM、
+预备语句缓存/临时/会话私有内存、可信预算/首次准入、Host最终VM/公开worker/
+受控恢复仍须代码；不能把两阶段计数或前台idle当全排空。Linux目标验收后置，
+默认关闭、Goal active/incomplete。
+
+## 历史：2026-10-25 关门期间已有事务的有界结束（仍非整体完成）
 
 PG17 dfd989817b0afbce19caf4c8bec73857b3d7a5a8 已在原分支推送核验，准确
 SHA和实际Neon1.13重编。已有显式/失败事务可在准入持续关闭时通过单条有界

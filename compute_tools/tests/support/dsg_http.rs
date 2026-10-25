@@ -192,3 +192,25 @@ pub(crate) async fn native_connections(signer: &Signer) -> Result<(Cluster, Arc<
     let app = router(&compute);
     Ok((cluster, compute, app))
 }
+
+/// Prepared1专用真实保留槽：旧原生API开门→真正PREPARE→关门，不伪造响应body。
+/// 合成平台管理事务仅供隔离测试，不授权伸缩器替客户选择提交或回滚。
+pub(crate) async fn native_prepared(signer: &Signer) -> Result<(Cluster, Arc<ComputeNode>, Router)> {
+    use std::io::Write;
+    let (mut cluster, _, _) = native_connections(signer).await?;
+    cluster.connect().await?.batch_execute("ALTER EXTENSION neon UPDATE TO '1.14'").await?;
+    let mut conf = std::fs::OpenOptions::new().append(true).open(cluster.data.join("postgresql.conf"))?;
+    writeln!(conf, "max_prepared_transactions=4")?;
+    drop(conf);
+    cluster.restart()?;
+    let sql = cluster.connect().await?;
+    sql.batch_execute("CREATE ROLE dsg_app LOGIN; CREATE TABLE public.prepared_native(i int); \
+        CREATE FUNCTION public.prepared_test_boot() RETURNS bigint AS '$libdir/test_dsg_region', 'test_dsg_boot_id' LANGUAGE C; \
+        CREATE FUNCTION public.prepared_test_gate(bigint,bigint,bigint,boolean) RETURNS boolean AS '$libdir/test_dsg_region', 'test_dsg_admission' LANGUAGE C STRICT").await?;
+    sql.simple_query("SELECT public.prepared_test_gate(public.prepared_test_boot(),1,1,true)").await?;
+    sql.simple_query("BEGIN; INSERT INTO public.prepared_native VALUES(42); PREPARE TRANSACTION 'native_retained'").await?;
+    sql.simple_query("SELECT public.prepared_test_gate(public.prepared_test_boot(),2,1,false)").await?;
+    let compute = node(signer.jwks.clone(), true, Some(&cluster));
+    let app = router(&compute);
+    Ok((cluster, compute, app))
+}

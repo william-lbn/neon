@@ -64,6 +64,8 @@ DATA = \
 	neon--1.12--1.11.sql \
 	neon--1.12--1.13.sql \
 	neon--1.13--1.12.sql \
+	neon--1.13--1.14.sql \
+	neon--1.14--1.13.sql \
 	neon--1.6--1.5.sql \
 	neon--1.5--1.4.sql \
 	neon--1.4--1.3.sql \

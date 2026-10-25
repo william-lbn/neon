@@ -33,6 +33,9 @@ class DsgConnectionGateLifecycle(unittest.TestCase):
                        f"unix_socket_directories='{self.public},{self.private}'\n"
                        "unix_socket_permissions=0700\ndynamic_shared_buffers_require_connection_gate=on\n"
                        "log_connections=on\nlog_line_prefix='[%p] '\n")
+        # 专项夹具在首次出生前固定postmaster-only参数；旧用例默认不变。
+        if extra := getattr(self, "extra_postgres_config", ""):
+            self.pg.config(extra)
         self.boot = self.pg.prepare_admission_fixture()
         self.pg.sql(f"CREATE FUNCTION dsg_connections() RETURNS text AS '{self.pg.quote(self.pg.library)}', "
                     "'test_dsg_connection_snapshot' LANGUAGE C VOLATILE PARALLEL UNSAFE")

@@ -114,6 +114,46 @@ async fn native_go_connection_ack_keeps_raw_management_and_original_pending() ->
 }
 
 #[tokio::test]
+#[ignore = "strict gate requires exact PG, Neon Prepared1 and precompiled Go race binary"]
+async fn native_go_prepared_state_keeps_retained_slot_and_original_pending() -> Result<()> {
+    let binary = std::env::var("NEON_TEST_DSG_GO_BIN")?;
+    let signer = Signer::new();
+    let (mut cluster, _, app) = support::native_prepared(&signer).await?;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
+    let address = listener.local_addr()?;
+    let _server = HttpTask(tokio::spawn(async move {
+        axum::serve(listener, app).await.unwrap();
+    }));
+    let token = signer.token(&signer.claims());
+    let initial = reqwest::Client::builder()
+        .no_proxy()
+        .build()?
+        .get(format!("http://{address}/dsg/v1/memory"))
+        .bearer_auth(&token)
+        .send()
+        .await?
+        .error_for_status()?
+        .json::<DsgMemoryResponse>()
+        .await?;
+    let mut original: DsgResizeRequest = serde_json::from_str(include_str!(
+        "../../libs/compute_api/testdata/dsg_request_v1.json"
+    ))?;
+    original.key.instance = initial.observed.instance.clone();
+    original.key.issuer_epoch = DsgUint64::new(1);
+    original.expected_capacity_generation = initial.observed.capacity_generation;
+    let input = json!({"http_base_url":format!("http://{address}"),"instance":initial.observed.instance,
+        "issuer_epoch":"1","token":token,"original":original});
+    run_go_test(
+        &binary,
+        &serde_json::to_vec(&input)?,
+        "TestNativePreparedState",
+    )
+    .await?;
+    cluster.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
 #[ignore = "strict cross-repository work gate requires exact PG and Go race binary"]
 async fn native_go_work_state_reads_actual_sql_without_clearing_pending() -> Result<()> {
     let binary = std::env::var("NEON_TEST_DSG_GO_BIN")?;

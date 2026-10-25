@@ -1324,6 +1324,78 @@ async fn native_connection_state_requires_formal_upgrade_and_real_postmaster_ack
     Ok(())
 }
 
+#[tokio::test]
+#[ignore = "strict gate requires exact PG and installed Neon Prepared1"]
+async fn native_prepared_state_requires_formal_member_and_keeps_retained_slot() -> Result<()> {
+    use compute_api::dsg_prepared::DsgPreparedResponse;
+
+    let signer = Signer::new();
+    let token = signer.token(&signer.claims());
+    let path = "/dsg/v1/work/prepared";
+    let (mut old, _, old_app) = support::native_connections(&signer).await?;
+    assert_eq!(
+        invoke(old_app.clone(), Method::GET, path, Some(&token), None)
+            .await?
+            .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    old.passed = true;
+    drop(old_app);
+    drop(old);
+    let (mut cluster, _, app) = support::native_prepared(&signer).await?;
+    let (code, body) = invoke(app.clone(), Method::GET, path, Some(&token), None).await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let fact: DsgPreparedResponse = serde_json::from_str(&body)?;
+    fact.validate_for(&fact.connections.work.observed.instance)?;
+    assert!(
+        fact.runtime_prepares_blocked
+            && fact.connections.acknowledged
+            && fact.connections.public_connections_blocked
+            && fact.connections.work.foreground_idle
+    );
+    assert_eq!(fact.prepared_slots, 1, "真实保留事务不能由前台idle补零");
+    assert_eq!(fact.maximum_prepared_slots, 4);
+    assert!(!fact.vm_shrink_permit);
+    let sql = cluster.connect().await?;
+    let row = sql
+        .query_one("SELECT gid FROM pg_prepared_xacts", &[])
+        .await?;
+    assert_eq!(row.get::<_, String>(0), "native_retained");
+    // 完成由测试中明确的原协调者选择；观察接口不替业务决定提交或回滚。
+    sql.simple_query("ROLLBACK PREPARED 'native_retained'")
+        .await?;
+    let (code, body) = invoke(app.clone(), Method::GET, path, Some(&token), None).await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let empty: DsgPreparedResponse = serde_json::from_str(&body)?;
+    empty.validate_for(&fact.connections.work.observed.instance)?;
+    assert_eq!(empty.prepared_slots, 0);
+    assert!(empty.runtime_prepares_blocked && !empty.vm_shrink_permit);
+    // 新函数仍须正式升级成员；降级不能由缓存的原生能力伪造成功。
+    sql.simple_query("ALTER EXTENSION neon UPDATE TO '1.13'")
+        .await?;
+    assert_eq!(
+        invoke(app.clone(), Method::GET, path, Some(&token), None)
+            .await?
+            .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    // 同点序列化公共helper被复用，旧Connection1直接路由的内容仍须可验证。
+    let (code, body) = invoke(
+        app,
+        Method::GET,
+        "/dsg/v1/connections/state",
+        Some(&token),
+        None,
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let connection: compute_api::dsg_connection::DsgConnectionResponse =
+        serde_json::from_str(&body)?;
+    connection.validate_for(&fact.connections.work.observed.instance)?;
+    cluster.passed = true;
+    Ok(())
+}
+
 // 真正的正式HTTP准入→普通应用事务→提交回调→正式同点观察，不能由body fixture
 // 或pg_stat_activity空闲拼许可。只使用准确PG/已安装Neon及本次独占目录。
 #[tokio::test]

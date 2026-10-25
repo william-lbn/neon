@@ -7,6 +7,7 @@ pub mod dsg_client;
 pub mod dsg_connection;
 pub mod dsg_control;
 pub mod dsg_initialization;
+pub mod dsg_prepared;
 pub mod dsg_state;
 pub mod dsg_work;
 pub mod dynamic_shared_buffers;

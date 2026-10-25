@@ -1,0 +1,126 @@
+{
+  "date": "2026-10-25",
+  "scope": "PG17两阶段保留槽原生登记与正式管理消费者；整体未完成",
+  "platform": "Mac arm64 SDK14.4 PG debug/cassert/injection-points",
+  "commits": {
+    "PG": "26e80ac6a3ad02fd149d272302d5bf9b4cbaa7ea",
+    "AS": "5b49d343c6223ffc18b40a150c0ea0a2c7f81c6b",
+    "CP": "f31fda8cb9c1d5d45c4a8a38f8306359d7a2e51c",
+    "CP_maintenance": "cf8e38733aabb5cab1b07c63a68d0f68dd42e4c7"
+  },
+  "versions": {
+    "BufferAPI": 6,
+    "WorkAPI": 2,
+    "ConnectionAPI": 1,
+    "PreparedAPI": 1,
+    "NeonExtension": "1.14"
+  },
+  "passed": {
+    "native_distinct": 6,
+    "native_skip": 0,
+    "native": "dsga-prepared-native.log5PASS1assertfail；error-replacement.log1PASS替换，总6场景，不重复5项",
+    "official": "official-regress.log prepared_xacts1PASS实际303行输出无SQLskip；official-isolation.log dedicatedprepared2PASS，DGonSB16MBmax64MB/maxPrepared10，不重复225/123",
+    "exact_replacement": "exact-native.log未valid/关门及真实WAL/磁盘恢复2PASS替换，不加计数",
+    "Rust_protocol": 1,
+    "Go_protocol_SDK_race": 2,
+    "CP_route_race": 2,
+    "formal_HTTP": 1,
+    "actual_Go_race_TLS_Router_JWT_SQL_PG": 1,
+    "Go_vet": "go-vet.log exit0",
+    "clippy": "api-clippy.log/http-clippy.log目标--no-deps-Dwarnings通过，未改依赖27警告保留",
+    "CP_exact_module": "Origin.Hash完整匹配AS；readonlyvet exit0，仅两项新sum",
+    "index": "18程序/4PG/39扩展阶段，5单测及Python/shell/YAML语法/新6收集通过；收集不算执行",
+    "CP_maintenance": "Node24 npmci--ignore-scripts，新增CLI/MCP本机HTTP/stdio15PASS0skip，仅新范围"
+  },
+  "actual_assertions": [
+    "同点2PC槽包括未valid准备、backend退出后保留及恢复；前台idle可与槽1共存",
+    "TwoPhaseStateLock→status串行，SU关闭新PREPARE拒绝；原有恢复不阻断，不停检查点",
+    "实际注册后ERROR触发原AtAbort/RemoveGXact回收，同GID可重用；满槽/重复不漏记",
+    "实际持TwoPhaseStateLock backend SIGKILL，WAL未checkpoint和落磁盘两种恢复只保留saved槽1，未持久reserved消失；数据42可见、99无",
+    "Neon1.14正式SQL，旧1.13缺成员503，真实槽1/最大4，显式原协调者回滚后0；降级503，原Connection1共享序列化有效",
+    "Go真实TLS/Router/JWT/SQL准确PG读取同点真实保留槽1、前台idle、Native事实不变、原Pending保留、零写POST"
+  ],
+  "failure_records": {
+    "native": "native.log只1失败：错误期望PL/pgSQL P0001，C ERROR实际XX000；仅修测试断言后单项替换通过，产品未弱化"
+  },
+  "compatibility": "独立Prepared1保持Work2/Connection1/Buffer6布局及ABI；runtime_prepares_blocked只禁止新运行期PREPARE TRANSACTION，WAL/磁盘恢复仍可增加旧槽。0槽不等于完整Quiesce；不是SQL PREPARE语句缓存。",
+  "reproduce": {
+    "native": "cd repos/neon/ci；NEON_TEST_PG_BIN=<prefix>/bin NEON_TEST_DSG_LIBRARY=<prefix>/lib/postgresql/test_dsg_region NEON_TEST_RMGR_LIBRARY=<prefix>/lib/postgresql/neon_rmgr python3 -m unittest test_dsg_prepared -v",
+    "official": "make -C <build>/src/test/regress check-tests TESTS=prepared_xacts TEMP_CONFIG=<preparedconf>；pg_isolation_regress --temp-instance=<ownedtmp> --inputdir=<source>/src/test/isolation --outputdir=<report> --bindir=<prefix>/bin --temp-config=<preparedconf> prepared-transactions prepared-transactions-cic",
+    "Rust_HTTP": "准确PG bin及EXPECTED_SHA26e80ac full；cargo test --locked --offline -p compute_tools --features compute_api/postgres-client --test dsg_http native_prepared_state_requires_formal_member_and_keeps_retained_slot -- --ignored --exact --nocapture",
+    "Go_HTTP": "同上+NEON_TEST_DSG_GO_BIN=<race build>；cargo test --locked --offline -p compute_tools --features compute_api/postgres-client --test dsg_go_http native_go_prepared_state_keeps_retained_slot_and_original_pending -- --ignored --exact --nocapture"
+  },
+  "remaining_CODE": [
+    "完整后台/并行/DSM及预备语句/临时/会话/扩展私有保留内存排空或持续上界",
+    "可信Prepare/Finalize/system outside、首次独立准入",
+    "Host/Scheduler/最终Controller-Runner-QMP、公开worker/生命周期、受控跨boot/owner未知关闭"
+  ],
+  "not_run": [
+    "Linux弱内存序/调度/进程压力",
+    "K8s/RBAC/NeonVM/KVM/cgroup2/HugeTLB/物理释放迁移/性能长稳",
+    "镜像构建、K8s准备/部署（排除）"
+  ],
+  "production_ready": false,
+  "vm_shrink_permit": false,
+  "source_sha256": {
+    "neon/ci/distribution.json": "7ef8734dc0db4d2264d5abd4d390f27961e795522a3f6a24216e866e14ee4cdd",
+    "neon/ci/test-dsg-postgres.sh": "6acbbae0f6c6fbac6e1a144abbf27c1e685d8f4b1d1c40991ad9b31e1c360431",
+    "neon/ci/test_dsg_connection_gate.py": "28eb3217ddada167761f11b649afb92df4c3c996453f3281bb928f7dd1a5b3dc",
+    "neon/ci/test_dsg_prepared.py": "8c866925ee62111bac4b2077f8fb9329f2aedf003d63b17be02a2dad3890f7e6",
+    "neon/compute_tools/src/http/dsg_openapi.yaml": "ff0fdf51deeee43f75d389509c5f1b8d5e73b91107fe91aaccb2f5c0e512f723",
+    "neon/compute_tools/src/http/routes/dsg.rs": "ab3ac6c17651ca669c11c851a5f1151e8fd8d942dcf9194537371cd000dff658",
+    "neon/compute_tools/tests/dsg_go_http.rs": "22718cc6a1067fa5a1e04bf53999163f59b8b667c5b306fe52111e46a7e0486c",
+    "neon/compute_tools/tests/dsg_http.rs": "09cc692566099bc68e3bec2628fa6e8b9b3674da1322c9d09a95a0b94d0f24e8",
+    "neon/compute_tools/tests/support/dsg_http.rs": "05d7a6db2fa8cac18757b4597224f43c04c6c550f03f02e4fb0fe9e4a6a1b8e8",
+    "neon/libs/compute_api/src/dsg_client.rs": "490731a47e3375f8f45dca5fb772572f61e5c30b346a65af287ee30f56e68291",
+    "neon/libs/compute_api/src/dsg_prepared.rs": "297df61f0dbf64289ad5f3914787156a5f2ff97b14c1ae0d6c7202af917949fd",
+    "neon/libs/compute_api/src/lib.rs": "3acca173b23d8b415c1f6da14b8e26e321fa7547a83f2ef35712b8b69c98abdf",
+    "neon/libs/compute_api/tests/dsg_prepared.rs": "7d7d986fd27df4841add7a5dfd606615c54d6b00c1d59aade1399d09be1ecf6d",
+    "neon/pgxn/neon/Makefile": "511191863197b885248f2017216ce3364aeddcaeb61e67c64ec1d97aa1a55975",
+    "neon/pgxn/neon/dsg_control.c": "679ef89bb17eab9fce1525320b452aaa2eb326155c986121058d156aea09d0f8",
+    "neon/pgxn/neon/neon--1.13--1.14.sql": "7f407234ff5ef42847f287163a35f1e3b588bf6f9883c682e1d867dc0ab40e13",
+    "neon/pgxn/neon/neon--1.14--1.13.sql": "e8f943a7fc651039ff667aef51aeb7b91278a6f4a41b8c3b129ae9d12df94186",
+    "neon/pgxn/neon/neon.control": "ec432753687f772e67d76c02cc899d8fcf1b0a0fe7c775bb4d22a0a494c13101",
+    "neon/vendor/revisions.json": "b38cdebee02e82f802f4e35688702752321c10428b4bddb3cfd02411924d176d",
+    "neon/vendor/postgres-v17/src/backend/access/transam/twophase.c": "00ea6f8e338d765c3e420e129b45f78e9c1bc3b444de276b6b3024bd6444ff44",
+    "neon/vendor/postgres-v17/src/backend/storage/buffer/dsg_work.c": "7fb7892011420a64eae769adb6a7a813ae23408db40925eec4edf971d4124e8b",
+    "neon/vendor/postgres-v17/src/include/storage/dsg_work.h": "6193d220dee5d93be1a4fc315edfe0998128469db6e2f1758e5b979a37923b45",
+    "neon/vendor/postgres-v17/src/test/modules/test_dsg_region/test_dsg_region.c": "e7461cd071fb93283555c9a5682fc928a60d8f2b1226f0322c5d4a0449aba424",
+    "autoscaling/pkg/api/dsga/prepared.go": "dfd8d901d6d6363ce677b37a733132cebfbb05e5e359ac7f48afe85b43f1d50c",
+    "autoscaling/pkg/api/dsga/prepared_test.go": "5cf4a6255ba489cb18de203a65eb0a59cdf13a4c7969ddd036cf1d68eea4a7c2",
+    "autoscaling/pkg/dsga/compute/native_prepared_test.go": "bdaf4e9adc0400e6439f26310044302be93f70675d23411a3fb3f22d4bebcdbc",
+    "autoscaling/pkg/dsga/compute/prepared.go": "90d268be86261304cc650c0a754d8ace0e2d3e22a1c508df5d176b5649b2b66b",
+    "autoscaling/pkg/dsga/compute/prepared_test.go": "fdd4833324685e1eb64fc37d743b6c8698beaf8cc891c7742d6857fd16fea326",
+    "control-plane/api/go.mod": "9e6ab1788ac67e16ccb241ae92cd8b891c4e479a220352da90642d588d853462",
+    "control-plane/api/go.sum": "1f51acb8516465497dcfd356be759f1cebb4fa9a38c7a70c69a867f7f6e221e5",
+    "control-plane/api/internal/control/dsga_proxy.go": "e5d9a0af7180e3bb69867ae9e06f98432851deba837936704b8ac9488ff2b862",
+    "control-plane/api/internal/control/dsga_proxy_test.go": "737be5dbf69acef923a05189741ffded74a63fdfe0718dc581ae025129911411"
+  },
+  "artifacts_sha256": {
+    "build/pg17-prepared-exact-install/bin/postgres": "1dd0a151d072b28d1da61c9be6375203e5d6f360ef1a884032c7eac93bfcccd0",
+    "build/pg17-prepared-exact-install/lib/postgresql/neon.dylib": "c7f1c0ac49e1f8b3594a272089e63afb958d3905f49db131366eda66dff96a69",
+    "build/pg17-prepared-exact-install/lib/postgresql/test_dsg_region.dylib": "da39a511ae51ad98221b74581a0a3bb2d5533c1a1a22b0703056bd056ea801ec",
+    "build/pg17-prepared-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e",
+    "build/dsga-prepared-go-native.test": "b5921171d4cb0e30d8f3c39d6c45feef4ff7d7e674ff517830a283491c1b8cd2"
+  },
+  "logs_sha256": {
+    "build/dsga-prepared-native.log": "3274a153bcc89ca2536fe7d4ef0018f31b318c6f9b32d420069128e0468334cd",
+    "build/dsga-prepared-error-replacement.log": "77bf314d9f154626389118a34fa5058efdbf0c6de5e32488f179099173135ae9",
+    "build/dsga-prepared-official-regress.log": "d33bc15d45112ed927d10d970803bb6e29276080228544115aa8541b656d9876",
+    "build/dsga-prepared-official-isolation.log": "385dc2918b0de558cdc6e01234c7fd7f54ef046d217ba9f5395d0b042581d115",
+    "build/dsga-prepared-exact-native.log": "fea186b828ad2fdfd9956989b6cd9221ff55f4a414014f86844746bc832ae4aa",
+    "build/dsga-prepared-http-native.log": "5934446f254754b74769909abd33cd575b7bed7c7bd7a616e40f787b5fb25a5c",
+    "build/dsga-prepared-go-http-native.log": "2446858492bd9d3f06893ce85e5111846c97a94bec8c4e8d17499e2900bb360e",
+    "build/dsga-prepared-rust-contract.log": "7b231b52fd09d0c4226079db5cf36797da723626834544a9408d5dcae08ceccb",
+    "build/dsga-prepared-go-new.jsonl": "e75f31df130478524fcffb1a1cea92348a2634a13671e78c40bd36f79d43ae15",
+    "build/dsga-prepared-go-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-prepared-cp-proxy.jsonl": "c3931c70e45d56cce3ddde9ae116a6427773dcd94d94487c630ee3dc67f864c4",
+    "build/dsga-prepared-cp-final-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-prepared-api-clippy.log": "a8c2435144f3dffa7a5e3443820b248f3ffe9c88d6e06bfd83c3e8f1c953e10a",
+    "build/dsga-prepared-http-clippy.log": "f431a7591e1c5eb4f66a55b78ba4e5f97b83261644bb43797bfe8abb8e9d8d43",
+    "build/dsga-prepared-index.log": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "build/dsga-prepared-index-tests.log": "2e96c20d902885902b871650ec9b1a622713f607f4a0f4aadbf9429fd1fb8c67",
+    "build/dsga-prepared-exact-version.log": "1cfaba5443de4fd1a3630fa801e9765b6e17fd3beeb3dcc4e908141673fb1379",
+    "build/dsga-prepared-neon-build.log": "be0ea919441384fedc563bd4f59b040902b6bd99c128854cd1070aad2e579302"
+  }
+}

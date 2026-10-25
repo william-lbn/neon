@@ -35,6 +35,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/budget/shared", get(shared_cost))
         .route("/dsg/v1/work/state", get(work_state))
         .route("/dsg/v1/connections/state", get(connection_state))
+        .route("/dsg/v1/work/prepared", get(prepared_state))
         .route("/dsg/v1/resource/identity", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/process", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/state", get(super::dsg_resource::proxy))
@@ -194,6 +195,24 @@ async fn connection_state(
             Err(_) => failure(
                 StatusCode::SERVICE_UNAVAILABLE,
                 "connection_observation_unavailable",
+                None,
+            ),
+        },
+        Err(error) => error,
+    }
+}
+
+// 固定只读路径复用原认证/current issuer/实例检查，不能由外部body报prepared计数。
+async fn prepared_state(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+) -> Response {
+    match client(&compute, &claims).await {
+        Ok(client) => match client.prepared_state().await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(_) => failure(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "prepared_observation_unavailable",
                 None,
             ),
         },
