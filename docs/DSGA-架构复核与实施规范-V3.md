@@ -776,6 +776,24 @@ Mac真实执行Owner/Lease/Store/CAS/SDK/TLS，Kube/root/PG为协议夹具，旧
 负向证明及去重17场景范围见[本批实际证据](DSGA-最终准入原资源复核-Mac基本验收-20261026.md)。
 本项不是首次准入或完整Prepare/Finalize实现，不授权VM/物理释放。
 
+### 8.22 首次PG身份先于任何执行器持久固定（2026-10-26）
+
+首次准入不能等首个Resize才把PG写入HWM。实际PGWorker仅在首次只读能力
+协商后，以原VM UID/RV CAS固定完整PGInstance；确认前不返回可用worker。
+写后丢回复保留可能已提交的原绑定，不重新发现当前boot。Clone/owner接管/
+历史淘汰均保留；显式另一个boot在凭据/HTTP之前拒绝。错误资源参数不能先
+污染首次身份，绑定本身不写PG准入/floor、不创建Active/HWM或预算/VM许可。
+
+创建保持Model v1，首次绑定与Model v2同CAS，v2必须带PGInstance，外层信封
+仍v1。此Model格式和最终Resume审计v2不同；旧严格读者拒绝新字段，并拒绝
+正确checksum的v2旧字段投影，原v1仍可读。所有读者先升级再启用，不删字段/
+降版本或重造日志回退。旧v1按原HWM恢复、不补首次字段；原历史保持可读，
+新请求不能更换HWM所指PG。旧未知Busy与同boot新owner可继续，通用Cleanup
+不能替代独立PG/资源/VM跨boot关闭证明；该受控恢复仍须实现。
+
+Mac实际Owner/SDK/typed Store/CAS及旧读者验证范围见[本批证据](DSGA-首次PG身份持久绑定-Mac基本验收-20261026.md)。
+本项只完成首次身份基础，首次预算/开放及完整预算/最终VM仍不可省略。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

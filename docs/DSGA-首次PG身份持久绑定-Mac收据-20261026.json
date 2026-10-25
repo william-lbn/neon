@@ -1,0 +1,202 @@
+{
+  "created_at": "2026-10-25T19:34:54.045162+00:00",
+  "scope": "首次PG身份先持久绑定的生产worker及准确读者集成；不是首次预算/开放、完整预算或VM许可",
+  "branches": {
+    "Neon": "codex/dsga-neon-v3-20261019",
+    "AS": "codex/dsga-autoscaling-20261019",
+    "CP": "codex/dsga-control-plane-v3-20261020",
+    "PG17": "codex/dsga-pg17-v3-20261019"
+  },
+  "as_commit": "da2aa56a1efaf6241ebf85c7814542e41e757a66",
+  "as_remote_verified": true,
+  "cp_commit": "21cdec42c379ae3d8eb5242640ab17d35117b596",
+  "cp_remote_verified": true,
+  "cp_module": {
+    "pseudo": "v0.0.0-20261025192811-da2aa56a1efa",
+    "OriginHash": "da2aa56a1efaf6241ebf85c7814542e41e757a66",
+    "sum_delta": 2
+  },
+  "pg_commit_unchanged": "b812536cd983595ba233a7fad418d9bae448b2f3",
+  "pg_gitlink_index": "160000 b812536cd983595ba233a7fad418d9bae448b2f3 0\tvendor/postgres-v17",
+  "pg_two_locks": "各一次同fullSHA",
+  "neon_extension": "1.15 unchanged",
+  "maintenance_freshfetch": [
+    {
+      "repo": "neon",
+      "ref": "upstream/main",
+      "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+      "missing": 0
+    },
+    {
+      "repo": "autoscaling",
+      "ref": "upstream/main",
+      "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+      "missing": 0
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "ref": "neon-upstream/REL_17_STABLE_neon",
+      "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+      "missing": 0
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "ref": "pg-upstream/REL_17_STABLE",
+      "sha": "bd807012669ed8573317562b78c1221e4fabe373",
+      "missing": 0
+    },
+    {
+      "repo": "control-plane",
+      "ref": "origin/main",
+      "sha": "f7df93a2dc9443f653d218960536a8e119b45645",
+      "missing": 0
+    }
+  ],
+  "validation": {
+    "distinct_top": 36,
+    "distinct_including_subcases": 71,
+    "test_skip": 0,
+    "final_failures": 0,
+    "candidate_narrow": "8top/29inclpass",
+    "full_journal_initial": "53pass1fail, oldtestassumedgenericCleanupallowedbootchange; failurelogretained",
+    "target_replacement": "newly named controlledboot test replaces oldfailure; legacyproofandotherreplacementnotdoublecounted",
+    "owner_admission_recovery": "only2changedpaths; other15notrepeated",
+    "old_product_negative": "beforeproductedit, noResize boot11→12 accepted; expectedfailedtestretained",
+    "old_reader": "actual oldmodel/store+unchangedoldcodec overlay: originalv1accepted, newfieldrejected, validchecksumv2oldfieldprojection rejectedbyversion",
+    "old_reader_initial_assertion": "testexpectedversionerrorbutstrictdecoderfirstrejectedfield; productalreadyfailedclosed, correctedcommentandassertions; initialpaniclogretained",
+    "models": "actualOwner/Lease/typedStore/WAL/RFC6902/CAS/SDK/TLS, Kube/PGcapabilities explicitfixtures",
+    "vet_exit": 0,
+    "agent_linux_crosscompile": [
+      "amd64",
+      "arm64"
+    ],
+    "artifact_provenance": "final3 binaries built beforecommit from finalbusiness source; no release VCStag claim",
+    "not_repeated": [
+      "PG/DSM/nativeHTTP",
+      "unchangedtest_compute5"
+    ],
+    "not_executed": [
+      "Linuxkernel/HugeTLB/physical",
+      "realK8s/NeonVM/E2E/performance"
+    ]
+  },
+  "cp_validation": {
+    "reader_race_pass": 1,
+    "failed": 0,
+    "skip": 0,
+    "initial_setup_failure": "newtestlibraryneeded extra x/textsum; replacedwithstandardtesting, no extradependency; initialsource/log retained",
+    "readonly_vet_exit": 0,
+    "models": "actualdedicatedTLSbroker/typedStore/CAS; KubeTokenReviewfixtures; noPG or fullbudget claim"
+  },
+  "index": "18binaries/4PG/39extensionstages PASS; unchangedtest_compute5 not repeated",
+  "format": "Modelv2 requiredPGInstance, envelopev1, distinctfromResumeauditv2; readersfirst/no fielddelete orresetrollback",
+  "still_code": [
+    "可信Prepare/Finalize/SystemOutsidePG来源",
+    "安全降normal/后台私有上界",
+    "首次预算/开放",
+    "Host最终VM/公开worker/受控跨boot"
+  ],
+  "linux_later": [
+    "kernel/HugeTLB/cgroup/physical",
+    "K8s/KVM/NeonVM/E2E/performance"
+  ],
+  "owner_AGENTS_SHA256_preserved": "5c61959674c362ecc4c3709930121304595e8b0bca1ff70ae401f0cf8f2803c1",
+  "source_sha256": {
+    "repos/autoscaling/pkg/dsga/journal/model.go": "f4c3643d782a91b07a4a76ac53f2cff7f9d0bc46062c1d4c73198dc2ed30fe29",
+    "repos/autoscaling/pkg/dsga/journal/store.go": "cc9747c61f455537d828565c8b3a6e4f17ea4f9178513392588a186049dc61c5",
+    "repos/autoscaling/pkg/dsga/journal/model_test.go": "082486c561d397dce00d166c6be06d8395aa43d69214c2f7575d72830be6620e",
+    "repos/autoscaling/pkg/dsga/journal/pg_binding_test.go": "5eb18570065bffcdc00495461e6d8bbf59ad01af8e71a37fbf9c0d6c4e533b9f",
+    "repos/autoscaling/pkg/dsga/owner/pg.go": "9bece15f41ccdf50bc78321c08dc93c0f0f117e5d80c1ca1d972a631a0bd0622",
+    "repos/autoscaling/pkg/dsga/owner/pg_binding_test.go": "c4e2eff15ed999f371b6d2077e1b36b0fe481b85a9549f58b7aade54700f54d6",
+    "repos/autoscaling/docs/DSGA-首次PG身份持久绑定-Mac验收-20261026.md": "ddd8bb0409aff7aef2813ab5a07d87627b7e39bceac31d3e517ba1e392d32210",
+    "repos/control-plane/api/go.mod": "356ecb3e0832d18c11968b401e4b9f2f4c6884d9ecd3b5f672335177d3c8880b",
+    "repos/control-plane/api/go.sum": "951c48c4b6263479d4e3187812b8acc613ef64780330a6ac61bf294fada7cc59",
+    "repos/control-plane/api/internal/control/dsga_pg_binding_test.go": "a095d5b4b4bdbee74e8cf2bbf3f73c6e926e091cadf252e9b552aaf412492a43",
+    "repos/control-plane/docs/DSGA-首次PG绑定账本读者-Mac验收-20261026.md": "1ae6c90874f0904b838f7073c7b753ecde6893945e980078048b71c23e1737a6",
+    "repos/autoscaling/docs/DSGA-首次PG身份持久绑定-Mac收据-20261026.json": "6c5ded6e6cfde1018b32ae5df95753b297eb4aff82ca5508c5e54d6316fdd06d",
+    "repos/control-plane/docs/DSGA-首次PG绑定账本读者-Mac收据-20261026.json": "9f013646c8ac039d5aa92ab4cd9ad66dce03350db057401acd2946525dd272a7",
+    "repos/neon/ci/distribution.json": "e794ca26182025948c9deb110ec3806866d62e77133f899e3f315b9ee8410ba1",
+    "repos/neon/vendor/revisions.json": "b6e214c9ec8ae2c194099aa23d7d0f288a5ae901b4f7eb983f116b4b2c35feb1",
+    "repos/neon/docs/DSGA-当前实施状态.md": "400b7e4e090676e30c9ca05884f4a3785aa62d1b32757431fc141abb367c1eec",
+    "repos/neon/docs/DSGA-架构复核与实施规范-V3.md": "d7a4227d80dd1650e1b0871d0b232f1d9bb6af01251afc59252faaf6139cd9f4",
+    "repos/neon/docs/DSGA-首次PG身份持久绑定-Mac基本验收-20261026.md": "1ca11a3b6c3c3a14c9ef49d11a3024a6b73471dbd04debfdd520bf38154130a9"
+  },
+  "artifact_sha256": {
+    "build/dsga-pg-first-binding-final3-agent-linux-amd64": "53c1c75498423081e42b4c2766fa3406fd48ae4125f13778ebb44aacb9fc88d9",
+    "build/dsga-pg-first-binding-final3-agent-linux-arm64": "c41efc891848fca05886821442cf9a86deb0e2f9b3ca0feacdcc646fbf0ccd9a",
+    "build/dsga-pg-first-binding-v2-vm.json": "4dff9598153790f6f99c8710cafbc329f411b3684e9bdb3013b7183062e58b02",
+    "build/dsga-pg-first-binding-v2-vm.json.v1.json": "838aff8eb3a8446365e4bbfa3963c3db503157fb4a017784153e37994830fb0b"
+  },
+  "exact_pg_artifacts_unchanged": {
+    "build/pg17-nonshmem-exact-install/bin/postgres": "58bd131d09d24ad5590ebe87e9dd2ec96c9f1061017ba56aa44ff3089e56958c",
+    "build/pg17-nonshmem-exact-install/lib/postgresql/test_dsg_region.dylib": "2c20e0152aee45d875ed0bb96c66a7d0a5b126ee5710cdc7ee8ce67333374bbe",
+    "build/pg17-nonshmem-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e",
+    "build/pg17-nonshmem-exact-install/lib/postgresql/neon.dylib": "73de874036aeb13e718be346257540fa8170eb3e46d6a612cef39e6be3b589ae"
+  },
+  "log_and_recipe_sha256": {
+    "build/dsga-pg-first-binding-admission-recovery.jsonl": "7b6ed2962dbb5abe0cf6e0990891547f456f4ffcc7af76f80480fa5810bc16a8",
+    "build/dsga-pg-first-binding-admission-recovery.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-agent-linux-amd64.log": "682d11219bfef31b24e445f5776dd350ea7271a3f084a63fe757ab7e2303edd1",
+    "build/dsga-pg-first-binding-agent-linux-arm64.log": "f66c57e016a12da41b09cefe7f2d8cf06010c4952679fd0c466c88427a5c19b3",
+    "build/dsga-pg-first-binding-final-agent-linux-amd64.log": "b2eef791af00e45c49902060e4597a8ef73c21199603a37fc17c2ec334babd03",
+    "build/dsga-pg-first-binding-final-agent-linux-arm64.log": "caa518c50d6e57b3165306cc4dbd239c8bf594cbb3cee884e6aa6dd055de5d0d",
+    "build/dsga-pg-first-binding-final2-agent-linux-amd64.log": "85125ffe6584b9b10bdfa40c9d520bdd8dd88b40b9fd0f11f8a82e1b2b89e4ce",
+    "build/dsga-pg-first-binding-final2-agent-linux-arm64.log": "fe9752b2a63387f2929d9f0f452de9172b5baa69e67499372aa10368a0904782",
+    "build/dsga-pg-first-binding-final2-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-final3-agent-linux-amd64.log": "11f6573bc03f075f2c6d656eaf318f02d981042893a92bc770b149a666716e9a",
+    "build/dsga-pg-first-binding-final3-agent-linux-arm64.log": "9d061b76db9526906afe922d7cb907b91f2466f86b8cab21bf2f2c43108f6440",
+    "build/dsga-pg-first-binding-final3-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-go.jsonl": "4dc4bd86490e0a3a3988880abb3baa3749ce01ec37c36a12c12181ffbca9078d",
+    "build/dsga-pg-first-binding-go.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-invalid-resources.jsonl": "f34e26084fb53469deab1a3cda8fbcd1c9b7b1fcc611b2dd8b0d8ecb1d2906af",
+    "build/dsga-pg-first-binding-invalid-resources.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-journal-final.jsonl": "cd1eb344c057bfd2cda634387afae539b2ff1586209ef91bdfcd59a8c583922c",
+    "build/dsga-pg-first-binding-journal-final.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-journal-replacement.jsonl": "f24e0204e5368df5bb0c589a18d0db88509a29f5581accd155d695299aede02e",
+    "build/dsga-pg-first-binding-journal-replacement.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-legacy-cases.jsonl": "a6d8d50ead1a6d6029d2cd53eb711e8052da6fdb526faac3a303ec30ec7cee7a",
+    "build/dsga-pg-first-binding-legacy-cases.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-old-model.go": "7235fd249ff780dc426822ca566d924de56e6cadb3451284fdeebd331148e280",
+    "build/dsga-pg-first-binding-old-negative.jsonl": "30b92cd7835832ab3f83b669d4ed080b03552b045c566a7b14fda29ae215504c",
+    "build/dsga-pg-first-binding-old-negative.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-old-reader-complete.log": "0c7550730d13569b7a6acf51968dd45f02df6ef0bc37ef14a6937fb7f43b53e7",
+    "build/dsga-pg-first-binding-old-reader-final.log": "b95f0af8a816e07aec2db9c6b646781e1b0c89f61a401a7775ab78251a22c5d2",
+    "build/dsga-pg-first-binding-old-reader-initial.go": "d43a076a9eb7e5c40939913521e979572e69a9d1333e2a69d30602dc3e105838",
+    "build/dsga-pg-first-binding-old-reader-overlay.json": "1a20a7b0f091a4b6dd032c9df18bd309ef32a8643fea59e5f2b55d93a56814e4",
+    "build/dsga-pg-first-binding-old-reader.go": "2ac59ea1828e555fcff87d291079e22d20d72ed6e65c3a052b82f3fd08c715bf",
+    "build/dsga-pg-first-binding-old-reader.log": "0c6715265104d3fa82bf851b19ac0c0b2cd287ddbbd35141dffa9d5a82e20681",
+    "build/dsga-pg-first-binding-old-store.go": "6a930b5be2ad726a746f723387fc8b40df7f618d08a52e54f01994027b6d5bff",
+    "build/dsga-pg-first-binding-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/run-dsga-pg-first-binding-admission-recovery.sh": "ff11f246f23c29ddf62c433d2881bab0a5913a87c6a51969cd4d54693b06d04e",
+    "build/run-dsga-pg-first-binding-agent-compile.sh": "650f88d8044b8412534ccd42604e6ed01856c4a9a92a9fbcf90a4cb18cb2adc9",
+    "build/run-dsga-pg-first-binding-final-agent-compile.sh": "e1eadc2a422b9b4582f1587b8d14d87defa834d3acb21184150054a912d0f100",
+    "build/run-dsga-pg-first-binding-final2-agent-compile.sh": "963646667b1c1502b6c622918b1cfe156df4b3e0647ca26b65a700d862372adf",
+    "build/run-dsga-pg-first-binding-final2-vet.sh": "5d5242e8b66cf86dd8236d54a2c239947db45be0920434d2b631363dca59c17c",
+    "build/run-dsga-pg-first-binding-final3-agent-compile.sh": "f93eb4b3eca17d33167fe34d3bac2530612843da65eb943f02720685ac4a75ac",
+    "build/run-dsga-pg-first-binding-final3-vet.sh": "4f15a295c70c4c1c04b8e07ff27782d473bd64ae5e9ad2f2ccc4a6ec977bac4a",
+    "build/run-dsga-pg-first-binding-go.sh": "a9337ceb3f742e811ac4051d9177ae55a02685922d536d7594e2dafd7d92ed46",
+    "build/run-dsga-pg-first-binding-invalid-resources.sh": "3235892b32f8cea88c879903d2515701e8348b4518787f25f33b5dd727691fd2",
+    "build/run-dsga-pg-first-binding-journal-final.sh": "515020c78c7ca4ccfd32ecc742393f2d1f1edc7894b4a7553c034eb84edb36f9",
+    "build/run-dsga-pg-first-binding-journal-replacement.sh": "4e20dddf47ab23aa1a84c003599e35e479aff3d014d5ad3dc871b2e5f96e263f",
+    "build/run-dsga-pg-first-binding-legacy-cases.sh": "60ef09c85c88320cae5f8fc6e1d9b329ad44d2430381c354ed205aef2c768cb1",
+    "build/run-dsga-pg-first-binding-old-negative.sh": "496024f7afd814519f3b99e64c0fc7d633d3e3d8b908dce0fe9cc569cb1643ca",
+    "build/run-dsga-pg-first-binding-old-reader-complete.sh": "17e6f9113c2f3e8c66ed67a607dd7efe3b33eb8074b9dd7dec59c9720afc2257",
+    "build/run-dsga-pg-first-binding-old-reader-final.sh": "aeb0541332075f93c8bc612cd057d809603ae3172e00e58a0086d019f9206deb",
+    "build/run-dsga-pg-first-binding-old-reader.sh": "12ac9df44c001d8f7cde1addc8aaecd928082765d06235276eaad6cbf59af498",
+    "build/run-dsga-pg-first-binding-vet.sh": "ec9be740c1fb6453f2a4ba00b7a2dcb5a5f7a605e7399ec40b39c037dc887168",
+    "build/dsga-pg-first-binding-cp-module.json": "840f8d10e1ef0057848c082830a84d6f907be33456c3580695a8cc9b97d7f248",
+    "build/dsga-pg-first-binding-cp-module.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-cp-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-cp-reader.jsonl": "45e793b20d0798a8adbf968d4c4d06e4882783536693173f19b97a7f50664a48",
+    "build/dsga-pg-first-binding-cp-reader.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-cp-reader-final.jsonl": "fd6919eb04c2233e3e7bbc21420dbf40b4c17e73cfc17acc6fab5ca2d3b446d8",
+    "build/dsga-pg-first-binding-cp-reader-final.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-pg-first-binding-cp-reader-test-initial.go": "f123fc112d97c6069f41f7d0db75b10559eb41613e337a1bdcb1bcec3d1bd6db",
+    "build/run-dsga-pg-first-binding-cp-dependency.py": "11cd53acd573726a8a3117b5c64dc6fa2ceafcbbd1c623a4c69cc6f766857567",
+    "build/run-dsga-pg-first-binding-cp-reader.sh": "3fa233064a37bbf0ae384f52098336f9af0a7a2eb331208f28d1c441b0d2af78",
+    "build/run-dsga-pg-first-binding-cp-reader-final.sh": "559fb38c380a9184b61d1e9f84497867229bcdc5e0d00d7c3383fc181817205e",
+    "build/dsga-pg-first-binding-index.log": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "build/dsga-pg-first-binding-diff-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "goal": "active/incomplete; PG17only; noimages/noK8s/mainmerge/release"
+}

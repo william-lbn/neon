@@ -3,7 +3,29 @@
 更新：2026-10-26（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-26 最终开放准入的原资源持续复核（仍非整体完成）
+## 最新：2026-10-26 首次PG身份先持久固定（仍非整体完成）
+
+AS da2aa56a1efaf6241ebf85c7814542e41e757a66已先推并核验，沿原服务分支。
+首次能力只读发现后，以原VM UID/RV CAS固定PGInstance才返回实际worker，
+不等首个Resize/HWM；写后丢回复保留原身份。参数/显式boot均先校验，空Active/
+接管/历史淘汰不改绑；旧v1沿原HWM恢复不补字段，新请求不能改HWM收养新boot。
+通用Cleanup不是跨boot关闭证明，原未知Busy/旧历史可读及同boot推进保留。
+
+首次绑定原子升账本Model v2，必带PGInstance，外层信封仍v1；与最终Resume
+审计v2不同。旧读者实测原v1可读，新字段和v2投影均拒绝，所有读者先升级再
+启用，不删字段/重造日志回退。Mac去重36顶层/71含子项race通过0测试skip，
+原完整journal53过1旧合同失败后只替换该项；实际旧读者三条检查、最终vet和
+Agent双Linux架构仅交叉编译通过。控制面准确自有模块Origin同da2、最小2sum/
+readonly vet，以及新增专用TLS签发器读v2的1项race通过，不改账本/凭据。
+Neon AS同锁，PGb812三处/扩展1.15不变，不重测PG/DSM/nativeHTTP/发行单测5。
+见[本批实现与证据](DSGA-首次PG身份持久绑定-Mac基本验收-20261026.md)。
+
+这只是首次身份基础，首次预算和开放仍须代码。完整可信Prepare/Finalize/
+SystemOutsidePG、安全降normal/后台私有上界、首次预算/开放、Host最终VM/
+公开worker/受控跨boot仍未完成，不包装成仅待Linux。Goal active/incomplete，
+只PG17、默认关闭，不构建镜像、不准备/执行部署、不合main；目标内核/物理另验。
+
+## 历史：2026-10-26 最终开放准入的原资源持续复核（仍非整体完成）
 
 AS d6979c068866b310e0cfc1dd04a075081b1684a9已先推自有原分支并核验远程。
 实际Agent/PGWorker的最终ResumeAdmission现在复用同一认证root，开放/显式
