@@ -9,6 +9,12 @@
 合入该项目main、不在这里修改其业务或分支；相关官方核心维护仍按规范同步。
 控制面暂缓不豁免预算、准入、Scheduler/Controller/Runner等核心业务缺口。
 
+同日所有者要求收尾封版：已于17:29:30（Asia/Shanghai）完成本轮最后一次PG17
+官方核对，完整纳入该时点公开维护后冻结；不再逐批追入新上游打断闭环。固定
+完整SHA、原分支与核心封版门槛见[冻结清单](DSGA-冻结基线与封版清单-20261026.md)。
+冻结后只补核心缺口、修自身缺陷和验证受影响范围；旧维护流程的追新要求不再
+适用于本轮，其他PG版本/独立控制面移植仍暂缓。
+
 ## 1. 复核结论及文档优先级
 
 **技术方向成立，但现有方案和已完成代码还不足以支持生产上线。** 在 Neon Compute 中动态调整 Shared Buffers，需要修改其 PostgreSQL fork 的 Buffer Manager；只改 Rust Pageserver、LFC 或 VM 内存无法完成这件事。应继续沿用 Neon 存算分离、PG 原生 pin/锁/WAL/smgr 和现有 Autoscaling 控制链。

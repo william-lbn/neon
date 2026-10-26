@@ -1,0 +1,413 @@
+{
+  "date": "2026-10-26",
+  "module": "frozen-pg17-two-phase-checkpoint-maintenance",
+  "goal_complete": false,
+  "default_disabled": true,
+  "baseline_frozen": {
+    "schema": "dsga-frozen-upstream-baseline-v1",
+    "cutoff_utc": "2026-10-26T09:29:30.311677+00:00",
+    "cutoff_asia_shanghai": "2026-10-26T17:29:30.311677+08:00",
+    "frozen_for_current_release": true,
+    "owner_instruction": "先纳入今天截至冻结时点已公开的PG17修复，停止持续追新上游；集中完成当前内存伸缩核心并封整体版本。控制面独立开发完成后再移植闭环。",
+    "upstreams": [
+      {
+        "repo": "neon",
+        "remote": "upstream",
+        "ref": "upstream/main",
+        "sha": "fa504217c61bbcaf5c512d75830564541f917f8f"
+      },
+      {
+        "repo": "autoscaling",
+        "remote": "upstream",
+        "ref": "upstream/main",
+        "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f"
+      },
+      {
+        "repo": "neon/vendor/postgres-v17",
+        "remote": "neon-upstream",
+        "ref": "neon-upstream/REL_17_STABLE_neon",
+        "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4"
+      },
+      {
+        "repo": "neon/vendor/postgres-v17",
+        "remote": "pg-upstream",
+        "ref": "pg-upstream/REL_17_STABLE",
+        "sha": "15f57b683d236b7dad4d57d03d8b7bac0e63a204"
+      }
+    ],
+    "freeze_does_not_claim_future_commits": "冻结时点之后发布的提交不在本轮自动纳入范围，下一轮维护或项目所有者明确解冻后处理。",
+    "development_branches": {
+      "neon": "codex/dsga-neon-v3-20261019",
+      "PG17": "codex/dsga-pg17-v3-20261019",
+      "autoscaling": "codex/dsga-autoscaling-20261019"
+    },
+    "control_plane_frozen": "d84c0b73004a7d8cc3e89f3c3f0e3f06cfa8cba9",
+    "other_pg_versions_deferred": true
+  },
+  "PG_published": {
+    "sha": "b078736a4cfdfccce69914feefb5b5e56560c1e8",
+    "branch": "codex/dsga-pg17-v3-20261019",
+    "remote_line": "b078736a4cfdfccce69914feefb5b5e56560c1e8\trefs/heads/codex/dsga-pg17-v3-20261019\n"
+  },
+  "PG_base": "11dcee22d3e3b29e6c57af876159d62e32ca3178",
+  "official_import": "15f57b683d236b7dad4d57d03d8b7bac0e63a204",
+  "AS_unchanged": "6d59154f69a9d669e8117ed3c1e59ca7ba62ede8",
+  "control_plane_deferred": {
+    "head": "d84c0b73004a7d8cc3e89f3c3f0e3f06cfa8cba9",
+    "no_import": true
+  },
+  "validation": {
+    "candidate_native": 3,
+    "official_prepared": 1,
+    "existing_native_prepared_crash": 1,
+    "old_negative": 1,
+    "failures_final": 0,
+    "skips": 0,
+    "initial_fixture_failure": "old debug version failed in 2PC future-XID assert, initial expected error text too narrow; failed log retained",
+    "exact_short_replacement": 1,
+    "exact_extension_load": 1,
+    "source_binding": "Validated 18 binaries, 4 pinned PG versions, 39 extension stages",
+    "no_unchanged_suite_repeats": true
+  },
+  "native_short_write": {
+    "candidate": {
+      "old_expected_failure": false,
+      "file": "00000000000002E3.tmp",
+      "requested": 232,
+      "written": 116,
+      "restart_returncode": 0
+    },
+    "old": {
+      "old_expected_failure": true,
+      "file": "00000000000002E3",
+      "requested": 232,
+      "written": 116,
+      "restart_returncode": 1
+    },
+    "exact": {
+      "old_expected_failure": false,
+      "file": "00000000000002E3.tmp",
+      "requested": 232,
+      "written": 116,
+      "restart_returncode": 0
+    }
+  },
+  "source_files": [
+    {
+      "path": "repos/neon/vendor/postgres-v17/src/backend/access/transam/twophase.c",
+      "sha256": "398575595043ea6e5f17a409dfa5d51075b34a6ea1ca1b9c6ebe1ee5f8df66c6",
+      "bytes": 79910
+    },
+    {
+      "path": "repos/neon/ci/distribution.json",
+      "sha256": "903f68792fb7f757f5a9dc34c8274aa4afafce3dc5f535e3320950594ccef726",
+      "bytes": 1247
+    },
+    {
+      "path": "repos/neon/vendor/revisions.json",
+      "sha256": "5dcdfa326ede411dbb0a00a2c743d5d272a520bd6cbb1bc85024fc99001a01df",
+      "bytes": 306
+    },
+    {
+      "path": "repos/neon/ci/dsga-frozen-baseline-20261026.json",
+      "sha256": "c677d4c8e56b342b06c8dd35239c426b8b8d8db05dc4edcbe21ad11e8ac726b1",
+      "bytes": 1572
+    },
+    {
+      "path": "repos/neon/ci/fixtures/twophase_short_write.c",
+      "sha256": "663c4dad0912c44242fcae4e221c75ba13d23448f8eccadc4ad952de179aed4e",
+      "bytes": 3797
+    },
+    {
+      "path": "repos/neon/ci/test_dsg_twophase_checkpoint.py",
+      "sha256": "787723f1a407cd6d70f9bb824533257d41e1ae49531aa43ab4726ebed74edde5",
+      "bytes": 8087
+    }
+  ],
+  "documents": [
+    {
+      "path": "repos/neon/AGENTS.md",
+      "sha256": "1bfb1bdb2947c4f9832a69e872b812d86429ae3cdffd29bcb2ecefa9315576b2",
+      "bytes": 3796
+    },
+    {
+      "path": "repos/neon/docs/上游同步与功能分支规范.md",
+      "sha256": "a9c7d7095bb35412fc3ac759df93f6e235c6377f4bba7e143c30eabadef542d2",
+      "bytes": 11221
+    },
+    {
+      "path": "repos/neon/docs/DSGA-架构复核与实施规范-V3.md",
+      "sha256": "47f660c8561c8b56deedf74709a750888bc40910918fd98fa37ddcf1adbd30f0",
+      "bytes": 107917
+    },
+    {
+      "path": "repos/neon/docs/DSGA-当前实施状态.md",
+      "sha256": "c3b8491388f730d5c5a2055af66b95e73f4522c925cf151024e6dee8d0d0f94f",
+      "bytes": 92671
+    },
+    {
+      "path": "repos/neon/docs/DSGA-冻结基线与封版清单-20261026.md",
+      "sha256": "0a5e762cf47f52c9f6558d9d76c79477c44d40c2c387ca78209d87fae1b1c06a",
+      "bytes": 5187
+    },
+    {
+      "path": "repos/neon/docs/DSGA-冻结PG17两阶段检查点修复-Mac验收-20261026.md",
+      "sha256": "c99df5f91e81d162d04b549f90776affcacd3078df6cae377d4842cbd4a0ea3d",
+      "bytes": 5570
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "5b613a0252c5d73d458bfdfa7e5b190f441493e7a3debb77dff18e7d26e62145",
+      "bytes": 2739
+    }
+  ],
+  "exact_artifacts": [
+    {
+      "path": "build/pg17-maint15f-exact-install/bin/postgres",
+      "sha256": "a17058725c03a99cdfcd369514f887c8162acb257da8d0e7fecf1a53c62774b4",
+      "bytes": 12066728
+    },
+    {
+      "path": "build/pg17-maint15f-exact-install/lib/postgresql/neon.dylib",
+      "sha256": "073721f54bc9819be74c24658d4cf84a18209fd4b093278eea427a52e27a892e",
+      "bytes": 65488760
+    },
+    {
+      "path": "build/pg17-maint15f-exact-install/lib/postgresql/test_dsg_region.dylib",
+      "sha256": "67cb11d0ca665dbfe4ef74091610e26c8377ee8d38a3a7b0d2098214b9f2e15c",
+      "bytes": 106200
+    },
+    {
+      "path": "build/pg17-maint15f-exact-install/lib/postgresql/neon_rmgr.dylib",
+      "sha256": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e",
+      "bytes": 58368
+    }
+  ],
+  "test_only_fault_library": {
+    "path": "build/dsga-maint15f-short-write.dylib",
+    "sha256": "a80acddd0b82b9fc7af56e8b3d693f48c17cedb450903e63dd120fd24f8ce559",
+    "bytes": 50688
+  },
+  "preserved_old_artifacts": [
+    {
+      "path": "build/pg17-maint3e-exact-install/bin/postgres",
+      "sha256": "79f93674b8b30f2465d8d9463c0fbe90040d5dc6f062a8358fe0534b6ff3de90",
+      "bytes": 12066616
+    },
+    {
+      "path": "build/pg17-maint3e-exact-install/lib/postgresql/neon.dylib",
+      "sha256": "efb44594c90e368fc4ca778a717dad4f5b204bae6a735e799b92a6c57ae3397b",
+      "bytes": 65488744
+    },
+    {
+      "path": "build/pg17-maint3e-exact-install/lib/postgresql/test_dsg_region.dylib",
+      "sha256": "d272db1ed873a536b95681b9e12e111d15c81d4b60f7e1618d8942c96e301cc5",
+      "bytes": 106200
+    },
+    {
+      "path": "build/pg17-maint3e-exact-install/lib/postgresql/neon_rmgr.dylib",
+      "sha256": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e",
+      "bytes": 58368
+    }
+  ],
+  "logs_and_scripts": [
+    {
+      "path": "build/dsga-maint15f-candidate-build.log",
+      "sha256": "a54374a01577ed4bf9ff5e6a041d77badfaefa0c83c2ca9ed1a19f4b66a8678d",
+      "bytes": 1349565
+    },
+    {
+      "path": "build/dsga-maint15f-candidate-configure.log",
+      "sha256": "7e4235e3254f35b14f0f52b211b2a26143bca80a8a154d462807477d0af2882a",
+      "bytes": 18507
+    },
+    {
+      "path": "build/dsga-maint15f-candidate-install.log",
+      "sha256": "b81d6c00aa5f02d83093111d59d98df2eba227115b5c91846b9da66b4ecbea04",
+      "bytes": 97856
+    },
+    {
+      "path": "build/dsga-maint15f-candidate-version.log",
+      "sha256": "024515914482b89a7030ad492ebe8104a300a35d224cc29a3bf1d06391c000a3",
+      "bytes": 55
+    },
+    {
+      "path": "build/dsga-maint15f-exact-build.log",
+      "sha256": "89f394db4e2bd25470fe35f2f227b4fd320db89e80b5196f6af69eff4863cc17",
+      "bytes": 1349485
+    },
+    {
+      "path": "build/dsga-maint15f-exact-configure.log",
+      "sha256": "7e4235e3254f35b14f0f52b211b2a26143bca80a8a154d462807477d0af2882a",
+      "bytes": 18507
+    },
+    {
+      "path": "build/dsga-maint15f-exact-install.log",
+      "sha256": "574d68afdbe6fce778b4af882de70dc42f081563aeb1fb88c438c0f11df5579c",
+      "bytes": 96672
+    },
+    {
+      "path": "build/dsga-maint15f-exact-neon-build.log",
+      "sha256": "ebcb605a653892c4dd77da4cf8e2893203d7f8c3c6fbee54bc9603cea94f14dc",
+      "bytes": 28525
+    },
+    {
+      "path": "build/dsga-maint15f-exact-version.log",
+      "sha256": "8a20625274f3191489b1cefea2c87261978a1618a5d3c8b9a6e0f5c3e98ed7d7",
+      "bytes": 71
+    },
+    {
+      "path": "build/dsga-maint15f-extension-load.json",
+      "sha256": "7f15569efaf0f61d1fe4e66611098c5a6f785848fc0671eee0f9ffcc909a00fd",
+      "bytes": 133
+    },
+    {
+      "path": "build/dsga-maint15f-extension-load.log",
+      "sha256": "e6544fe4c903e39b0d6d339d55025fc14693ba72f82b850ba49840a62a2ab305",
+      "bytes": 289
+    },
+    {
+      "path": "build/dsga-maint15f-merge.log",
+      "sha256": "84d7fcb6976a585ce93db5aa601a9719f496b1242847a23c58b94da8ce3018d5",
+      "bytes": 117
+    },
+    {
+      "path": "build/dsga-maint15f-native-candidate.log",
+      "sha256": "17e6d9f677848a0927e3222608c2df6931a46e12c587d34deb3618ca7f594be5",
+      "bytes": 469
+    },
+    {
+      "path": "build/dsga-maint15f-native-exact-short.log",
+      "sha256": "af2aac9613680cf2e0222cc01a20f50ad7f1ded6d2a1996108156b35e59a7d47",
+      "bytes": 224
+    },
+    {
+      "path": "build/dsga-maint15f-neon-binding.log",
+      "sha256": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+      "bytes": 65
+    },
+    {
+      "path": "build/dsga-maint15f-official-prepared.log",
+      "sha256": "c815fa1dec64422984ab4cc6df5beed0bc731406124d56e5d2e8b8abaa9f11f1",
+      "bytes": 3691
+    },
+    {
+      "path": "build/dsga-maint15f-old-negative-final.log",
+      "sha256": "042635b5761be95c822f627e6b7c4c371d279b5d91b0ac199cfa786bd8001aa0",
+      "bytes": 224
+    },
+    {
+      "path": "build/dsga-maint15f-old-negative.log",
+      "sha256": "eb6a2521ced503fa14b47bed7eb1814814f6fd85eb782858d73a912334672105",
+      "bytes": 4621
+    },
+    {
+      "path": "build/dsga-maint15f-pg-published.json",
+      "sha256": "860929f8893206f49e5569332f5e31f4f30d50d4770a53823c94f803bf688cd0",
+      "bytes": 202
+    },
+    {
+      "path": "build/dsga-maint15f-pg-push.log",
+      "sha256": "ff734bac6d6b758521ad7d1cbb79ca89b8510db7c637271b03d60144b5f2c715",
+      "bytes": 104
+    },
+    {
+      "path": "build/dsga-maint15f-prepared-crash.log",
+      "sha256": "98e7b38e1c4979c4500014a04ef31eb1441a46e6684ae5845563b3007fa91022",
+      "bytes": 216
+    },
+    {
+      "path": "build/dsga-maint15f-prepared_xacts.out",
+      "sha256": "fe1fe2dbecb34d02e95a33ec32da875bae4c1221c7cdd1f961ebc49fd0d6b50f",
+      "bytes": 7448
+    },
+    {
+      "path": "build/dsga-maint15f-short-write-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-maint15f-short-write-candidate-evidence.json",
+      "sha256": "68a893c8b2056247e0f8775e0e104de1f05bf48960b231d29cb0e47aa17d6872",
+      "bytes": 3238
+    },
+    {
+      "path": "build/dsga-maint15f-short-write-exact-evidence.json",
+      "sha256": "6af95bad04fc703762885fb5835b2bb5b85f7dbc3af8f28673a473d9c4c63cf5",
+      "bytes": 3270
+    },
+    {
+      "path": "build/dsga-maint15f-short-write-old-evidence.json",
+      "sha256": "25457b74d91617fa81c1eb0e9e40abb98cbf1db3da72a461fb83e7f524cd1c00",
+      "bytes": 3778
+    },
+    {
+      "path": "build/run-dsga-maint15f-candidate.sh",
+      "sha256": "5c6256299e6857be4f567b3fa495ecd176e877dba231b1924f6fded93e1d6a98",
+      "bytes": 1531
+    },
+    {
+      "path": "build/run-dsga-maint15f-exact-neon-build.sh",
+      "sha256": "2e1bb32aac777b08035918cfbb9e73d60d591561a2478a9054b663511e0158dd",
+      "bytes": 1029
+    },
+    {
+      "path": "build/run-dsga-maint15f-exact-short.sh",
+      "sha256": "297cdaea9872563656bfe9e478409cddac441479c4df1cb254507f1c3613d238",
+      "bytes": 682
+    },
+    {
+      "path": "build/run-dsga-maint15f-exact.sh",
+      "sha256": "94d304fe585b38578e81abdecfb2342b8207c2b38c4adc492ca5d43a5faebd6a",
+      "bytes": 1728
+    },
+    {
+      "path": "build/run-dsga-maint15f-extension-load.py",
+      "sha256": "fb9f0c9ce22187ae39b25734f8b4884120a994d9cbf15e256fc7ef086a66dc79",
+      "bytes": 1448
+    },
+    {
+      "path": "build/run-dsga-maint15f-native.sh",
+      "sha256": "a3dce6f1cd2f85a3a4d82841a93682a7fe9e508fc4e405941a23d3d10ec705df",
+      "bytes": 1037
+    },
+    {
+      "path": "build/run-dsga-maint15f-official-prepared.sh",
+      "sha256": "aaa3dc7db7def2e7233dd1f2ad624dad71de4f5aad9ff9ac043b35593b178c0f",
+      "bytes": 588
+    },
+    {
+      "path": "build/run-dsga-maint15f-old-negative-final.sh",
+      "sha256": "fd0676d19796c66b8b8ff26a047cdea301094b96bd8df34b87295f412ec08f2b",
+      "bytes": 726
+    },
+    {
+      "path": "build/run-dsga-maint15f-old-negative.sh",
+      "sha256": "4023cc28aaafabe3dcf0da9b3543c3fbb0052a687068695cdef4fe7c590cf46b",
+      "bytes": 720
+    },
+    {
+      "path": "build/run-dsga-maint15f-prepared.sh",
+      "sha256": "a96819824748e66c25581bb7f5f3d7345a50c2c6fcfa8b396b5be78d370acdf8",
+      "bytes": 581
+    },
+    {
+      "path": "build/dsga-freeze-20261026-final-fetch.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-frozen-baseline-20261026.json",
+      "sha256": "1b77041cdcdd9bae7ff88013f06c83216bfdebd2832e43bd0c80d1f5c6eb804f",
+      "bytes": 1724
+    }
+  ],
+  "local_links_checked": 104,
+  "not_executed": [
+    "Linux fault library build/run (LD_PRELOAD/procfs branch)",
+    "real storage power-loss/basebackup race certification",
+    "K8s/apiserver/etcd/RBAC/Host/NeonVM/KVM/HugeTLB/NUMA/physical/performance",
+    "complete memory elasticity core production chain and future control-plane port"
+  ],
+  "core_feature_complete": false
+}

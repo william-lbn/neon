@@ -1,0 +1,41 @@
+{
+  "schema": "dsga-frozen-upstream-baseline-v1",
+  "cutoff_utc": "2026-10-26T09:29:30.311677+00:00",
+  "cutoff_asia_shanghai": "2026-10-26T17:29:30.311677+08:00",
+  "frozen_for_current_release": true,
+  "owner_instruction": "先纳入今天截至冻结时点已公开的PG17修复，停止持续追新上游；集中完成当前内存伸缩核心并封整体版本。控制面独立开发完成后再移植闭环。",
+  "upstreams": [
+    {
+      "repo": "neon",
+      "remote": "upstream",
+      "ref": "upstream/main",
+      "sha": "fa504217c61bbcaf5c512d75830564541f917f8f"
+    },
+    {
+      "repo": "autoscaling",
+      "remote": "upstream",
+      "ref": "upstream/main",
+      "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f"
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "remote": "neon-upstream",
+      "ref": "neon-upstream/REL_17_STABLE_neon",
+      "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4"
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "remote": "pg-upstream",
+      "ref": "pg-upstream/REL_17_STABLE",
+      "sha": "15f57b683d236b7dad4d57d03d8b7bac0e63a204"
+    }
+  ],
+  "freeze_does_not_claim_future_commits": "冻结时点之后发布的提交不在本轮自动纳入范围，下一轮维护或项目所有者明确解冻后处理。",
+  "development_branches": {
+    "neon": "codex/dsga-neon-v3-20261019",
+    "PG17": "codex/dsga-pg17-v3-20261019",
+    "autoscaling": "codex/dsga-autoscaling-20261019"
+  },
+  "control_plane_frozen": "d84c0b73004a7d8cc3e89f3c3f0e3f06cfa8cba9",
+  "other_pg_versions_deferred": true
+}
