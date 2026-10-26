@@ -982,6 +982,10 @@ Shrink重新核原Provider物理释放、Guest限额、关闭门禁及前台排�
 实际requested/actual都到原目标才结算；ObserveVM再次核同一原Resize来源、
 保存逐字节相同事实，不增加内存写。原not_sent不自动重放。Finalize与准入
 持续重新GET原Runner来源，来源缺失/重建、floor或完整命令不符保持未完成。
+实际Agent Run须将Runner原待对账/not_sent保持为原owner下的等待，不因
+异步发布尚未到达退出owner；原初始化空发布和落后floor只等待，不赋派发权。
+同epoch换holder、错误Lease/UID或坏来源仍拒绝。修复前后两项实际循环与
+6项读者边界证据见同模块补正收据，不用逐步Advance代替真实循环验证。
 
 含Runner来源的最终预算与Finalize Completed同CAS原子升**Model v4**，独立
 于有限历史长期持有；不能降级成无Runner来源预算。旧v1/v2/v3仍严格读取，

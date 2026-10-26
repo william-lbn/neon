@@ -5,7 +5,7 @@ typed ResizeVM/ObserveVM、最终预算和准入对原Runner持久来源的消�
 `codex/dsga-autoscaling-20261019`前向演进；代码提交为
 `844e99c76e785aada27eef92df780e002b7d8303`，前置预算v4提交为`2bc22973`。
 PG17仍为`b078736a4cfdfccce69914feefb5b5e56560c1e8`，不再追新增上游。
-自有Autoscaling远程分支已核验为`22f042b50e69bd6c67c38696d3b0783a965a847c`，Neon准确锁定该依赖。
+自有Autoscaling远程分支已核验为`29edec63d3939212d8b19fcf79fb368abfbe565e`，含下文实际循环补正；Neon锁定该准确依赖。
 源码、实际用例全名、日志和编译产物哈希见[机器收据](DSGA-Agent原VM派发与来源结算-Mac收据-20261027.json)。
 
 这项关闭Agent与Runner之间的缺口。**整体核心仍有文末所列未实现功能，不能
@@ -104,3 +104,20 @@ Linux后验另列：真实apiserver CAS/RBAC/来源保护，QEMU/runas/私有soc
 virtio-mem异步或部分热拔及连接故障，cgroup/普通页/HugeTLB真实物理回收，
 Host持有/迁移互斥，性能与长稳。独立控制面完成后再移植、做统一端到端。
 其他PG版本暂缓；不构建镜像、不准备/执行部署、不合主分支、不发布生产。
+
+## 后续补正：实际循环保持Runner等待（2026-10-27）
+
+收尾复核发现主体模块的逐步Advance用例尚未覆盖实际Run：原Runner仍待读回
+或明确not_sent会被主循环当致命错误退出owner。已在真实已发布22f042b5生产
+实现上用两个新增循环用例复现，再由`adc614bfb5dcf8aa60ba2baa74ad5e1fab3d98cc`前向修复；
+[补正机器收据](DSGA-Agent循环等待修复-Mac收据-20261027.json)保留原失败与最终证据。
+
+主循环现在保原意图等待这两种状态，不改变epoch、不重发QMP；not_sent仍需
+后续显式选择。原初始化空发布、首次Lease固定与落后floor也只等待；错误UID/
+Lease、同epoch换holder、较新floor、坏发布仍拒绝，不能把任意来源错误吞掉。
+
+定向Mac race去重3顶层/11含子项通过：实际循环等Runner后自动到最终准入，
+not_sent经过多次轮询仍Unconfirmed且零内存/PG/开放写；6个读者边界及关闭
+通道回归通过。Grow父测试名与主体重复，不叠加原164项。增量lint0问题、两包
+vet及更新后Agent双Linux架构仅编译通过；原Runner/Controller未变执行行为，
+复用主体模块证据。协议仍v4，PG/独立控制面不变，其余核心与Linux边界如上。

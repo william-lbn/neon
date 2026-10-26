@@ -36,6 +36,9 @@ Mac去重53顶层/164含子项通过，0最终失败/跳过；8包vet、增量li
 Agent/Runner/Controller双Linux架构仅编译通过。真实旧c7读者接受v3并拒绝v4/
 投影。PG17仍b078；控制面保留d84/SDK565，后续移植须先升级v4读者。
 完整代码版本、原日志/包装器退出区别及夹具边界见[本模块](DSGA-Agent原VM派发与来源结算-Mac基本验收-20261027.md)。
+随后实际Run复核发现并修复原Runner等待误退出owner：两个循环修复前失败、
+修复后与6个读者边界/关闭通道共3顶层11含子项通过，增量lint0问题，两包vet
+及更新后Agent双Linux架构仅编译通过；不重复累计原164项。原v4/PG/控制面不变。
 可信Prepare、Host/Scheduler等剩余核心继续原分支，Linux认证另列，不追新上游。
 
 ## 已完成Runner消费/私有QMP与Controller状态接线（2026-10-26）

@@ -1000,7 +1000,7 @@
     "other PG majors",
     "images or deployments or main merges"
   ],
-  "autoscaling_commit": "22f042b50e69bd6c67c38696d3b0783a965a847c",
+  "autoscaling_commit": "29edec63d3939212d8b19fcf79fb368abfbe565e",
   "autoscaling_receipt_sha256": "a355b4fcd81037d8e85afe99fccc1a14e7b3da3e92e498945618285de4eed4ce",
   "neon_branch": "codex/dsga-neon-v3-20261019",
   "neon_index_validation": {
@@ -1015,5 +1015,10 @@
     "checkout": "b078736a4cfdfccce69914feefb5b5e56560c1e8",
     "unchanged": true,
     "index_validation_requires_checkout": "v17"
+  },
+  "followup": {
+    "code_commit": "adc614bfb5dcf8aa60ba2baa74ad5e1fab3d98cc",
+    "receipt": "DSGA-Agent循环等待修复-Mac收据-20261027.json",
+    "base_source_hashes_remain_bound_to_original_code_commit": true
   }
 }
