@@ -1,0 +1,80 @@
+{
+  "created_at": "2026-10-26T02:18:44.254998+00:00",
+  "PG_published": {
+    "sha": "11dcee22d3e3b29e6c57af876159d62e32ca3178",
+    "branch": "codex/dsga-pg17-v3-20261019",
+    "remote": "11dcee22d3e3b29e6c57af876159d62e32ca3178"
+  },
+  "official_commit": "3e914438a3ac4abfde004b8a850cb198f64613f3",
+  "AS_unchanged": "849d84285e9099ae33c3d837a0563ff1f4974aa3",
+  "CP_unchanged": "53d0c0d2f601fa5aeed20f74cf7394b8e05582ac",
+  "validation": {
+    "official_core_DSG_enabled": 225,
+    "warnings": 0,
+    "old_wrong_rows": 90,
+    "exact_correct_rows": 0,
+    "exact_probe_pass": 1,
+    "probe_skip": 0,
+    "Neon": "1.15 exactPG rebuilt",
+    "bindings": "18/4/39"
+  },
+  "source_sha256": {
+    "repos/neon/ci/distribution.json": "a4551c8b3f1efaae106afa476229a155a17061ee86899987e665cb2f4db1f4cd",
+    "repos/neon/vendor/revisions.json": "db41dba9c933307765fe2af83a1f98b21952710c6937e89a74bb4a36a9c5ec7e",
+    "repos/neon/docs/DSGA-同步PG17包装路径条件修复-Mac验收-20261026.md": "9cfaab703b04089f0e5ed03b7c4b7af5f4fc216a75fdd19e005f45663bb0199c",
+    "repos/neon/docs/DSGA-当前实施状态.md": "304ec553fb295c9d80a3dc6a26365a22e8f1601c728438bcfd1d011deab716b9",
+    "repos/neon/vendor/postgres-v17/src/backend/optimizer/path/joinpath.c": "0169c5e4325cbfcc856acd51ef77fdf839b61f9705f62aca0b494daa46fc54ec",
+    "repos/neon/vendor/postgres-v17/src/backend/optimizer/util/pathnode.c": "727e3faeb041fb55d27b10e9e7af9fd2e4b57f7b3a359bf7209aff030869c6a4",
+    "repos/neon/vendor/postgres-v17/src/backend/optimizer/util/relnode.c": "ec167ba1ba0970f0bd72e69c2c6b78ffef5ae4b8621df5ef4a19a16864648d91",
+    "repos/neon/vendor/postgres-v17/src/include/nodes/pathnodes.h": "84b3261fc626037becbe32dde1ac03edf5808ea4e18e646f96ee551604750297",
+    "repos/neon/vendor/postgres-v17/src/include/optimizer/pathnode.h": "606a0ee35c2ebb383dc560870d5f0bc4495379c1e1917c679ac1122681835313",
+    "repos/neon/vendor/postgres-v17/src/test/regress/expected/join.out": "449d1cd1279bb823f0f21e0affb5b63c5b133c775304baa5dad0428a2502d146",
+    "repos/neon/vendor/postgres-v17/src/test/regress/sql/join.sql": "09477c75ac45718b0c775e34fa9b02000b9c8cee5d2126aaf1ac960633ee0252"
+  },
+  "artifact_sha256": {
+    "build/pg17-maint3e-exact-install/bin/postgres": "79f93674b8b30f2465d8d9463c0fbe90040d5dc6f062a8358fe0534b6ff3de90",
+    "build/pg17-maint3e-exact-install/lib/postgresql/neon.dylib": "efb44594c90e368fc4ca778a717dad4f5b204bae6a735e799b92a6c57ae3397b",
+    "build/pg17-maint3e-exact-install/lib/postgresql/test_dsg_region.dylib": "d272db1ed873a536b95681b9e12e111d15c81d4b60f7e1618d8942c96e301cc5",
+    "build/pg17-maint3e-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+  },
+  "old_d4f_artifacts_preserved": {
+    "build/pg17-maint08-exact-install/bin/postgres": "6a85d098e366da385ac0b4c1531ce24641e2803209288763d2d02149578fd60b",
+    "build/pg17-maint08-exact-install/lib/postgresql/neon.dylib": "7d863aba6f787a4995e2965f8d7efdb109fda27159b183593aa2f9c5f47957b7",
+    "build/pg17-maint08-exact-install/lib/postgresql/test_dsg_region.dylib": "7771f1ccafb732b54fc59b7559a62235aaa37a8403e243b8db65705784aa9148",
+    "build/pg17-maint08-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+  },
+  "log_and_recipe_sha256": {
+    "build/dsga-maint3e-official.conf": "f1cf49c6c44447c500647d0e70166e50827cb828f9ee362306a839957ccffce0",
+    "build/dsga-maint3e-neon-runtime-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-maint3e-old-negative.log": "1e905fceb1127d96292be33ce45ae43485ced1209c02aecb08a217d1bd2afa4b",
+    "build/dsga-maint3e-exact-build.log": "1959006e848b9a5403b037c10784d1ddc8a3533d9308e3ef3ab8866eaf639792",
+    "build/dsga-maint3e-exact-neon-build.log": "34c7ef81d2d806403be1f7909fb9985b676b69489a4f0d6e80d4c36b08ee89bc",
+    "build/dsga-maint3e-exact-install.log": "3e4ed16e7ee6554301f0b41d2aa891691d5bb3e3ab90dd6ea934611fc117f42a",
+    "build/dsga-maint3e-exact-configure.log": "9fb897b241efd83fea9b21f693a3e1e82fc6452380ea2229e77feec2c50f1023",
+    "build/dsga-maint3e-official-regress.log": "e5db6c5feb88adc8a95034eaeb57f0f45acad41f63d8d00e09cee415c729f339",
+    "build/run-dsga-maint3e-exact.sh": "49dcaa46843fc7942a76e38b5ca5c2aa1382503ca32f3804b0d85f7847ae31d3",
+    "build/dsga-maint3e-candidate-configure.log": "9fb897b241efd83fea9b21f693a3e1e82fc6452380ea2229e77feec2c50f1023",
+    "build/dsga-maint3e-candidate-version.log": "802b9558509d5b9effdd5c621ab0dfdd95cb095fbff07d68f6a849ea5830a5db",
+    "build/run-dsga-maint3e-candidate.sh": "bb6344c86b7c34bd65dace3e3ff3a0824c2d785e11a15d23529c525aee5378a1",
+    "build/dsga-maint3e-pg-published.json": "803a8e00062049743e0fa6048f88204750e440d49267bce87ed654d700a40a71",
+    "build/dsga-maint3e-exact-version.log": "b140203a08b2667b3d049e6378a376a605a04c636a7d711fcd9ff855f5a8bc84",
+    "build/run-dsga-maint3e-exact-neon-build.sh": "c02a7dbc1c6427a9df1eab82c2496da60b49b7d92bb147ba3b2c3ee17bb76ccc",
+    "build/run-dsga-maint3e-join-probe.py": "cc10cce56fce59b8264f1691a403c02f098a196f920012dca40faa1c9f9e40f0",
+    "build/dsga-maint3e-exact-probe.log": "113b234c64aeb5981b8b9fdf1cc589bda48d36fdcbe41caf102a0656f6403965",
+    "build/run-dsga-maint3e-candidate-tests.sh": "894b06f10ef64474b27c114b345932f27409ca58c3d6efa16ed109ea891919cc",
+    "build/dsga-maint3e-pg-comparison.json": "71c04a34a325e2f4192214c70332fc63dc2dbc2a461da56775c9a34e8bf6c953",
+    "build/dsga-maint3e-candidate-build.log": "3fc1139a01d7f000ea10d67ac18a59e99cb65b383ef0484f225a15677a3232c9",
+    "build/dsga-maint3e-bindings.log": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "build/dsga-maint3e-candidate-install.log": "d6685fb1b44f3fbc38bd29de6124d2b4a58ea69fafc0f0ce1f82639a1bff4fd1",
+    "build/dsga-maint3e-probe-old/explain.json": "b8c0177dc3d701449533b9724ebe4dd1f56ac4b923d66755a7481dc98c5ba6cc",
+    "build/dsga-maint3e-probe-old/rows.json": "505b8b2a96e90c1f551080cf7537308f5530533191bcf18798d4f4c33ad946b4",
+    "build/dsga-maint3e-probe-old/summary.json": "af1b33e7c780a49d7847ed1aeba81a16d87b5ea56b138d5f27f2d2eef975ed4e",
+    "build/dsga-maint3e-probe-old/version.txt": "984c9ebeb544f780f6b67a847b1aabb73e9f12f13c01c66924bfa59e0cfd04bf",
+    "build/dsga-maint3e-probe-exact/explain.json": "6f5f9dc1be2d5113d35a41338309607c5cc02d82f3d59efa58133052a0f06a54",
+    "build/dsga-maint3e-probe-exact/rows.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+    "build/dsga-maint3e-probe-exact/summary.json": "152278ca9beb46082a152f6d55266941466d1f6cac3db8c5b16ca29c96b29413",
+    "build/dsga-maint3e-probe-exact/version.txt": "b140203a08b2667b3d049e6378a376a605a04c636a7d711fcd9ff855f5a8bc84",
+    "build/dsga-maint3e-regress-results/join.out": "449d1cd1279bb823f0f21e0affb5b63c5b133c775304baa5dad0428a2502d146"
+  },
+  "goal": "active/incomplete, no businessbudget code added this batch"
+}
