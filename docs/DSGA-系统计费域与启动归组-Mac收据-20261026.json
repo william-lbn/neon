@@ -1,0 +1,468 @@
+{
+  "date": "2026-10-26",
+  "AS_published": {
+    "sha": "e3641392ac2d3d2b4a5db76130c1de041f8c7c91",
+    "pseudo": "v0.0.0-20261026025902-e3641392ac2d"
+  },
+  "CP_published": {
+    "sha": "3ba51c5c66e8fdd264109ba16555b681d45bd0be"
+  },
+  "PG_unchanged": "11dcee22d3e3b29e6c57af876159d62e32ca3178",
+  "maintenance": [
+    {
+      "repo": "neon",
+      "ref": "upstream/main",
+      "sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+      "missing": 0,
+      "current_missing": 0
+    },
+    {
+      "repo": "autoscaling",
+      "ref": "upstream/main",
+      "sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+      "missing": 0,
+      "current_missing": 0
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "ref": "neon-upstream/REL_17_STABLE_neon",
+      "sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+      "missing": 0,
+      "current_missing": 0
+    },
+    {
+      "repo": "neon/vendor/postgres-v17",
+      "ref": "pg-upstream/REL_17_STABLE",
+      "sha": "3e914438a3ac4abfde004b8a850cb198f64613f3",
+      "missing": 0,
+      "current_missing": 0
+    },
+    {
+      "repo": "control-plane",
+      "ref": "origin/main",
+      "sha": "2283b1fa37bce34e78f9d5b172f98f5bece852f4",
+      "missing": 0,
+      "current_missing": 0
+    }
+  ],
+  "validation": {
+    "AS_top": 42,
+    "AS_all": 70,
+    "CP_top": 1,
+    "CP_all": 1,
+    "failed": 0,
+    "skipped": 0,
+    "AS_Mac_and_Linux_vet": 0,
+    "CP_readonly_vet": 0,
+    "binding": "18 binaries / 4 pinned PG / 39 extension stages",
+    "Linux_cross_compile_only": 4,
+    "PG_native_tests_repeated": false
+  },
+  "source_files": [
+    {
+      "path": "repos/neon/ci/distribution.json",
+      "sha256": "3bec064531a86638391463430290d5d299bd18ea34806c40e62d1f48f6993ed2",
+      "bytes": 1247
+    },
+    {
+      "path": "repos/neon/vendor/revisions.json",
+      "sha256": "db41dba9c933307765fe2af83a1f98b21952710c6937e89a74bb4a36a9c5ec7e",
+      "bytes": 306
+    },
+    {
+      "path": "repos/neon/docs/DSGA-架构复核与实施规范-V3.md",
+      "sha256": "300c6399f5c0fe8bcde7f010f5855e8c0d082957cbb5800fae78360f1b25eab8",
+      "bytes": 102304
+    },
+    {
+      "path": "repos/neon/docs/DSGA-当前实施状态.md",
+      "sha256": "85e7c5448dfbb7fe11a7069672f0a850039b0b4d6273954e148260d4c74c25e5",
+      "bytes": 87551
+    },
+    {
+      "path": "repos/neon/docs/DSGA-系统计费域与启动归组-Mac基本验收-20261026.md",
+      "sha256": "9014e6f421e7bebd70354ead00301d403ee31f2d81cf6ee389ce6689121c7bfc",
+      "bytes": 3692
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/budget/quiesced.go",
+      "sha256": "a92cdf3ace83b7ffa4184d986fa1c32388a54124ef741942c3a8a001078e050f",
+      "bytes": 5188
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/budget/quiesced_test.go",
+      "sha256": "37b54138227ae05cfa3ffe799b003ea2462ac87606b6afe453c871ab9f6769c8",
+      "bytes": 5568
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/budget/root_aggregate.go",
+      "sha256": "1521c0267a4cc7cf8a1ecf4ed26cff1a7e834f41bf0e2cbfc17e38b69b31bd25",
+      "bytes": 6416
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/budget/system_charged.go",
+      "sha256": "bbf15702a44f6f4f6d059fa06c3018af0f07d79b24fb0525bb1632fc96144d5a",
+      "bytes": 3418
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/budget/system_charged_test.go",
+      "sha256": "83ce08bd8ed7bf494f5bf3d8b07cb5e0e766a2c7548927a907a8ceaa8d14d1df",
+      "bytes": 3632
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/owner/guest_ready_test.go",
+      "sha256": "0778ea05f1acb7b8dbbb775afbd36642ce23f65bd79d2934a317a0196d9a871a",
+      "bytes": 21765
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceexec/executor.go",
+      "sha256": "f03b8d30551e57cb24c61975394e70ee14e623024d93c3459b780eccffedaeb0",
+      "bytes": 15553
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/bootstrap.go",
+      "sha256": "a4bfecff1fe1878f2dff656daf17707f3706de77d414a65ec5bb4d1401dd8069",
+      "bytes": 8818
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/guard.go",
+      "sha256": "d9f7e4343840cf213ea5fdcd5fd2b18045199e316eab34fc43c3c58836f5bec2",
+      "bytes": 21305
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/guard_test.go",
+      "sha256": "88c1e6c34f453d10d623015bf7964c150701540ba286aa11d409492d949460df",
+      "bytes": 12412
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/kernel_linux.go",
+      "sha256": "7798d7a898ee4aa59c0279eecb4dafd732591fa36a5354b1cf53ad259b4ae7d0",
+      "bytes": 17710
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/launch.go",
+      "sha256": "6f7180c21989ea7cacf4ad75b5c854289d5723c361f5fd05134754ff67160731",
+      "bytes": 3789
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/provision.go",
+      "sha256": "21edb86424ce1191c7750268b2993a64db2ef6e9a1b19690d09247040657a6ff",
+      "bytes": 5540
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/provision_linux.go",
+      "sha256": "21213ecae41c958b498c6056ffe84b6a38e2b00643cae5ea7630a4349fb26d86",
+      "bytes": 8298
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/system.go",
+      "sha256": "b298cf1f24dd0f76fcd9e1fe4bd5328237311ec5a080a95fc7e8a08ad1af786d",
+      "bytes": 6911
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/system_linux.go",
+      "sha256": "fb851f5491a6539eb429159bb05f41d83d761d9b24f1c16f5beb6e8082bd438e",
+      "bytes": 6838
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/system_test.go",
+      "sha256": "ae35f9d975ab741deddb9bfd8d41e059bab0f31e2958db2907234cf3ab0db515",
+      "bytes": 10335
+    },
+    {
+      "path": "repos/autoscaling/pkg/dsga/resourceguard/view.go",
+      "sha256": "da57f5815cd71869f016e99fbbe53ef7ac989b424cc2bbeaf45218fc2c1dfa87",
+      "bytes": 4016
+    },
+    {
+      "path": "repos/control-plane/api/go.mod",
+      "sha256": "ecc8d18f7284b4f2b2594705fdb760058b9c8a969047a1c47f924a6025dabff2",
+      "bytes": 4200
+    },
+    {
+      "path": "repos/control-plane/api/go.sum",
+      "sha256": "e4977e4d2f4f572f1ce7c4a21ce1d6ae0cf2dbbcda7b12c5c406983a63f287b8",
+      "bytes": 28842
+    },
+    {
+      "path": "repos/control-plane/api/internal/control/dsga_resource_renderer.go",
+      "sha256": "100c39eb38e3a311235b242729a7ae62852adcd777b60f3c79d1db930f3b0850",
+      "bytes": 2403
+    },
+    {
+      "path": "repos/control-plane/api/internal/control/dsga_resource_renderer_test.go",
+      "sha256": "f3dde4ea549973dc0afea01680d1eb4e6f379b0ddb6ae514e53f64f5723c8343",
+      "bytes": 10173
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "build/dsga-system-domain-resource-guard-linux-amd64",
+      "sha256": "277592616de700512ee5e446f0de654b8bbb70aeb23d9966af83d275cdfb00b9",
+      "bytes": 8956808
+    },
+    {
+      "path": "build/dsga-system-domain-resource-guard-linux-arm64",
+      "sha256": "968d186895ca73ee14fa4bfb274151643ddce2225b6dad296e79fa69553c1f25",
+      "bytes": 8336373
+    },
+    {
+      "path": "build/dsga-system-domain-agent-final-linux-amd64",
+      "sha256": "bca64d702ed3ab827ffb0a459738c2160f608c637305f4d2c8fbfc71b07bbdff",
+      "bytes": 79429713
+    },
+    {
+      "path": "build/dsga-system-domain-agent-final-linux-arm64",
+      "sha256": "b413d1d8f926c687aeed9c9be8afb653154915a8b22a76aabe9c21ab031f7cc5",
+      "bytes": 75070730
+    }
+  ],
+  "preserved_PG_artifacts": [
+    {
+      "path": "build/pg17-maint3e-exact-install/bin/postgres",
+      "sha256": "79f93674b8b30f2465d8d9463c0fbe90040d5dc6f062a8358fe0534b6ff3de90"
+    },
+    {
+      "path": "build/pg17-maint3e-exact-install/lib/postgresql/neon.dylib",
+      "sha256": "efb44594c90e368fc4ca778a717dad4f5b204bae6a735e799b92a6c57ae3397b"
+    },
+    {
+      "path": "build/pg17-maint3e-exact-install/lib/postgresql/test_dsg_region.dylib",
+      "sha256": "d272db1ed873a536b95681b9e12e111d15c81d4b60f7e1618d8942c96e301cc5"
+    },
+    {
+      "path": "build/pg17-maint3e-exact-install/lib/postgresql/neon_rmgr.dylib",
+      "sha256": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+    }
+  ],
+  "logs_and_recipes": [
+    {
+      "path": "build/dsga-system-domain-agent-final-linux-amd64.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-agent-final-linux-arm64.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-agent-linux-amd64.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-agent-linux-arm64.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-budget.jsonl",
+      "sha256": "d21b81417285082ff1c469d32fbd3ab5a051818cd5ddf660aa12728fb04ff8b2",
+      "bytes": 7566
+    },
+    {
+      "path": "build/dsga-system-domain-budget.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-guard.jsonl",
+      "sha256": "ee2f2c338b3dd136e12ab404e761f5cd632e7d346af680640991fdc42ef57237",
+      "bytes": 51865
+    },
+    {
+      "path": "build/dsga-system-domain-guard.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-linux-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-mac-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-old-reader.jsonl",
+      "sha256": "e580b49c8c321c5d40d4d8ae4f1f8b93dc9c2b091fa8a191e73a40ece4f4a15e",
+      "bytes": 4750
+    },
+    {
+      "path": "build/dsga-system-domain-old-reader.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-owner.jsonl",
+      "sha256": "b9bbed4af31f4d322fcbfbc5c12ab0e43d2db01e9f01ace0b0f499f5e6951c36",
+      "bytes": 8751
+    },
+    {
+      "path": "build/dsga-system-domain-owner.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-partial-cap.jsonl",
+      "sha256": "68fdcf154b79e1d10463c3ad9024519a99e94211441ee1b3b21d3e28897ca207",
+      "bytes": 1694
+    },
+    {
+      "path": "build/dsga-system-domain-partial-cap.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-quiesce-replacement.jsonl",
+      "sha256": "5f301d5244ebfddc2170e232950d060e732b6dedf2fcb5721fd7fc7f55273dad",
+      "bytes": 1638
+    },
+    {
+      "path": "build/dsga-system-domain-quiesce-replacement.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-resource-guard-linux-amd64.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-resource-guard-linux-arm64.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/run-dsga-system-domain-agent-final.sh",
+      "sha256": "50d5ad92ff369e5aa4611f31046ef81c3a443ef263da09411cca41e939adf966",
+      "bytes": 462
+    },
+    {
+      "path": "build/run-dsga-system-domain-budget.sh",
+      "sha256": "c4770bac9497cb33212bd38def0d91609fc5fa8a9685ea718b720bc1fb204a4a",
+      "bytes": 701
+    },
+    {
+      "path": "build/run-dsga-system-domain-compile.sh",
+      "sha256": "5af26b13e7c80891bc474bc9a33aed37ff96d8ad425a8ecb9452da7a7ad3b8f5",
+      "bytes": 796
+    },
+    {
+      "path": "build/run-dsga-system-domain-guard.sh",
+      "sha256": "ff13c479cf0662fb01a116fa35b5cd5e7ff3f48a98f275c4dede9a1b24b83718",
+      "bytes": 595
+    },
+    {
+      "path": "build/run-dsga-system-domain-old-reader.sh",
+      "sha256": "425539a69ec297d408e8dae8a3085b6b525f3ef11b6c80f1989f8cd2b7d9124a",
+      "bytes": 487
+    },
+    {
+      "path": "build/run-dsga-system-domain-owner.sh",
+      "sha256": "c624944435803d82720cd67e40720b7cee177fd97132345865816ede37f8dfdc",
+      "bytes": 662
+    },
+    {
+      "path": "build/run-dsga-system-domain-partial-cap.sh",
+      "sha256": "33eb9ef0f10e2b2ef281216c2cb7360d029ab72126ffd6add2974c0eed1c3526",
+      "bytes": 685
+    },
+    {
+      "path": "build/run-dsga-system-domain-quiesce-replacement.sh",
+      "sha256": "d44e0ee84b9e6980983d38a26d62ff7ed14c29071cae0bc96bd33b1a6eface69",
+      "bytes": 695
+    },
+    {
+      "path": "build/dsga-system-domain-cp-dependency.log",
+      "sha256": "7ad5418101d2073aaf5f2c7ffd157601fd6552bccd78179459689027bf490842",
+      "bytes": 168
+    },
+    {
+      "path": "build/dsga-system-domain-cp-module.json",
+      "sha256": "c31b441ce1c4105e8da6cc115c7c1c9466238c9268b8e9c6ac549dae7dec78df",
+      "bytes": 945
+    },
+    {
+      "path": "build/dsga-system-domain-cp-module.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-cp-renderer.jsonl",
+      "sha256": "d2d7511ff1dd7487e5182ce47a7b6814d929e36743a359d5267911aa3835ebfb",
+      "bytes": 1613
+    },
+    {
+      "path": "build/dsga-system-domain-cp-renderer.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/dsga-system-domain-cp-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "build/run-dsga-system-domain-cp-dependency.py",
+      "sha256": "768a62121de6b3f9db72bf588f5b94c4d341cd4f48f9f249b621e105d3f57cd7",
+      "bytes": 2461
+    },
+    {
+      "path": "build/run-dsga-system-domain-cp-renderer.sh",
+      "sha256": "8198285a28dcfb8c013db3652d094ec792a5df2e5828978cff4ba2abc570e3d4",
+      "bytes": 941
+    },
+    {
+      "path": "build/dsga-system-domain-as-push.log",
+      "sha256": "8342f6157bddf8435858443daef934c2f0ecff935c0bd397843ee51f15635467",
+      "bytes": 105
+    },
+    {
+      "path": "build/dsga-system-domain-as-published.json",
+      "sha256": "165995d16ceccb64fac5275462f9051f7cfa4869700ebdc601ee20d21acd7c5a",
+      "bytes": 203
+    },
+    {
+      "path": "build/dsga-system-domain-cp-push.log",
+      "sha256": "75c565dd36a5e49ff30e74333a1a3fd58a16db040306aaebcf425a40f7095d7f",
+      "bytes": 124
+    },
+    {
+      "path": "build/dsga-system-domain-cp-published.json",
+      "sha256": "fc7e4f992345bb9f8e28446c2c82118c5a44ec448bdb3f435b88baad8a913c18",
+      "bytes": 213
+    },
+    {
+      "path": "build/dsga-system-domain-bindings-initial.log",
+      "sha256": "3f231d25c6f6f13949fc03d97c3a0191de5048733f74f2539c895335339f9740",
+      "bytes": 1605
+    },
+    {
+      "path": "build/dsga-system-domain-bindings.log",
+      "sha256": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+      "bytes": 65
+    },
+    {
+      "path": "build/dsga-system-domain-native-unchanged.json",
+      "sha256": "fb2842b097d06fdca8599a03c8d9ad40ec7bfee643edcdfda1f06b90be241bc3",
+      "bytes": 795
+    },
+    {
+      "path": "build/dsga-system-domain-maintenance-ancestry.json",
+      "sha256": "c7dd8242129ac02e9ba937767dcf368b8484323f69e4e060fad3a8cb36acd374",
+      "bytes": 863
+    }
+  ],
+  "boundary": {
+    "scope": "system-cgroup-charged-pages only",
+    "full_SystemOutsidePG": false,
+    "full_V3_complete": false,
+    "Linux_runtime_executed": false,
+    "images_or_deployments": false
+  },
+  "preserved_owner_agents_sha256": "5c61959674c362ecc4c3709930121304595e8b0bca1ff70ae401f0cf8f2803c1"
+}

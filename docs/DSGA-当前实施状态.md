@@ -3,6 +3,20 @@
 更新：2026-10-26（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
+## 最新业务：2026-10-26 固定系统计费域与启动归组（仍非完整外部预算）
+
+AS `e3641392ac2d3d2b4a5db76130c1de041f8c7c91`、控制面 `3ba51c5c66e8fdd264109ba16555b681d45bd0be` 已沿原分支推送核验。
+原计划显式冻结系统额度，真实cgroup身份/WAL先于额度与PID1优先有界归组，
+持久确认前不出生PG；运行worker/Quiesce保留原值，SystemCharged组件不重复计费。
+迁移不迁旧charge，根组旧页/未计费项仍须其他可信来源，不能冒充完整SystemOutsidePG。
+
+Mac AS去重42顶层/70含子项、控制面新增1项race通过0失败/跳过；readonly vet、
+root helper/Agent双Linux架构仅交叉编译及准确旧读者拒绝新字段通过。PG17仍11d，
+gitlink/两锁/实际检出及既有4产物hash核验，18/4/39来源校验通过，不重复未变PG测试。
+见[本批代码、来源与Linux边界](DSGA-系统计费域与启动归组-Mac基本验收-20261026.md)。
+完整Prepare/Finalize/残余系统上界、安全降normal/私有后台约束、首次预算/开放、
+Host最终VM、公开worker完整生命周期和受控跨boot仍需代码，Goal active/incomplete。
+
 ## 最新维护：2026-10-26 PG17包装路径条件丢失修复（不代表业务完成）
 
 PG17 `11dcee22d3e3b29e6c57af876159d62e32ca3178` 已完整合入社区3e914438并沿原分支推送核验；7导入文件

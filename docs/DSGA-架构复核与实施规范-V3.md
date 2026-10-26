@@ -841,6 +841,33 @@ N只影响来源标识，不重复加到normal+整个Guest HugeTLB池的字节�
 完整私有/外部预算、安全降normal、首次开放、Host最终VM/公开worker/受控跨boot
 仍需业务代码，不能以该模块通过宣称整体完成。
 
+### 8.25 固定系统计费域与完整外部预算的边界（2026-10-26）
+
+可信原创建可以显式配置system_memory_max_bytes和固定系统组模式，0/缺省仍为
+旧未约束来源，不补RSS/比例默认。该额度属于OutsideUpperBytes的一部分，不再
+加到PG聚合或总额度。全链原计划/封存配置/系统组device-inode/资源WAL/运行命令
+保持同值，PG boot和owner接管不能更换；缺字段或变更在实际worker写前拒绝。
+
+固定neon-system必须是真实root独占cgroup2/domain；原Bootstrap fsync后，在空组
+建立memory.max及swap0并读回。启动归组另记持久确认，顺序为同资源锁下PID1先入组、
+根组用户进程有界迁入、PG空组及额度/归组复核、fsync确认；未确认不出生PG。
+内核线程排除，PID1 starttime允许0；重复PID去重，变化/不收敛/部分效果保持未知。
+数值PID写不是pidfd原子迁移，前后身份检查只能检出竞争，因此必须在sysinit、普通
+服务/PG出生前且唯一root迁移者条件下使用。确认后只读核验，漂移不自动修复。
+
+系统组的memory计费域是完整SystemOutsidePG的一个组件。迁入进程不迁移旧charge；
+根组用户进程为0不代表根组内存为0；根组旧页、未计费内核项等必须由其他可信来源
+独立覆盖。SystemCharged只提供这一组件，不可直接当完整外部预算或VM许可。
+该来源不随PG Held/revision/floor变化重造；完整预算生产者仍须组合不重叠且足够的
+残余外部/过渡/安全约束。依据[Linux6.12 Memory Ownership](https://docs.kernel.org/6.12/admin-guide/cgroup-v2.html#memory-ownership)。
+
+系统额度不随PG缩容降低；过低额度导致启动/OOM不是安全缩容成功。平台须在Linux
+资格验收中确定管理服务/辅助进程及恢复余量和剩余系统上界。旧严格读者实测拒绝新
+字段，必须先升级全部读者，不能删字段降级或借已有旧来源补造证书。
+本批实现、Mac实际通过和Linux待验见[系统计费域验收](DSGA-系统计费域与启动归组-Mac基本验收-20261026.md)。
+完整Prepare/Finalize、安全降normal/私有后台上界、首次预算/开放、Host-QMP最终链、
+公开worker完整生命周期及受控跨PG boot恢复仍需代码，不能改记为仅待Linux验证。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
