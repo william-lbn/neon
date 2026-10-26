@@ -1,0 +1,71 @@
+{
+  "created_at": "2026-10-26T01:14:26.435877+00:00",
+  "pg": "d4f92ee0170c3566c12fbf2f563f0021c1e3d413",
+  "control_plane": "4b151e4afc640c08c1b8a29227b631644212897a",
+  "as_unchanged": "da2aa56a1efaf6241ebf85c7814542e41e757a66",
+  "pg_remote_verified": true,
+  "cp_remote_verified": true,
+  "validation": {
+    "core": 225,
+    "pty_assertions": 4,
+    "exact_replacement": 1,
+    "pg_build_warnings": 0,
+    "CP_top": 34,
+    "CP_including_subcases": 118,
+    "CP_skip": 0,
+    "client_distinct": 9
+  },
+  "source_sha256": {
+    "repos/neon/ci/distribution.json": "daeacfeb4fec2ed31b949b3c2e26e256c49c9b95c35e442860d7f6316f05780e",
+    "repos/neon/vendor/revisions.json": "0b5003e6e171fb57472ad76a21692cfa109db18db6dc6e44bc94fd03fed7cb3c",
+    "repos/neon/docs/DSGA-同步PG17与控制面维护-Mac验收-20261026.md": "f28649430d5e89990a608bf51e8ec6809bae84b9a41e159e9e7befa05dd6cba3",
+    "repos/neon/docs/DSGA-当前实施状态.md": "7240942c540fadd671b0ee584229bdd0ce07908716c3a1969bf9ccf8b8516cd8",
+    "repos/neon/vendor/postgres-v17/src/backend/access/heap/heapam_visibility.c": "64b5f528831c0d5a9a1f1b5fc7ca66f4f03ca3cc4feaa87d963d23668c331611",
+    "repos/neon/vendor/postgres-v17/src/backend/port/posix_sema.c": "eb4a4a8a2d9f0cc7df5c6c43826586991b4e4a4c09744ebd8e54e9362207dc2f",
+    "repos/neon/vendor/postgres-v17/src/bin/psql/tab-complete.c": "a72d1f39d9ff441259c9b61781995e0bae7c983efc64d9e6a91f281aaca50ec5",
+    "repos/neon/vendor/postgres-v17/src/test/regress/expected/cluster.out": "4599bde4c67e81fe5f66c61faca5b42635d2ff5df07c1ecc61363e321ebe6599",
+    "repos/neon/vendor/postgres-v17/src/test/regress/sql/cluster.sql": "c649128dd1f327b35e6d4e81f8e2dd3cbca3c480b66c0e667608384a3e8617a2"
+  },
+  "artifact_sha256": {
+    "build/pg17-maint08-exact-install/bin/postgres": "6a85d098e366da385ac0b4c1531ce24641e2803209288763d2d02149578fd60b",
+    "build/pg17-maint08-exact-install/lib/postgresql/neon.dylib": "7d863aba6f787a4995e2965f8d7efdb109fda27159b183593aa2f9c5f47957b7",
+    "build/pg17-maint08-exact-install/lib/postgresql/test_dsg_region.dylib": "7771f1ccafb732b54fc59b7559a62235aaa37a8403e243b8db65705784aa9148",
+    "build/pg17-maint08-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e"
+  },
+  "old_ea07_verified": {
+    "build/pg17-va-guard-exact-install/bin/postgres": "cfd8c6da17c52fe7a8da3e4ed4fef35134b9f44b7f33870f50e615faf8f76680",
+    "build/pg17-va-guard-exact-install/lib/postgresql/test_dsg_region.dylib": "acbde87e4a745bbaa84f30f6d66062b8287dc6e57d0a39b58e806769120b1f85",
+    "build/pg17-va-guard-exact-install/lib/postgresql/neon_rmgr.dylib": "06600a59d8b428f780e5d579f6ada648d7b45b6913766df35a61637401f1083e",
+    "build/pg17-va-guard-exact-install/lib/postgresql/neon.dylib": "1c7637bc8c46538beec68dd4cbe03b666dc1cdb8ac8ba277918625be173936f3"
+  },
+  "log_and_recipe_sha256": {
+    "build/dsga-maint08-neon-runtime-diff.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "build/dsga-maint08-exact-install.log": "b4399c7a93970c7f7835b9a0b312a07106bb0b28bc009156d925cbc2b9cd0d9f",
+    "build/dsga-maint08-exact-neon-build.log": "f2149d2adc6d9f9a370856663dc63bf95bca41af051318d119c0b9a52a241f9e",
+    "build/control-main228-published.json": "233174ec65a8ae14e8c0a105db583971ba4568f7acb0cc7c4ce4467289442f90",
+    "build/dsga-maint08-official-regress.log": "d4f94f1c44df3d8adcd967836410fb1df16f00b7f79a0355df1fccd263c681e6",
+    "build/dsga-maint08-candidate-configure.log": "9fb897b241efd83fea9b21f693a3e1e82fc6452380ea2229e77feec2c50f1023",
+    "build/dsga-maint08-candidate-version.log": "a1b2cf4c090bfba348d79704f8ce2ef8c1b0125fd2b3c837b8ec4ce14219cdcf",
+    "build/run-dsga-maint08-candidate-tests.sh": "087c22a60568f67a4df1e85355f3dbef86c48220b996f07b4f288a90fa0356ab",
+    "build/dsga-maint08-pg-comparison.json": "d793ab0ff92345d566985cd4607c8d7ff08e8b68827c73ded297a27b6b220ac3",
+    "build/run-dsga-maint08-candidate.sh": "095ea3b9dd5d44f9d583af2a2aa8c53e8eff441bcf121fa514898884c4fdc640",
+    "build/run-dsga-maint08-exact.sh": "8f2d828fe3042a4049b523a570caba783c19471bb89cc0d4ab67d1f79a4bc42e",
+    "build/dsga-maint08-exact-configure.log": "9fb897b241efd83fea9b21f693a3e1e82fc6452380ea2229e77feec2c50f1023",
+    "build/dsga-maint08-exact-probe.log": "c4749766f9603217e7e7df12b79d7a478849b53bd64200fc3759f3e63c54c4f5",
+    "build/dsga-maint08-candidate-build.log": "ccad3c4a884d72bef30dbb1161d465a871a3fe2ced4f01ece52baa2dce68fef1",
+    "build/dsga-maint08-exact-version.log": "984c9ebeb544f780f6b67a847b1aabb73e9f12f13c01c66924bfa59e0cfd04bf",
+    "build/dsga-maint08-pg-published.json": "5210c4ce0c9cd0a252df0fbc4d5863c2ad4aec170d4f3119a4917ffa95b6a588",
+    "build/dsga-maint08-official.conf": "0c00ec1f8aa12b17b803c8fcea677b9308eecf68d47e2f335248990248f611dd",
+    "build/dsga-maint08-psql-completion.log": "58d368710e6d0efafa848a893dcf9d2f521b830662d47e3174b2897c053e4b95",
+    "build/dsga-maint08-exact-build.log": "3fb8515e76b28c588a13bea2974a9eb5dd27bef81c5df58af18ef4f0a3417c8d",
+    "build/dsga-maint08-bindings.log": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "build/run-dsga-maint08-exact-neon-build.sh": "b6e2560cb2f5a0b0a6d9fa9640e4f66b3219af3a20d02e78127193cb36b2fc72",
+    "build/011_maint08_concurrent_refresh.pl": "8fd40889b075d47967667e4e2e3b8344f3e9f9945af8a2405fe4f16595b59904",
+    "build/run-dsga-maint08-exact-probe.py": "27f5122887e285ad89e5a0db1f282785f2997c080a8dbd97b73bd7ca731cf37d",
+    "build/dsga-maint08-candidate-install.log": "a8768030a15b1f0fd86e8723990959796e091612014daa438fbe4b8046e576d1",
+    "build/dsga-maint08-psql-logs/010_psql_history.txt": "e1003d8eb0fe24a2c0b1038b9ce0e4c211352101b4948c371df659a2f81dc5a2",
+    "build/dsga-maint08-psql-logs/011_maint08_concurrent_refresh_main.log": "987610963d671e886f6fd8dbe5abd97da81dc2b9ecc18aefdfbcd9ec035127f2",
+    "build/dsga-maint08-psql-logs/regress_log_011_maint08_concurrent_refresh": "4a39241e8adfc27a6678b55a73946d7b2f8012f0fc546eb2e5ea912670dcff6c",
+    "build/dsga-maint08-regress-results/cluster.out": "4599bde4c67e81fe5f66c61faca5b42635d2ff5df07c1ecc61363e321ebe6599"
+  }
+}
