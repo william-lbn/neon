@@ -20,11 +20,32 @@ Neon1.15/DSG组合加载1项通过，0最终失败/跳过；准确构建关键�
 见[维护、故障证据和边界](DSGA-冻结PG17两阶段检查点修复-Mac验收-20261026.md)。
 
 **整体核心尚未完成，不能宣称已封完整在线伸缩版本。** 可信Prepare/系统剩余
-上界、Host/Scheduler生产者、安全降normal/首次
+上界、Host的Scheduler全授予/恢复/选主/释放接入、安全降normal/首次
 准入、完整生命周期与受控跨boot仍是核心代码缺口。后续集中关闭这些项；
 控制面完成后另行移植/统一E2E，Linux内核/物理/性能后验，Goal继续active。
 
-## Host节点持久账本原语完成，实际Scheduler接线继续（2026-10-27）
+## Host来源发布与实际Agent消费完成，Scheduler完整接入继续（2026-10-27）
+
+AS代码`0d9fc2c9a16fcf1c7e052038e40c8eb642e8b850`、中文验收/收据
+`a305c389618570ae527efcd8a9f7b1e8e55af758`已沿原分支推送并核对远程。
+新Publisher从原VM WAL/Lease、Prepare/Outside、Runner实际观察及Pod核验，
+先Node容量CAS，再原保护CM，最后Node CAS固定原CM UID；消费者在发布前拒绝。
+实际生产Agent已接只读Consumer，原Host引用/摘要先写VM命令，复核后结算，
+Start/Record未知只读原UID；Node/CM丢失或重建不自动补证/释放。正常未发布
+窗口只等待；Host v2/Node发布v2须读者先升级，Model v4/Runner record v1不变。
+
+Mac去重20顶层/142含子项最终通过0失败/跳过，7包vet、最终增量lint0问题，
+准确Agent/Runner双Linux架构仅编译通过；真实旧29 Host读者拒绝v2。
+包含实际Host生产/消费→Agent/Runner→预算/准入的扩缩组合，但Kube/QEMU及
+Prepare/Host资格/PG/Root内核仍为显式fixture。原失败、中断和替换规则保留，
+不重复未改PG/HTTP。见[模块交付与准确证据](DSGA-Host来源发布与Agent消费-Mac基本验收-20261027.md)。
+
+**Publisher尚未接实际Scheduler运行入口。** 全授予/重启恢复、选主/引导、
+其他工作负载完整计账、首次VM持有、显式释放/迁移互斥仍须代码；剩余可信
+Prepare/首次预算/安全normal/公开生命周期继续，不能宣布整体封版或只待Linux。
+控制面及PG/冻结基线未变；下节是本批之前的基础账本交付记录。
+
+## 历史：Host节点持久账本原语（2026-10-27）
 
 AS代码`6159109676a178c5294d0d78625651e812116714`、验收记录
 `4e9656a3d6687a1fcfb98cfdc0003ad42be721c8`已推原分支并核对远程。完整原请求/

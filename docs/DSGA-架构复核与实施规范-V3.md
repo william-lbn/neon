@@ -1054,6 +1054,36 @@ Mac真实HTTP/RFC6902客户端与模型新增7顶层/26含子项race通过，0�
 [本批验收](DSGA-Host节点持久账本-Mac基本验收-20261027.md)。冻结基线、PG
 与控制面均未变化，整体核心继续原分支实施，不重复未变功能。
 
+### 8.32 原Node持有的Host来源发布与Agent消费（2026-10-27）
+
+Host容量与来源采用明确顺序：原Node完整Plan先UID/RV CAS持有，原VM保护
+immutable CM后创建并真实GET，最后Node CAS固定原CM UID并升级模型v2。
+该最后CAS才是来源生效点；CM先出现不能提前消费。发布前CREATE丢回复可从
+同一完整CM恢复；发布CAS未知只读原UID，发布后丢/换CM不CREATE替代，不TTL
+释放或清空持有。所有读取均由启动固定的可信Kube客户端执行，网络间不持本地锁。
+
+新`hostexec.Publisher`自行读取原VM WAL/Lease、Complete Prepare/Outside、
+Runner Birth/State实际观察及原Pod/Node，核原owner、期限、before与目标几何。
+不接受外部传入Prepared或借源对象名称证明容量。域外/Host开销必须来自可信
+平台上界，此组件本身不认证资格；实际Scheduler须纳入全部授予/恢复和迁移。
+
+Host v2读者核原Node完整计划/SourceID/CM UID/保护与容量；Host v1保留历史
+合同解码，生产不消费。实际Agent接只读Consumer，原Host引用和完整摘要先写
+VM UID/RV命令、复核后结算ReserveHost，Start/Record未知只读原命令/UID。
+正常跨对象未发布窗口等待，不提前Start/完成或误退出owner；坏源/丢源不补证。
+Agent不增加Node/CM写权限。VM Model仍v4、Runner record v1和PG ABI不变，
+Host新协议须读者先升级；实际旧29读者实测拒绝v2。
+
+Mac去重20顶层/142含子项最终通过，0失败/跳过；实际Host组件到Agent/Runner/
+预算/准入扩缩组合已测，仍有明确Kube/QEMU、资格与内核fixture。7包vet、
+最终增量lint0问题及双Linux架构Agent/Runner仅编译通过，原失败/中断保留并按
+完整用例名替换。见[本模块](DSGA-Host来源发布与Agent消费-Mac基本验收-20261027.md)。
+
+**实际Scheduler入口仍未接线**：全授予/重启恢复、选主/显式初始化、其他成本
+计账、首次VM持有、显式释放/迁移互斥须继续实现，不能把本生产组件交付写成
+完整Host或整体封版。可信Prepare/系统剩余上界、安全normal/首次预算/公开
+生命周期与跨boot仍按剩余清单完成。PG/控制面/冻结基线保持，不追新上游。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
