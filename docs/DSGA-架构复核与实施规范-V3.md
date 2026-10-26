@@ -794,6 +794,27 @@ Mac真实执行Owner/Lease/Store/CAS/SDK/TLS，Kube/root/PG为协议夹具，旧
 Mac实际Owner/SDK/typed Store/CAS及旧读者验证范围见[本批证据](DSGA-首次PG身份持久绑定-Mac基本验收-20261026.md)。
 本项只完成首次身份基础，首次预算/开放及完整预算/最终VM仍不可省略。
 
+### 8.23 四数组VA必须跨同Postmaster内部恢复持续持有（2026-10-26）
+
+后续地址空间额度不能在内部恢复时把固定DSG额度让给通用分配器。Postmaster
+私有所有权表持续持有四数组VA/span；退出共享boot时在原范围单次MAP_FIXED
+换成PROT_NONE私有占位，新boot只在该占位建立全新匿名共享backing。不先
+munmap再任意选址，不触旧共享目录；几何变化/转换未知FATAL，不能继续复用
+可能已失去所有权的地址。必须先停止全部共享使用者，非共享子进程独立脱离
+所有Shared/Parked槽，即使DSBCtrl已为空。四数组不等于整个进程地址空间。
+
+这不是跨Postmaster/跨VM attach，也不复用旧boot数据；相同VA不证明相同
+backing/boot或旧操作完成，首次PG持久绑定与旧预算/未知继续保留。Region布局
+和原生各ABI不变，不发物理释放或VM许可。Linux RLIMIT_AS核对total_vm，
+固定VA仅是后续额度的必要前提，不能单独推出私有/系统内存上界，见
+[Linux v6.12实现](https://raw.githubusercontent.com/torvalds/linux/v6.12/mm/mmap.c)。
+
+Mac单进程MAP_SHARED实测vmmap标签可为PRV，不允许据此拆私有/共享预算。
+测试的单Region采用VA/真实C读写与整个PROT_NONE覆盖、新backing全span零值；
+PG父/backend双映射共享仍严格核验。连续三个真实内部boot保持几何/数据，
+实际范围与原失败替换见[本批验收](DSGA-跨内部恢复地址占位-Mac基本验收-20261026.md)。
+可执行私有/后台额度、exec/PID边界、完整预算/首次开放/最终VM仍须继续实现。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

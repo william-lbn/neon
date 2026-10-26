@@ -33,6 +33,8 @@ class DsgNonShmemChildLifecycle(unittest.TestCase):
             "'test_dsg_array_mappings' LANGUAGE C VOLATILE PARALLEL UNSAFE;"
             f"CREATE FUNCTION dsg_grow(bigint,bigint,bigint,int,int,boolean) RETURNS text "
             f"AS '{lib}', 'test_dsg_grow' LANGUAGE C STRICT;"
+            f"CREATE FUNCTION dsg_region_recycle(text) RETURNS text AS '{lib}', "
+            "'test_dsg_region_recycle' LANGUAGE C STRICT VOLATILE PARALLEL UNSAFE;"
             "CREATE TABLE logger_data AS SELECT i,repeat(md5(i::text),4) AS v "
             "FROM generate_series(1,100) i; CHECKPOINT;")
         self.peer = self.connect()
@@ -147,26 +149,86 @@ class DsgNonShmemChildLifecycle(unittest.TestCase):
         before = self.fact()
         logger = self.logger()
         self.verify(before, logger, "before-crash")
-        # 杀本次持久连接的真实BackendKeyData PID，触发同一Postmaster内部恢复。
-        os.kill(self.peer.backend_pid, signal.SIGKILL)
-        deadline = time.monotonic() + 12
-        after = None
-        while time.monotonic() < deadline:
-            try:
-                self.peer = self.connect()
-                after = self.fact()
-                if after["boot_id"] != before["boot_id"]:
-                    break
-            except (OSError, RuntimeError, StopIteration):
-                pass
-            time.sleep(0.01)
-        self.assertIsNotNone(after)
-        self.assertNotEqual(before["boot_id"], after["boot_id"])
-        self.assertEqual(int((self.pg.data / "postmaster.pid").read_text().splitlines()[0]), self.postmaster)
-        self.assertEqual(self.logger(), logger, "logger must really survive this shared boot change")
-        # 旧、新目录的共享VA均不得由同一长寿命logger持有；不以新boot补零旧引用。
-        logs = self.maps(logger, "surviving-logger-old-source")
-        for a in before["arrays"]:
-            start, end = int(a["address"]), int(a["address"]) + int(a["mapped_bytes"])
-            self.assertFalse(any(shared and left < end and right > start for left, right, shared in logs))
-        self.verify(after, logger, "after-crash")
+        for cycle in range(3):
+            # 只杀此独占集群持久连接的BackendKeyData PID。三个真实新boot
+            # 保持整个Postmaster寿命的VA/span，仍必须换boot和全新backing。
+            os.kill(self.peer.backend_pid, signal.SIGKILL)
+            deadline = time.monotonic() + 12
+            after = None
+            while time.monotonic() < deadline:
+                try:
+                    self.peer = self.connect()
+                    after = self.fact()
+                    if after["boot_id"] != before["boot_id"]:
+                        break
+                except (OSError, RuntimeError, StopIteration):
+                    pass
+                time.sleep(0.01)
+            self.assertIsNotNone(after)
+            self.assertNotEqual(before["boot_id"], after["boot_id"])
+            self.assertEqual(before["arrays"], after["arrays"], "internal recovery must retain owned VA geometry")
+            self.assertEqual(int((self.pg.data / "postmaster.pid").read_text().splitlines()[0]), self.postmaster)
+            self.assertEqual(self.logger(), logger, "logger must really survive each shared boot change")
+            self.verify(after, logger, f"after-crash-{cycle}")
+            before = after
+
+    def recycle(self, command):
+        messages = self.peer.exchange([(b"Q", f"SELECT dsg_region_recycle('{self.pg.quote(command)}')".encode() + b"\0")])
+        self.assertFalse(any(k == b"E" for k, _ in messages), messages)
+        rows = [b for k, b in messages if k == b"D"]
+        self.assertEqual(len(rows), 1)
+        return json.loads(rows[0][6:])
+
+    def test_owned_region_parks_without_access_then_rearms_fresh_at_same_va(self):
+        first = self.recycle("reserve")
+        (self.artifacts / "local-first.json").write_text(json.dumps(first, indent=2) + "\n")
+        self.assertEqual(first["state"], "shared")
+        self.assertIs(first["all_zero"], False, "test must really write old backing")
+        start, size = int(first["address"]), int(first["mapped_bytes"])
+        self.assertGreater(start, 0)
+        self.assertGreater(size, 0)
+        for cycle in range(3):
+            live = self.maps(self.peer.backend_pid, f"local-live-{cycle}")
+            # Mac单进程MAP_SHARED实际显示SM=PRV（原始行已留证），不能用
+            # ALI/SHM推断未fork的单映射。这里核VA仍完整存在，真实C读写/清零
+            # 证明访问性；四数组在父/backend两进程的共享覆盖仍由verify严格核验。
+            present = [(left, right, True) for left, right, _ in live]
+            self.assertTrue(self.covered(present, start, start + size), first)
+            parked = self.recycle("park")
+            (self.artifacts / f"local-parked-{cycle}.json").write_text(json.dumps(parked, indent=2) + "\n")
+            self.assertEqual((parked["state"], parked["address"], parked["mapped_bytes"]),
+                             ("parked", first["address"], first["mapped_bytes"]))
+            self.assertIsNone(parked["all_zero"], "parked backing must never be read")
+            label = f"local-parked-{cycle}"
+            rows = self.maps(self.peer.backend_pid, label)
+            self.assertFalse(any(shared and left < start + size and right > start
+                                 for left, right, shared in rows))
+            raw = (self.artifacts / f"{label}-{self.peer.backend_pid}.maps.txt").read_text()
+            protected = []
+            for line in raw.splitlines():
+                if platform.system() == "Darwin":
+                    match = re.search(r"([0-9a-fA-F]{8,16})-([0-9a-fA-F]{8,16}).*?\s([rwx-]{3})/[rwx-]{3}", line)
+                else:
+                    match = re.match(r"([0-9a-f]+)-([0-9a-f]+)\s+([rwx-]{3})[ps]", line)
+                if match:
+                    protected.append((int(match[1], 16), int(match[2], 16), match[3] == "---"))
+            self.assertTrue(self.covered(protected, start, start + size), "real OS must report entire PROT_NONE span")
+            fresh = self.recycle("rearm")
+            (self.artifacts / f"local-fresh-{cycle}.json").write_text(json.dumps(fresh, indent=2) + "\n")
+            self.assertEqual((fresh["state"], fresh["address"], fresh["mapped_bytes"]),
+                             ("shared", first["address"], first["mapped_bytes"]))
+            self.assertIs(fresh["all_zero"], True, "new anonymous shared backing must not retain old marker")
+            self.assertIs(self.recycle("mark")["all_zero"], False)
+        # 直接销毁不可访问占位也必须完整脱离；对应非共享子进程继承Guard的底层清理。
+        self.assertEqual(self.recycle("park")["state"], "parked")
+        self.assertEqual(self.recycle("destroy")["state"], "empty")
+        self.verify(self.fact(), self.logger(), "after-local-lifecycle")
+
+    def test_invalid_owned_mapping_geometry_is_fatal_before_any_replacement(self):
+        before = self.fact()
+        failed = self.pg.sql("SELECT dsg_region_recycle('invalid')", check=False)
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("FATAL", failed.stderr)
+        self.assertIn("invalid owned DSGA mapping geometry", failed.stderr)
+        self.assertEqual(before, self.fact(), "invalid local geometry must not alter parent/directory/boot")
+        self.verify(before, self.logger(), "after-invalid-local-geometry")

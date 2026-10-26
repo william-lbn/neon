@@ -3,7 +3,29 @@
 更新：2026-10-26（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：2026-10-26 首次PG身份先持久固定（仍非整体完成）
+## 最新：2026-10-26 四数组跨内部恢复持续保留地址占位（仍非整体完成）
+
+PG17 ea07fdd1a0b5851de4b985d3b0d47c3b2f468bfe已先推自有原分支并核验。
+Postmaster私有四slot表持续持有VA/span，旧共享backing在全部共享子进程退出
+后换成不可访问私有占位；新boot在同址建立全新零共享backing。转换未知FATAL，
+不先解除VA再选址；非共享子进程清自身表，DSBCtrl为空也不漏占位，不写共享目录。
+Buffer6/Work2/Connection1/Prepared1/DSM1、Region结构、WAL/配置和扩展1.15不变。
+
+Mac受影响原生5不同场景通过0skip，含连续3次真实内部恢复、同址保护/新零
+backing与坏几何FATAL、真实数据；启用DSGA的官方core225通过。初组测试SQL
+引号和单进程vmmap标签假设失败均保留，仅替换该项，产品不放宽。单映射
+MAP_SHARED实测SM=PRV，不能据此推断私有成本；父/backend双映射共享仍严格
+验证。准确SHA与配套库/Neon1.15重编通过，关键2项替换通过，不叠加计数。
+Neon三处PG同锁；ASda2/CP21c保持，不造空提交，不重跑未变Go/HTTP/发行单测5。
+见[本批代码、原始证据与边界](DSGA-跨内部恢复地址占位-Mac基本验收-20261026.md)。
+
+本项只是可执行预算的地址空间寿命前提，不是私有硬额度或VM许可。完整可信
+Prepare/Finalize/SystemOutsidePG、安全降normal/后台私有上界、exec/PID边界、
+首次预算/开放、Host最终VM/公开worker/受控跨boot仍须代码。Linux内核/映射/
+HugeTLB/物理/目标E2E/性能另验。Goal active/incomplete、PG17、默认关闭，不
+构建镜像、不准备/执行部署、不合main；相同VA不代表相同boot或旧操作已结清。
+
+## 历史：2026-10-26 首次PG身份先持久固定（仍非整体完成）
 
 AS da2aa56a1efaf6241ebf85c7814542e41e757a66已先推并核验，沿原服务分支。
 首次能力只读发现后，以原VM UID/RV CAS固定PGInstance才返回实际worker，
