@@ -937,6 +937,38 @@ Completed而仍保存旧预算，原WAL/回执或Guest/PG/floor不一致。Budge
 再统一E2E；不能为迁就旧控制面忽略新字段或降级当前账本。
 见[本批Mac验收与未完成核心项](DSGA-当前预算长期持有-Mac基本验收-20261026.md)。
 
+### 8.28 最终Runner以原Kube意图串行执行私有QMP（2026-10-26）
+
+最终VM域复用已认证Kube通道：Agent先将完整typed ResizeVM命令写入既有VM
+UID/RV WAL；Runner用自身固定客户端拉取，不新增控制面业务、公开memory RPC
+或请求自报授权。Lease→完整journal→Lease复核与原Birth/Pod/Node/状态CM核验
+后，只消费原Prepare/Guest/Host UID及全文绑定；摘要不是预算资格或来源认证。
+Grow先有Host，Shrink先有完整PG释放/Guest硬约束，Host必须持续持有
+max(before,target)+overhead，不能先按target缩小原Host持有。
+
+原Runner随机boot在任何CREATE前本地fsync，受保护immutable Birth固定原Pod/
+Node/几何和State UID；QEMU UUID固定到同一boot。丢出生/WAL、同名新进程或
+重建对象不能重新发首次身份。受管模式只用私有Unix QMP，关闭TCP/manual；
+实际Pod要求显式SA/sysfs、Downward原身份和状态卷，不用default SA回退。
+
+锁序为本VM文件锁→持久floor/完整prepared→二次可信来源→持久may_have_sent
+→一次有期限的私有QMP→独立实际读回→持久原结果；没有后台旧writer释放锁
+后继续发送。新floor只fence，不清旧pending/预算。非no-op必须记录B≠A且原
+requested/actual都为B；唯一set后只有完整requested/device/summary到A可结清。
+丢回复/部分热拔/超时保持未知，只读原目标、不自动重发。no-op零set。prepared
+恢复not_sent；显式重放仍须完整同命令/owner/Key/来源、原before及新nonce。
+
+原结果先创建/GET确认受保护immutable回执并持久UID，再允许新目标。可变State
+按原UID/RV发布当前floor/pending/实际值；Controller展示不发许可，Agent后续
+必须匹配原不可变回执并重新核当前Root/PG/Host。新VM来源仍须进入完整长期
+预算协议、升级所有相关读者后启用，不能让旧VMSettlement或旧SDK忽略新字段。
+当前Model v3/PG ABI未因此改变；控制面SDK本轮保留，待独立任务完成移植。
+
+实际Runner消费与Controller接线及Mac证据见[本模块](DSGA-Runner持久执行与私有QMP-Mac基本验收-20261026.md)。
+Agent派发/结算、可信Prepare/Host生产者、生产显式重放/完整恢复仍有代码，
+不以本节或Mac协议夹具声称完整E2E。Linux内核/KVM/真实Host/性能后验独立，
+上游按17:29:30固定基线，不用未来维护提交打断核心收尾。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

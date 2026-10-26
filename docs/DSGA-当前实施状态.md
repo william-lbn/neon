@@ -20,9 +20,19 @@ Neon1.15/DSG组合加载1项通过，0最终失败/跳过；准确构建关键�
 见[维护、故障证据和边界](DSGA-冻结PG17两阶段检查点修复-Mac验收-20261026.md)。
 
 **整体核心尚未完成，不能宣称已封完整在线伸缩版本。** 可信Prepare/系统剩余
-上界、Host/Scheduler及最终Controller/Runner/QMP执行链、安全降normal/首次
+上界、Host/Scheduler生产者及Agent最终VM派发/来源结算、安全降normal/首次
 准入、完整生命周期与受控跨boot仍是核心代码缺口。后续集中关闭这些项；
 控制面完成后另行移植/统一E2E，Linux内核/物理/性能后验，Goal继续active。
+
+## Runner消费/私有QMP与Controller状态接线完成（2026-10-26）
+
+原Runner出生、固定Kube意图消费、每VM持久floor/完整pending、私有QMP唯一
+set/实际读回及原UID回执已接实际Runner启动；受管Controller使用直接API来源，
+移除TCP/manual入口，实际Pod核显式SA/sysfs/原Downward身份与状态卷。Mac去重
+20顶层/110含子项通过，最终0失败/跳过，readonly vet和双Linux架构仅编译通过。
+证据、质量补正及独立边界见[模块验收](DSGA-Runner持久执行与私有QMP-Mac基本验收-20261026.md)。
+此为最终消费域模块，Agent typed派发/VM来源长期结算和真实Prepare/Host生产者
+等仍须完成；不能把新接线写成整个自动伸缩已经封版。继续固定基线核心收尾。
 
 ## 当前范围：内存伸缩核心先独立完成（2026-10-26所有者最新指示）
 
