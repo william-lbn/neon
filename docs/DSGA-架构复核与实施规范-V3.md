@@ -962,12 +962,43 @@ requested/actual都为B；唯一set后只有完整requested/device/summary到A�
 按原UID/RV发布当前floor/pending/实际值；Controller展示不发许可，Agent后续
 必须匹配原不可变回执并重新核当前Root/PG/Host。新VM来源仍须进入完整长期
 预算协议、升级所有相关读者后启用，不能让旧VMSettlement或旧SDK忽略新字段。
-当前Model v3/PG ABI未因此改变；控制面SDK本轮保留，待独立任务完成移植。
+本节Runner消费阶段未改变Model v3/PG ABI；后续§8.29将含原Runner来源的
+当前预算升为Model v4。控制面SDK本轮保留，待独立任务完成移植。
 
 实际Runner消费与Controller接线及Mac证据见[本模块](DSGA-Runner持久执行与私有QMP-Mac基本验收-20261026.md)。
-Agent派发/结算、可信Prepare/Host生产者、生产显式重放/完整恢复仍有代码，
-不以本节或Mac协议夹具声称完整E2E。Linux内核/KVM/真实Host/性能后验独立，
+Agent派发/结算已在后续§8.29接通；可信Prepare/Host生产者、生产显式重放/
+完整恢复仍有代码，不以本节或Mac协议夹具声称完整E2E。Linux内核/KVM/真实Host/性能后验独立，
 上游按17:29:30固定基线，不用未来维护提交打断核心收尾。
+
+### 8.29 Agent消费原Runner回执并长期保留VM来源（2026-10-27）
+
+实际Agent通过既有VM UID/RV WAL保存完整typed ResizeVM，Runner自行拉取，
+Agent不直发QMP或创建自报预算。写前必须当前PG/Root/原Host和Runner成立；
+Shrink重新核原Provider物理释放、Guest限额、关闭门禁及前台排空，Host持续
+持有max(before,target)+overhead，不能先按缩容目标释放。新Start失败/丢回复
+保留原未知；恢复先查原Runner，再核外部来源，不能因缺Host而自动重发。
+
+新VMSettlement绑定原Birth/State/Receipt UID、完整命令及原Runner/外层摘要，
+实际requested/actual都到原目标才结算；ObserveVM再次核同一原Resize来源、
+保存逐字节相同事实，不增加内存写。原not_sent不自动重放。Finalize与准入
+持续重新GET原Runner来源，来源缺失/重建、floor或完整命令不符保持未完成。
+
+含Runner来源的最终预算与Finalize Completed同CAS原子升**Model v4**，独立
+于有限历史长期持有；不能降级成无Runner来源预算。旧v1/v2/v3仍严格读取，
+实际已发布c7旧读者验证v3接受、v4及删字段投影拒绝。PG ABI不变。独立控制面
+本轮仍d84/SDK565，后续移植须先升级所有读者到支持v4的准确依赖，再启用并
+统一E2E；不得为兼容旧控制面删字段、降版本或跳过来源。
+
+Mac实际Agent/Runner协议组合、预算/日志受影响全包、来源反向与真实旧读者
+合计去重53顶层/164含子项通过，0最终失败/跳过；原内核/Host/Prepare为明确
+夹具，真实Unix socket/文件锁/WAL/Agent/Runner代码执行。增量lint0问题、
+8包vet和Agent/Runner/Controller双Linux架构仅编译通过。步骤、包装器退出
+说明和边界见[本模块](DSGA-Agent原VM派发与来源结算-Mac基本验收-20261027.md)。
+
+可信完整Prepare/系统剩余上界、真实Host/Scheduler持有/释放、安全normal
+下降及持续私有后台约束、首次预算/准入、公开策略/取消/受控跨boot和生产
+显式VM重放仍须核心代码；不将其列为仅待Linux，不宣称整体已封版。固定上游
+继续使用2026-10-26基线，跨日期不自动解冻。
 
 ## 9. 请求、权限、幂等与观测接口
 

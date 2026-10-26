@@ -1,6 +1,6 @@
 # DSGA 当前实施状态
 
-更新：2026-10-26（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
+更新：2026-10-27（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；用户已纠正提前暂停，继续PG17完整功能开发**。本页为当前事实入口；阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
 ## 本轮上游已冻结：优先核心整体收尾（2026-10-26 17:29:30）
@@ -20,19 +20,33 @@ Neon1.15/DSG组合加载1项通过，0最终失败/跳过；准确构建关键�
 见[维护、故障证据和边界](DSGA-冻结PG17两阶段检查点修复-Mac验收-20261026.md)。
 
 **整体核心尚未完成，不能宣称已封完整在线伸缩版本。** 可信Prepare/系统剩余
-上界、Host/Scheduler生产者及Agent最终VM派发/来源结算、安全降normal/首次
+上界、Host/Scheduler生产者、安全降normal/首次
 准入、完整生命周期与受控跨boot仍是核心代码缺口。后续集中关闭这些项；
 控制面完成后另行移植/统一E2E，Linux内核/物理/性能后验，Goal继续active。
 
-## Runner消费/私有QMP与Controller状态接线完成（2026-10-26）
+## Agent原VM派发与Runner来源长期结算完成（2026-10-27）
+
+实际生产PGWorker已接typed ResizeVM/ObserveVM，原VM UID/RV先保存命令、
+Runner自行拉取执行；Agent未知先查原Runner，不直发QMP。Shrink写前再核
+当前PG/Root、原门禁/前台排空与Host双端持有；Observe复用原Resize事实。
+最终预算和准入均核原Birth/State/Receipt UID及完整命令，来源丢失/替换不完成。
+新来源当前预算与Finalize Completed同CAS原子升Model v4，淘汰历史/接管不丢失。
+
+Mac去重53顶层/164含子项通过，0最终失败/跳过；8包vet、增量lint0问题及
+Agent/Runner/Controller双Linux架构仅编译通过。真实旧c7读者接受v3并拒绝v4/
+投影。PG17仍b078；控制面保留d84/SDK565，后续移植须先升级v4读者。
+完整代码版本、原日志/包装器退出区别及夹具边界见[本模块](DSGA-Agent原VM派发与来源结算-Mac基本验收-20261027.md)。
+可信Prepare、Host/Scheduler等剩余核心继续原分支，Linux认证另列，不追新上游。
+
+## 已完成Runner消费/私有QMP与Controller状态接线（2026-10-26）
 
 原Runner出生、固定Kube意图消费、每VM持久floor/完整pending、私有QMP唯一
 set/实际读回及原UID回执已接实际Runner启动；受管Controller使用直接API来源，
 移除TCP/manual入口，实际Pod核显式SA/sysfs/原Downward身份与状态卷。Mac去重
 20顶层/110含子项通过，最终0失败/跳过，readonly vet和双Linux架构仅编译通过。
 证据、质量补正及独立边界见[模块验收](DSGA-Runner持久执行与私有QMP-Mac基本验收-20261026.md)。
-此为最终消费域模块，Agent typed派发/VM来源长期结算和真实Prepare/Host生产者
-等仍须完成；不能把新接线写成整个自动伸缩已经封版。继续固定基线核心收尾。
+此为最终消费域模块；Agent typed派发/VM来源长期结算已由上节补齐，真实
+Prepare/Host生产者等仍须完成。不能把新接线写成整个自动伸缩已经封版。
 
 ## 当前范围：内存伸缩核心先独立完成（2026-10-26所有者最新指示）
 
