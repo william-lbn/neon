@@ -815,6 +815,32 @@ PG父/backend双映射共享仍严格核验。连续三个真实内部boot保持
 实际范围与原失败替换见[本批验收](DSGA-跨内部恢复地址占位-Mac基本验收-20261026.md)。
 可执行私有/后台额度、exec/PID边界、完整预算/首次开放/最终VM仍须继续实现。
 
+### 8.24 原创建有限任务数必须真实落实且持续冻结（2026-10-26）
+
+私有/后台内存上界不能假设“连接数等于进程数”。可信原创建可显式固定有限
+pids_max_tasks，覆盖整个PG domain cgroup的进程/线程；0/缺省保留旧未约束，
+不补默认、不据此发私有额度。原bootstrap写前WAL/fsync后先写pids.max，部分
+效果保留Unknown；所有运行命令/Held/Quiesce/资源来源摘要保持同N，owner/boot
+不能改变。实际Agent在VM-CAS完整命令中复制N，派发前拒绝Prepare改N或遗漏。
+
+kernel pids约束fork/clone，但迁入/调低上限可产生current>max，瞬态计数也可
+超过上限；真实读回必须max==原N且current<=N，超额/漂移不确认、不释放预算。
+启动/再次出生还须current确为0，不用populated=false推断无尚未release的任务。
+Go helper多线程迁入→降权→exec持原资源锁；后续须真实PG executable/UID/group/
+starttime确认，不能用Birth记录或helper迁入冒充已满足N。
+
+N只影响来源标识，不重复加到normal+整个Guest HugeTLB池的字节账本，不证明
+每任务私有/内核/exec或SystemOutsidePG上界，更不授权降normal或VM。动态N需
+另行证明后台活性/预算，本批冻结N避免把fork余量变化隐藏在内存调整里。平台须
+在Linux选择/验证足够后台/辅助/扩展线程、恢复峰值的N，不能靠自动放宽规避预算。
+
+实际旧严格读者拒绝新字段，所有读者先升级再为新Guest启用；不删字段重造日志
+降级，旧0来源不变成有限证书。Compute是原字节透明资源代理，无须复制Go字段表。
+代码、Mac57项及控制面1项合同、准确模块/版本锁和Linux边界见
+[本批验收](DSGA-有限任务数硬约束-Mac基本验收-20261026.md)。真实内核待Linux，
+完整私有/外部预算、安全降normal、首次开放、Host最终VM/公开worker/受控跨boot
+仍需业务代码，不能以该模块通过宣称整体完成。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
