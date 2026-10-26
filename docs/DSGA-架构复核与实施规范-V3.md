@@ -868,6 +868,37 @@ N只影响来源标识，不重复加到normal+整个Guest HugeTLB池的字节�
 完整Prepare/Finalize、安全降normal/私有后台上界、首次预算/开放、Host-QMP最终链、
 公开worker完整生命周期及受控跨PG boot恢复仍需代码，不能改记为仅待Linux验证。
 
+### 8.26 最终预算结算必须核验持续持有来源（2026-10-26）
+
+实际Agent通过NewProductionPGWorker启用Finalize执行器及带持有来源的准入；
+缺可信Core读者不回落旧路径。新Prepared的OutsideClaim、Finalized的Sources
+固定真实原对象UID和最终VM回执摘要，旧严格读者实测拒绝新字段，先升级全体
+读者再启用。旧格式保留历史读取，生产入口不能据无Sources旧结算发新开放。
+
+最终结算只消费原账本Completed的Prepare、GuestReady v2、ResizePG及最终VM事实；
+原Guest审计须等于原WAL命令，并核同一Root聚合/真实PG出生/当前限额/floor。
+Shrink必须核ObserveVM与ResizeVM原body相同及当前四数组物理release；Grow的
+VM先于未来GuestReady，不能在VM回执补造未来资源来源，结算时再独立核原Root。
+原完整Finalized和前驱摘要先经同VM UID/RV CAS持久，再读原持有对象、Root、PG
+出生/成本和VM版本后记Completed。丢回复只读复核同一原命令，不重算、更换来源
+或重发PG/资源/QMP；取消/期限也不自动释放预算。原请求epoch不改成接管floor，
+跨owner完整生产恢复仍需专门验收，不由本批同owner重建测试替代。
+
+Outside/Host承诺必须来自对应可信生产者持续持有的原immutable对象：namespace、
+UID、VM ownerref、BlockOwnerDeletion及保护finalizer均核验；原Pod UID/IP/Node/
+存活和真实Node UID另读。Host保留目标Guest内存加显式非零VMM/Host开销且不溢出。
+保护finalizer防止VM删除/GC在旧预算或QMP未结清时清掉持有对象；普通Agent只读，
+只有领域生产者证明完整关闭才可移除。最终开放前后继续核同一原持有来源，缺失、
+重建、删除中或保护丢失不能记完成；已派发准入仍先保留原只读查询及Unknown。
+
+标签、immutable、资格ID或JSON结构不证明真实上界/Host预留/QMP完成。可信Prepare
+必须建立剩余系统上界/过渡/安全来源，Host和最终Controller/Runner必须真实fence、
+串行执行、读回并生产对应持有对象/VM回执，不能由调用者临时补一份声明。
+这些生产者仍缺代码，本批执行器不代为创建，故不能将Finalize接线记成完整预算或
+完整在线伸缩。首次预算/开放、安全降normal/私有后台、公开生命周期和受控跨boot
+也仍需代码；真实Kube RBAC/GC/finalizer/Host/内核/物理/性能后验。
+见[最终预算结算验收](DSGA-最终预算结算与原持有来源-Mac基本验收-20261026.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
