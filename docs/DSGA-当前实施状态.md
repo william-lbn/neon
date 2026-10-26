@@ -24,6 +24,20 @@ Neon1.15/DSG组合加载1项通过，0最终失败/跳过；准确构建关键�
 准入、完整生命周期与受控跨boot仍是核心代码缺口。后续集中关闭这些项；
 控制面完成后另行移植/统一E2E，Linux内核/物理/性能后验，Goal继续active。
 
+## 原VM显式重放传输完成（2026-10-27）
+
+实际Session/Agent循环可在明确选择下复用原typed VM命令，将原not_sent三
+对象UID/摘要与新nonce以同VM UID/RV保存；Runner自行拉取，锁内核本地原
+回执UID，不因错误/普通轮询自动选择。重复选择只读确认，不改原命令/步骤/
+Model序列；可能已发送拒绝，Host失联阻断，新not_sent需新明确选择。
+
+Mac去重8顶层/33含子项最终通过0失败/跳过，原失败及替换规则保留；4包
+vet、增量lint0问题及Agent/Runner双Linux架构仅编译通过。真实旧29 Runner
+忽略提示、not_sent零写。Model仍v4、record v1、PG/控制面不变，见
+[中文规范与准确证据](DSGA-原VM显式重放-Mac基本验收-20261027.md)。
+通道默认nil，公开授权/策略/操作入口接线仍须生命周期实现；本模块只关闭
+生产原VM重放传输缺口，不能声称整体核心或真实Linux物理已完成。
+
 ## Agent原VM派发与Runner来源长期结算完成（2026-10-27）
 
 实际生产PGWorker已接typed ResizeVM/ObserveVM，原VM UID/RV先保存命令、

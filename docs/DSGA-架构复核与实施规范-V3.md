@@ -966,8 +966,8 @@ requested/actual都为B；唯一set后只有完整requested/device/summary到A�
 当前预算升为Model v4。控制面SDK本轮保留，待独立任务完成移植。
 
 实际Runner消费与Controller接线及Mac证据见[本模块](DSGA-Runner持久执行与私有QMP-Mac基本验收-20261026.md)。
-Agent派发/结算已在后续§8.29接通；可信Prepare/Host生产者、生产显式重放/
-完整恢复仍有代码，不以本节或Mac协议夹具声称完整E2E。Linux内核/KVM/真实Host/性能后验独立，
+Agent派发/结算已在后续§8.29接通，原VM显式重放传输见§8.30；可信Prepare/
+Host生产者、公开生命周期/完整恢复仍有代码，不以本节或Mac协议夹具声称完整E2E。Linux内核/KVM/真实Host/性能后验独立，
 上游按17:29:30固定基线，不用未来维护提交打断核心收尾。
 
 ### 8.29 Agent消费原Runner回执并长期保留VM来源（2026-10-27）
@@ -1000,9 +1000,39 @@ Mac实际Agent/Runner协议组合、预算/日志受影响全包、来源反向�
 说明和边界见[本模块](DSGA-Agent原VM派发与来源结算-Mac基本验收-20261027.md)。
 
 可信完整Prepare/系统剩余上界、真实Host/Scheduler持有/释放、安全normal
-下降及持续私有后台约束、首次预算/准入、公开策略/取消/受控跨boot和生产
-显式VM重放仍须核心代码；不将其列为仅待Linux，不宣称整体已封版。固定上游
+下降及持续私有后台约束、首次预算/准入、公开策略/取消/受控跨boot仍须
+核心代码；显式VM传输由下节关闭，公开授权入口接线继续生命周期工作。
+不将缺失业务列为仅待Linux，不宣称整体已封版。固定上游
 继续使用2026-10-26基线，跨日期不自动解冻。
+
+### 8.30 原VM明确未发送后的持久显式选择（2026-10-27）
+
+重放必须是受信协调入口的明确选择，普通轮询/错误/not_sent不产生授权。
+实际Session/PGWorker提供独立VM原重放方法与循环通道，完整命令从原WAL
+读取。Agent先查原不可变not_sent、当前无pending/原owner/真实before，再
+核当前PG/Root/原Host及Shrink持续门禁/Guest；期限、epoch、Key和命令不变。
+
+选择以同VM UID/RV持久保存原Key/owner、三对象UID、完整双摘要及新128位
+nonce；整个注解含外层空白限2048字节，严格拒绝歧义。复用原VM写权限，不
+授Agent预算CM写权限或公开QMP。重复原选择只GET确认同RV，不再PATCH；
+丢回复先查原选择/原回执，不生成替代nonce。
+
+Runner自行拉取，原文件锁内同时核本地LastPublished原回执UID与新nonce。
+再一次prepared失败产生新not_sent后，旧选择不能轮换nonce循环执行；新结果
+须先实际发布、再有新的明确选择。写前prepared/may_have_sent、二次可信
+来源复核与一次QMP尝试保持；可能已发送始终只读原目标，不走显式重放。
+
+选择不是预算/执行许可，不改变Model v4、Runner record v1或PG ABI。实际
+已发布29 Runner实测忽略新提示并保not_sent零写；启用前先升级Runner。
+VMReplay通道默认nil，公开策略/操作入口的授权接线仍须生命周期实现，不能
+以本传输模块冒充整个公开业务闭环。取消、跨boot与旧来源释放/回收亦未由此实现。
+
+Mac去重8顶层/33含子项最终通过、0失败/跳过；扩缩重放、选择丢回复、Host
+在选择前后丢失、可能发送拒绝、原回执UID与旧选择防循环均有定向证据。
+初轮边界/夹具失败保留并仅替换受影响项，4包vet、增量lint0问题与双Linux
+架构Agent/Runner仅编译通过。详见[本模块](DSGA-原VM显式重放-Mac基本验收-20261027.md)。
+Prepare/Host/PG/Root/QEMU为明确协议夹具，真实Linux/内核/Host/性能后验
+继续；不重复未变PG或追新上游，余下核心仍须真实完成。
 
 ## 9. 请求、权限、幂等与观测接口
 
