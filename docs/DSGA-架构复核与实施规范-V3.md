@@ -1034,6 +1034,26 @@ Mac去重8顶层/33含子项最终通过、0失败/跳过；扩缩重放、选�
 Prepare/Host/PG/Root/QEMU为明确协议夹具，真实Linux/内核/Host/性能后验
 继续；不重复未变PG或追新上游，余下核心仍须真实完成。
 
+### 8.31 节点容量持久账本原语（2026-10-27）
+
+新增Host节点账本以固定原Node/Lease UID和Node UID/RV CAS记录完整请求、VM
+incarnation/Pod UID、前后容量及非零开销。同一原VM/Pod多个承诺取峰值；不同
+Pod即使VM UID相同也相加，不把新Pod出现当旧QEMU已退出。新owner先原子抬
+floor、保留全部旧持有，丢回复不发票据；缺失/空值/损坏/同名重建不自动reset。
+初始化单独显式操作，域外额度固定，容量/条目/字节/序列溢出均拒绝，不TTL释放。
+
+这是Scheduler持久分配的基础原语，**不是完整Host生产者**。域外额度必须由
+可信平台覆盖全部其他成本，生产Scheduler须真正纳入所有授予/重启恢复、选主
+引导及迁移互斥，并从原VM/Pod/Runner核验后才发布来源。尚未接线的代码不能
+写成已完成或仅待Linux；显式释放仍须核完整未知/实际VM/当前预算，不能靠Pod
+消失、Lease过期或历史淘汰清账。
+
+Mac真实HTTP/RFC6902客户端与模型新增7顶层/26含子项race通过，0失败/跳过；
+最终增量lint0问题、readonly vet及双Linux架构包测试程序仅编译通过。该测试
+程序不是已接入Scheduler的业务产物。完整源码/日志/产物摘要和fixture边界见
+[本批验收](DSGA-Host节点持久账本-Mac基本验收-20261027.md)。冻结基线、PG
+与控制面均未变化，整体核心继续原分支实施，不重复未变功能。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
