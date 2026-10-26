@@ -20,11 +20,32 @@ Neon1.15/DSG组合加载1项通过，0最终失败/跳过；准确构建关键�
 见[维护、故障证据和边界](DSGA-冻结PG17两阶段检查点修复-Mac验收-20261026.md)。
 
 **整体核心尚未完成，不能宣称已封完整在线伸缩版本。** 可信Prepare/系统剩余
-上界、Host的Scheduler全授予/恢复/选主/释放接入、安全降normal/首次
+上界、Host显式释放/收敛及其他写入者准入、迁移、安全降normal/首次
 准入、完整生命周期与受控跨boot仍是核心代码缺口。后续集中关闭这些项；
 控制面完成后另行移植/统一E2E，Linux内核/物理/性能后验，Goal继续active。
 
-## Host来源发布与实际Agent消费完成，Scheduler完整接入继续（2026-10-27）
+## 实际Scheduler与首次Runner容量接入完成，继续剩余核心（2026-10-27）
+
+AS依次提交44bddd7f（v3首次容量/原Lease锁）、55cec6aa（实际Scheduler）和
+`76f8dc05e6fb18da489ac285cc034e47b125c486`（最终Runner及组合）。实际入口已接
+独立节点选主、固定原RV显式引导、Pod/原VM恢复、Reserve/旧批准与Publisher；
+首次QEMU之前还核原Node/Pod/VM容量。不同副本可经原Node CAS单调加持有，
+发布仍限节点owner，默认关闭；旧域不自动改义，未知/Unreserve不释放。
+中文验收/准确源码收据由`ae4c937699568a1402433beadf97f3d8e3f4fe9e`随代码
+推送自有原分支并核对远程，Neon发行依赖固定该SHA；PG17三处锁仍同b078736a。
+
+新增/受影响Mac去重20顶层/98含子项通过0最终失败/skip，含实际Scheduler
+循环到原Host发布及受影响Agent/Runner扩缩组合；6包vet、最终lint0问题。
+准确76f8dc05的Scheduler/Runner/Agent双Linux架构共6个ELF仅交叉编译通过，
+未在Linux执行；Kube/QEMU和资格/PG/Root仍有明确fixture边界。日志及24文件/
+6产物摘要见[本批实施约束与验收](DSGA-Scheduler首次容量与实际接入-Mac验收-20261027.md)。
+
+仍须代码：Host显式释放/历史收敛、迁移/跨boot结清、其他分配写入者准入与
+独立CPU联动（当前受管VM关闭旧CPU批准旁路），以及可信完整Prepare、首次
+预算/准入、安全normal、策略/Monitor/公开操作/取消/恢复。不是只待Linux。
+Linux真实权限/内核/VM/物理/性能及控制面后续移植E2E按原边界完成；Goal active。
+
+## 历史：Host来源发布与实际Agent消费（0d9fc2c9基线，2026-10-27）
 
 AS代码`0d9fc2c9a16fcf1c7e052038e40c8eb642e8b850`、中文验收/收据
 `a305c389618570ae527efcd8a9f7b1e8e55af758`已沿原分支推送并核对远程。
@@ -40,7 +61,7 @@ Mac去重20顶层/142含子项最终通过0失败/跳过，7包vet、最终增�
 Prepare/Host资格/PG/Root内核仍为显式fixture。原失败、中断和替换规则保留，
 不重复未改PG/HTTP。见[模块交付与准确证据](DSGA-Host来源发布与Agent消费-Mac基本验收-20261027.md)。
 
-**Publisher尚未接实际Scheduler运行入口。** 全授予/重启恢复、选主/引导、
+**本段0d9fc2c9基线时Publisher尚未接实际Scheduler入口；现由上节76f8dc05接入。** 当时全授予/重启恢复、选主/引导、
 其他工作负载完整计账、首次VM持有、显式释放/迁移互斥仍须代码；剩余可信
 Prepare/首次预算/安全normal/公开生命周期继续，不能宣布整体封版或只待Linux。
 控制面及PG/冻结基线未变；下节是本批之前的基础账本交付记录。

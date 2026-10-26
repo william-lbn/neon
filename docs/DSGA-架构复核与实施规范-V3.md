@@ -1079,10 +1079,33 @@ Mac去重20顶层/142含子项最终通过，0失败/跳过；实际Host组件�
 最终增量lint0问题及双Linux架构Agent/Runner仅编译通过，原失败/中断保留并按
 完整用例名替换。见[本模块](DSGA-Host来源发布与Agent消费-Mac基本验收-20261027.md)。
 
-**实际Scheduler入口仍未接线**：全授予/重启恢复、选主/显式初始化、其他成本
+**本节0d9fc2c9基线时实际Scheduler入口尚未接线，后续接线见§8.33**：当时全授予/重启恢复、选主/显式初始化、其他成本
 计账、首次VM持有、显式释放/迁移互斥须继续实现，不能把本生产组件交付写成
 完整Host或整体封版。可信Prepare/系统剩余上界、安全normal/首次预算/公开
 生命周期与跨boot仍按剩余清单完成。PG/控制面/冻结基线保持，不追新上游。
+
+### 8.33 实际Scheduler、首次容量与最终Runner核验（2026-10-27）
+
+AS 44bddd7f/55cec6aa/`76f8dc05e6fb18da489ac285cc034e47b125c486`
+已实现原Node v3完整Placements、不同副本单调容量CAS及固定原Lease UID选主，
+接入实际plugin启动/Framework.Reserve/事件恢复/旧VM批准/Host Publisher。
+普通Pod按完整硬limit/init-sidecar峰值，VM按原VM Use/实际/批准/目标最大值及
+固定开销入账，不打折memory；默认nil保留未启用域的官方行为。最终Runner
+在birth-intent/来源CREATE/QEMU之前独立核首次Pod/VM/incarnation持有。
+
+v3的Outside只含平台固定系统域，不能把v1/v2自动改义升级；引导固定原Node RV，
+丢账/换UID不自动初始化。NodeLease只授权owner发布/fence；容量多写者不借另
+副本身份获取执行权。未知、Unreserve或Pod消失不清持有。硬限额、配置ID或
+交叉编译均不认证物理上界，全部入域写入者仍需准入隔离及平台资格。
+
+Mac20顶层/98含子项最终通过，实际Scheduler选主到Host发布组合已运行；
+6包vet/lint0，准确代码Scheduler/Runner/Agent双Linux架构仅编译。完整边界、
+失败及替换证据见[本批实施约束与Mac验收](DSGA-Scheduler首次容量与实际接入-Mac验收-20261027.md)。
+
+**显式释放/历史收敛、其他写入者准入、独立CPU联动与迁移/跨boot结清仍须代码**；
+256条/192KiB上限拒绝不是可长期运行的替代。当前受管VM旧CPU批准也被关闭，
+后续须单独贯通，不能称全部CPU能力已保留。可信完整Prepare、首次预算/准入、
+安全normal和完整策略/取消/受控恢复仍按封版清单完成，不把本批写成整体交付。
 
 ## 9. 请求、权限、幂等与观测接口
 
