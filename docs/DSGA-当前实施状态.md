@@ -24,12 +24,40 @@ Neon1.15/DSG组合加载1项通过，0最终失败/跳过；准确构建关键�
 准入、完整生命周期与受控跨boot仍是核心代码缺口。后续集中关闭这些项；
 控制面完成后另行移植/统一E2E，Linux内核/物理/性能后验，Goal继续active。
 
-## 未派发取消与预算关闭水位阶段完成（2026-10-27）
+## 原VM未发送取消与Agent消费阶段完成（2026-10-27）
+
+AS代码`1e0d432d8ac6cd39c07e10c94f9227ebaf707a0a`、中文验收/准确收据
+`fe3967bc6c72dea8027395b50ae30ad5b4e3c742`已推送原分支并核远程，Neon
+发行锁固定此依赖；PG17三处仍为b078，独立控制面d84c不变。
+
+ResizeVM已在VM WAL派发、Runner尚未发送QMP时，在原flock内以两次原Kube
+认证包围原QEMU before，持久封为cancelled_before_send并禁止迟到重放。
+普通not_sent仍可重放，不能冒充取消；may_have_sent保留未知，真实目标完成
+只落Completed。Agent核原Birth/State/不可变Receipt UID后原VM UID/RV只记录
+这一条VM NoEffect，PG/Guest此前效果、旧预算及节点峰值全部保留。
+
+首次新终态升**Runner record v2**，新普通动作不降级；VM v5/Node v5/Host
+v2/PG ABI保持，外层Publication/Receipt对象类别v1。严格旧读者拒绝新原域
+格式，独立控制面后续移植须同时支持VM v5与Runner v2，不混用旧服务。
+
+Mac32顶层/153含子项最终通过0失败/skip，含受影响vmguard全包29/139、
+实际扩缩取消/丢回复/丢回执/取消过晚及正常伸缩、显式重放和Host缺源；四包
+vet/lint0。准确1e0d432d四服务双Linux目标8个ELF仅编译，未Linux执行。
+组合发现并修复Host把其他域NoEffect当致命错误的分流，未授予跳过前驱的
+许可。测试UID类型未编译及原分流失败完整保留，仅重跑失败、复用未变通过
+结果，详见[原VM取消实施与边界](DSGA-原VM未发送取消-Mac验收-20261027.md)。
+
+**完整取消仍须预算/准入AbortReconcile与容量/来源结清代码**；单条VM
+NoEffect不能Finish整条操作。无Wait/Start/init恢复、跨boot/迁移、其他写者/
+CPU、完整可信Prepare/首次/normal预算准入、持续约束与策略公开生命周期
+继续。Linux内核/物理/K8s/性能后验；整体未封版，Goal active。
+
+## 历史：未派发取消与预算关闭水位（2026-10-27）
 
 AS代码`3b7d06c647acc2a2991070190221dbf3367309af`与
 `68fd1addb28cde796fac6642310b03bbdb05b4c3`，中文验收/准确收据
 `81aa3405ef7dbd9760bda3ed8e4960aed78268cd`已沿原分支推送并核远程。
-Neon发行锁固定此依赖，PG17三处仍为b078，控制面d84c不变。
+该阶段已固定相应依赖；本页最新发行锁见上节。PG17三处仍为b078，控制面d84c不变。
 
 实际生产worker在领域分流前只关闭完整全Planned、无Cleanup及SDK未决、
 同原VM/PG的取消；原UID/RV CAS与派发/接管竞争，回复未知只读回。预算、

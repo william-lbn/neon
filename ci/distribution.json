@@ -1,7 +1,7 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "81aa3405ef7dbd9760bda3ed8e4960aed78268cd",
+  "autoscaling_commit": "fe3967bc6c72dea8027395b50ae30ad5b4e3c742",
   "postgres_repository": "william-lbn/postgres",
   "postgres": {
     "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",

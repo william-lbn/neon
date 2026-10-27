@@ -1184,6 +1184,26 @@ Mac去重54顶层/148含子项最终通过、相关vet/lint0，准确四服务�
 恢复、可信Prepare/预算准入与策略公开生命周期仍须代码，详见
 [本批实施与真实证据](DSGA-未派发取消与预算关闭水位-Mac验收-20261027.md)。
 
+### 8.38 原VM未发送取消终态与Agent消费（2026-10-27）
+
+AS `1e0d432d8ac6cd39c07e10c94f9227ebaf707a0a`接通已进入VM WAL、尚未
+发送QMP的原命令取消。Runner在原flock内以两次固定Kube认证包围真实before，
+只对尚未接收/prepared/not_sent封成cancelled_before_send，保留完整原派发者/
+命令/HWM和取消快照，禁止迟到重放。may_have_sent不清未知，真实目标完成
+仍为Completed；普通Denied/not_sent/404/超时或当前before不代替新终态。
+
+Agent两次核原Birth/State/不可变Receipt UID与完整命令后，原VM UID/RV
+CAS只记这一条VM NoEffect，不回滚此前PG/Guest、不开放准入或释放峰值。
+Host对其他域NoEffect/Rejected交后续协调，不能因错误分流退出owner或跳过
+前驱派发。完整预算/准入AbortReconcile及容量/来源结清仍须代码。
+
+首次新终态升Runner record v2，新普通动作不降级；VM v5/Node v5/Host v2/
+PG ABI保持，外层Publication/Receipt类别v1。旧严格读者拒绝新record/字段；
+独立控制面后续移植须支持原格式/引用，不通过丢字段兼容。Mac32顶层/153
+含子项最终通过、四包vet/lint0，准确四服务8个Linux ELF只编译。实际组合
+覆盖扩缩取消、丢回复/回执、过晚只认Completed，来源/内核仍按明确夹具
+边界，见[本批准确验收与剩余代码](DSGA-原VM未发送取消-Mac验收-20261027.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
