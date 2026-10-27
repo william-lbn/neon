@@ -1148,6 +1148,20 @@ Start/init失败、sandbox/cgroup/页缓存残留资格不成立时的分阶段�
 normal准入和策略公开闭环按冻结清单继续。Linux真实内核/VM/权限/GC/物理/
 性能后验，不能据本节称整体封版或只剩Linux测试。
 
+### 8.36 Scheduler有界轮询及关闭历史/GC扫描（2026-10-27）
+
+AS `521537186a337cefaeb3ce298ee09ea3e6aca36c`运行期每轮最多两个256项
+页面和16项尝试，单项调用前出队，未尝试尾部续到下一轮。只跳过原Node v5
+已确认且无保护的原关闭历史；410只重置发现游标，预算/floor/WAL不变。
+首次引导仍完整核算。精确结清水位的一分钟GC调度缓存有界、可丢、到期重核，
+不是容量TTL或执行许可。协议版本不变，关键中文不变量与锁/恢复说明随代码。
+
+Mac8顶层/16含子项通过、两包vet/lint0，准确Scheduler双Linux目标仅编译；
+包括512历史分页、取消后队尾、410恢复及实际协调跨ticker稳定namespace LIST。
+真实规模/QPS/变动/分页和延迟后验，不能把512个夹具写成物理退出认证或给出
+所有规模SLO。其他核心取消/恢复/预算/准入/策略仍须代码，见
+[本批准确收据及边界](DSGA-Scheduler有界轮询与GC收敛-Mac验收-20261027.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
