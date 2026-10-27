@@ -1245,6 +1245,32 @@ Through本身CM GC组合通过。其他关闭证明的纯Node用例是显式领�
 为已派发VM NoEffect、部分PG/Guest效果伪造VM边界。原预算与新取消来源认证、
 完整取消预算/准入及其他核心代码继续，详见[验收与后续实施边界](DSGA-Host关闭水位与取消防重放-Mac验收-20261027.md)。
 
+### 8.41 原VM容量未变取消的旧预算恢复（2026-10-27）
+
+AS `be7592544678514ec543f5bee51b7b0799935bfc`在首次Start同CAS保存原预算
+关闭链并升VM Model v7。新Grow只有原VM不可变cancelled_before_send、
+Guest/PG等均未派发时，才可核旧完整预算恢复。独立联合读者认证旧Completed
+及新取消、当前原Birth/State/floor/实际容量；普通完成读者不放宽。PG/Root/
+Outside/Host与原Node持有逐项重核，Cleanup记录两端审计，最终Finish延伸原
+Through，原BudgetHeld保持，新目标不写成成功。原成功和取消历史淘汰后仍可
+核永久链，真实Publisher结清峰值、防迟到重占并清失效Host来源。
+
+当前准入已开放只读确认；关闭时普通循环保留owner等待独立可信选择，不覆盖
+暂停/运维意图。明确选择后使用旧预算写前开放；未知Start/setter/Record/Finish
+按原SDK pending查询和原派发者显式重放恢复，不改Key/epoch，不重发容量动作。
+此Go入口与通道不等于完整Monitor/产品策略发起方已经实现。
+
+Mac采用94顶层/347含子场景的去重通过记录，3个无测试文件包单列，七包lint/
+vet通过。准确源码四个CLI各两架构8个Linux ELF核VCS SHA/架构，仅编译。
+前一完整v6源码快照接受v6、拒绝v7，Node仍v6、Runner record v2、PG17 ABI
+不变。未改PG/Rust不重复；混合失败调用仅采用明确通过的受影响子场景，完整
+日志/复用理由/初始失败见[本批验收](DSGA-原容量取消恢复-Mac验收-20261027.md)。
+
+部分PG/Guest/VM效果取消的真实预算、可信Prepare/首次/normal服务、异常启动/
+跨boot/迁移、持续约束与全部写者CPU、Monitor/策略仍须代码。Linux物理/内核/
+集群验证仍未执行，详见[核心进度与Linux清单](DSGA-核心进度与Linux验证清单-20261027.md)；
+不能据本批或Mac证据宣称整体完成。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
