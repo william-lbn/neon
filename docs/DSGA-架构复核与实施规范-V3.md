@@ -1204,6 +1204,28 @@ PG ABI保持，外层Publication/Receipt类别v1。旧严格读者拒绝新recor
 覆盖扩缩取消、丢回复/回执、过晚只认Completed，来源/内核仍按明确夹具
 边界，见[本批准确验收与剩余代码](DSGA-原VM未发送取消-Mac验收-20261027.md)。
 
+### 8.39 完整容量落账后的取消恢复与Host结清（2026-10-27）
+
+AS `f4986b05adaa50b3240c894255c20ade0003b5ee`完成所有容量步骤均Completed、
+同一次完整Finalize预算已持有后的取消恢复。保留实际目标和原BudgetHeld，不
+回滚猜测、不记整操作NoEffect。原Resume未知先查询落账；已完成开放只查询；
+未派发开放须独立Cleanup写前CAS后恢复准入。写前/写后/Finish前均核PG成本/
+floor、Root限额及出生、Host/Outside/Runner来源与实际VM UID/RV和当前门禁。
+
+Cleanup未知从原WAL重建SDK栅栏，普通not-found/超时不重发；独立受信循环
+选择仅能重放原owner的完整原命令，接管只查旧命令。Cleanup落账和Finish分轮，
+业务结果仍AbortedAfterReconcile；同CAS升级VM v6保存容量关闭水位，才能由
+真实Host Publisher再次认证来源并结清峰值。通用Cleanup、部分效果、未知或
+其他预算不得取得该资格，下一次派发依旧立即撤销关闭水位。
+
+VM v6/Node v5/Host v2/Runner record v2，PG17 ABI不变；旧VM v5读者拒绝新
+版本。独立控制面保持原分支，后续须升级读者并统一E2E。Mac去重62顶层/
+181含子项通过、0跳过，4包vet/lint通过；准确四服务双Linux架构8个ELF只
+编译，未执行Linux。原生内核/平台资格/Prepare/真实Kube和QEMU仍为明确
+组合夹具。部分PG/Guest/VM取消预算、可信Prepare/首次预算、Monitor/公开
+策略/完整生命周期等仍须代码，不能称整体核心封版。实际步骤、失败记录与
+目标环境边界见[本批验收与剩余清单](DSGA-完整容量后取消恢复-Mac验收-20261027.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
