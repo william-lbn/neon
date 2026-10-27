@@ -20,11 +20,32 @@ Neon1.15/DSG组合加载1项通过，0最终失败/跳过；准确构建关键�
 见[维护、故障证据和边界](DSGA-冻结PG17两阶段检查点修复-Mac验收-20261026.md)。
 
 **整体核心尚未完成，不能宣称已封完整在线伸缩版本。** 可信Prepare/系统剩余
-上界、Host显式释放/收敛及其他写入者准入、迁移、安全降normal/首次
+上界、VM/整Pod退出及取消结清、其他写入者准入、迁移、安全降normal/首次
 准入、完整生命周期与受控跨boot仍是核心代码缺口。后续集中关闭这些项；
 控制面完成后另行移植/统一E2E，Linux内核/物理/性能后验，Goal继续active。
 
-## 实际Scheduler与首次Runner容量接入完成，继续剩余核心（2026-10-27）
+## 成功操作的Host峰值结清与旧来源收敛完成（2026-10-27）
+
+AS账本`39839c1f93976b92aa9dc4d3d7685bec1b39f119`、实际链路
+`efc385a77412379987ee14ba9054ffc22152a2de`及中文收据
+`285fa2e626407ecb3f12de895d3a2a8f3776bbc7`已推自有原分支并核对远程。
+实际Scheduler在原VM无Active且最新成功操作闭合后，核永久预算和原Runner
+持久完成/无pending/实际值，再经Node UID/RV CAS结清旧峰值；目标、当前
+来源与更晚在途承诺继续持有。节点首结清v4保留永久水位，旧执行读取拒绝，
+只允许当前预算专用核验；确认后按原UID/RV清严格早于水位的同域旧Host CM。
+
+新增/受影响Mac19顶层/68含子项最终通过0失败/skip，5包vet、最终lint0，
+准确efc385a7的Scheduler/Runner/Agent六个双Linux架构ELF仅编译通过。
+包括实际缩容到结清/等待Pod获得容量、未知/来源故障、实际Scheduler两阶段
+结清与GC；原失败夹具单独替换，不重复不变功能、不叠加各批重叠计数。
+详见[真实范围、准确收据和Linux边界](DSGA-Host峰值结清与来源收敛-Mac验收-20261027.md)。
+
+**这里只结清运行中成功操作的峰值承诺，不是整份额度释放或物理证明。**
+VM/Pod停止销毁、失败取消、迁移/跨boot及其他来源生命周期仍须代码；
+全写入者隔离、CPU、可信完整Prepare、首次预算/安全normal/完整策略继续。
+物理Host归还/平台资格及真实K8s/KVM/HugeTLB/性能留Linux后验；Goal active。
+
+## 历史：实际Scheduler与首次Runner容量接入（76f8dc05，2026-10-27）
 
 AS依次提交44bddd7f（v3首次容量/原Lease锁）、55cec6aa（实际Scheduler）和
 `76f8dc05e6fb18da489ac285cc034e47b125c486`（最终Runner及组合）。实际入口已接
@@ -40,7 +61,8 @@ AS依次提交44bddd7f（v3首次容量/原Lease锁）、55cec6aa（实际Schedu
 未在Linux执行；Kube/QEMU和资格/PG/Root仍有明确fixture边界。日志及24文件/
 6产物摘要见[本批实施约束与验收](DSGA-Scheduler首次容量与实际接入-Mac验收-20261027.md)。
 
-仍须代码：Host显式释放/历史收敛、迁移/跨boot结清、其他分配写入者准入与
+本段76f8dc05时仍须Host显式释放/历史收敛；成功操作部分现已由上节efc385a7完成。
+VM退出/取消/迁移/跨boot结清、其他分配写入者准入与
 独立CPU联动（当前受管VM关闭旧CPU批准旁路），以及可信完整Prepare、首次
 预算/准入、安全normal、策略/Monitor/公开操作/取消/恢复。不是只待Linux。
 Linux真实权限/内核/VM/物理/性能及控制面后续移植E2E按原边界完成；Goal active。
