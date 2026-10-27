@@ -1226,6 +1226,25 @@ VM v6/Node v5/Host v2/Runner record v2，PG17 ABI不变；旧VM v5读者拒绝�
 策略/完整生命周期等仍须代码，不能称整体核心封版。实际步骤、失败记录与
 目标环境边界见[本批验收与剩余清单](DSGA-完整容量后取消恢复-Mac验收-20261027.md)。
 
+### 8.40 Host关闭Through水位与取消防重放（2026-10-27）
+
+AS `4a8b9cd609770add0c3d0083e670f6862039d0ba`将原成功预算与关闭Through
+Key/Sequence分开保留。只能从原VM永久BudgetBoundary派生；Node同UID/RV
+CAS保留当前预算及更晚在途，结清关闭水位以内其他持有，永久拒绝迟到取消
+Key/同Revision别名重占容量。同预算水位只能前进，新完整预算必须晚于整条
+关闭链；未知CAS只重读。只读来源允许同原预算的旧Node关闭水位，执行路径
+仍拒绝已结清授权。GC涵盖Through本身的迟到Host CM，保留当前及其他Pod。
+
+携带Through的Node升v6，普通旧结清保持原JSON形状；旧v5版本门槛拒绝v6，
+退休不降级。VM v6/Host来源v2/Runner record v2/PG17 ABI保持。Mac36顶层/
+123含子项通过，0测试用例跳过；budgetclaims无独立测试文件的包级skip 1
+明确保留。4包lint/5包vet通过，准确四服务8个Linux ELF仅编译。
+
+实际Agent/Runner→原VM零派发取消→真实历史淘汰→Host结清/迟到Reserve拒绝/
+Through本身CM GC组合通过。其他关闭证明的纯Node用例是显式领域夹具，不
+为已派发VM NoEffect、部分PG/Guest效果伪造VM边界。原预算与新取消来源认证、
+完整取消预算/准入及其他核心代码继续，详见[验收与后续实施边界](DSGA-Host关闭水位与取消防重放-Mac验收-20261027.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
