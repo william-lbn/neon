@@ -20,11 +20,34 @@ Neon1.15/DSG组合加载1项通过，0最终失败/跳过；准确构建关键�
 见[维护、故障证据和边界](DSGA-冻结PG17两阶段检查点修复-Mac验收-20261026.md)。
 
 **整体核心尚未完成，不能宣称已封完整在线伸缩版本。** 可信Prepare/系统剩余
-上界、VM/整Pod退出及取消结清、其他写入者准入、迁移、安全降normal/首次
+上界、取消/无退出回执恢复、其他写入者准入、迁移、安全降normal/首次
 准入、完整生命周期与受控跨boot仍是核心代码缺口。后续集中关闭这些项；
 控制面完成后另行移植/统一E2E，Linux内核/物理/性能后验，Goal继续active。
 
-## 成功操作的Host峰值结清与旧来源收敛完成（2026-10-27）
+## 原QEMU退出、Pod结清和VM来源清理阶段完成（2026-10-27）
+
+AS基础`e3cc8b66501a853a6c8d1d09b64a777b60045753`、实际接线
+`08f3ebcb7e1b03930a840acb2d2aad45a677e731`及准确收据
+`d57654e4531c2f8ae707334c110447e0a899fd9f`已沿原分支提交推送。
+原Runner持有同一Start/Wait，先同步退出屏障再发布原Birth/容器绑定的退出CM；
+退出不改原未知内存WAL，也不能继续消费旧QMP状态。Scheduler核全部原容器
+终态及原Wait来源，按原Node UID/RV结清整Pod承诺；首结清v5拒绝旧节点写者，
+先持久写原VM关闭锚点再移除Pod保护。Controller保留受管停止身份，删除时
+核原锚点、全部Node无持有后，按原UID/RV清本协议来源；未知可续跑。
+
+本批去重Mac20顶层/68含子项最终通过，0失败/skip；5包vet、6包Linux增量
+lint0。准确08f3ebcb的Scheduler/Runner/Controller/Agent双Linux架构共8个ELF
+仅交叉编译，均未Linux执行。真实Mac测试子进程不是QEMU，Kubelet/CRI/平台
+开销是明确夹具；Controller清理为分段组合，不能称真实集群完整E2E。
+见[实施顺序、源码/日志准确收据和剩余项](DSGA-原QEMU退出与Pod结清-Mac验收-20261027.md)。
+
+**已实现的是关闭协议与分配账本，尚未认证整Pod的全部物理成本归还。**
+Start/init失败、Runner被杀后没有Wait等未知路径仍持有，原Node/CRI受控恢复
+生产者仍须代码；sandbox/cgroup/页缓存残留及平台开销须认证，不成立时须补
+分阶段结清。取消、迁移/跨boot、其他写者/CPU、Scheduler有界公平/历史扫描、
+可信Prepare/首次与normal准入、Monitor/策略公开闭环继续；整体未完成，Goal active。
+
+## 历史：成功操作的Host峰值结清与旧来源收敛（2026-10-27）
 
 AS账本`39839c1f93976b92aa9dc4d3d7685bec1b39f119`、实际链路
 `efc385a77412379987ee14ba9054ffc22152a2de`及中文收据
@@ -41,7 +64,7 @@ AS账本`39839c1f93976b92aa9dc4d3d7685bec1b39f119`、实际链路
 详见[真实范围、准确收据和Linux边界](DSGA-Host峰值结清与来源收敛-Mac验收-20261027.md)。
 
 **这里只结清运行中成功操作的峰值承诺，不是整份额度释放或物理证明。**
-VM/Pod停止销毁、失败取消、迁移/跨boot及其他来源生命周期仍须代码；
+本段基线时VM/Pod停止销毁仍缺，正常原Wait/终态的协议结清现见上节；失败取消、迁移/跨boot及其他来源生命周期仍须代码；
 全写入者隔离、CPU、可信完整Prepare、首次预算/安全normal/完整策略继续。
 物理Host归还/平台资格及真实K8s/KVM/HugeTLB/性能留Linux后验；Goal active。
 

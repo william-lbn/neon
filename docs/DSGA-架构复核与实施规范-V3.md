@@ -1126,6 +1126,28 @@ AS 39839c1f/`efc385a77412379987ee14ba9054ffc22152a2de`已接实际Scheduler。
 继续完成；标准RAM后端discard/平台开销、实际K8s/RBAC/Lease/GC及KVM/HugeTLB/
 物理/性能仍需Linux认证。旧节点v3拒绝v4为静态源码核对，未运行旧程序。
 
+### 8.35 原QEMU退出、整Pod承诺结清与VM关闭来源（2026-10-27）
+
+AS基础e3cc8b66/实际`08f3ebcb7e1b03930a840acb2d2aad45a677e731`完成原Runner
+Start/Wait→本地不可覆盖退出屏障→原Birth/容器绑定不可变退出来源；保留原
+未知resize WAL，不把QMP断开/Pod404/PID消失变成退出或动作完成。实际Scheduler
+核完整原Pod终态与Wait来源，持久Pod关闭意图后经原Node UID/RV CAS结清该Pod
+全部峰值；首结清v5要求所有新容量写者真实核Pod终态，旧v4程序拒绝v5。
+运行成功结清在v5保持版本，不可降级。先写原VM关闭锚点再移除Pod保护，
+Controller保留停止身份，删除时核原锚点与全Node无原VM持有，再按UID/RV
+清本协议来源；删除/写丢回复均从原锚点恢复，不自动重启换boot。
+
+VM Model v4、Runner record/Publication v1、Host CM v2与PG ABI不变；受管
+停止不走旧Cleanup/自动重启。Mac20顶层/68含子项通过、5包vet/lint0，四个
+服务共8个准确双Linux目标仅编译。真实测试子进程不是QEMU，API/终态/资格
+仍有明确夹具；Controller清理为分段组合，见[准确验收与边界](DSGA-原QEMU退出与Pod结清-Mac验收-20261027.md)。
+
+本节结清分配承诺，不认证全部Host物理成本已返还。Node/CRI无回执异常恢复、
+Start/init失败、sandbox/cgroup/页缓存残留资格不成立时的分阶段结清、失败取消、
+迁移/跨boot及其他写入者/CPU、有界公平和历史扫描仍须完成；可信Prepare/首次/
+normal准入和策略公开闭环按冻结清单继续。Linux真实内核/VM/权限/GC/物理/
+性能后验，不能据本节称整体封版或只剩Linux测试。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
