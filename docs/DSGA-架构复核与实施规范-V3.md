@@ -1297,6 +1297,29 @@ skip单列，相关新读取由真实Runner/Node来源组合覆盖。三包lint/
 历史淘汰不能丢当前预算，旧读者须拒绝新增持久语义。不能据合同/读者通过
 宣布部分取消或整体核心完成；其他核心缺口和Linux认证边界继续按进度清单。
 
+### 8.43 永久实际预算及原Cleanup SDK恢复（2026-10-28）
+
+AS `d99e4cb6998b3f1d248861ae9de72261b2dbf802`新增VM Model v8 CapacityHeld，
+和普通BudgetHeld互斥。原Cleanup完整命令/审计、资源身份、原origin及落账
+序列在同Record CAS长期保存；不改原目标或投影成Finalized。原Prepare/Host/
+VM摘要、PG WAL结论和完整Root身份必须相符，不跨容量Unknown或已派发最终
+预算/准入。Finish保留业务取消及永久容量关闭水位，历史淘汰/接管不清预算。
+后继正常Finalize要求当前真实PG代次，同CAS替换实际头，格式不降级。
+
+生产worker可在没有旧Finalized时从原实际预算Cleanup恢复准确Admission
+pending，仍用当前PG代次，不能误取原目标成功后的generation+1或新建空SDK。
+实际Agent/Runner组合覆盖VM已扩/PG未扩、Cleanup Start丢回复及生产worker
+重建；旧完整容量取消丢回复回归通过。当前尚不由自动执行器生成这些新命令。
+
+Mac采用52顶层/151含子场景去重通过记录。全journal调用的单个新正常替换
+夹具错误，修正后仅定向重跑通过；其余144具体结果复用，不将原失败调用整体
+写成成功。两包lint/vet通过，准确四服务双架构8个Linux ELF只编译。旧v7完整
+源码接受v7/拒绝v8。Node仍v6、Runner v2、PG17 ABI不变；独立控制面后续移植。
+
+自动实际预算Cleanup/准入执行、Host/Scheduler当前实际预算读取及按实际VM
+结清、完整Agent部分效果故障/再操作仍须代码。Host旧读者拒绝不能被绕过，
+本批不等于完整部分取消或核心封版。详见[永久实际预算阶段验收](DSGA-永久实际预算与原准入恢复-Mac验收-20261028.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
