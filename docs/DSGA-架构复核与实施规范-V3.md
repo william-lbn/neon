@@ -1271,6 +1271,32 @@ vet通过。准确源码四个CLI各两架构8个Linux ELF核VCS SHA/架构，�
 集群验证仍未执行，详见[核心进度与Linux清单](DSGA-核心进度与Linux验证清单-20261027.md)；
 不能据本批或Mac证据宣称整体完成。
 
+### 8.42 部分容量预算合同和可信来源读者（2026-10-28）
+
+AS `1f850453aa4bcc2cf564c193ab6348a7b30139f8`新增独立ReconciledCapacity，
+保留原Request，分别记录实际PG前缀/代次/原操作和VM容量，不放宽Finalized
+的完整原目标成功语义。当前PG须稳定、终态、分配已知，成本不能超保留上界。
+Outside的原目标必须覆盖当前准确VM，不能借小VM资格覆盖尚未缩小的大VM；
+Host继续覆盖before/目标/实际峰值。Root聚合及整HugeTLB池去重，完整来源摘要
+与当前认证读取缺一不可。独立Cleanup命令/审计约束当前实际预算下的原准入
+代次，nullable只读路径不能虚构开放，未知/较新门禁不能变成原成功。
+
+实际Runner读者分别核Completed target和不可再发送取消before；普通not_sent/
+may_have_sent不产结清源。新增Active取消的Host/Outside原CM、Pod、Node读者，
+核真实UID/RV/protection/owner及Node已发布原完整Host计划，网络前后重读。
+结构校验和来源提取不赋派发/释放权，PG/Root/平台仍须真实生产者认证。
+
+Mac采用49顶层/237含子场景去重通过记录；budgetclaims无独立测试文件包级
+skip单列，相关新读取由真实Runner/Node来源组合覆盖。三包lint/vet通过，
+准确四个CLI双架构8个Linux ELF只编译。VM仍v7、Node v6、Runner v2，无新
+永久预算头字段；PG17/独立控制面未改。完整来源/失败与复用记录见
+[阶段验收](DSGA-部分容量预算合同与来源读取-Mac验收-20261028.md)。
+
+本批是领域底座，**尚未接永久实际预算替换、自动Cleanup/准入恢复、Host按
+实际容量结清及完整Agent部分效果组合**。后续必须同CAS保存真实原审计，
+历史淘汰不能丢当前预算，旧读者须拒绝新增持久语义。不能据合同/读者通过
+宣布部分取消或整体核心完成；其他核心缺口和Linux认证边界继续按进度清单。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
