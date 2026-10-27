@@ -1162,6 +1162,28 @@ Mac8顶层/16含子项通过、两包vet/lint0，准确Scheduler双Linux目标�
 所有规模SLO。其他核心取消/恢复/预算/准入/策略仍须代码，见
 [本批准确收据及边界](DSGA-Scheduler有界轮询与GC收敛-Mac验收-20261027.md)。
 
+### 8.37 未派发取消与永久预算关闭水位（2026-10-27）
+
+AS `3b7d06c647acc2a2991070190221dbf3367309af`接通实际worker的原计划
+全Planned取消，只按原VM UID/RV关闭；有派发、Cleanup、删除/跨PG或本地
+SDK矛盾均保留原意图。预算/节点持有不动，不产生原生Cancel或NoEffect。
+
+`68fd1addb28cde796fac6642310b03bbdb05b4c3`在成功Finish同CAS保存永久
+BudgetBoundary，首次升**VM Model v5**，与原预算完整命令/落账/成功关闭
+绑定。仅未派发取消推进，任何Start/Cleanup均在写前撤销证明；换预算重新成功
+关闭且版本不降级。Host不再依赖短期历史/HWM恰等于原请求，仍核原Runner/
+当前来源/Node并原CAS。接管、数量/字节淘汰不丢证明，绝不跨已派发效果。
+
+旧v4仅在显式Finish中以完整原成功及连续零派发历史升级；过期/夹杂派发
+不猜测。Node v5/Host v2/Runner v1/PG ABI不变，旧VM读者拒绝v5；独立
+控制面冻结不改，其后移植须同步升级并统一E2E。
+
+Mac去重54顶层/148含子项最终通过、相关vet/lint0，准确四服务双Linux
+目标8个ELF只编译。实际codec字节淘汰→worker取消→原Host结清组合通过；
+数量18轮由Model/codec覆盖，避免重复外部链路。完整已派发取消、异常/受控
+恢复、可信Prepare/预算准入与策略公开生命周期仍须代码，详见
+[本批实施与真实证据](DSGA-未派发取消与预算关闭水位-Mac验收-20261027.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
