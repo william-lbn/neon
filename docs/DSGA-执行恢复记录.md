@@ -4,6 +4,23 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新恢复点：Guest已发送失租接管已归档，2026-10-29
+
+AS测试96ca5c2adcef82fd2abd9819f5401d872971e70f、归档
+08d875571479fb20585ef8f83761009ff89f0301已推原分支并核远程。Root已设置丢回复后
+真实失租，新SDK恢复原GuestReady Pending；新owner不重放旧命令，只Observe，
+Record落盘丢回复后按实际Root/未Grow PG/1GiB VM取消结清预算与Host。Root setter
+和QMP各1、PG Resize0；下一新Key Prepare通过。新增Mac-race1顶层/1记录67.77秒、
+包70.407秒，0fail/skip，vet/增量lint0；[验收](DSGA-已发送Guest失租接管-Mac验收-20261029.md)
+和[收据](DSGA-已发送Guest失租接管-Mac收据-20261029.json)已固定准确源码与日志。
+
+仅测试接线，无生产Go/PG17/Rust或新Linux构建执行，不重复未变矩阵。PG17三处
+b078不变，所有者AS AGENTS保留不stage、不apply旧stash。PG/Guest已生效丢回复
+接管窗口均已有证据；分区旧进程、异常来源关闭、早期init/无Wait/跨boot迁移、
+安全降normal/私有后台持续上界及Monitor/自动策略/全部写者/CPU仍须核心工作。
+整体未完整，Goal active、原heartbeat沿用；PG17完整归档后PG18→PG16；上游冻结、
+独立控制面、不构建镜像/部署/合main边界保持，下一阶段继续实际代码缺口。
+
 ## 最新恢复点：PG已发送失租接管已归档，2026-10-29
 
 AS测试源码ebf064ac0d411662bc6f6086a85d4ff1f034adc1、阶段归档
