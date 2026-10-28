@@ -69,6 +69,7 @@ async fn resource_routes_require_control_scope_and_frozen_instance_before_uds() 
         (Method::POST, "/dsg/v1/resource/apply"),
         (Method::POST, "/dsg/v1/resource/observe"),
         (Method::POST, "/dsg/v1/resource/replay-original"),
+        (Method::POST, "/dsg/v1/resource/repair-held"),
     ] {
         assert_eq!(
             invoke(app.clone(), method.clone(), path, None, None)

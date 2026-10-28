@@ -47,6 +47,12 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
             "/dsg/v1/resource/replay-original",
             post(super::dsg_resource::proxy),
         )
+        // 独立显式恢复仅选择Root已持久的原约束摘要；网关不接受/推导
+        // 新限额，Root仍重新验签、核原floor/出生并拒绝任何实际降限。
+        .route(
+            "/dsg/v1/resource/repair-held",
+            post(super::dsg_resource::proxy),
+        )
         .route("/dsg/v1/resize", post(resize))
         .route("/dsg/v1/resize/status", post(status))
         .route("/dsg/v1/resize/cancel", post(cancel))

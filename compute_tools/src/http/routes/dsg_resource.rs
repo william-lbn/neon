@@ -125,6 +125,13 @@ mod tests {
 
     #[tokio::test]
     async fn fixed_resource_proxy_preserves_original_and_closes_connection() {
+        check_fixed_forward("/dsg/v1/resource/observe").await;
+        check_fixed_forward("/dsg/v1/resource/repair-held").await;
+    }
+
+    // 转发保持原字节/原签名，不在Rust根据JSON重新生成恢复选择。
+    // 此处UDS peer为夹具；完整Root请求及鉴权由Go生产handler另验。
+    async fn check_fixed_forward(route: &'static str) {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("guard.sock");
         let listener = tokio::net::UnixListener::bind(&path).unwrap();
@@ -133,23 +140,25 @@ mod tests {
             hyper::server::conn::http1::Builder::new()
                 .serve_connection(
                     TokioIo::new(stream),
-                    hyper::service::service_fn(|r: Request<hyper::body::Incoming>| async move {
-                        assert_eq!(r.uri(), "/dsg/v1/resource/observe");
-                        assert_eq!(r.headers()[AUTHORIZATION], "Bearer original-signature");
-                        assert!(!r.headers().contains_key("x-issuer-epoch"));
-                        assert_eq!(
-                            r.into_body().collect().await.unwrap().to_bytes(),
-                            r#"{"issuer_epoch":"9007199254740993"}"#
-                        );
-                        Ok::<_, std::convert::Infallible>(
-                            http::Response::builder()
-                                .header(CONTENT_TYPE, "application/json")
-                                .header(http::header::CACHE_CONTROL, "no-store")
-                                .header("set-cookie", "must-not-forward")
-                                .body(Full::new(Bytes::from_static(b"{}")))
-                                .unwrap(),
-                        )
-                    }),
+                    hyper::service::service_fn(
+                        move |r: Request<hyper::body::Incoming>| async move {
+                            assert_eq!(r.uri(), route);
+                            assert_eq!(r.headers()[AUTHORIZATION], "Bearer original-signature");
+                            assert!(!r.headers().contains_key("x-issuer-epoch"));
+                            assert_eq!(
+                                r.into_body().collect().await.unwrap().to_bytes(),
+                                r#"{"issuer_epoch":"9007199254740993"}"#
+                            );
+                            Ok::<_, std::convert::Infallible>(
+                                http::Response::builder()
+                                    .header(CONTENT_TYPE, "application/json")
+                                    .header(http::header::CACHE_CONTROL, "no-store")
+                                    .header("set-cookie", "must-not-forward")
+                                    .body(Full::new(Bytes::from_static(b"{}")))
+                                    .unwrap(),
+                            )
+                        },
+                    ),
                 )
                 .await
                 .unwrap();
@@ -157,7 +166,7 @@ mod tests {
         let response = forward(
             path.to_str().unwrap(),
             http::Method::POST,
-            "/dsg/v1/resource/observe",
+            route,
             http::HeaderValue::from_static("Bearer original-signature"),
             Bytes::from_static(br#"{"issuer_epoch":"9007199254740993"}"#),
         )
