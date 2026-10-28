@@ -1560,6 +1560,17 @@ VM或Host终态。原维度单调、身份和最终fence不放宽。详见
 [本阶段验收](DSGA-Root管理恢复入口-Mac验收-20261029.md)。worker建立前入口、
 安全降低normal及其他核心缺口仍需实现；修复不是新的正常缩容协议。
 
+### 8.56 PG发现前的只Root恢复与阶段绑定（2026-10-29）
+
+Agent先建立同一Session的ResourceRecoveryWorker并运行独立门槛。首次已确认
+Bootstrap/无孤立Original且来源完整时，允许漂移状态先固化原Guest身份再fence，
+不等于确认资源或开放准入。只Root管理端点采用管理专用CoordinationBinding，
+0 boot只准资源状态/原摘要修复/观察；原生PG Instance非零要求不放宽。普通
+轮询不修复或清PendingHeldRepair，显式观察完成后先注销原端点再发现真实PG。
+两阶段共用原SDK执行槽，旧端点不能复用；Run停止须取消并join活跃管理HTTP。
+准确[验收](DSGA-启动期Root恢复交接-Mac验收-20261029.md)与源码/日志边界已固定。
+缺/坏来源、未知Bootstrap/孤立命令及其他异常受控关闭仍需实现，不自动收养。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

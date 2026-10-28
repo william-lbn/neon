@@ -9,7 +9,7 @@
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | 8f371309dbfadec1b3346dde4914d78beb525571 |
+| Autoscaling | codex/dsga-autoscaling-20261019 | 69f302488371aad9441ef17c8c3044874f3499cd |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
@@ -25,6 +25,30 @@ Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同A
 [原来源有界回收验收](DSGA-原来源有界回收-Mac验收-20261029.md)与
 [机器收据](DSGA-原来源有界回收-Mac收据-20261029.json)。上一阶段从未派发取消
 `33b76210`/`91b84273`/`c2bb86a9`已完成，不重新开发；其证据继续按未变范围复用。
+
+## 最新阶段：PG发现前Root恢复与交接
+
+AS核心11dee1f1、Agent准确源码23d455fb9ed95cdca35474bd670fbc75d8416550、归档
+69f302488371aad9441ef17c8c3044874f3499cd已推原分支并核完整远程；Neon采用同一
+发行锁。已有完整确认Bootstrap、没有孤立Original时，漂移中的原Guest先固化
+身份/fence；PG发现前的只Root端点提供原摘要显式修复/观察。管理专用绑定0 boot
+只表示Root阶段，不放宽原PG Instance非零约束，也不允许PG/业务动作。普通轮询
+不修复、不清Pending；确认后先结束/注销，再建立真实PG端点。执行槽串行、Run/
+Session/调用者三方取消及原WAL保留。详见[验收](DSGA-启动期Root恢复交接-Mac验收-20261029.md)
+与[收据](DSGA-启动期Root恢复交接-Mac收据-20261029.json)。
+
+Mac四包去重20顶层/52父子记录、0fail/skip，vet/增量lint0。真实私有UDS→正式
+恢复循环及实际阻塞TLS管理调用的Run独立取消通过。Agent/Root Guard双架构共
+4个准确ELF仅编译未执行，VCS revision/架构/摘要已核；唯一AGENTS改动导致
+modified=true，离线模块缓存权限警告如实保留。首次字段/管理绑定解码及测试
+传输类型错误已修复，失败日志不计通过；旧等价子树不重复累计。
+
+本批只关闭“有完整原来源的初始Root约束漂移”窗口；缺/坏来源、未确认Bootstrap/
+孤立命令及实际高于原限额、swap/任务/系统异常的受控关闭仍需代码；安全降normal/
+持续上界、其他接管/启动/无Wait/跨boot迁移、Monitor/策略及全部写者/CPU继续。
+所有本阶段测试/质量/构建/AS推送会话已终态，不重复轮询；AS所有者AGENTS保留
+不stage，不apply旧stash。PG17三处b078不变，整体未完整，Goal active，沿用原
+自动接续，PG17完整归档后PG18→PG16；上游冻结/独立控制面/镜像/部署/main边界不变。
 
 ## 最新阶段：normal最终写者防线
 
@@ -152,6 +176,7 @@ Mac Go -race去重22顶层/56含父子记录、两包0fail/skip；Rust认证和U
 | 首次VM从未派发取消与恢复 | capacity v3独立原启动来源，VM仍Planned且无任何Runner命令；永久Initial/真实512MiB Host结清/Node v8、丢回复/SDK重建和后继完整Grow/下一Prepare组合通过 | [本次未派发闭环](DSGA-VM未派发取消闭环-Mac验收-20261029.md) |
 | 旧操作来源回收与资格终结 | 原Host结清后逐payload核永久头/历史/Runner引用，有界回收同原域旧Outside/receipt；分页/丢回复/同名换UID及后继Prepare通过；活动资格保留，原VM完整关闭后才终结资格 | [本次有界来源回收](DSGA-原来源有界回收-Mac验收-20261029.md) |
 | 原Root显式管理恢复 | 同一SDK/Session/Run按原Held摘要修复及丢回复只读观察，外层预算/WAL不变；不涵盖worker建立前异常 | [本次Root管理验收](DSGA-Root管理恢复入口-Mac验收-20261029.md) |
+| PG发现前Root恢复与交接 | 完整确认Bootstrap的初始漂移先固化原Guest，0 boot管理专用端点显式恢复；未知保留，确认后交接真实PG端点 | [启动Root验收](DSGA-启动期Root恢复交接-Mac验收-20261029.md) |
 | Agent可信本地协调入口 | 私有UDS实际接同一Session/Run，Begin/状态/取消/显式领域恢复与三方取消；默认关闭 | [本次入口验收](DSGA-Agent本地管理入口-Mac验收-20261029.md) |
 | 已发送VM失租接管与实际预算 | QMP生效丢回复后真实续约失租，新Session只读Completed、按1GiB结清原Prepare预算/Host，后继PG Grow及下一Prepare通过 | [本次已发送接管](DSGA-已发送VM失租接管-Mac验收-20261029.md) |
 | 真实失租接管后的原VM取消与后继业务链 | 正式Elector续约失败/同Lease接管CAS丢回复，原WAL和预算保留，取消/实际预算/Host/后继Grow/下一Prepare通过；只涵盖该窗口 | [本次接管验收](DSGA-真实失租接管业务闭环-Mac验收-20261029.md) |
@@ -203,7 +228,7 @@ Node/owner 10顶层/20含父记录；budget/journal/admissionexec 13顶层/78记
 | 1 | 来源与异常生命周期 | 原Root已持有约束的单调恢复已完成；缺原来源/资格/日志、实际高于原上界及swap/任务/系统异常、跨boot来源闭合仍须受控恢复。旧来源有界回收及关闭后资格终结不再重复开发 |
 | 2 | 安全降低normal与活性 | 上层执行器与最终Root Guard均拒绝无证明的normal降低，旧未知只读恢复保留；完整后台/私有持续上界及安全降限协议仍有代码工作 |
 | 3 | 启动/接管/跨boot恢复 | 原VM未发送及已发送丢回复两个真实失租接管窗口、持久launch后确定NoStart已完成；PG/Guest已派发/分区旧进程、无Wait、缺launch早期init及跨boot/迁移仍须组合与受控恢复，不能自动改绑原出生 |
-| 4 | 持续控制与入口 | Agent私有可信请求/取消/分域重放入口已接；Monitor/自动策略、worker建立前异常恢复及全部写者/CPU仍须代码及组合 |
+| 4 | 持续控制与入口 | Agent私有可信请求/取消/分域重放入口已接；PG发现前有完整原来源的Root漂移恢复已接；Monitor/自动策略、缺源/其他异常关闭及全部写者/CPU仍须代码及组合 |
 | 5 | PG18与PG16 | PG17核心Mac候选完整归档后分别移植与测试。PG18缺Neon发行接入且有AIO持有者差异，PG16需单独移植/集成；公共未变Go逻辑复用 |
 
 这些是代码或Mac组合缺口，不是仅待Linux验证。独立控制面由另一任务完成后

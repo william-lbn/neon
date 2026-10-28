@@ -4,6 +4,30 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新恢复点：启动Root恢复交接已归档，2026-10-29
+
+AS核心11dee1f1、Agent准确源码23d455fb9ed95cdca35474bd670fbc75d8416550、归档
+69f302488371aad9441ef17c8c3044874f3499cd已推原分支并核完整远程；Neon采用同一
+发行锁。已有完整确认Bootstrap、没有孤立Original时，漂移中的原Guest先固化
+身份/fence；PG发现前的只Root端点提供原摘要显式修复/观察。管理专用绑定0 boot
+只表示Root阶段，不放宽原PG Instance非零约束，也不允许PG/业务动作。普通轮询
+不修复、不清Pending；确认后先结束/注销，再建立真实PG端点。执行槽串行、Run/
+Session/调用者三方取消及原WAL保留。详见[验收](DSGA-启动期Root恢复交接-Mac验收-20261029.md)
+与[收据](DSGA-启动期Root恢复交接-Mac收据-20261029.json)。
+
+Mac四包去重20顶层/52父子记录、0fail/skip，vet/增量lint0。真实私有UDS→正式
+恢复循环及实际阻塞TLS管理调用的Run独立取消通过。Agent/Root Guard双架构共
+4个准确ELF仅编译未执行，VCS revision/架构/摘要已核；唯一AGENTS改动导致
+modified=true，离线模块缓存权限警告如实保留。首次字段/管理绑定解码及测试
+传输类型错误已修复，失败日志不计通过；旧等价子树不重复累计。
+
+本批只关闭“有完整原来源的初始Root约束漂移”窗口；缺/坏来源、未确认Bootstrap/
+孤立命令及实际高于原限额、swap/任务/系统异常的受控关闭仍需代码；安全降normal/
+持续上界、其他接管/启动/无Wait/跨boot迁移、Monitor/策略及全部写者/CPU继续。
+所有本阶段测试/质量/构建/AS推送会话已终态，不重复轮询；AS所有者AGENTS保留
+不stage，不apply旧stash。PG17三处b078不变，整体未完整，Goal active，沿用原
+自动接续，PG17完整归档后PG18→PG16；上游冻结/独立控制面/镜像/部署/main边界不变。
+
 ## 最新恢复点：normal最终写者防线已归档，2026-10-29
 
 AS安全代码480c0259、归档8f371309dbfadec1b3346dde4914d78beb525571已推原分支
