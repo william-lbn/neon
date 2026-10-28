@@ -4,7 +4,36 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
-## 最新恢复点：首次取消与后继操作Mac通过，优先于下文历史
+## 最新恢复点：VM从未派发取消闭合，2026-10-29
+
+当前事实入口为[核心清单](DSGA-核心进度与Linux验证清单-20261027.md)。本批已经
+完成独立原启动容量来源、capacity v3、VM仍Planned的原Cleanup、永久Initial/
+Host实际512MiB结清与Node v8接线；不能重新列为缺失，也不等于完整核心封版。
+
+- AS原分支`codex/dsga-autoscaling-20261019`：合同/WAL/Node准确
+  `33b762100b5b96b405aa56c1247105fa51537440`，生产接线/组合准确
+  `91b84273deea8d6cc87467f6a43b295839d12a5d`，收据归档准确
+  `c2bb86a9a0a8d60fdf8b97c40031273fcf96da87`，已先推并核自有远程完整SHA。
+  Neon仍沿原`codex/dsga-neon-v3-20261019`准确绑定；其完整提交从Git/refs取得。
+- 最终Mac -race完整生产组合101.20秒通过；同时Node9项，总10顶层/20含父子
+  记录、两个包通过。budget/journal/admissionexec最终13顶层/78含父子记录、
+  三包通过。均0fail/skip，七包vet与相对65737287增量lint0，未声称全仓清零。
+  19个Go文件/6测试文件、完整映射及日志hash见
+  [新收据](DSGA-VM未派发取消闭环-Mac收据-20261029.json)。旧严格JSON/夹具
+  Lease/UID类型/lint失败保留，不计成功。没有新Linux执行/8产物重编。
+- 本轮真实会话5335、15167、85899、96676、36706、77724均已终态；接续先核当前
+  Git/日志，不poll旧会话、不重跑未变PG/Rust/GuestReady矩阵、不apply旧stash。
+  Autoscaling所有者AGENTS.md原未提交环境修改继续保留，绝不混合stage或撤销。
+- PG17仍`b078736a4cfdfccce69914feefb5b5e56560c1e8`，子模块和两份锁一致；不
+  解冻上游。独立控制面原分支原位，未修改。Goal active、原30分钟heartbeat
+  ID`neon`已复核，勿重复创建；PG17核心完整归档后PG18→PG16，逐版适配验证。
+
+下一工作：缺原来源/Root不一致的受控恢复与完整来源持有/GC，随后安全降normal/
+私有后台持续约束、真正owner接管/启动异常/跨boot迁移和Monitor自动入口/全部
+写者CPU。缺失业务不写成Linux待测。Linux内核/K8s/NeonVM/HugeTLB/物理回收/
+性能仍独立验收；默认关闭、不构建镜像、不准备/执行部署、不合main、不发布。
+
+## 2026-10-29此前恢复点：首次原VM命令取消与后继操作
 
 当前事实入口为[核心清单](DSGA-核心进度与Linux验证清单-20261027.md)，
 旧2026-10-21以下恢复点保留为历史，不能重跑旧进程、追新上游或回退原分支。

@@ -1495,6 +1495,27 @@ Model/codec5.65秒；相邻实际容量Host/普通Scheduler-GC及两项既有分
 仍须代码，VM仍v9/Node v7；不能据此签收整体或Linux。见
 [阶段验收](DSGA-首次Host持续核验与零派发取消-Mac验收-20261028.md)及收据。
 
+### 8.52 原VM从未派发的取消预算与实际结清（2026-10-29）
+
+Prepare/Host已生效而原VM仍Planned，不能为了复用旧恢复流程伪造一次Resize
+或NoEffect。`InitialVMSources`单独绑定完整原Initial的PG实例/Birth/State UID/
+Runner身份摘要/实际启动容量；生产Reader要求原floor/Lease和全部命令历史
+为空、requested==actual==原启动值。实际预算v3永久保存完整Initial，原Root/
+资格/Host持续重读，Cleanup同一Record CAS替换初始头，未知先查而不改原目标。
+
+Host结清独立保留可比较的原启动来源，Node v8和capacity v3均拒绝旧读者降级。
+VM Model仍v9/Runner record仍v2，普通v1/v2合同形状不变；专用16KiB仅供完整
+Initial，原普通命令和全账本边界不放宽。该场景不发QMP，结清只释放Host峰值
+承诺，不能据此声称物理页已回收。真实生产接线`91b84273`、合同`33b76210`。
+
+完整首次→VM未派发取消→Cleanup丢回复/SDK重建→原资格恢复/释放拒绝→实际
+512MiB Host结清→后继Grow/root setter丢回复只读恢复→下一Shrink Prepare，
+最终Mac -race101.20秒通过；Node9项及领域13项定向回归通过，七包vet/增量
+lint0。准确19源码SHA、用例映射与失败修正见[阶段验收](DSGA-VM未派发取消闭环-Mac验收-20261029.md)
+及收据。Kube/PG/root/平台/QMP是明确夹具；缺源/Root受控恢复/完整GC、安全
+降normal、启动/接管/跨boot/迁移、Monitor自动入口与全部写者/CPU仍须代码。
+PG17核心完整归档后PG18→PG16，Linux物理/权限/内核/性能仍独立验收。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
