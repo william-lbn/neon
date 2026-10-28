@@ -4,7 +4,20 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
-## 最新恢复点：真实失租接管业务组合已归档，2026-10-29
+## 最新恢复点：已发送VM失租接管已归档，2026-10-29
+
+AS测试源码a6a2e7616c07f82a33d30fcc11d0722784d1b577、文档
+909756fe4f7407b86edfa4d4830a397d20591771已推原分支并核完整远程SHA；Neon本次
+采用同一发行锁、验收/机器收据。最终sent日志1顶层/1记录113.40秒、包116.312秒
+通过0fail/skip；vet/增量lint0，源码/日志摘要已核。测试及AS推送会话均已终态，
+不重跑；首轮错误Model UID断言失败保留且未计成功。原VM实际1GiB只读恢复，
+取消按原Prepare而非旧512MiB Initial结清，后继PG Grow及下一Prepare通过。
+
+AS所有者AGENTS.md修改保留、不stage，不apply旧stash。PG17三处仍b078；没有
+新Linux执行/ELF，不改控制面/追新上游/镜像/部署。其余核心代码继续，不把缺失
+实现归Linux待验。PG17完整后PG18→PG16；Goal active、原heartbeat沿用。
+
+## 前一恢复点：真实失租接管业务组合已归档，2026-10-29
 
 AS测试代码2501160db2524aacd1daa09f9311ce5250032ed6、归档
 5c8a1bd1b284beb397c1110c6a2994d48b359dd4已推原分支并核完整SHA；Neon本次采用同一依赖，
