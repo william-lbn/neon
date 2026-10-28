@@ -1847,3 +1847,22 @@ Root的历史Cancelled保存完整旧出生及资源水位，当前Birth可按�
 含父子记录0fail/skip，vet/增量lint0。daemon双架构及Agent/Guard四ELF均仅
 交叉编译未执行；新回归先复现旧代码失败，原失败/最终采用见[本阶段验收](DSGA-CPU结果与取消后出生-Mac验收-20261029.md)。
 PG17三处b078、上游冻结和独立控制面边界不变，其他核心按进度清单继续。
+
+### 8.62 正常全步骤确认后必须由生产循环实际结案（2026-10-29）
+
+原正常路径在ResumeAdmission落账后永久ExternalStep，测试辅助Finish不能代表
+生产生命周期。正式Runner及原来源读者齐全的执行器现在独立下一轮：严格验证
+原完整准入审计，再查询原开放，复核当前PG容量/成本/floor、Root原出生/持有/
+约束、Outside资格、Host/Runner和同VM RV，才以UID/RV CAS执行Finish并建立
+永久预算关闭边界。不是从历史Completed直接关闭或提前释放任何原承诺。
+
+Finish提交后丢回复仍保留未知，从原WAL读回；不生成替代Key、改写原命令或
+回执、不重发setter，重建也只保留一次历史。原准入被更高关闭覆盖、原资格
+释放或任一来源漂移均保留Active。旧领域构造器和取消恢复保留既有边界，缺
+完整历史审计不得自动补造。此生命周期补齐不等于Monitor/自动策略已实现。
+
+准确AS源码7cca3f1c、远程归档a1c6c05f，Mac最终7顶层/56含父子记录0fail/skip；
+正式Run丢Finish回复、五类来源变化、Host结清和下一Prepare通过。两包vet/lint0，
+Agent双Linux ELF只编译未执行；peer不外推真实Linux/K8s/物理认证。详见
+[本阶段验收](DSGA-正常自动结案-Mac验收-20261029.md)。其他核心、PG18/PG16及
+平台验收仍按核心清单继续，PG17冻结、独立控制面和默认关闭边界保持。

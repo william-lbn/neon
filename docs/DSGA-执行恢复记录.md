@@ -4,6 +4,29 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新归档：正式正常扩缩容自动结案
+
+AS准确源码7cca3f1cc088aed8e512d94b3e5e22c5c23af887、归档
+a1c6c05f84a1d40184796e3f571d044ee506c146已推原功能分支并核完整远程SHA；本仓
+发行锁采用同一依赖。补齐生产worker全步骤确认后仍占Active、依赖测试辅助
+Finish的真实生命周期缺口。独立下一轮严格核原审计、查询原准入、双重认证
+PG/Root/Outside资格/Host/Runner及同VM RV才Finish；不重发setter或改原回执/
+预算。Finish提交丢回复后Run从原WAL读回，重建不重复历史，Host结清和下一
+Prepare通过。五类来源变化均保留原Active；旧领域构造器/取消恢复边界不变。
+
+Mac最终采用7顶层/56含父子记录0fail/skip，新组合53.99秒（包55.733秒）；
+两包vet/增量lint0。初次夹具CancelClosed遗漏和宽松解码未知字段失败分别
+保留，严格解码后未知/缺失/null/重复字段及上下文负向通过，不累计重复组合。
+准确源码Agent双Linux架构仅交叉编译未执行，VCS/架构/摘要已核，唯一所有者
+AGENTS导致modified及缓存警告如实归档。详见[阶段验收](DSGA-正常自动结案-Mac验收-20261029.md)
+和[机器收据](DSGA-正常自动结案-Mac收据-20261029.json)。PG17三处b078不变。
+
+本组合PG/Root/Kube/QMP仍为明确peer。normal安全降限/后台私有持续上界与活性、
+异常来源受控关闭、分区/出生不完整/Runner无Wait/外层跨boot迁移、Monitor自动
+策略/全部写者/可信CPU仍须实际核心代码；随后PG18→PG16独立实现验证。原Goal
+active，沿用heartbeat；不追新、不改独立控制面、不构建镜像/部署/合main。
+本阶段已完成的正常结案不能反复重做，也不代表自动策略或整体功能已经完成。
+
 ## 最新归档：CPU完成读回与取消屏障后的PG再出生
 
 Autoscaling CPU准确源码5181b364958928316385f0675529a1894c5d8d69、Root修复
