@@ -1516,6 +1516,28 @@ lint0。准确19源码SHA、用例映射与失败修正见[阶段验收](DSGA-VM
 降normal、启动/接管/跨boot/迁移、Monitor自动入口与全部写者/CPU仍须代码。
 PG17核心完整归档后PG18→PG16，Linux物理/权限/内核/性能仍独立验收。
 
+### 8.53 原Host结清后的旧来源有界回收与资格终结（2026-10-29）
+
+原Host持久结清后，逐份解析永久Budget/Capacity/Initial及有界History/Runner
+原payload计算保留集合，不能marshal顶层Model而漏掉base64中的ObjectRef。
+保留当前来源/完整Last与同名替代对象；资格/Birth/State/Exit在活动VM不收。
+仅同原VM/incarnation/Guest/PG/Runner且完整关闭Key覆盖的Outside/receipt
+可成为候选；每次GET核UID/原文SHA/协议并重核原VM/Lease/Node结清水位，
+自己的保护用UID/RV JSON Patch移除，DELETE带UID/RV，不动他人finalizer。
+
+每类页64、每调用最多两页/16候选尝试（可各有PATCH+DELETE），队列仅保存
+小引用和摘要。Scheduler重建Publisher仍保留有界进度；丢回复不阻断队尾，
+扫完尾部再从API重试。裸Pending不写一分钟完成缓存，真实错误仍报告。
+旧Host GC沿既有实现，不能宣称本批也改成有界新扫描。VM原关闭证明、
+全部Node无持有后Controller补识别平台资格；活动资格不因旧历史淘汰删除。
+
+准确代码c09798ea/66e8eee2，Mac -race 11顶层/53含父子记录、四包、0fail/skip，
+完整首次取消→后继Grow→GC→下一Prepare 117.08秒；五包vet/增量lint0。
+批量来源和Kube/PG/root/资格/QMP为明确夹具。详见
+[阶段验收与准确收据](DSGA-原来源有界回收-Mac验收-20261029.md)。
+未改PG17/Rust，协议VM v9/Node v8/Runner v2保持。缺源/Root受控恢复、异常
+跨boot生命周期、安全降normal、启动接管与自动入口仍须代码；不能封版。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

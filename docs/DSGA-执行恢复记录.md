@@ -4,7 +4,32 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
-## 最新恢复点：VM从未派发取消闭合，2026-10-29
+## 最新恢复点：原来源有界回收及资格终结已归档，2026-10-29
+
+本次AS原分支已推并核远程完整SHA `17d7c744a5a2cc11b34b600c8c3f7cac7c504929`。
+模块代码：资格终结`c09798ea8880f40b925cc9d63fe66609670db76f`，旧来源回收/接线
+`66e8eee20186f349be130ad3dadfe492fddb3aca`；Neon沿原功能分支绑定与复制验收/
+JSON，准确自身提交由Git/远程refs核，不嵌自身SHA。PG17 b078和三处锁保持。
+
+最终Mac -race：owner两顶层/五父子记录，首次完整组合117.08秒、受影响三子
+父组合56.15秒，包175.757秒；领域/Controller九顶层/48记录。总11顶层/53记录、
+四不同包，0fail/skip。五包vet/相对c2bb86a9增量lint0；14源码SHA/7测试文件、
+准确逐用例/日志hash及失败留档见[验收](DSGA-原来源有界回收-Mac验收-20261029.md)
+和机器收据。中间117.95秒不累计，最终小引用队列实现已验证。
+
+原Host结清后旧Outside/receipt有界清理及关闭后资格终结已经完成，不能重新
+列作下一缺口。活动资格/Birth/State/Exit仍保护；未知/跨boot需受控恢复。
+最终sessions 42892/95090/27069已收exit0，vet直接exit0；不再poll或重跑。
+所有者AS AGENTS.md原修改继续保留、未stage；不apply旧stash，不建子代理。
+
+下一真实代码项：缺原来源/资格、Root不一致受控恢复；其后安全降normal/后台
+私有持续上界、真正owner切换/Start-init失败/无Wait/迁移跨boot、Monitor自动
+可信请求取消重放及全部写者/CPU。缺失业务与Linux待验分开，不报整体接近100%。
+长期Goal active、原30分钟heartbeat ID neon沿用。PG17核心完整归档后PG18→PG16；
+冻结不解冻，不碰独立控制面、不构建镜像、不准备/执行K8s、不合main、不发布。
+
+## 2026-10-29此前恢复点：VM从未派发取消闭合
+
 
 当前事实入口为[核心清单](DSGA-核心进度与Linux验证清单-20261027.md)。本批已经
 完成独立原启动容量来源、capacity v3、VM仍Planned的原Cleanup、永久Initial/

@@ -9,7 +9,7 @@
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | c2bb86a9a0a8d60fdf8b97c40031273fcf96da87 |
+| Autoscaling | codex/dsga-autoscaling-20261019 | 17d7c744a5a2cc11b34b600c8c3f7cac7c504929 |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
@@ -19,11 +19,12 @@ Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同A
 独立控制面既有分支保留，未追其main、未修改业务/SDK。工作区Autoscaling的
 所有者AGENTS.md环境说明修改继续保留，不与业务提交混合。
 
-本次原启动合同/WAL/Node`33b76210`、实际生产接线及组合`91b84273`已经模块化
-提交，中文验收/收据归档`c2bb86a9`。准确代码、逐用例映射和失败修正见
-[VM未派发取消归档](DSGA-VM未派发取消闭环-Mac验收-20261029.md)与
-[JSON收据](DSGA-VM未派发取消闭环-Mac收据-20261029.json)。上一阶段原VM命令
-不可重发取消`826e9c40`及资源错误修复`f5a0e4df`保留，不把阶段SHA当整体封版。
+本次资格终结`c09798ea8880f40b925cc9d63fe66609670db76f`、旧Outside/Runner回收
+`66e8eee20186f349be130ad3dadfe492fddb3aca`及阶段归档`17d7c744`已模块化提交、
+先推自有Autoscaling原分支并核完整远程SHA。准确源码、逐用例及失败边界见
+[原来源有界回收验收](DSGA-原来源有界回收-Mac验收-20261029.md)与
+[机器收据](DSGA-原来源有界回收-Mac收据-20261029.json)。上一阶段从未派发取消
+`33b76210`/`91b84273`/`c2bb86a9`已完成，不重新开发；其证据继续按未变范围复用。
 
 ## 已完成并有Mac采用证据的范围
 
@@ -38,6 +39,7 @@ Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同A
 | 初始Host与零派发取消 | 实际Publisher/Scheduler核原Initial/Runner/Node；历史淘汰保留完整首次预算。该观察分支不退placement或峰值 | [首次Host验收](DSGA-首次Host持续核验与零派发取消-Mac验收-20261028.md) |
 | 首次VM未发送取消与恢复 | 真实原命令不可重发取消后，以原Initial支撑永久实际预算；认证来源寿命、Cleanup丢回复/SDK重建、实际Host结清、后继完整Grow及下一次Shrink Prepare通过 | [本次首次取消闭环](DSGA-首次取消实际预算闭环-Mac验收-20261028.md) |
 | 首次VM从未派发取消与恢复 | capacity v3独立原启动来源，VM仍Planned且无任何Runner命令；永久Initial/真实512MiB Host结清/Node v8、丢回复/SDK重建和后继完整Grow/下一Prepare组合通过 | [本次未派发闭环](DSGA-VM未派发取消闭环-Mac验收-20261029.md) |
+| 旧操作来源回收与资格终结 | 原Host结清后逐payload核永久头/历史/Runner引用，有界回收同原域旧Outside/receipt；分页/丢回复/同名换UID及后继Prepare通过；活动资格保留，原VM完整关闭后才终结资格 | [本次有界来源回收](DSGA-原来源有界回收-Mac验收-20261029.md) |
 | 资源发送未知错误 | 修复出生查询/序列化局部err遮蔽；三类setter准确ClientError及SDK只读恢复，18个受影响GuestReady场景通过 | 同上，错误修复准确提交f5a0e4df |
 
 各模块收据的顶层/子场景计数只对其采用范围有效，不累加成完整产品E2E。
@@ -46,14 +48,23 @@ Go组合使用明确PG/root/资格/Kube/QMP夹具；本地真实PG与Rust模块�
 
 ## 本次实际通过与复用
 
-- 最终VM从未派发取消完整生产组合Mac `-race`101.20秒通过；原Runner来源在
-  Cleanup前和Host结清后两个寿命点核8类漂移/命令历史及来源替换拒绝、原对象
-  恢复。与Node9项合计10顶层/20含父子记录，两个包通过，0fail/skip。
-- 最终budget/journal/admissionexec定向13顶层/78含父子记录，三个包通过，
-  0fail/skip。七包go vet通过，相对65737287增量lint0。19源码SHA、完整映射/
-  日志摘要已归档。JSON/夹具Lease/UID类型和lint初次失败保留，不计作通过。
-- 本批只重跑新增/变化/受影响范围，未变PG17/Rust/GuestReady矩阵复用；没有
-  新Linux运行或8产物重编。Node从本批起v8，VM仍v9，Runner record仍v2。
+- 最终Mac -race：首次服务→未派发取消→后继完整Grow→有界来源回收→下一
+  Shrink Prepare组合117.08秒；受影响三条Shrink/Host/Scheduler子组合的父
+  组合56.15秒。owner两顶层/五含父子记录，包耗时175.757秒，0fail/skip。
+- 最终hostexec/hostscheduler/Controller领域9顶层/48含父子记录，三包通过，
+  0fail/skip。本批总11顶层/53记录、4个不同包，不是53次独立产品E2E。
+  五包vet通过，相对c2bb86a9的增量lint0；没有宣称全仓lint清零。
+- 完整源码提交、14个Go文件SHA/7测试文件、逐用例及日志摘要、复现命令和
+  初轮失败写入机器收据。Guest UUID夹具及旧Scheduler LIST计数失败保留，
+  未放宽生产校验/Lease期限；中间通过结果不重复累计。每轮两页/16候选尝试，
+  每候选可能PATCH+DELETE；进度只存小引用，不留32KiB正文。
+- 20旧Outside/3旧receipt是明确批量领域夹具；Kube/Lease/PG/root/资格及QMP
+  peer仍是夹具，不能外推真实Linux。PG17/Rust/GuestReady未改，不重跑；
+  没有新Linux执行或8产物重编。VM v9、Node v8、Runner v2保持。
+
+前一阶段未变的VM未派发取消/原启动来源证据：完整Mac -race101.20秒，合计
+Node/owner 10顶层/20含父记录；budget/journal/admissionexec 13顶层/78记录；
+均0fail/skip，七包vet/增量lint0。详见原VM未派发取消收据，不与本批重复累计。
 
 上一阶段未变范围证据如下，计数不与本批相加成独立产品E2E：
 
@@ -73,7 +84,7 @@ Go组合使用明确PG/root/资格/Kube/QMP夹具；本地真实PG与Rust模块�
 
 | 顺序 | 工作项 | 当前不能签收的具体边界 |
 |---|---|---|
-| 1 | 来源与异常生命周期 | 缺原来源/资格、Root不一致的受控恢复；Outside/资格/Runner等完整持有与回收，不能靠永久保守持有掩盖泄漏 |
+| 1 | 来源与异常生命周期 | 缺原来源/资格、Root不一致受控恢复及异常/跨boot来源闭合仍须实现。已关闭活动同原域旧Outside/receipt有界回收和原VM关闭后资格终结，不再重复开发 |
 | 2 | 安全降低normal与活性 | 当前资源执行器明确拒绝降低memory.max；完整后台/私有内存持续上界及安全降限协议仍有代码工作 |
 | 3 | 启动/接管/跨boot恢复 | 真正VM owner切换的完整组合；无Wait、Start/init失败；跨boot/迁移受控恢复，不能自动改绑原出生 |
 | 4 | 持续控制与入口 | Monitor/自动策略、可信请求/取消/重放生产入口，全部写者与CPU隔离接线，仍须代码及组合 |
