@@ -1458,6 +1458,23 @@ Session/SDK已验证，PG/root/平台/Runner/Host域仍是明确夹具。
 Model/SDK通过归为完整产品或Linux物理验收。详见
 [本阶段证据与生产接线边界](DSGA-首次预算持久化与SDK恢复-Mac验收-20261028.md)。
 
+### 8.50 实际首次服务生产、原选择通道和后继预算（2026-10-28）
+
+代码`3d363028e98aa36a02e8b36f537edf12165d4680`及查询顺序修复
+`b9d274accbb94b1f6fd595014c5f10e420da8184`接通initialexec：实际PG/root/
+原Runner/固定资格/初始Node读者认证后保存完整Initial，再写原开放WAL并取得
+UID/RV票据才发送。普通未知先查原Status，来源缺失不掩盖原未知；独立原摘要
+通道仅原派发owner可原样重放，不自动换epoch/revision覆盖维护门禁。新floor
+建立后重查原Status，完整原审计才落账；已开放持续复核，原漂移不自动重造。
+
+新首次到后继Grow组合最终-race 42.90秒通过，覆盖各阶段丢回复、SDK重建、
+原选择通道和来源漂移；完整正常Finalize同CAS替换InitialHeld。既有可信Prepare
+受影响组合通过并复用，共2场景/2顶层/3含父记录，0skip；三包lint/vet通过。
+准确最终源码8个Linux ELF仅编译，未执行。VM仍v9/Node v7，平台/PG/root等
+仍协议夹具，真实接管组合未认证。此阶段更新§8.49“未接首次生产”的状态，
+初始取消/当前Host消费与生命周期、安全降normal及其他既有缺口继续有代码。
+详见[首次服务验收](DSGA-首次服务生产与原准入恢复-Mac验收-20261028.md)及收据。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
