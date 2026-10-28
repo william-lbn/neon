@@ -9,7 +9,7 @@
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | b9f9ab7fbb4f79bc8ee5f607a51a5900a4d00a85 |
+| Autoscaling | codex/dsga-autoscaling-20261019 | 378c91022429f1a1d093b4b359ef4dc25cdb346a |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
@@ -25,6 +25,22 @@ Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同A
 [原来源有界回收验收](DSGA-原来源有界回收-Mac验收-20261029.md)与
 [机器收据](DSGA-原来源有界回收-Mac收据-20261029.json)。上一阶段从未派发取消
 `33b76210`/`91b84273`/`c2bb86a9`已完成，不重新开发；其证据继续按未变范围复用。
+
+## 最新阶段：原Root恢复接入同一管理循环
+
+AS准确业务463c1ad8031de4d15bc6e7c8ced6b165ff13ca40、归档
+378c91022429f1a1d093b4b359ef4dc25cdb346a已推原分支并核完整远程；Neon采用同一
+发行锁。resource_state/repair_held_resources/observe_held_resources复用同一
+ResourceWorker，在当前Session同一个PGWorker.Run中按原Held摘要显式修复/只读
+对账。错摘要零POST；修复生效丢回复后保留Pending，显式Observe清独立栅栏，
+总POST1次，外层预算/GuestReady/VM/Host WAL不变。Mac-race4顶层/20父子记录、
+两包0fail/skip；四包vet、增量lint0。详见[阶段验收](DSGA-Root管理恢复入口-Mac验收-20261029.md)
+及[准确收据](DSGA-Root管理恢复入口-Mac收据-20261029.json)。本阶段没有新Linux
+编译/执行；旧12a993e7双架构ELF不认证本次源码。入口仍依赖PGWorker已成功构造，
+建立前Root异常、安全降normal/持续约束及其他核心缺口继续，不能归Linux待验。
+PG17三处b078不变；所有者AS AGENTS修改保留不stage，不apply旧stash。测试与
+AS推送会话均已终态，不重复运行。Goal active，原heartbeat沿用，PG17完整后
+PG18→PG16；上游冻结和独立控制面/镜像/部署/main边界不变。
 
 ## 最新阶段：Agent私有管理入口与同一owner串行接线
 
@@ -123,6 +139,7 @@ Mac Go -race去重22顶层/56含父子记录、两包0fail/skip；Rust认证和U
 | 首次VM未发送取消与恢复 | 真实原命令不可重发取消后，以原Initial支撑永久实际预算；认证来源寿命、Cleanup丢回复/SDK重建、实际Host结清、后继完整Grow及下一次Shrink Prepare通过 | [本次首次取消闭环](DSGA-首次取消实际预算闭环-Mac验收-20261028.md) |
 | 首次VM从未派发取消与恢复 | capacity v3独立原启动来源，VM仍Planned且无任何Runner命令；永久Initial/真实512MiB Host结清/Node v8、丢回复/SDK重建和后继完整Grow/下一Prepare组合通过 | [本次未派发闭环](DSGA-VM未派发取消闭环-Mac验收-20261029.md) |
 | 旧操作来源回收与资格终结 | 原Host结清后逐payload核永久头/历史/Runner引用，有界回收同原域旧Outside/receipt；分页/丢回复/同名换UID及后继Prepare通过；活动资格保留，原VM完整关闭后才终结资格 | [本次有界来源回收](DSGA-原来源有界回收-Mac验收-20261029.md) |
+| 原Root显式管理恢复 | 同一SDK/Session/Run按原Held摘要修复及丢回复只读观察，外层预算/WAL不变；不涵盖worker建立前异常 | [本次Root管理验收](DSGA-Root管理恢复入口-Mac验收-20261029.md) |
 | Agent可信本地协调入口 | 私有UDS实际接同一Session/Run，Begin/状态/取消/显式领域恢复与三方取消；默认关闭 | [本次入口验收](DSGA-Agent本地管理入口-Mac验收-20261029.md) |
 | 已发送VM失租接管与实际预算 | QMP生效丢回复后真实续约失租，新Session只读Completed、按1GiB结清原Prepare预算/Host，后继PG Grow及下一Prepare通过 | [本次已发送接管](DSGA-已发送VM失租接管-Mac验收-20261029.md) |
 | 真实失租接管后的原VM取消与后继业务链 | 正式Elector续约失败/同Lease接管CAS丢回复，原WAL和预算保留，取消/实际预算/Host/后继Grow/下一Prepare通过；只涵盖该窗口 | [本次接管验收](DSGA-真实失租接管业务闭环-Mac验收-20261029.md) |

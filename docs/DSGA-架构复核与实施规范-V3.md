@@ -1551,6 +1551,15 @@ HTTP失败不证明NoEffect，不触发自动重放。Run/Session/调用者同�
 服务UID/root，不向Guest/租户暴露，不等同独立控制面的租户API移植。Monitor/
 自动策略、worker建立前的Root异常恢复及其他核心缺口仍须实现，整体未完成。
 
+### 8.55 原Root约束的显式管理恢复（2026-10-29）
+
+resource_state只读原View并返回可修复的原Held来源摘要；修复及只读观察都须
+同一摘要，经同一个Session/PGWorker.Run，复用原SDK及Pending栅栏。丢回复
+不能另建客户端/换原来源；Reconciled仅结清Root独立恢复，不写外层预算、PG、
+VM或Host终态。原维度单调、身份和最终fence不放宽。详见
+[本阶段验收](DSGA-Root管理恢复入口-Mac验收-20261029.md)。worker建立前入口、
+安全降低normal及其他核心缺口仍需实现；修复不是新的正常缩容协议。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

@@ -5,6 +5,22 @@
 阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
+## 最新：原Root恢复接入实际管理循环
+
+AS准确业务463c1ad8031de4d15bc6e7c8ced6b165ff13ca40、归档
+378c91022429f1a1d093b4b359ef4dc25cdb346a已推原分支并核完整远程；Neon采用同一
+发行锁。resource_state/repair_held_resources/observe_held_resources复用同一
+ResourceWorker，在当前Session同一个PGWorker.Run中按原Held摘要显式修复/只读
+对账。错摘要零POST；修复生效丢回复后保留Pending，显式Observe清独立栅栏，
+总POST1次，外层预算/GuestReady/VM/Host WAL不变。Mac-race4顶层/20父子记录、
+两包0fail/skip；四包vet、增量lint0。详见[阶段验收](DSGA-Root管理恢复入口-Mac验收-20261029.md)
+及[准确收据](DSGA-Root管理恢复入口-Mac收据-20261029.json)。本阶段没有新Linux
+编译/执行；旧12a993e7双架构ELF不认证本次源码。入口仍依赖PGWorker已成功构造，
+建立前Root异常、安全降normal/持续约束及其他核心缺口继续，不能归Linux待验。
+PG17三处b078不变；所有者AS AGENTS修改保留不stage，不apply旧stash。测试与
+AS推送会话均已终态，不重复运行。Goal active，原heartbeat沿用，PG17完整后
+PG18→PG16；上游冻结和独立控制面/镜像/部署/main边界不变。
+
 ## 最新：Agent私有协调入口已实际接线
 
 AS公共f94d4e86、Agent准确12a993e7677817e9d936c79f072df98be9670afe、归档
