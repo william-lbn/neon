@@ -1866,3 +1866,28 @@ Finish提交后丢回复仍保留未知，从原WAL读回；不生成替代Key�
 Agent双Linux ELF只编译未执行；peer不外推真实Linux/K8s/物理认证。详见
 [本阶段验收](DSGA-正常自动结案-Mac验收-20261029.md)。其他核心、PG18/PG16及
 平台验收仍按核心清单继续，PG17冻结、独立控制面和默认关闭边界保持。
+
+### 8.63 可信自动建议与原Begin投递屏障（2026-10-29）
+
+按VM UID可信配置明确规格、时间和千分比阈值，必须复用正式Prepare的原资格。
+只读认证原Root出生/约束、原Runner实际容量、PG Work2及同VM RV；只有原owner
+空闲轮次才自动Begin，所有资源执行仍由原领域WAL与认证负责。持续高压Grow、
+持续更长无公共客户端低压Shrink、冷却/滞回和紧急优先不构成安全证明；闭门/
+未知/坏来源不得越过。实例、容量、normal上限、可选资格、采样间断变化重新
+累计窗口；保留时间水位拒绝重复/倒退样本，包括拒绝后再次重送的紧急样本。
+
+Begin投递未知先核同Session/Lease，保存完整Key/目标/期限/原发送RV，只读原
+WAL；原Key未接收且RV已前进才关本地投递栅栏。过期但同RV须用独立日志序列
+CAS屏障排除迟到旧Begin，不补效果/预算/历史/HWM/NoEffect，不清领域SDK未知。
+与Begin双方提交顺序及屏障丢回复均独立验证；不换Key、不延长原期限。
+
+准确AS ef3b3313、归档f631f2c3，Mac最终19顶层/62含父子记录0fail/skip，四包
+vet/增量lint0；正式自动Grow完成预算/Host/VM/Guest/PG/准入与自动Finish/Host
+结清，重建后自动Shrink至正式Prepare。**后续Shrink步骤仍Planned**；同VM减
+Buffer且保持normal仅证明当前支持接线，不证明更小VM或安全降normal。准确
+Agent双Linux ELF仅交叉编译未执行。peer不代替Linux/K8s/物理验收，详见
+[本阶段验收](DSGA-可信自动策略-Mac验收-20261029.md)。
+
+安全降normal/私有后台持续约束、异常受控关闭、完整生命周期、Monitor缓存/
+WSS/组配额/RW-RO策略和全部写者/可信CPU仍须核心工作，随后PG18→PG16。
+默认关闭、PG17冻结与独立控制面边界保持；阶段归档不代表整体完成。

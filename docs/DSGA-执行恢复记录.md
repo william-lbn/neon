@@ -4,6 +4,41 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新归档：可信自动内存策略与原Begin投递恢复
+
+AS策略c1796644、屏障883c6a13、准确生产源码ef3b331309de703c62a273ba8e64d5a060972340，
+归档f631f2c3945b5b8229f992d910c2865dbe9db194已推原功能分支并核完整远程SHA。
+本仓采用同一发行锁。按VM UID可信配置明确规格/阈值，固定复用Prepare原资格；
+原owner空闲轮次只读Root/Runner/PG Work2及同VM RV，持续高压建议Grow、持续更长
+无公共客户端低压建议Shrink，紧急优先仍不越闭门/预算/排空/VM门禁。采样间断/
+实例/代次/上限/可选资格变化重置窗口，时间水位阻止重复/倒退样本。
+
+自动Begin丢回复保留原完整请求与最后发送RV，恢复先核同Session/Lease再读原WAL。
+未接收且RV前进才能关本地投递栅栏；过期同RV使用独立序列CAS屏障，双方提交
+顺序和丢回复均已验证，不补NoEffect、不清SDK执行未知、不改原Key/目标/期限。
+
+Mac最终采用19顶层/62含父子记录0fail/skip，四包vet/增量lint0。新正式组合
+43.48秒（最终包46.099秒）：自动Grow Begin丢回复→全预算/Host/VM/Guest/PG/准入
+扩容→自动Finish及Host结清→重建后持续空闲自动Shrink到正式Prepare；后续明确
+Planned。漂移/资格释放/未资格目标零Begin及失租Session零IO负向通过。只采用
+最终受影响记录，不重复未变PG/Rust或长租约矩阵。准确源码Agent双Linux ELF
+交叉编译通过但未执行，VCS/架构/摘要已核，唯一所有者AGENTS造成modified及
+缓存警告如实保留。详见[阶段验收](DSGA-可信自动策略-Mac验收-20261029.md)和
+[机器收据](DSGA-可信自动策略-Mac收据-20261029.json)。PG17三处b078不变。
+
+**当前仍须代码**：自动Shrink在Prepare后的完整组合；安全降normal及后台/私有
+持续上界/活性；Root/资格/日志异常和越界受控关闭；分区旧进程、出生不完整、
+Runner无Wait、外层跨boot/迁移；Monitor缓存/WSS/组配额/RW-RO策略、全部最终
+写者与可信CPU全链。之后PG18→PG16独立内核/扩展/发行及各自验证。采样拒绝仅
+冻结新建议，不是安全关闭；同VM减Buffer且保持normal的Prepare不代表更小VM或
+物理回收。本机PG/Root/Kube/QMP仍是peer，Linux/K8s/NeonVM/HugeTLB/性能后验。
+
+接续先确认上列阶段所有测试/构建/推送已终态、分支和未提交状态，再补自动
+Shrink正式Prepare之后的全链及normal降限所需真实安全协议，不重复本批。AS仅
+所有者AGENTS未提交保留，不stage、不apply旧stash。原Goal active/heartbeat沿用，
+上游冻结/独立控制面/默认关闭边界不变，不构建镜像/部署/合main或发布生产。
+阶段归档不是停止或整体完成；以下旧段落保留为历史，不能覆盖本段最新边界。
+
 ## 最新归档：正式正常扩缩容自动结案
 
 AS准确源码7cca3f1cc088aed8e512d94b3e5e22c5c23af887、归档
