@@ -1418,6 +1418,23 @@ Key，原派发者仍持Session才可原样创建。Host、Finalize、永久预�
 安全降normal继续明确拒绝，默认关闭，不部署、不合main。详见
 [阶段验收及边界](DSGA-可信Prepare预算生产-Mac验收-20261028.md)。
 
+### 8.48 首次预算合同与原初始Host读者（2026-10-28）
+
+AS源码`34814dfa08b84b1b9a6daa7c064f15cffd83f0f0`增加独立`budget.Initial`
+与`budgetclaims`初始placement读者。首次预算直接绑定PG初始容量/门禁、原
+root bootstrap/出生、原平台资格和Runner/Pod/Node，不伪造Resize成功、HWM
+或后续HostReservation。PG normal与整HugeTLB池聚合只计一次，再加原系统/
+过渡/安全承诺；资格与当前完整Host持有从原客户端重读，不相信自报数字。
+
+新合同及来源读取3顶层/23含子场景通过，三包lint/vet通过；两包Linux双架构
+仅编译，没有新增完整CLI ELF，也未执行Linux。来源测试中的Kube/root及未
+消费Runner出生引用是明确夹具，不是首次服务E2E。
+
+**尚未接持久首次预算/开放WAL、native首次开放、SDK未知恢复或后继替换，
+首次服务仍未完成。** 当前VM仍v8、Node仍v7；后续持久格式须显式升级并使旧
+读者拒绝，原未知必须先查询、原重放独立、完整原预算永久保留到实际替换。
+详见[已实现底座与后续接线标准](DSGA-首次预算合同与初始来源-开发记录-20261028.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
