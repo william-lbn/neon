@@ -9,7 +9,7 @@
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | 59b668472b087f1d35c8f13ac526df7d0f9bd22e |
+| Autoscaling | codex/dsga-autoscaling-20261019 | aebb209a327692c85d048362f48f64d18299e212 |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
@@ -26,7 +26,26 @@ Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同A
 [机器收据](DSGA-原来源有界回收-Mac收据-20261029.json)。上一阶段从未派发取消
 `33b76210`/`91b84273`/`c2bb86a9`已完成，不重新开发；其证据继续按未变范围复用。
 
-## 最新阶段：原Root已持有上界的受限恢复
+## 最新阶段：原QEMU确定未启动的关闭和Host结清
+
+Autoscaling业务`0710d8cdc1a7c956742c9706076732cecf190416`、归档
+`aebb209a327692c85d048362f48f64d18299e212`已沿原分支推送并核对完整远程SHA；
+本页、验收/收据和Neon发行锁采用相同依赖，PG17三处锁保持b078。
+原启动意图已持久、同一RunQEMU明确未进入Start或Start失败且无Process/
+ProcessState时，产生ProcessExit v2；PID/退出码/信号全零，不伪造Wait。
+先原文件锁与内存WAL核验、fsync关闭，再发布原不可变来源；丢回复只恢复同一
+原文，拒绝迟到Tick和重启。Scheduler继续要求整个原Pod全部容器终态及Node
+UID/RV条件结清；NoStart不能代替sidecar停止或物理成本释放资格。
+
+Mac -race三包12顶层/54含父子记录、0fail/skip；三包vet、增量lint0，vmguard
+双Linux架构测试ELF只编译未执行。来源/源码/日志摘要和准确用例映射见
+[本阶段验收](DSGA-QEMU确定未启动关闭-Mac验收-20261029.md)及
+[机器收据](DSGA-QEMU确定未启动关闭-Mac收据-20261029.json)。不重复未变测试。
+本批只关闭持久launch后的确定NoStart；缺原启动来源的早期init、Runner被杀
+无Wait、跨boot/迁移仍须代码及组合，不能列为仅待Linux验收。下面Root阶段是
+已完成历史证据，当前准确发行依赖以上表为准，整体核心未完成。
+
+## 前一阶段：原Root已持有上界的受限恢复
 
 Autoscaling业务`81a4a2b3255fa032dc6743a69a2e7e7fb9baf608`、阶段归档`59b66847`，
 Neon正式认证路由`6d71ad239dfa038adbcd26e659a1ee6ae665f23b`已实现。本页采用
@@ -56,6 +75,7 @@ Mac Go -race去重22顶层/56含父子记录、两包0fail/skip；Rust认证和U
 | 首次VM未发送取消与恢复 | 真实原命令不可重发取消后，以原Initial支撑永久实际预算；认证来源寿命、Cleanup丢回复/SDK重建、实际Host结清、后继完整Grow及下一次Shrink Prepare通过 | [本次首次取消闭环](DSGA-首次取消实际预算闭环-Mac验收-20261028.md) |
 | 首次VM从未派发取消与恢复 | capacity v3独立原启动来源，VM仍Planned且无任何Runner命令；永久Initial/真实512MiB Host结清/Node v8、丢回复/SDK重建和后继完整Grow/下一Prepare组合通过 | [本次未派发闭环](DSGA-VM未派发取消闭环-Mac验收-20261029.md) |
 | 旧操作来源回收与资格终结 | 原Host结清后逐payload核永久头/历史/Runner引用，有界回收同原域旧Outside/receipt；分页/丢回复/同名换UID及后继Prepare通过；活动资格保留，原VM完整关闭后才终结资格 | [本次有界来源回收](DSGA-原来源有界回收-Mac验收-20261029.md) |
+| 原QEMU确定未启动的停止与Host结清 | 原持久launch后确定未Start/Start失败，以v2关闭；丢回复和整Pod/Node CAS恢复通过；不涵盖无launch或无Wait | [本次NoStart验收](DSGA-QEMU确定未启动关闭-Mac验收-20261029.md) |
 | 资源发送未知错误 | 修复出生查询/序列化局部err遮蔽；三类setter准确ClientError及SDK只读恢复，18个受影响GuestReady场景通过 | 同上，错误修复准确提交f5a0e4df |
 
 各模块收据的顶层/子场景计数只对其采用范围有效，不累加成完整产品E2E。

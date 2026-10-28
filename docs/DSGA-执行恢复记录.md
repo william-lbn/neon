@@ -4,7 +4,23 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
-## 最新恢复点：原Root已持有上界受限恢复，2026-10-29
+## 最新恢复点：原QEMU确定未启动的关闭与Host结清，2026-10-29
+
+AS业务`0710d8cdc1a7c956742c9706076732cecf190416`、归档
+`aebb209a327692c85d048362f48f64d18299e212`已推原分支并核远程完整SHA。Neon
+采用同一准确依赖、验收和机器收据；PG17 b078、原分支及三处绑定不变。
+原launch持久后同调用确定未Start/Start失败已闭合；正常v1保持，v2严格PID/
+退出码/信号全零，不能用于无Wait或缺launch推断。Mac三包-race12顶层/54父子
+记录、0fail/skip；三包vet/增量lint0，双Linux测试ELF仅编译未执行。源码与
+日志SHA256核对一致；原首次沙箱监听失败保留，不计通过，详见[收据](DSGA-QEMU确定未启动关闭-Mac收据-20261029.json)。
+
+本批测试、vet/lint、编译和AS推送会话均已终态，不重复轮询/重跑；不apply旧
+stash，AS所有者AGENTS.md修改保留且不stage。下一步继续真实owner切换的完整
+恢复组合及核心清单，其余缺源/早期init/无Wait/跨boot迁移、安全降normal/持续
+约束、Monitor入口仍须代码，不能归为仅待Linux。PG17核心完整归档后PG18→PG16；
+Goal active、原heartbeat沿用，冻结及独立控制面/镜像/部署边界不变。
+
+## 前一恢复点：原Root已持有上界受限恢复，2026-10-29
 
 Autoscaling代码81a4a2b3、文档59b66847已沿原分支推送，完整远程SHA复核为
 `59b668472b087f1d35c8f13ac526df7d0f9bd22e`。Neon正式路由6d71ad239；本次将

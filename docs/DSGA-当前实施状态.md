@@ -5,7 +5,18 @@
 阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
-## 最新：原Root已持有约束的受限恢复与阶段归档
+## 最新：原QEMU确定未启动的停止屏障和Host结清
+
+AS业务`0710d8cd`、归档`aebb209a`已推原分支并核完整SHA，Neon准确发行锁、
+验收和收据同步采用。仅原持久launch后同一次调用明确未Start或Start失败且无
+进程时产生v2停止来源，不伪造Wait；先本地fsync再不可变发布，Node结清仍须
+整个原Pod容器终态。Mac三包-race12顶层/54含父子记录0fail/skip，三包vet/
+增量lint0；双Linux测试ELF仅编译。见[阶段验收](DSGA-QEMU确定未启动关闭-Mac验收-20261029.md)。
+PG17未变，不重跑原矩阵。无原launch的早期init、Runner被杀无Wait、来源异常、
+安全降normal和持续预算、完整owner接管/跨boot迁移及Monitor自动入口仍须代码。
+本阶段归档后继续PG17核心；其完整归档后PG18→PG16，整体未完成，Goal active。
+
+## 前一阶段：原Root已持有约束的受限恢复与阶段归档
 
 AS业务`81a4a2b3`、归档`59b66847`，Neon认证路由`6d71ad239`，准确发行锁已对齐。
 原来源摘要/Root文件锁内floor/写前持久化/完整实际读回闭合；新owner不改老命令，
