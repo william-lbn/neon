@@ -5,6 +5,34 @@
 阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
+## 最新归档：CPU完成读回与取消屏障后的PG再出生
+
+Autoscaling CPU准确源码5181b364958928316385f0675529a1894c5d8d69、Root修复
+准确源码a009521f1d84af3920aebc8d21e652bcf14650a8，阶段归档
+8c4e482cd3afbaab18cdc759b7bf5b2bc8e485de已推原分支并核完整远程SHA；本仓
+发行锁采用同一依赖。CPU不再吞OfflineCPUs读取错误，扩缩写后须实际在线数量
+读回，部分写失败保留实际效果、下次差量；0/负目标零IO拒绝。受管旧无认证PUT
+仍拒绝，本原语修复不等于可信CPU全链完成。
+
+复查前批发现自身取消日志把历史取消命令与当前Birth永久同PID，导致正常PG
+再出生后日志无法读取；三类新回归先真实复现，再修复。历史Cancelled保留旧
+PID/starttime和水位，当前Birth按原空组/确认约束门槛推进，启动save前校验
+整个record；当前取消签发/回执仍核原出生，不借新PG补NoEffect。v2格式不变，
+旧Apply/Replay仍拒绝，后继新命令越过持久取消水位。本项不证明外层跨boot恢复。
+
+Mac CPU整包6顶层/15记录、取消/出生受影响14顶层/33记录，均0fail/skip；两包
+vet/增量lint0。首次CPU格式问题及Root旧实现复现/沙箱listen拒绝日志保留，最终
+授权组4.045秒通过。daemon按5181b364双Linux架构、Agent/Guard按a009521f四
+ELF均仅编译未执行，VCS/架构/摘要已核；唯一所有者AGENTS导致modified及缓存
+stat权限警告如实记录。详见[本阶段验收](DSGA-CPU结果与取消后出生-Mac验收-20261029.md)
+及[机器收据](DSGA-CPU结果与取消后出生-Mac收据-20261029.json)。不重复未变长租约、
+PG/Rust测试，不改Controller/Runner；PG17三处b078不变，Goal已核active。
+
+其余核心仍按下表推进：安全降normal/持续后台私有上界、异常Root/资格/日志
+受控关闭、分区旧进程/出生不完整/Runner无Wait/外层跨boot迁移、可信CPU写链/
+Monitor/自动策略及全部最终写者。随后PG18→PG16独立实现验证。冻结/独立控制面/
+不构建镜像/部署/合main边界保持，本阶段归档不等于整体完成。
+
 ## 最新归档：原GuestReady未送达的启动交接与持久取消
 
 AS Root primitive a463acb5、准确接线371949821689adf6012d93d4c13d0cecaab99069，
