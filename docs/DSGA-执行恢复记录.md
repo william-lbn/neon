@@ -4,6 +4,22 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新恢复点：原Root已持有上界受限恢复，2026-10-29
+
+Autoscaling代码81a4a2b3、文档59b66847已沿原分支推送，完整远程SHA复核为
+`59b668472b087f1d35c8f13ac526df7d0f9bd22e`。Neon正式路由6d71ad239；本次将
+同一准确依赖及验收/收据归档进Neon原分支。PG17仍b078，三处PG绑定保持。
+Go -race去重22顶层/56含父子记录、两包0fail/skip；Rust认证/UDS各1项通过，
+vet/增量lint0、Clippy退出0；resourceguard双Linux测试ELF仅编译、未运行。
+准确摘要见[受限恢复收据](DSGA-原Root上界受限恢复-Mac收据-20261029.json)。
+原日志dsga-held-repair-*均终态，不重跑；AS所有者AGENTS修改保留、不stage。
+
+下一步仍按核心清单处理缺原来源/资格/日志、异常生命周期、安全降normal和
+持续预算、完整接管/无Wait/跨boot/迁移及Monitor自动入口。原Root单调恢复不再
+列缺失，但不能把其他恢复变成仅待Linux。PG17完整归档后PG18→PG16；PG18 AIO/
+Neon扩展/构建发行与PG16分别适配测试，公共未变协议复用。Goal active，已有
+heartbeat ID neon ACTIVE已复核，不创建重复任务。冻结、控制面/部署边界不变。
+
 ## 最新恢复点：原来源有界回收及资格终结已归档，2026-10-29
 
 本次AS原分支已推并核远程完整SHA `17d7c744a5a2cc11b34b600c8c3f7cac7c504929`。
