@@ -1891,3 +1891,23 @@ Agent双Linux ELF仅交叉编译未执行。peer不代替Linux/K8s/物理验收�
 安全降normal/私有后台持续约束、异常受控关闭、完整生命周期、Monitor缓存/
 WSS/组配额/RW-RO策略和全部写者/可信CPU仍须核心工作，随后PG18→PG16。
 默认关闭、PG17冻结与独立控制面边界保持；阶段归档不代表整体完成。
+
+### 8.64 自动缩VM在受支持固定normal规格中的完整控制链（2026-10-29）
+
+8.63只到Prepare的Mac组合已扩展：明确独立1GiB中间资格，自动Grow至2GiB并
+由生产Finish/Host结清，再重建策略重新累计空闲低压，自动Begin 1GiB Shrink。
+正式Prepare/Host/Quiesce/PG Resize及Release/GuestReady/Runner ResizeVM/ObserveVM/
+FinalizeBudget/ResumeAdmission/Finish及Host结清均真实执行，不注入Completed或
+手动Finish。两规格normal均512MiB；后台/DSM/2PC保留非零由原聚合约束覆盖。
+不能把它解释成安全降低normal或真实Linux物理回收已经实现/认证。
+
+原ObserveVM Actual/QMP均1GiB，永久预算与两条Succeeded历史固定原请求，Active
+为空且准入开放，QMP仅扩缩各一次。本批只有两个测试文件，准确测试72d8a420、
+归档8214eb5d，正式源码仍ef3b3313；复用前批双Linux交叉编译，不重复编译未变
+生产代码。最终Mac 1顶层/5含父子记录0fail/skip，120.28秒；vet/增量lint0，
+详见[验收及边界](DSGA-自动缩VM全链-Mac验收-20261029.md)。本条替代8.63的
+“该组合Shrink后续仍Planned”时点，不抹去此前证据或冒充目标平台认证。
+
+normal降限/持续约束/异常受控关闭/完整生命周期/Monitor完整策略和全部写者/
+可信CPU仍须核心代码，随后PG18→PG16各自验证。PG17冻结、独立控制面、默认
+关闭和Linux后验边界保持，原Goal active，整体未完成。

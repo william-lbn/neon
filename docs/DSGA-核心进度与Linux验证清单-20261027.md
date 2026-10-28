@@ -5,6 +5,41 @@
 **PG17核心实现、Mac可执行验证和阶段归档 → PG18 → PG16**；PG14/15与独立
 控制面暂缓。2026-10-26上游冻结继续生效，不重新追新，不重复未变功能。
 
+## 最新归档：自动2GiB到1GiB缩VM的完整Mac控制链
+
+AS准确测试72d8a4208267d935b29c5ea0a2e7d1aeb237bffe、归档
+8214eb5d5f73a39ea52dbea24e2467553c085947已推原功能分支并核完整远程SHA；本仓
+发行锁采用同一依赖。本批仅两个测试文件，正式源码仍ef3b3313，不重复已通过
+Agent双Linux交叉编译、策略/Journal/Agent/PG/Rust矩阵。前阶段Shrink只到Prepare
+的边界已在**原资格支持且normal不降低的规格**中推进为完整Mac业务组合。
+
+首次自动Grow至2GiB→生产Finish/Host结清→重建并重新累计无公共客户端低压→
+自动Begin Shrink至1GiB→正式Prepare/Host/Quiesce/PG Resize与Release/GuestReady/
+Runner ResizeVM/ObserveVM/最终预算/重新开放/生产Finish/Host结清。两规格normal
+均512MiB，后台/DSM/2PC保留非零，不靠低占用减小约束或伪造排空。原VM/QMP
+回执均读回1GiB，两条Succeeded历史、Active空、准入已开放；QMP扩缩各一次，
+Shrink PG Resize一次、关门和重开各一次，无手填领域Completed或手动Finish。
+
+最终Mac -race 1顶层/5含父子记录0fail/skip，120.28秒（包123.025秒）；owner
+vet/增量lint0。首轮新增测试字段引用编译错误已修，第二轮119.86秒通过后仅为
+本组合留三分钟测试调度余量并补日志再复验；生产请求期限/租约不变，不累计
+重复。证据见[阶段验收](DSGA-自动缩VM全链-Mac验收-20261029.md)及
+[机器收据](DSGA-自动缩VM全链-Mac收据-20261029.json)。正式源码与ef3b3313
+相同已核Git差异，前批双Linux ELF仅编译未执行；本组合PG/Root/Kube/QMP及
+Provider释放仍为显式peer，不冒充真实Linux/K8s/热插拔/HugeTLB/物理/性能认证。
+
+**当前剩余代码**：normal安全降限与私有/后台持续上界和活性；异常Root/资格/
+日志及越界受控关闭；分区旧进程、出生不完整、Runner无Wait、外层跨boot/迁移；
+Monitor缓存/WSS/组配额/RW-RO完整策略、全部最终写者与可信CPU。PG17完整归档
+后PG18→PG16独立内核/扩展/发行和各版验证。目标Linux/K8s/NeonVM/HugeTLB/
+物理回收/性能和独立控制面后续统一E2E保持后验，缺失业务不能归为仅待Linux。
+
+本批测试/质量/AS推送均终态；接续核分支与未提交后推进上述normal/持续约束和
+异常受控关闭，不重复自动Grow→Shrink组合。AS仅所有者AGENTS修改保留不stage，
+不apply旧stash。PG17实际HEAD/gitlink/两份锁仍b078736a，上游冻结/独立控制面/
+默认关闭边界保持；原Goal active、沿用heartbeat，不构建镜像/部署/合main。
+整体尚未完成，阶段归档不是停止。以下历史段落不覆盖本段最新完成与剩余边界。
+
 ## 最新归档：可信自动内存策略与原Begin投递恢复
 
 AS策略c1796644、屏障883c6a13、准确生产源码ef3b331309de703c62a273ba8e64d5a060972340，
@@ -167,7 +202,7 @@ VCS/架构/摘要已核；缓存权限警告和唯一所有者AGENTS的modified=
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | f631f2c3945b5b8229f992d910c2865dbe9db194 |
+| Autoscaling | codex/dsga-autoscaling-20261019 | 8214eb5d5f73a39ea52dbea24e2467553c085947 |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
