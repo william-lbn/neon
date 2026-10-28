@@ -1435,6 +1435,29 @@ root bootstrap/出生、原平台资格和Runner/Pod/Node，不伪造Resize成�
 读者拒绝，原未知必须先查询、原重放独立、完整原预算永久保留到实际替换。
 详见[已实现底座与后续接线标准](DSGA-首次预算合同与初始来源-开发记录-20261028.md)。
 
+### 8.49 永久首次预算、独立开放WAL及SDK未知恢复（2026-10-28）
+
+AS源码`dfe62868aded79b978f5ee52c01effa73b3cc2d3`增加VM v9 InitialHeld，
+独立于Resize/HWM保存完整初始预算及首次开放原命令。与普通/实际预算互斥，
+首次保存与格式升级同CAS，父v8读者拒绝。Start没有确认票据不能发setter；
+未知首次开放阻止新Resize，接管保留原命令，新owner只读确认。完整正常/
+实际预算结算与替换初始头同CAS，不提前释放任何外部来源。Node仍v7。
+
+首次命令仅初始容量/revision1，绑定完整原预算；原审计须PG Applied/Replayed、
+当前floor/Shared/root一致，NotFound/Expired或布尔值不能完成。SDK从独立
+原WAL恢复pending，即使Active=nil也不清未知；Status确认只清本地SDK相同
+请求，不冒充VM完整预算落账，重建仍恢复原WAL。原ResourceWorker不能省略。
+
+采用81顶层测试/种子入口、293含子场景/种子pass，0 skip；三包lint/vet
+与8个准确Linux ELF仅编译通过，fuzz仅种子。实际Model/codec/typed Store/
+Session/SDK已验证，PG/root/平台/Runner/Host域仍是明确夹具。
+
+**实际首次服务生产循环与原重放通道仍未接入，首次服务尚未完成。** 后续
+须当前认证PG/root/出生/原资格/初始Host/Runner复核后按WAL顺序执行native
+开放，完成首次到后继操作、取消/长期预算/Host来源闭合。不能将本阶段
+Model/SDK通过归为完整产品或Linux物理验收。详见
+[本阶段证据与生产接线边界](DSGA-首次预算持久化与SDK恢复-Mac验收-20261028.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
