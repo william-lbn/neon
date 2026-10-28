@@ -5,9 +5,9 @@
 **PG17核心实现、Mac可执行验证和阶段归档 → PG18 → PG16**；PG14/15与独立
 控制面暂缓。2026-10-26上游冻结继续生效，不重新追新，不重复未变功能。
 
-## 本地候选：CPU故障隔离内存状态，待恢复审批后补推
+## 最新归档：CPU故障隔离内存状态
 
-AS源码4d8033b298bf88b9e101cabd1a799f2517274af1、本地归档
+AS源码4d8033b298bf88b9e101cabd1a799f2517274af1、远程归档
 c7855907e6cd1e1c5d6f0bc11714a440ba3ef3a3。Running/Scaling已共用原Runner内存
 来源和直接读取Pod；CPU失败写DSGACPUReady=False，保持Scaling并允许正式Status
 写回已确认内存。CPU POST接受后须下一轮GET匹配才Ready，旧无认证PUT未放开；
@@ -21,17 +21,13 @@ legacy回归。first新增夹具Create误带resourceVersion失败已修并保留
 离线缓存权限警告如实归档。详见[验收](DSGA-CPU故障隔离内存状态-Mac验收-20261029.md)
 和[机器收据](DSGA-CPU故障隔离内存状态-Mac收据-20261029.json)。
 
-**远程归档未完成**：自动审批服务额度失败，拒绝执行AS git push，提示北京时间
-05:50后重试；命令未执行，不是代码被判不安全，不绕过审批。AS远程最后核验仍
-b90afa0de50f5001782252a6925b33706ae0cb7d，Neon远程仍
-16d0492a30adc0f91418c6eda6d50b6cd1696cda，发行锁仍采用b90，不能先写成已采用
-c785。所有测试/质量/构建会话均已终态，AS只保留所有者AGENTS未提交，勿重跑。
+2026-10-29 05:51（Asia/Shanghai）审批恢复后，AS原功能分支已成功推送，
+ls-remote核完整SHA为c7855907e6cd1e1c5d6f0bc11714a440ba3ef3a3；本仓发行锁
+采用相同依赖。此前额度拒绝没有执行push，历史故障保留在Git；此次未重跑已通过
+Controller测试或Linux交叉编译。PG17三处b078不变，原heartbeat/Goal已核active。
 
-恢复后首先补推AS原codex/dsga-autoscaling-20261019并核完整SHA；确认包含c785
-后才更新Neon发行锁、把本条候选改为已采用，索引validate/diff、中文commit，再
-推codex/dsga-neon-v3-20261019核远程。PG17三处b078不动。原heartbeat沿用，
-不新建重复目标；额度限制不代表整体完成。上游冻结、独立控制面和镜像/部署/
-main边界保持，随后继续核心代码，PG17完整后PG18→PG16。
+当前继续GuestReady外层已写前、Root未收到窗口。取消屏障和同SDK启动交接源码
+正在验证，尚未提交，不当作已交付；不动独立控制面、上游冻结或镜像/部署/main边界。
 
 ## 最新阶段：Agent启动原GuestReady只读恢复
 
@@ -60,7 +56,7 @@ VCS/架构/摘要已核；缓存权限警告和唯一所有者AGENTS的modified=
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | b90afa0de50f5001782252a6925b33706ae0cb7d |
+| Autoscaling | codex/dsga-autoscaling-20261019 | c7855907e6cd1e1c5d6f0bc11714a440ba3ef3a3 |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
@@ -347,7 +343,7 @@ Node/owner 10顶层/20含父记录；budget/journal/admissionexec 13顶层/78记
 | 1 | 来源与异常生命周期 | 原Root已持有约束的单调恢复已完成；缺原来源/资格/日志、实际高于原上界及swap/任务/系统异常、跨boot来源闭合仍须受控恢复。旧来源有界回收及关闭后资格终结不再重复开发 |
 | 2 | 安全降低normal与活性 | 上层执行器与最终Root Guard均拒绝无证明的normal降低，旧未知只读恢复保留；完整后台/私有持续上界及安全降限协议仍有代码工作 |
 | 3 | 启动/接管/跨boot恢复 | 原VM未发送及已发送丢回复两个真实失租接管窗口、持久launch后确定NoStart已完成；PG及Guest已生效丢回复的失租接管/实际预算窗口已完成；完整出生后未launch的init失败关闭已完成；分区旧进程、无Wait、出生不完整及跨boot/迁移仍须组合与受控恢复；启动原GuestReady未送达Root时的显式恢复/取消入口仍待接线，不能自动改绑原出生 |
-| 4 | 持续控制与入口 | Agent私有可信请求/取消/分域重放入口已接；PG发现前有完整原来源的Root漂移恢复已接；CPU失败不再吞内存状态的候选已本地验证；受管Guest旧无认证CPU PUT继续拒绝，可信CPU写通道、Monitor/自动策略、缺源/其他异常关闭及全部写者仍须代码及组合 |
+| 4 | 持续控制与入口 | Agent私有可信请求/取消/分域重放入口已接；PG发现前有完整原来源的Root漂移恢复已接；CPU失败不再吞内存状态已验证归档；受管Guest旧无认证CPU PUT继续拒绝，可信CPU写通道、Monitor/自动策略、缺源/其他异常关闭及全部写者仍须代码及组合 |
 | 5 | PG18与PG16 | PG17核心Mac候选完整归档后分别移植与测试。PG18缺Neon发行接入且有AIO持有者差异，PG16需单独移植/集成；公共未变Go逻辑复用 |
 
 这些是代码或Mac组合缺口，不是仅待Linux验证。独立控制面由另一任务完成后
