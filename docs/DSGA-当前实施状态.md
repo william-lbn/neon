@@ -5,6 +5,30 @@
 阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
+## 最新：PG已发送失租接管与实际预算
+
+AS测试源码ebf064ac0d411662bc6f6086a85d4ff1f034adc1、阶段归档
+d8594166517fdc44053fe9118fdfaf8faa2344b8已推原功能分支并核完整远程SHA；Neon
+采用同一发行锁。完整首次/Prepare/Host/VM/GuestReady后，PG已提交丢回复，经
+真实续约失败、同Lease UID新Session接管和CAS丢回复，原命令/预算/Initial均
+保留，旧owner迟到调用及新owner重发旧Resize拒绝。原取消TooLate确认实际
+Committed；Record落盘丢回复后仍用同SDK只读Status清原Pending，再按实际PG
+成本/1GiB VM结清预算、Cleanup和Host，下一新Key Shrink Prepare成功。Resize
+和QMP各1次，不能用旧512MiB Initial覆盖已发生效果。
+
+新增Mac -race1顶层/1记录73.58秒、包76.167秒，0fail/skip；owner vet及相对
+69f30248增量lint0。仅测试接线，PG17/Rust/生产Go未变，不重跑未变矩阵或重编
+Linux产物；准确23d455fb编译证据按未变范围复用。首次Prepared字段错误和
+lint无效语句已修，失败日志不计通过。详见[验收](DSGA-已发送PG失租接管-Mac验收-20261029.md)
+与[准确收据](DSGA-已发送PG失租接管-Mac收据-20261029.json)。
+
+Guest已派发、分区旧进程、无launch早期init、无Wait/跨boot迁移、异常来源关闭、
+安全降normal/私有后台持续上界及Monitor/自动策略/全部写者/CPU仍须核心代码或
+组合验证，不能归为Linux待验。PG17三处b078不变；AS所有者AGENTS修改保留不
+stage，不apply旧stash。阶段测试/质量/AS推送均已终态，不重复运行；Goal active、
+既有heartbeat沿用，PG17核心完整归档后PG18→PG16；上游冻结/独立控制面及
+不构建镜像、不部署、不合main边界保持。
+
 ## 最新：PG发现前Root恢复与实际阶段交接
 
 AS核心11dee1f1、Agent准确源码23d455fb9ed95cdca35474bd670fbc75d8416550、归档
