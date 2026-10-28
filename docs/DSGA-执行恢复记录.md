@@ -4,7 +4,22 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
-## 最新恢复点：原QEMU确定未启动的关闭与Host结清，2026-10-29
+## 最新恢复点：真实失租接管业务组合已归档，2026-10-29
+
+AS测试代码2501160db2524aacd1daa09f9311ce5250032ed6、归档
+5c8a1bd1b284beb397c1110c6a2994d48b359dd4已推原分支并核完整SHA；Neon本次采用同一依赖，
+复制中文验收/机器收据，PG17三处绑定仍b078。本批无生产行为改变。真正旧holder
+续约失败、同Lease新owner接管CAS丢回复、保留原未知及预算、取消/实际预算/Host/
+后继Grow和下一Prepare完整175.02秒通过。最终-race4顶层/4记录0fail/skip，包
+179.587秒；vet/增量lint0，5个源码摘要一致。准确[收据](DSGA-真实失租接管业务闭环-Mac收据-20261029.json)。
+所有测试/质量/AS推送会话已终态，不poll或重跑；175.53秒中间通过不重复累计。
+所有者AS AGENTS.md未提交修改保留，勿stage或apply旧stash。没有Linux执行或
+新ELF构建。仅此接管窗口关闭，其他PG/Guest已派发、分区旧进程、早期init/
+无Wait/跨boot迁移、缺源/异常、安全降normal/持续约束及Monitor入口仍继续。
+不将缺失业务归成Linux后验，PG17完整后PG18→PG16，Goal active、原heartbeat
+沿用。不追上游/控制面、不构建镜像、不部署、不合main、不发布。
+
+## 前一恢复点：原QEMU确定未启动的关闭与Host结清，2026-10-29
 
 AS业务`0710d8cdc1a7c956742c9706076732cecf190416`、归档
 `aebb209a327692c85d048362f48f64d18299e212`已推原分支并核远程完整SHA。Neon
