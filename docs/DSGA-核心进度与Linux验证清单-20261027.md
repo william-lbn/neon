@@ -9,7 +9,7 @@
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | 378c91022429f1a1d093b4b359ef4dc25cdb346a |
+| Autoscaling | codex/dsga-autoscaling-20261019 | 8f371309dbfadec1b3346dde4914d78beb525571 |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
@@ -25,6 +25,18 @@ Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同A
 [原来源有界回收验收](DSGA-原来源有界回收-Mac验收-20261029.md)与
 [机器收据](DSGA-原来源有界回收-Mac收据-20261029.json)。上一阶段从未派发取消
 `33b76210`/`91b84273`/`c2bb86a9`已完成，不重新开发；其证据继续按未变范围复用。
+
+## 最新阶段：normal最终写者防线
+
+AS安全代码480c0259、归档8f371309dbfadec1b3346dde4914d78beb525571已推原分支
+并核完整远程；Neon采用相同发行锁。生产Root运行写在原文件锁内比较Held与
+实际normal，上新WAL及写内核前拒绝未经证明的降限；旧pending保持ErrUnknown、
+只读Observe仍可确认历史，已确认相同重试只读。受影响Guard整包Mac-race47顶层/
+96父子记录、0fail/skip、包7.867秒；vet和增量lint0。准确[验收](DSGA-normal最终写者防线-Mac验收-20261029.md)
+及[收据](DSGA-normal最终写者防线-Mac收据-20261029.json)已固定四文件/逐用例/
+日志摘要。此防线不是安全降normal实现；相关持续上界及其他核心代码继续。
+本批无新Linux构建/执行，不重跑其他未变矩阵。PG17三处b078不变，独立控制面、
+上游冻结及部署/main边界不变，Goal active，PG17完整归档后PG18→PG16。
 
 ## 最新阶段：原Root恢复接入同一管理循环
 
@@ -189,7 +201,7 @@ Node/owner 10顶层/20含父记录；budget/journal/admissionexec 13顶层/78记
 | 顺序 | 工作项 | 当前不能签收的具体边界 |
 |---|---|---|
 | 1 | 来源与异常生命周期 | 原Root已持有约束的单调恢复已完成；缺原来源/资格/日志、实际高于原上界及swap/任务/系统异常、跨boot来源闭合仍须受控恢复。旧来源有界回收及关闭后资格终结不再重复开发 |
-| 2 | 安全降低normal与活性 | 当前资源执行器明确拒绝降低memory.max；完整后台/私有内存持续上界及安全降限协议仍有代码工作 |
+| 2 | 安全降低normal与活性 | 上层执行器与最终Root Guard均拒绝无证明的normal降低，旧未知只读恢复保留；完整后台/私有持续上界及安全降限协议仍有代码工作 |
 | 3 | 启动/接管/跨boot恢复 | 原VM未发送及已发送丢回复两个真实失租接管窗口、持久launch后确定NoStart已完成；PG/Guest已派发/分区旧进程、无Wait、缺launch早期init及跨boot/迁移仍须组合与受控恢复，不能自动改绑原出生 |
 | 4 | 持续控制与入口 | Agent私有可信请求/取消/分域重放入口已接；Monitor/自动策略、worker建立前异常恢复及全部写者/CPU仍须代码及组合 |
 | 5 | PG18与PG16 | PG17核心Mac候选完整归档后分别移植与测试。PG18缺Neon发行接入且有AIO持有者差异，PG16需单独移植/集成；公共未变Go逻辑复用 |

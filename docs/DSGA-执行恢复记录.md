@@ -4,6 +4,18 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新恢复点：normal最终写者防线已归档，2026-10-29
+
+AS安全代码480c0259、归档8f371309dbfadec1b3346dde4914d78beb525571已推原分支
+并核完整远程；Neon采用相同发行锁。生产Root运行写在原文件锁内比较Held与
+实际normal，上新WAL及写内核前拒绝未经证明的降限；旧pending保持ErrUnknown、
+只读Observe仍可确认历史，已确认相同重试只读。受影响Guard整包Mac-race47顶层/
+96父子记录、0fail/skip、包7.867秒；vet和增量lint0。准确[验收](DSGA-normal最终写者防线-Mac验收-20261029.md)
+及[收据](DSGA-normal最终写者防线-Mac收据-20261029.json)已固定四文件/逐用例/
+日志摘要。此防线不是安全降normal实现；相关持续上界及其他核心代码继续。
+本批无新Linux构建/执行，不重跑其他未变矩阵。PG17三处b078不变，独立控制面、
+上游冻结及部署/main边界不变，Goal active，PG17完整归档后PG18→PG16。
+
 ## 最新恢复点：Root管理恢复入口已归档，2026-10-29
 
 AS准确业务463c1ad8031de4d15bc6e7c8ced6b165ff13ca40、归档
