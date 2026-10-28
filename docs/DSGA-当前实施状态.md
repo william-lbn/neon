@@ -5,6 +5,30 @@
 阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
+## 最新：完整Runner出生后未登记launch的关闭
+
+AS源码95e8e2dbf7a3892461af78ffa2dc885bab611af5、归档
+45c88cdb0987390536ec7e680aea4908b86f34ca已推原分支并核完整远程。原Runner完整
+出生前移至init/磁盘/网络/命令生成前；其后尚无launch的失败，在同flock核完整
+WAL并fsync v3关闭屏障，迟到Start/Tick拒绝。原命令/内存未知保留；已有launch
+不猜NoEffect或补Wait，发布未知只补同一来源。原Pod删除允许关闭但不允许Start。
+Host仍核全部容器终态和Node CAS，sidecar未停不退容量，丢回复可恢复且不重复退还。
+
+同时修复生产命令的SIGTERM私有socket被最终单QMP校验误拒绝，两端统一固定
+路径，只额外允许一次该完整powerdown socket；任意路径/选项及重复仍拒绝。
+Mac采用三包去重16顶层/41父子记录0fail/skip，vet/增量lint0；Linux runner包
+增量lint0，准确源码amd64/arm64 ELF仅编译未执行，架构/VCS/摘要已核。离线
+缓存权限警告及唯一所有者AGENTS导致modified=true如实保留。初次Go test参数
+位置失败已修，不计通过；最终子树替换，不重复累加。详见[验收](DSGA-Runner未登记启动关闭-Mac验收-20261029.md)
+及[机器收据](DSGA-Runner未登记启动关闭-Mac收据-20261029.json)。
+
+本批只关闭完整出生后的未launch失败。出生尚未完整、Runner被杀无Wait、分区/
+跨boot迁移、Root/资格异常、安全降normal/私有后台持续上界和Monitor/自动策略/
+全部写者/CPU仍须核心代码及组合。PG17三处b078不变，不重跑未变PG/Rust；AS
+所有者AGENTS保留不stage、不apply旧stash，测试/质量/编译/推送会话均已终态。
+Goal active、既有heartbeat沿用，PG17完整归档后PG18→PG16；冻结/独立控制面/
+不构建镜像/部署/合main边界保持，后续继续真实代码缺口。
+
 ## 最新：Guest已生效丢回复后真实失租接管
 
 AS测试96ca5c2adcef82fd2abd9819f5401d872971e70f、归档

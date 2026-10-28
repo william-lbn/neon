@@ -1571,6 +1571,23 @@ Bootstrap/无孤立Original且来源完整时，允许漂移状态先固化原Gu
 准确[验收](DSGA-启动期Root恢复交接-Mac验收-20261029.md)与源码/日志边界已固定。
 缺/坏来源、未知Bootstrap/孤立命令及其他异常受控关闭仍需实现，不自动收养。
 
+### 8.57 完整Runner出生后、未登记启动的永久关闭（2026-10-29）
+
+原生产入口在init/磁盘/网络/命令准备前固定Runner出生；后续错误退出在独立
+10秒期限内关闭。CloseUnlaunched必须在同一目录flock中核完整原WAL、确认
+process-launch.json缺失并fsync process-exit.json；关闭与RunQEMU的写前launch
+只能一方获许可，迟到Start/Tick拒绝。v3无nonce/argv/PID/Wait，不伪装v1/v2；
+旧读者不识别即拒绝。已有launch只返回未关闭，不从超时/PID/QMP猜NoEffect。
+原内存未知不动，发布失败只补同一原文；缺完整出生/坏日志仍待受控恢复。
+
+原Pod删除可由同UID/owner/node且未重启的原Running容器保存关闭，不准新Start；
+Scheduler仍须全部容器终态和原Node CAS才退Host。SIGTERM固定私有powerdown
+socket与内存socket分别固定并严格验证，仅原处理器可发固定关机命令，不开放
+任意路径/选项或第二内存写者。实际生成器与最终校验共用常量，避免自拒启动。
+准确[Mac验收及源码收据](DSGA-Runner未登记启动关闭-Mac验收-20261029.md)已归档；
+双Linux架构仅编译未执行。无Wait/出生不完整/分区跨boot、normal/持续预算和
+自动策略等仍须核心工作，Linux真实内核/CRI/QEMU和物理回收仍独立验收。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
