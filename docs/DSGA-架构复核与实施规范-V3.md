@@ -1538,6 +1538,19 @@ PG17核心完整归档后PG18→PG16，Linux物理/权限/内核/性能仍独立
 未改PG17/Rust，协议VM v9/Node v8/Runner v2保持。缺源/Root受控恢复、异常
 跨boot生命周期、安全降normal、启动接管与自动入口仍须代码；不能封版。
 
+### 8.54 Agent可信本地管理入口与串行约定（2026-10-29）
+
+当前Agent已接默认关闭的私有Unix socket管理服务，正式Session端点向同一
+PGWorker.Run投递完整Begin或原Key/摘要选择；不在HTTP中另开SDK执行者。
+完整实例及预期当前owner必须显式固定，旧Key与当前epoch分开，领域原WAL/
+fence继续决定是否能重放。状态/发现不授予执行权，Accepted不是整操作完成，
+HTTP失败不证明NoEffect，不触发自动重放。Run/Session/调用者同时约束执行，
+先取消并join管理网络再退出；错误选择不杀死健康owner。目录/祖先/UID权限、
+16KiB正文/16在途/130秒期限及准确Mac/交叉编译证据见
+[入口验收](DSGA-Agent本地管理入口-Mac验收-20261029.md)。此入口信任Agent
+服务UID/root，不向Guest/租户暴露，不等同独立控制面的租户API移植。Monitor/
+自动策略、worker建立前的Root异常恢复及其他核心缺口仍须实现，整体未完成。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。

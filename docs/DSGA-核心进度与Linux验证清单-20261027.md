@@ -9,7 +9,7 @@
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | 909756fe4f7407b86edfa4d4830a397d20591771 |
+| Autoscaling | codex/dsga-autoscaling-20261019 | b9f9ab7fbb4f79bc8ee5f607a51a5900a4d00a85 |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
@@ -26,7 +26,23 @@ Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同A
 [机器收据](DSGA-原来源有界回收-Mac收据-20261029.json)。上一阶段从未派发取消
 `33b76210`/`91b84273`/`c2bb86a9`已完成，不重新开发；其证据继续按未变范围复用。
 
-## 最新阶段：QMP已生效丢回复后真实失租接管
+## 最新阶段：Agent私有管理入口与同一owner串行接线
+
+AS公共模块f94d4e86、Agent源码12a993e7677817e9d936c79f072df98be9670afe及归档
+b9f9ab7fbb4f79bc8ee5f607a51a5900a4d00a85已沿原分支推送并核远程SHA，Neon采用相同准确发行锁。
+默认关闭的私有UDS已实际接Agent taskgroup和当前Session，支持完整Request接受、
+状态/owner发现、取消与按原Key/摘要的分域显式恢复。HTTP不另建执行者，全部进
+同一个Run；三方取消/原WAL未知和领域fence保留，不改独立控制面或部署文件。
+
+Mac四包去重16顶层/43含子记录0fail/skip，vet/增量lint0；真实UDS→正式
+Elector/Session→UID-RV Begin/幂等/零派发取消历史、原PG显式重放及Run取消
+正在执行的管理HTTP通过。准确源码Agent Linux双架构仅编译、未执行，VCS
+revision一致，唯一AGENTS改动导致modified=true；详见[验收](DSGA-Agent本地管理入口-Mac验收-20261029.md)
+和[收据](DSGA-Agent本地管理入口-Mac收据-20261029.json)。不是全预算/物理产品E2E。
+Monitor/自动策略、worker建立前的Root异常入口及其他核心恢复、normal持续约束、
+全部写者/CPU仍须代码，不归Linux待验；PG17完整后PG18→PG16，Goal active。
+
+## 前一阶段：QMP已生效丢回复后真实失租接管
 
 AS测试源码`a6a2e7616c07f82a33d30fcc11d0722784d1b577`、归档
 `909756fe4f7407b86edfa4d4830a397d20591771`已推原分支并核完整远程SHA；Neon采用
@@ -107,6 +123,7 @@ Mac Go -race去重22顶层/56含父子记录、两包0fail/skip；Rust认证和U
 | 首次VM未发送取消与恢复 | 真实原命令不可重发取消后，以原Initial支撑永久实际预算；认证来源寿命、Cleanup丢回复/SDK重建、实际Host结清、后继完整Grow及下一次Shrink Prepare通过 | [本次首次取消闭环](DSGA-首次取消实际预算闭环-Mac验收-20261028.md) |
 | 首次VM从未派发取消与恢复 | capacity v3独立原启动来源，VM仍Planned且无任何Runner命令；永久Initial/真实512MiB Host结清/Node v8、丢回复/SDK重建和后继完整Grow/下一Prepare组合通过 | [本次未派发闭环](DSGA-VM未派发取消闭环-Mac验收-20261029.md) |
 | 旧操作来源回收与资格终结 | 原Host结清后逐payload核永久头/历史/Runner引用，有界回收同原域旧Outside/receipt；分页/丢回复/同名换UID及后继Prepare通过；活动资格保留，原VM完整关闭后才终结资格 | [本次有界来源回收](DSGA-原来源有界回收-Mac验收-20261029.md) |
+| Agent可信本地协调入口 | 私有UDS实际接同一Session/Run，Begin/状态/取消/显式领域恢复与三方取消；默认关闭 | [本次入口验收](DSGA-Agent本地管理入口-Mac验收-20261029.md) |
 | 已发送VM失租接管与实际预算 | QMP生效丢回复后真实续约失租，新Session只读Completed、按1GiB结清原Prepare预算/Host，后继PG Grow及下一Prepare通过 | [本次已发送接管](DSGA-已发送VM失租接管-Mac验收-20261029.md) |
 | 真实失租接管后的原VM取消与后继业务链 | 正式Elector续约失败/同Lease接管CAS丢回复，原WAL和预算保留，取消/实际预算/Host/后继Grow/下一Prepare通过；只涵盖该窗口 | [本次接管验收](DSGA-真实失租接管业务闭环-Mac验收-20261029.md) |
 | 原QEMU确定未启动的停止与Host结清 | 原持久launch后确定未Start/Start失败，以v2关闭；丢回复和整Pod/Node CAS恢复通过；不涵盖无launch或无Wait | [本次NoStart验收](DSGA-QEMU确定未启动关闭-Mac验收-20261029.md) |
@@ -157,7 +174,7 @@ Node/owner 10顶层/20含父记录；budget/journal/admissionexec 13顶层/78记
 | 1 | 来源与异常生命周期 | 原Root已持有约束的单调恢复已完成；缺原来源/资格/日志、实际高于原上界及swap/任务/系统异常、跨boot来源闭合仍须受控恢复。旧来源有界回收及关闭后资格终结不再重复开发 |
 | 2 | 安全降低normal与活性 | 当前资源执行器明确拒绝降低memory.max；完整后台/私有内存持续上界及安全降限协议仍有代码工作 |
 | 3 | 启动/接管/跨boot恢复 | 原VM未发送及已发送丢回复两个真实失租接管窗口、持久launch后确定NoStart已完成；PG/Guest已派发/分区旧进程、无Wait、缺launch早期init及跨boot/迁移仍须组合与受控恢复，不能自动改绑原出生 |
-| 4 | 持续控制与入口 | Monitor/自动策略、可信请求/取消/重放生产入口，全部写者与CPU隔离接线，仍须代码及组合 |
+| 4 | 持续控制与入口 | Agent私有可信请求/取消/分域重放入口已接；Monitor/自动策略、worker建立前异常恢复及全部写者/CPU仍须代码及组合 |
 | 5 | PG18与PG16 | PG17核心Mac候选完整归档后分别移植与测试。PG18缺Neon发行接入且有AIO持有者差异，PG16需单独移植/集成；公共未变Go逻辑复用 |
 
 这些是代码或Mac组合缺口，不是仅待Linux验证。独立控制面由另一任务完成后

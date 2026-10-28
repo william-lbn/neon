@@ -4,6 +4,19 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新恢复点：Agent私有管理入口已归档，2026-10-29
+
+AS公共f94d4e86、Agent准确12a993e7677817e9d936c79f072df98be9670afe、归档
+b9f9ab7fbb4f79bc8ee5f607a51a5900a4d00a85已推原分支并核完整远程；Neon采用同一发行锁和
+验收/收据。私有UDS默认关闭，已接真实Session/同一Run，完整Request/取消/分域
+显式恢复、三方取消和原WAL保留。Mac四包去重16顶层/43含子记录0fail/skip，
+vet/增量lint0；Agent双Linux架构准确revision ELF只编译、未执行，源码14摘要
+一致，唯一AGENTS未提交导致modified=true。详见[阶段验收](DSGA-Agent本地管理入口-Mac验收-20261029.md)。
+所有本阶段测试/质量/构建/AS推送会话均已终态，勿poll或重跑；所有者AGENTS
+修改保留不stage，不apply旧stash。不是完整产品E2E；Monitor/自动策略、worker
+建立前Root异常恢复、normal持续约束和其他核心仍继续，PG17完整后PG18→PG16。
+Goal active，原heartbeat沿用；冻结/独立控制面/镜像/部署/main边界不变。
+
 ## 最新恢复点：已发送VM失租接管已归档，2026-10-29
 
 AS测试源码a6a2e7616c07f82a33d30fcc11d0722784d1b577、文档
