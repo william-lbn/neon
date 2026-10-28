@@ -1771,3 +1771,23 @@ VM 项补充：Host/Guest、QEMU/virtio-mem、NUMA/HugeTLB 配置、runner 能�
 - [Neon smgr](https://github.com/william-lbn/neon/blob/8103321197c8ba9a64f27d52fa624c8b68a1ba7f/pgxn/neon/pagestore_smgr.c)、[主仓版本接入](https://github.com/william-lbn/neon/blob/8103321197c8ba9a64f27d52fa624c8b68a1ba7f/.gitmodules)：存储和版本边界。
 
 本次结论是有条件的工程可行性判断：完整实现所需的组件和安全门槛已在本文明确；未知平台能力和未执行验证保留为显式门槛。不得将方案定稿、Mac 候选完成、Linux 认证和生产可用合并成同一个状态。
+
+
+### 8.58 启动恢复可Observe外层完整原GuestReady（2026-10-29）
+
+Agent必须先完成Root恢复再创建正式PGWorker，但Root已设置、自身完成未知时，
+原Observe不能仅放在后者。启动循环在同一执行槽内从外层UID/RV写前日志恢复
+完整原GuestReady，只读Observe，前后核当前owner、Guest身份和活动请求。
+Root可按完整内核读回补自身Applied/Held并清同SDK原Pending；启动阶段不Apply/
+Replay、不换epoch/PID/目标、不Record外层或结清预算。正式PG执行器仍独立核
+PG/VM/预算并再次只读原命令后才Record，启动确认不替代完整业务证据。
+
+缺原来源/部分效果继续未知，孤立SDK Pending在任何RPC前拒绝；资源revision
+不能从PG Key推导。独立HeldRepair未知仍只能显式Observe，普通启动查询不能
+清它。SDK构造与启动查询共用原派发校验，防止不同入口采用不同恢复来源。
+本条没有新增wire权限、自动写重试或静默改绑；旧默认关闭和生产门槛保持。
+
+准确AS4f85588c及归档b90afa0d；Mac去重10顶层/33记录0fail/skip，真实失租组合
+改走同Agent gate，setter/QMP各1、PG Resize0。Agent双Linux架构仅编译未执行；
+证据见[验收及剩余边界](DSGA-启动原GuestReady观察-Mac验收-20261029.md)。
+安全降normal、异常关闭及其他核心仍继续，不能以本条宣称PG17整体完成。

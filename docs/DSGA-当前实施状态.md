@@ -1,9 +1,32 @@
 # DSGA 当前实施状态
 
-更新：2026-10-29（Asia/Shanghai）。V3为实施标准；**整体仍未完成，Goal active；继续PG17核心收尾后PG18→PG16**。当前逐项完成/候选/剩余代码及Linux边界统一见
+更新：2026-10-29（Asia/Shanghai）。V3为实施标准；**整体仍未完成，继续已授权持续任务；继续PG17核心收尾后PG18→PG16**。当前逐项完成/候选/剩余代码及Linux边界统一见
 [核心进度与验证清单](DSGA-核心进度与Linux验证清单-20261027.md)。下文保留各历史时点的验收记录，不能把旧段落的“尚缺”或“当前SHA”当成最新状态。
 阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
+
+## 最新：Agent启动原GuestReady只读恢复
+
+AS源码4f85588c5f29c822a91917d89a99e3605243b145、归档
+b90afa0de50f5001782252a6925b33706ae0cb7d已推原分支并核完整远程。修复Agent先等
+Root确认、再建PGWorker而原Observe只能由后者执行的环依赖；启动循环只核外层
+完整原GuestReady并Observe，不补发、不换epoch/PID/目标、不记录外层步骤或预算。
+Root自身可按完整读回补Applied/Held，正式执行器仍重新核PG/VM/预算才Record。
+独立HeldRepair未知仍须显式Observe，孤立Pending在RPC前拒绝。
+
+Mac去重10顶层/33父子记录0fail/skip，owner vet0、增量lint0。两个负向场景
+第一轮完整响应后仍保持未知，第二轮才取消；修改后的真实失租接管69.31秒，
+先过同Agent启动gate再建正式PG，setter/QMP各1、PG Resize0，原Record丢回复、
+取消预算与Host结清及下一Prepare通过。准确Agent双Linux架构ELF仅编译未执行，
+VCS/架构/摘要已核；缓存权限警告和唯一所有者AGENTS的modified=true如实归档。
+详见[验收](DSGA-启动原GuestReady观察-Mac验收-20261029.md)与
+[收据](DSGA-启动原GuestReady观察-Mac收据-20261029.json)。
+
+本阶段所有测试/质量/编译/AS推送会话均已终态，AS只保留所有者AGENTS未提交，
+不apply旧stash，不重跑未变PG/Rust。PG17三处b078不变；异常来源受控关闭、
+安全降normal/持续上界、分区/出生前失败/无Wait/跨boot迁移、Monitor/自动策略/
+全部写者与CPU仍须核心工作。PG17完整归档后PG18→PG16；冻结/独立控制面/
+不构建镜像/部署/合main边界保持。阶段归档不代表整体完成。
 
 ## 最新：完整Runner出生后未登记launch的关闭
 
