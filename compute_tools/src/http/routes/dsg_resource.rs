@@ -127,6 +127,7 @@ mod tests {
     async fn fixed_resource_proxy_preserves_original_and_closes_connection() {
         check_fixed_forward("/dsg/v1/resource/observe").await;
         check_fixed_forward("/dsg/v1/resource/repair-held").await;
+        check_fixed_forward("/dsg/v1/resource/cancel-original").await;
     }
 
     // 转发保持原字节/原签名，不在Rust根据JSON重新生成恢复选择。

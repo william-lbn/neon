@@ -53,6 +53,12 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
             "/dsg/v1/resource/repair-held",
             post(super::dsg_resource::proxy),
         )
+        // 取消仅转发原完整命令及当前owner签名。Root须持久禁止迟到Apply，
+        // 网关的NotFound、超时或数值读回都不能构造NoEffect。
+        .route(
+            "/dsg/v1/resource/cancel-original",
+            post(super::dsg_resource::proxy),
+        )
         .route("/dsg/v1/resize", post(resize))
         .route("/dsg/v1/resize/status", post(status))
         .route("/dsg/v1/resize/cancel", post(cancel))
