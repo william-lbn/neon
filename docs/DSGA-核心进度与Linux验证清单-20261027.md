@@ -5,6 +5,32 @@
 **PG17核心实现、Mac可执行验证和阶段归档 → PG18 → PG16**；PG14/15与独立
 控制面暂缓。2026-10-26上游冻结继续生效，不重新追新，不重复未变功能。
 
+## 最新归档：原GuestReady未送达的启动交接与持久取消
+
+AS Root primitive a463acb5、准确接线371949821689adf6012d93d4c13d0cecaab99069，
+远程归档959465096970031ba633902a7636f93b8991e1e4已推原功能分支并核完整SHA；
+本仓采用同一发行锁。Neon认证路由b2a3eb131237f8ab6f589bf80da7cc829187e633。
+原GuestReady写前成功而Root未收到时，完整原PG/WAL核验后保留同SDK Pending交
+正式PGWorker；普通未知不自动重放/取消，新owner不能重放旧epoch。持久Abort
+经Root同flock确认从未接收、原出生和旧约束后fsync取消屏障，才可NoEffect；
+丢回复只读屏障恢复，外层再CAS记账，PG/VM/完整实际预算和Host仍独立结清。
+
+Root首次取消同时升级日志v2；旧Guard回滚失败关闭，禁止删除日志/降格式绕过。
+取消水位消耗资源revision，后继命令越过Original/Cancelled，不无限存历史正文。
+Mac -race去重59顶层/146含父子记录，0fail/skip，四包vet/增量lint0。新真实失租
+组合65.14秒，Root setter0、取消POST1、PG Resize0、QMP1，实际预算/Host及下一
+Prepare通过。Root真实锁/持久化独立验证，owner组合的PG/root/Kube/QMP仍为peer。
+Rust真实UDS/正式认证各1项、3文件格式及受影响库Clippy通过；既有警告保留。
+准确源码Agent/Guard双Linux架构4个ELF仅编译未执行，VCS/架构/摘要已核；唯一
+所有者AGENTS导致modified及离线缓存警告如实归档。详见[本阶段验收](DSGA-原GuestReady未收到取消-Mac验收-20261029.md)
+和[机器收据](DSGA-原GuestReady未收到取消-Mac收据-20261029.json)。
+
+所有本阶段测试/质量/构建/AS推送均终态，不重复已有组合；PG17三处b078不变，
+AS仅所有者AGENTS保留不stage，不apply旧stash。Goal已核active，原heartbeat
+沿用。安全降normal/持续上界、异常关闭、分区旧进程/出生不完整/无Wait/跨boot
+迁移、Monitor/自动策略和全部写者/可信CPU仍需核心工作，随后PG18→PG16；冻结/
+独立控制面/不构建镜像/部署/合main边界保持，阶段归档不等于整体完成。
+
 ## 最新归档：CPU故障隔离内存状态
 
 AS源码4d8033b298bf88b9e101cabd1a799f2517274af1、远程归档
@@ -26,8 +52,7 @@ ls-remote核完整SHA为c7855907e6cd1e1c5d6f0bc11714a440ba3ef3a3；本仓发行�
 采用相同依赖。此前额度拒绝没有执行push，历史故障保留在Git；此次未重跑已通过
 Controller测试或Linux交叉编译。PG17三处b078不变，原heartbeat/Goal已核active。
 
-当前继续GuestReady外层已写前、Root未收到窗口。取消屏障和同SDK启动交接源码
-正在验证，尚未提交，不当作已交付；不动独立控制面、上游冻结或镜像/部署/main边界。
+以上CPU段为前一阶段历史。本窗口已由本页顶部95946509归档覆盖，不再处于未提交候选；其余核心缺口继续。
 
 ## 最新阶段：Agent启动原GuestReady只读恢复
 
@@ -56,7 +81,7 @@ VCS/架构/摘要已核；缓存权限警告和唯一所有者AGENTS的modified=
 
 | 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Autoscaling | codex/dsga-autoscaling-20261019 | c7855907e6cd1e1c5d6f0bc11714a440ba3ef3a3 |
+| Autoscaling | codex/dsga-autoscaling-20261019 | 959465096970031ba633902a7636f93b8991e1e4 |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
 Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
@@ -342,7 +367,7 @@ Node/owner 10顶层/20含父记录；budget/journal/admissionexec 13顶层/78记
 |---|---|---|
 | 1 | 来源与异常生命周期 | 原Root已持有约束的单调恢复已完成；缺原来源/资格/日志、实际高于原上界及swap/任务/系统异常、跨boot来源闭合仍须受控恢复。旧来源有界回收及关闭后资格终结不再重复开发 |
 | 2 | 安全降低normal与活性 | 上层执行器与最终Root Guard均拒绝无证明的normal降低，旧未知只读恢复保留；完整后台/私有持续上界及安全降限协议仍有代码工作 |
-| 3 | 启动/接管/跨boot恢复 | 原VM未发送及已发送丢回复两个真实失租接管窗口、持久launch后确定NoStart已完成；PG及Guest已生效丢回复的失租接管/实际预算窗口已完成；完整出生后未launch的init失败关闭已完成；分区旧进程、无Wait、出生不完整及跨boot/迁移仍须组合与受控恢复；启动原GuestReady未送达Root时的显式恢复/取消入口仍待接线，不能自动改绑原出生 |
+| 3 | 启动/接管/跨boot恢复 | 原VM未发送及已发送丢回复两个真实失租接管窗口、持久launch后确定NoStart已完成；PG及Guest已生效丢回复的失租接管/实际预算窗口已完成；完整出生后未launch的init失败关闭已完成；分区旧进程、无Wait、出生不完整及跨boot/迁移仍须组合与受控恢复；启动原GuestReady未送达Root的同SDK交接与原取消屏障已闭合，不能自动改绑原出生 |
 | 4 | 持续控制与入口 | Agent私有可信请求/取消/分域重放入口已接；PG发现前有完整原来源的Root漂移恢复已接；CPU失败不再吞内存状态已验证归档；受管Guest旧无认证CPU PUT继续拒绝，可信CPU写通道、Monitor/自动策略、缺源/其他异常关闭及全部写者仍须代码及组合 |
 | 5 | PG18与PG16 | PG17核心Mac候选完整归档后分别移植与测试。PG18缺Neon发行接入且有AIO持有者差异，PG16需单独移植/集成；公共未变Go逻辑复用 |
 

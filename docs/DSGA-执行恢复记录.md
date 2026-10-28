@@ -4,6 +4,32 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新归档：原GuestReady未送达的启动交接与持久取消
+
+AS Root primitive a463acb5、准确接线371949821689adf6012d93d4c13d0cecaab99069，
+远程归档959465096970031ba633902a7636f93b8991e1e4已推原功能分支并核完整SHA；
+本仓采用同一发行锁。Neon认证路由b2a3eb131237f8ab6f589bf80da7cc829187e633。
+原GuestReady写前成功而Root未收到时，完整原PG/WAL核验后保留同SDK Pending交
+正式PGWorker；普通未知不自动重放/取消，新owner不能重放旧epoch。持久Abort
+经Root同flock确认从未接收、原出生和旧约束后fsync取消屏障，才可NoEffect；
+丢回复只读屏障恢复，外层再CAS记账，PG/VM/完整实际预算和Host仍独立结清。
+
+Root首次取消同时升级日志v2；旧Guard回滚失败关闭，禁止删除日志/降格式绕过。
+取消水位消耗资源revision，后继命令越过Original/Cancelled，不无限存历史正文。
+Mac -race去重59顶层/146含父子记录，0fail/skip，四包vet/增量lint0。新真实失租
+组合65.14秒，Root setter0、取消POST1、PG Resize0、QMP1，实际预算/Host及下一
+Prepare通过。Root真实锁/持久化独立验证，owner组合的PG/root/Kube/QMP仍为peer。
+Rust真实UDS/正式认证各1项、3文件格式及受影响库Clippy通过；既有警告保留。
+准确源码Agent/Guard双Linux架构4个ELF仅编译未执行，VCS/架构/摘要已核；唯一
+所有者AGENTS导致modified及离线缓存警告如实归档。详见[本阶段验收](DSGA-原GuestReady未收到取消-Mac验收-20261029.md)
+和[机器收据](DSGA-原GuestReady未收到取消-Mac收据-20261029.json)。
+
+所有本阶段测试/质量/构建/AS推送均终态，不重复已有组合；PG17三处b078不变，
+AS仅所有者AGENTS保留不stage，不apply旧stash。Goal已核active，原heartbeat
+沿用。安全降normal/持续上界、异常关闭、分区旧进程/出生不完整/无Wait/跨boot
+迁移、Monitor/自动策略和全部写者/可信CPU仍需核心工作，随后PG18→PG16；冻结/
+独立控制面/不构建镜像/部署/合main边界保持，阶段归档不等于整体完成。
+
 ## 当前接续点：CPU分域状态已采用，继续原GuestReady未收到窗口
 
 AS源码4d8033b298bf88b9e101cabd1a799f2517274af1、远程归档
@@ -25,15 +51,13 @@ ls-remote核完整SHA为c7855907e6cd1e1c5d6f0bc11714a440ba3ef3a3；本仓发行�
 采用相同依赖。此前额度拒绝没有执行push，历史故障保留在Git；此次未重跑已通过
 Controller测试或Linux交叉编译。PG17三处b078不变，原heartbeat/Goal已核active。
 
-当前继续GuestReady外层已写前、Root未收到窗口。取消屏障和同SDK启动交接源码
-正在验证，尚未提交，不当作已交付；不动独立控制面、上游冻结或镜像/部署/main边界。
+以上CPU段为前一阶段历史。本窗口已由本页顶部95946509归档覆盖，不再处于未提交候选；其余核心缺口继续。
 
 
-下一项实际代码需先分析：原GuestReady已写前但Root尚未收到时，启动gate的
-Observe会继续未知，正式PGWorker尚未建立，现有显式replay_resource入口无法
-到达。必须把同原WAL的完整恢复/取消接入启动顺序，不可用NotFound直接当
-NoEffect或清Pending；新owner也不能重发旧epoch。此前已发送/已生效组合不能
-代替这一窗口。可信CPU写通道亦未实现，不能因新增Condition通过就关闭该项。
+上述原GuestReady未收到窗口已实现并归档，不重新开发或重跑长租约组合。
+下一项需核实际最终写者接线及可信CPU通道；受管Guest旧无认证PUT继续拒绝，
+不能以CPU Condition隔离或编译成功宣称写通道已闭合。安全降normal/持续上界及
+异常生命周期仍按核心清单继续。
 
 ## 最新恢复点：Agent原GuestReady启动确认已归档，2026-10-29
 

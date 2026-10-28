@@ -1808,3 +1808,23 @@ pending存在时仍不能Running。此处理不修改操作WAL，也不发公开
 fail/skip，Controller双Linux架构仅编译未执行。审批额度恢复后已先推AS并核完整
 远程SHA，本仓发行锁采用c7855907；PG17三处b078保持。
 证据与仍缺业务见[验收](DSGA-CPU故障隔离内存状态-Mac验收-20261029.md)。
+
+
+### 8.60 原GuestReady未送达的同SDK交接和取消屏障（2026-10-29）
+
+外层原GuestReady已写前而Root未收到，不能永远等待Observe阻断正式PGWorker。
+仅核完整原PG/Guest/WAL/当前Session后交接同一Pending SDK；普通未知不自动写，
+初始或无完整绑定仍走原Root gate。新owner只查/取消旧epoch，不改原命令/出生。
+管理取消先持久Abort；Root同Apply文件锁核“从未接收”、完整确认旧约束/出生/
+floor/连续revision后fsync取消屏障，零setter，才返回NoEffect领域证据。Apply
+先入锁则取消拒绝，取消先落盘则迟到Apply拒绝；未知部分效果继续保留。丢回复
+只读完整屏障，外层重核同原命令/owner/Abort后CAS Record；完整预算/PG/VM/Host
+仍分别确认，不能由取消回执授予VM缩容或退Host权限。
+
+首次取消屏障与日志格式v1→v2同次持久，旧Guard回滚失败关闭，禁止降格式或删
+日志。取消水位与Original共同生成后继revision，只留最近完整取消正文保持有界。
+Neon固定认证cancel-original路径透明转发原正文/签名，不由网关猜无效果。
+准确AS37194982、远程归档95946509；Mac59顶层/146含父子记录0fail/skip，真实
+失租组合及实际预算/Host结清通过，Rust认证/UDS各1项；4个准确Linux ELF仅编译
+未执行。详见[验收和限制](DSGA-原GuestReady未收到取消-Mac验收-20261029.md)。
+本条只关闭该窗口，安全降normal/异常恢复/持续策略及其他核心仍须实现。
