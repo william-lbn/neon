@@ -1,8 +1,41 @@
 # DSGA 执行与恢复记录
 
-更新：2026-10-21（Asia/Shanghai）。V3是实施标准；Goal保持active、无预算。
+更新：2026-10-29（Asia/Shanghai）。V3是实施标准；Goal保持active、无预算。
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
+
+## 最新恢复点：首次取消与后继操作Mac通过，优先于下文历史
+
+当前事实入口为[核心清单](DSGA-核心进度与Linux验证清单-20261027.md)，
+旧2026-10-21以下恢复点保留为历史，不能重跑旧进程、追新上游或回退原分支。
+
+- PG17仍为`b078736a4cfdfccce69914feefb5b5e56560c1e8`，原分支/子模块/
+  两份锁一致，2026-10-26上游冻结不解冻；本批未改PG，不重跑原内核矩阵。
+- Autoscaling沿原`codex/dsga-autoscaling-20261019`。准确业务
+  `826e9c400dd7d23ba376041f51ca6e68019fa4ab`，资源错误修复单独
+  `f5a0e4df5b4404e7f38608792e9076bcb566bcf2`，文档/收据
+  `657372870bd8c48ce6ab39489940cb6be5639e03`。依赖先推再由Neon准确绑定，
+  推送和完整远程SHA核验以本次工具结果及当前清单为准，不能沿用旧审批受阻结论。
+- 最终首次完整服务→VM不可重发取消→Cleanup Start/Record丢回复→SDK重建→
+  实际预算/Host结清→后继Grow/root丢回复只读恢复→下一Shrink Prepare，
+  Mac -race 135.04秒通过；GuestReady18子场景13.82秒通过，同包2顶层/20含父
+  记录0fail/skip。此前21/107领域、2/4旧组合、模型26.24秒按未变范围复用。
+  四包vet通过、增量lint0；全量lint55项不冒充清零。源码/日志摘要及用例映射
+  已写入[阶段收据](DSGA-首次取消实际预算闭环-Mac收据-20261028.json)。
+- 55442/81715旧失败与98408 vet、42550最终测试、84759全量lint、16379增量lint
+  均已终态；不能重新poll或重复运行。失败日志保留，错误确认为process局部err
+  仍遮蔽外层，最终修复准确ClientError，不放松生产校验。无新增Linux执行。
+- 工作区仅保留所有者Autoscaling AGENTS.md环境说明，勿混合提交或apply旧stash。
+  不修改独立控制面，不创建子代理。当前长期顺序PG17核心归档→PG18→PG16；
+  公共协议复用，PG18 AIO/内核/扩展/FFI/构建及PG16各自回归分别验。
+- active Goal之外已在当前聊天创建每30分钟heartbeat接续，自动任务ID`neon`。
+  不再创建重复自动任务；无状态变化保持安静。平台中断/额度仍可能影响执行，
+  恢复先读当前Git/日志。本条不是整体完成或生产认证。
+
+下一代码项：Prepare/Host已有动作、VM仍Planned且无旧Native命令的首次取消。
+其后缺源/Root恢复与来源GC、安全降normal、无Wait/接管/迁移/跨boot、Monitor/
+策略及全部写者/CPU。完整清单和Linux验收分开记录；缺失业务不写成待Linux。
+默认关闭、不构建镜像、不准备或执行部署、不合主分支、不发布。
 
 ## 当前源码与分支
 

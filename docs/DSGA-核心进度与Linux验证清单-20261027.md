@@ -1,74 +1,74 @@
 # 内存伸缩核心进度、Mac证据与Linux待验清单
 
-本清单是2026-10-28当前状态，不是按提交数计算的完成率。PG17核心仍有代码
-工作，尚不能封版或声称生产可用。所有者新增长期顺序：PG17核心收尾及Mac
-验证归档→PG18→PG16；PG14/15、独立控制面仍暂缓。2026-10-26上游冻结
-继续生效，只修改自身缺陷和剩余功能，不重新追新。
+更新：2026-10-29（Asia/Shanghai）。本清单不按提交数量计算完成率。PG17核心
+仍有明确代码工作，不能封完整版本或声称生产可用。所有者确认长期顺序：
+**PG17核心实现、Mac可执行验证和阶段归档 → PG18 → PG16**；PG14/15与独立
+控制面暂缓。2026-10-26上游冻结继续生效，不重新追新，不重复未变功能。
 
-## 已归档代码与当前工作树
+## 当前阶段归档与准确依赖
 
-| 仓库 | 固定功能分支 | 已归档提交 |
+| 仓库 | 固定功能分支 | 本次采用准确提交 |
 |---|---|---|
-| Neon | codex/dsga-neon-v3-20261019 | d2b5911a3dfb6d522614ce4a20e74301dd412657 |
-| Autoscaling | codex/dsga-autoscaling-20261019 | 316d5e698fed473d2a3d585d8af546654b036ea3 |
+| Autoscaling | codex/dsga-autoscaling-20261019 | 657372870bd8c48ce6ab39489940cb6be5639e03 |
 | PG17 | codex/dsga-pg17-v3-20261019 | b078736a4cfdfccce69914feefb5b5e56560c1e8 |
 
-这些是本次开始时已交付且已有远程核验的版本；当前新增取消恢复尚未提交，
-**不能按已归档HEAD将工作树候选算成已交付**。PG17实际源码在
-vendor/postgres-v17，gitlink、ci/distribution.json、vendor/revisions.json一致。
-独立控制面原分支保持d84c0b73004a7d8cc3e89f3c3f0e3f06cfa8cba9，不修改其业务。
+Neon沿`codex/dsga-neon-v3-20261019`归档本页、源码/测试收据及相同Autoscaling
+发行锁；Neon自身准确提交由包含本页的Git记录和远程refs核验，避免文档嵌入自身
+提交SHA形成循环。PG17实际源码在`vendor/postgres-v17`，gitlink、
+`ci/distribution.json`和`vendor/revisions.json`保持同一b078提交。
+独立控制面既有分支保留，未追其main、未修改业务/SDK。工作区Autoscaling的
+所有者AGENTS.md环境说明修改继续保留，不与业务提交混合。
+
+本次领域合同`b21595a5`、永久来源模型`f3af51a3`、资源错误传播修复`f5a0e4df`
+与实际取消接线`826e9c40`均已模块化提交；中文验收/收据归档`65737287`。
+本页后续维护不把某个阶段源码SHA等同整体已封版。准确代码、日志摘要、测试
+映射及失败修正见[首次取消归档](DSGA-首次取消实际预算闭环-Mac验收-20261028.md)
+与[JSON收据](DSGA-首次取消实际预算闭环-Mac收据-20261028.json)。
 
 ## 已完成并有Mac采用证据的范围
 
 | 核心模块 | 当前已实现与验证 | 准确证据入口 |
 |---|---|---|
 | PG17动态Buffer/Provider/生命周期 | Grow/Shrink、保守成本、pin/IO/遍历/checkpoint、同Postmaster恢复、准入/连接/工作/DSM/2PC及冻结维护已有模块证据；本批未改PG，不重跑 | [冻结与PG17验收索引](DSGA-冻结基线与封版清单-20261026.md) |
-| 持久意图与执行权 | 原实例/出生/owner、UID/RV WAL、独立领域fence、未知先查/显式原重放；不是开放产品入口 | [原容量取消恢复](DSGA-原容量取消恢复-Mac验收-20261027.md) |
+| 持久意图与执行权 | 原实例/出生/owner、UID/RV WAL、独立领域fence、未知先查/显式原重放；尚非完整产品入口 | [原容量取消恢复](DSGA-原容量取消恢复-Mac验收-20261027.md) |
 | 成功扩缩与Host结清 | 实际Go Agent/Runner/QMP协议、预算/准入组合，Scheduler容量/峰值/Through与防迟到重占、部分GC | [Host实际容量结清](DSGA-Host实际容量结清-Mac验收-20261028.md) |
 | 部分效果取消 | 实际VM已扩/PG未扩、自动实际预算/Cleanup/Finish/Host；自身部分Shrink、旧大VM资格、历史淘汰及后继正常操作组合 | [自动恢复](DSGA-自动实际预算恢复-开发记录-20261028.md)、[部分Shrink组合](DSGA-部分缩容与后继操作-Mac验收-20261028.md) |
 | 完整Prepare生产 | 原可信平台资格驱动Prepare/Outside v2生产及消费，Start/Create/Record丢回复与SDK重建 | [可信Prepare](DSGA-可信Prepare预算生产-Mac验收-20261028.md) |
 | 首次预算与开放 | VM v9永久Initial/WAL、原setter与独立原重放、完整首次到后继Grow、原来源漂移拒绝/恢复 | [首次服务生产](DSGA-首次服务生产与原准入恢复-Mac验收-20261028.md) |
 | 初始Host与零派发取消 | 实际Publisher/Scheduler核原Initial/Runner/Node；历史淘汰保留完整首次预算。该观察分支不退placement或峰值 | [首次Host验收](DSGA-首次Host持续核验与零派发取消-Mac验收-20261028.md) |
+| 首次VM未发送取消与恢复 | 真实原命令不可重发取消后，以原Initial支撑永久实际预算；认证来源寿命、Cleanup丢回复/SDK重建、实际Host结清、后继完整Grow及下一次Shrink Prepare通过 | [本次首次取消闭环](DSGA-首次取消实际预算闭环-Mac验收-20261028.md) |
+| 资源发送未知错误 | 修复出生查询/序列化局部err遮蔽；三类setter准确ClientError及SDK只读恢复，18个受影响GuestReady场景通过 | 同上，错误修复准确提交f5a0e4df |
 
-各模块收据内的顶层/子场景计数只对其采用范围有效，不累加成完整产品E2E。
-Go协议组合使用明确PG/root/平台资格/Kube/QMP夹具；本地PG与Rust模块另有
-真实执行证据。不能把夹具执行的物理动作外推为真实Linux证明。
+各模块收据的顶层/子场景计数只对其采用范围有效，不累加成完整产品E2E。
+Go组合使用明确PG/root/资格/Kube/QMP夹具；本地真实PG与Rust模块另有证据。
+夹具的物理动作不外推真实Linux证明。
 
-## 当前正在收尾的代码与验证
+## 本次实际通过与复用
 
-首次真实VM命令未发送QMP即取消：实际VM512MiB、原目标1GiB，原Initial资格
-必须能继续支撑实际预算。候选实现显式ReconciledCapacity v2/InitialOutside，
-保存完整原初始预算，与旧OutsideRequest互斥；不改原目标、不伪造旧Resize或
-VM命令。完整Cleanup与InitialHeld→CapacityHeld替换同CAS，Host按实际容量结清。
-
-已采用、未受后续测试夹具修正影响的结果：
-
-- budget/budgetclaims/journal/admissionexec定向回归21顶层/107含子记录，0fail/0skip。
-- 旧Grow partial-auto与Shrink restore-prior组合2顶层/4含父记录，0fail/0skip。
-- 受影响六包lint为0 issues，go vet通过；静态检查不算业务测试。
-
-新增完整首次→取消→自动Cleanup/Finish→Host实际结清→后继Grow→下一次
-Shrink Prepare尚无最终采用通过。最后诊断调用已走到后继正常扩容及末尾Prepare，
-在120秒测试总期限到期，日志为build/dsga-initial-cancel-combined-diagnostic2.jsonl。
-此前Guest响应不确定错误被局部err遮蔽的问题已补候选修复，并补准确ClientError
-断言；完整组合仅扩大测试总上限至3分钟，不改生产请求/租约/单轮期限。
-
-新网络组合和上述错误回归因工具自动审批额度限制尚未执行。失败日志不是通过，
-候选代码尚未提交；恢复执行后只跑这些新增/受影响场景，不能跳过后推送冒充完成。
-本地的build目录是执行日志，不是远程已归档证据。
+- 新首次→取消→实际预算→Host结清→后继Grow→下一次Shrink Prepare组合：
+  1项，Mac `-race`135.04秒通过；GuestReady受影响18子场景13.82秒通过。
+  同一包最终2顶层/20条含父记录，0fail/skip；不是20条独立完整E2E。
+- budget/budgetclaims/journal/admissionexec定向回归21顶层/107记录、旧Grow/Shrink
+  两组合2顶层/4记录及永久来源模型26.24秒采用未变行为的准确既有结果，不重跑。
+- 最终四包go vet通过；相对3f039e0a增量lint 0 issues。全量lint55项结果保留，
+  未声称全仓lint清零，也不为历史规范问题重复整套业务测试。
+- 最初离线缓存路径、旧lint工具版本错误及准确ClientError断言失败均保留；
+  修复后最终通过。完整组合仅扩大测试总上限到3分钟，未修改生产请求/租约期限。
+- 本批没有改PG/Rust内核，没有新Linux执行或8产物重编；此前准确产物/原生
+  验证证据按原源码范围复用。源码SHA/用例映射/日志摘要已提交，不仅留在build。
 
 ## 仍须实现或补足组合验证的核心功能
 
 | 顺序 | 工作项 | 当前不能签收的具体边界 |
 |---|---|---|
-| 1 | 首次部分效果取消与Host峰值 | 上述真实VM未发送取消候选待最终验证；Prepare/Host后VM尚未派发且无旧Native命令的恢复仍须独立真实来源，不能伪造命令 |
-| 2 | 来源与异常生命周期 | 缺原来源/资格、Root不一致的受控恢复；Outside/资格/Runner等完整持有与回收；不能靠永久保守持有掩盖泄漏 |
-| 3 | 安全降低normal与活性 | 当前资源执行器明确拒绝降低memory.max；完整后台/私有内存持续上界及安全降限协议仍有代码工作，不能只补成功断言 |
+| 1 | VM尚未派发的首次部分效果取消 | Prepare/Host已有动作、VM仍Planned且无旧Native命令时，仍缺独立真实容量来源；不能伪造VM命令或将保守持有当回收完成 |
+| 2 | 来源与异常生命周期 | 缺原来源/资格、Root不一致的受控恢复；Outside/资格/Runner等完整持有与回收，不能靠永久保守持有掩盖泄漏 |
+| 3 | 安全降低normal与活性 | 当前资源执行器明确拒绝降低memory.max；完整后台/私有内存持续上界及安全降限协议仍有代码工作 |
 | 4 | 启动/接管/跨boot恢复 | 真正VM owner切换的完整组合；无Wait、Start/init失败；跨boot/迁移受控恢复，不能自动改绑原出生 |
 | 5 | 持续控制与入口 | Monitor/自动策略、可信请求/取消/重放生产入口，全部写者与CPU隔离接线，仍须代码及组合 |
-| 6 | PG18与PG16 | PG17核心归档后分别移植与测试。PG18尚缺Neon发行接入，不能仅改PG17版本宏；PG16尚未移植 |
+| 6 | PG18与PG16 | PG17核心Mac候选完整归档后分别移植与测试。PG18缺Neon发行接入且有AIO持有者差异，PG16需单独移植/集成；公共未变Go逻辑复用 |
 
-这些是代码或Mac组合缺口，不能写成仅待Linux验证。独立控制面由另一任务完成后
+这些是代码或Mac组合缺口，不是仅待Linux验证。独立控制面由另一任务完成后
 移植统一产品E2E，本任务不追它的main或提前扩展其SDK。
 
 ## Mac通过后，Linux还必须验证什么
