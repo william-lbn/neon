@@ -4,6 +4,41 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 当前接续点：CPU故障隔离候选已提交，推送尚未执行
+
+AS源码4d8033b298bf88b9e101cabd1a799f2517274af1、本地归档
+c7855907e6cd1e1c5d6f0bc11714a440ba3ef3a3。Running/Scaling已共用原Runner内存
+来源和直接读取Pod；CPU失败写DSGACPUReady=False，保持Scaling并允许正式Status
+写回已确认内存。CPU POST接受后须下一轮GET匹配才Ready，旧无认证PUT未放开；
+可信CPU写通道仍有核心代码缺口。CPU错误回包body关闭并限4KiB，不改内存WAL。
+
+Mac按子树采用4顶层/27记录0最终fail/skip，正式Reconcile和Status写回、真实
+本地HTTP覆盖读错/写错/超量回包、设置后再GET、坏来源零CPU请求及旧来源/
+legacy回归。first新增夹具Create误带resourceVersion失败已修并保留，second
+新增整组2.687秒通过；未重复未变子树。vet0、增量lint0。准确Controller双Linux
+架构ELF均exit0，架构/VCS/摘要已核，未执行；唯一所有者AGENTS导致modified及
+离线缓存权限警告如实归档。详见[验收](DSGA-CPU故障隔离内存状态-Mac验收-20261029.md)
+和[机器收据](DSGA-CPU故障隔离内存状态-Mac收据-20261029.json)。
+
+**远程归档未完成**：自动审批服务额度失败，拒绝执行AS git push，提示北京时间
+05:50后重试；命令未执行，不是代码被判不安全，不绕过审批。AS远程最后核验仍
+b90afa0de50f5001782252a6925b33706ae0cb7d，Neon远程仍
+16d0492a30adc0f91418c6eda6d50b6cd1696cda，发行锁仍采用b90，不能先写成已采用
+c785。所有测试/质量/构建会话均已终态，AS只保留所有者AGENTS未提交，勿重跑。
+
+恢复后首先补推AS原codex/dsga-autoscaling-20261019并核完整SHA；确认包含c785
+后才更新Neon发行锁、把本条候选改为已采用，索引validate/diff、中文commit，再
+推codex/dsga-neon-v3-20261019核远程。PG17三处b078不动。原heartbeat沿用，
+不新建重复目标；额度限制不代表整体完成。上游冻结、独立控制面和镜像/部署/
+main边界保持，随后继续核心代码，PG17完整后PG18→PG16。
+
+
+下一项实际代码需先分析：原GuestReady已写前但Root尚未收到时，启动gate的
+Observe会继续未知，正式PGWorker尚未建立，现有显式replay_resource入口无法
+到达。必须把同原WAL的完整恢复/取消接入启动顺序，不可用NotFound直接当
+NoEffect或清Pending；新owner也不能重发旧epoch。此前已发送/已生效组合不能
+代替这一窗口。可信CPU写通道亦未实现，不能因新增Condition通过就关闭该项。
+
 ## 最新恢复点：Agent原GuestReady启动确认已归档，2026-10-29
 
 平台状态核对：本次get_goal实际返回blocked，与旧记录active不一致；当前按所有者

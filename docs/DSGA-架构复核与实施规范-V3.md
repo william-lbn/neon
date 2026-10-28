@@ -1791,3 +1791,20 @@ PG/VM/预算并再次只读原命令后才Record，启动确认不替代完整�
 改走同Agent gate，setter/QMP各1、PG Resize0。Agent双Linux架构仅编译未执行；
 证据见[验收及剩余边界](DSGA-启动原GuestReady观察-Mac验收-20261029.md)。
 安全降normal、异常关闭及其他核心仍继续，不能以本条宣称PG17整体完成。
+
+
+### 8.59 CPU未确认不得吞掉独立内存状态（2026-10-29，本地候选）
+
+Controller受管Running/Scaling共用同一原Runner内存来源及直接读取的Pod；原
+身份/Node/floor/来源不符仍整体拒绝。内存来源有效而CPU HTTP失败时，保留
+已确认内存的Status写回，CPU专属Condition为False并保持Scaling/1秒对账。
+辅助函数返回nil只表示允许外层提交部分已核状态，不能解释为CPU/预算/Host或
+整个伸缩成功。CPU POST接受目标后仍未确认，下一轮GET匹配才Ready；内存
+pending存在时仍不能Running。此处理不修改操作WAL，也不发公开QMP/内存写。
+
+普通非受管顺序保留；CPU错误回包同样关闭body并限4KiB。可信CPU写通道仍须
+实现，受管Guest旧daemon无认证PUT继续拒绝，不能以本状态隔离宣称CPU自动
+伸缩完成。准确AS4d8033b2、本地归档c7855907，Mac采用4顶层/27记录0最终
+fail/skip，Controller双Linux架构仅编译未执行。AS推送被自动审批额度阻止，
+本条未作为Neon发行锁采用；恢复后依赖先推并核SHA，再更新本仓引用。
+证据与仍缺业务见[验收](DSGA-CPU故障隔离内存状态-Mac验收-20261029.md)。
