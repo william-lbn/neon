@@ -1320,6 +1320,29 @@ Mac采用52顶层/151含子场景去重通过记录。全journal调用的单个�
 结清、完整Agent部分效果故障/再操作仍须代码。Host旧读者拒绝不能被绕过，
 本批不等于完整部分取消或核心封版。详见[永久实际预算阶段验收](DSGA-永久实际预算与原准入恢复-Mac验收-20261028.md)。
 
+### 8.44 Host按实际容量结清及Scheduler读取（2026-10-28）
+
+AS代码`f2a96d0216edf6ce9520c70107b417a360ad8d4c`接通VM v8实际预算的
+Host消费。Node v7显式保存实际VM bytes，原Request不改；只接受原计划的
+before/target。缩容取消后VM仍大时按实际大容量记账。Publisher严格核独立
+实际关闭合同、原Outside/Host/Pod/Node、Runner当前事实，再执行Node UID/RV
+CAS及重读。当前来源、未来峰值和Through约束保留，未知不清账。
+
+Scheduler当前容量恢复/Reserve及Runner当前读者接入CapacityHeld；后者
+不将原域cancelled_before_send改称Completed。普通旧JSON保持空字段省略，
+旧Node v6完整源码接受v6/拒绝实际v7；PG17 ABI、Runner v2和VM v8保持。
+
+Mac采用39顶层/128含子场景通过记录；六包lint/vet、四CLI双架构8个Linux
+ELF编译通过。初次旧future-version及新Scheduler名称夹具失败已保留并
+定向修正；原失败全调用不记成功。实际Agent/Runner→typed Record/Finish→
+Publisher→Scheduler组合通过，但Cleanup审计仍人工组装，自动实际取消执行器
+尚待接线。平台资格/PG/Root/Kube/QMP对端为显式夹具，不证明真实物理效果。
+详见[阶段验收及缺口](DSGA-Host实际容量结清-Mac验收-20261028.md)。
+
+本段更新8.42/8.43时点中Host尚未接线的状态。仍缺自动部分效果恢复、完整
+来源生命周期、可信Prepare/首次预算、异常生命周期及持续策略，不能封版；
+Linux/K8s/KVM/cgroup/HugeTLB/存储性能长稳后验。不构建镜像或部署，不合main。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
