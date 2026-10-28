@@ -1343,6 +1343,32 @@ Publisher→Scheduler组合通过，但Cleanup审计仍人工组装，自动实�
 来源生命周期、可信Prepare/首次预算、异常生命周期及持续策略，不能封版；
 Linux/K8s/KVM/cgroup/HugeTLB/存储性能长稳后验。不构建镜像或部署，不合main。
 
+### 8.45 已持有来源下的实际预算自动取消恢复（2026-10-28）
+
+AS源码`c8cc47a710c1c7fb00444fb574fada1e74a77602`接入自动Cleanup，原
+Prepare/效果必须已知，原Finalize/Resume未派发。由当前PG稳定代次/成本、
+Root完整持久约束/出生、原生VM终态及原Outside/Host构造实际预算，源对象
+不缺失、不换UID，资格准确覆盖实际VM。新命令与旧命令复核分开，已有
+Cleanup不重算；Start/发送/Record/Finish间重读并由原VM UID/RV线性化。
+
+已开放服务采用只读恢复；自身仍有效的原Quiesce可恢复，更高/外部关闭须
+受信策略独立选择。Owner新增CapacityAdmissionRecovery通道，不由超时投递。
+Start未知不发setter，已发未知先查询，显式原重放限原派发者；接管只读。
+永久头与原Record同CAS，Finish保留业务取消，PG/Guest/VM不自动反向操作。
+
+Mac实际Agent/Runner VM已扩/PG未扩的自动Cleanup→永久头→Finish→Host/
+Scheduler组合通过；独立服务选择和Start/setter前后/Record丢回复及SDK重建
+串联通过。6顶层/27含子场景为去重采用结果，不把原失败父调用记成功。
+三包lint/vet、准确四CLI双架构8个Linux ELF只编译通过；VM v8/Node v7/
+Runner v2不再升级，PG17 ABI不变。原DSM/压缩账本注入夹具错误已定向修正。
+
+PG/Root/资格/Kube/QMP对端仍为显式夹具，SDK重建不是实际换主。实际PG/
+Guest部分效果、原Shrink关闭、换主/历史/后继操作组合还要继续；缺原Host/
+实际大VM资格或Root不一致时的生产恢复、可信Prepare/首次服务及其余生命周期/
+策略仍需代码闭环。详见[阶段验收和准确来源](DSGA-自动实际预算恢复-开发记录-20261028.md)。
+本段更新8.42–8.44中的“自动执行器尚未接线”时点，不能扩大为全部取消或
+整体核心封版。Linux真实平台、物理/存储/性能仍后验，控制面后续独立移植。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
