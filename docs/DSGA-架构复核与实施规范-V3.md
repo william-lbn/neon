@@ -1475,6 +1475,21 @@ UID/RV票据才发送。普通未知先查原Status，来源缺失不掩盖原�
 初始取消/当前Host消费与生命周期、安全降normal及其他既有缺口继续有代码。
 详见[首次服务验收](DSGA-首次服务生产与原准入恢复-Mac验收-20261028.md)及收据。
 
+### 8.51 初始Host持续核验、零派发取消与历史寿命（2026-10-28）
+
+代码`1e7826557b79592f4dac853913e404f7f9054f25`接通Scheduler对无Active
+InitialHeld的观察，由Publisher核原资格/Pod/Node/Runner出生及实际容量、当前
+owner和两端重读。没有原Resize/Host CM时不伪造Settlement；本分支不降容量、
+不清峰值或来源。PG/root持续认证仍归Agent，Host观察不替代完整服务许可。
+
+新首次→Host→零派发取消→实际Scheduler4.06秒，初始预算在历史上限后仍持有的
+Model/codec5.65秒；相邻实际容量Host/普通Scheduler-GC及两项既有分配验证通过，
+共6顶层/8含父记录、0skip，四包lint/vet与8个准确Linux ELF仅编译通过。
+旧fake LIST补节点字段过滤、单个真实ticker/GC组合45秒外层测试期限的原因和
+失败记录单列，业务期限及生产校验不变。初始部分效果取消/峰值结清/来源回收
+仍须代码，VM仍v9/Node v7；不能据此签收整体或Linux。见
+[阶段验收](DSGA-首次Host持续核验与零派发取消-Mac验收-20261028.md)及收据。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
