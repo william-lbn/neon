@@ -1369,6 +1369,28 @@ Guest部分效果、原Shrink关闭、换主/历史/后继操作组合还要继�
 本段更新8.42–8.44中的“自动执行器尚未接线”时点，不能扩大为全部取消或
 整体核心封版。Linux真实平台、物理/存储/性能仍后验，控制面后续独立移植。
 
+### 8.46 部分Shrink取消、历史与后继正常操作组合（2026-10-28）
+
+AS测试`eb8a89ac1014663e0947488905bf9d2c359dc2e4`新增一条多请求组合：
+真实Grow成功预算→新Shrink的Quiesce/PG/Guest生产执行器→VM未发送取消→
+自身准入恢复→历史淘汰/零派发取消→Host结清→后继正常Grow。PG代次经过
+1→2→3→3→4，实际VM在取消时保持2GiB、原目标仍1GiB。当前实际预算保留
+旧2GiB Outside资格，不借小目标资格，也不按取消目标退还Host容量。
+
+同名新UID资格和Root限额漂移在Cleanup前被拒绝。历史受真实annotation
+预算淘汰后，永久实际头/原生来源/旧资格仍可结清，Through前进；后继正常
+预算按准确PG代次原子替换实际头。normal memory.max保持512MiB不降低。
+
+Mac -race单组合131.91秒通过，1场景+父记录2条pass；Owner增量lint/vet
+通过。首轮新status夹具误读Query，修正后通过；生产检查没有放宽。仅3个
+测试文件变化，运行时仍c8cc47a7，复用原8个Linux编译证据，不重复未改测试/
+编译，不冒充当前测试提交产物。详见[组合验收](DSGA-部分缩容与后继操作-Mac验收-20261028.md)。
+
+PG/Provider/Root/资格/Kube/QMP对端仍为明确领域/协议夹具，未认证真实
+物理内核。该组合更新8.45中自身Shrink、部分PG/Guest/历史/后继操作未验
+状态；实际换主/其他异常、缺来源生产恢复、可信Prepare/首次服务、异常
+生命周期/持续策略和安全降normal仍须闭合，不能宣布整个核心完成。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
