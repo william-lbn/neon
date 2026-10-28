@@ -1391,6 +1391,33 @@ PG/Provider/Root/资格/Kube/QMP对端仍为明确领域/协议夹具，未认�
 状态；实际换主/其他异常、缺来源生产恢复、可信Prepare/首次服务、异常
 生命周期/持续策略和安全降normal仍须闭合，不能宣布整个核心完成。
 
+### 8.47 可信Prepare/Outside生产与原资格寿命（2026-10-28）
+
+AS源码`da291ce8f8549f5c225a3b6b00ce2efbf6dcd9ec`接入实际`prepareexec`。
+可信Agent配置按VM UID固定原平台资格CM的UID及完整原始内容摘要；资格由
+独立签发者在目标平台取得，绑定Guest/root bootstrap、Runner出生/Pod/Node
+和确切VM规格，不从请求、RSS或更小VM结果外推。实际生产者验证原PG成本/
+floor、root持有/出生和Runner实际容量后，先同VM UID/RV持久完整原命令，
+后创建受保护immutable Outside v2，再将服务端原UID记入Prepared Completed。
+Prepare仅保留目标承诺，不提前调整Guest、PG、QMP、准入或Host。
+
+Start丢回复没有票据不得Create；Create/Record未知普通轮询只GET原对象，
+404不当NoEffect或自动重建。显式`ReplayPrepareOriginal`/独立通道仅选择原
+Key，原派发者仍持Session才可原样创建。Host、Finalize、永久预算及取消重整
+均传递重读原资格寿命/UID/内容和Pod/Node，不能只有Prepare的一次性认证。
+历史v1保留原严格读取，新生产者只生成v2，旧严格JSON读者拒绝新增字段。
+
+23顶层/117含子场景pass为本阶段采用结果；其中新增组合1场景及父记录2条，
+20.21秒，串联三阶段丢回复、原重放、SDK重建、完整Grow/Host结清、资格漂移
+和后继Shrink Prepare。五包lint/vet及8个准确Linux ELF仅编译；PG/root/
+资格/Kube/QEMU仍为明确夹具，不是完整Agent外层策略或Linux物理E2E。
+
+本段更新此前“缺可信Prepare实际生产”的时点记录，不等于首次完整预算、
+安全降normal、换主/缺源/启动/跨boot生命周期、Monitor/自动策略及全部写者
+已完成。资格实际数值/报告及K8s权限须目标环境提供和验证，Mac不能签发认证。
+安全降normal继续明确拒绝，默认关闭，不部署、不合main。详见
+[阶段验收及边界](DSGA-可信Prepare预算生产-Mac验收-20261028.md)。
+
 ## 9. 请求、权限、幂等与观测接口
 
 请求至少绑定 `(VM UID, Compute 实例身份, PG boot ID, issuer epoch, Revision, operation ID)`，并携带预期 capacity generation、目标 PG Buffer 数、目标 VM bytes、目标预算承诺标识和期限。预算承诺是外部约束的引用，不能由普通 SQL 调用者自行填个数字就获得资源。
