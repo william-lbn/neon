@@ -1,0 +1,13 @@
+{
+  "autoscaling_commit": "3c4e12b9ea695a31e0894ea908be63d5c609b4fa",
+  "remote_ref_verified": true,
+  "ci_tests": {
+    "total": 218,
+    "pass": 13,
+    "skip": 205,
+    "fail": 0,
+    "log_sha256": "a7014ea2710acb680b565e2c8feff794c56623e8593b80c9e3e7ee0affd348e7"
+  },
+  "pg17_unchanged": "325aeb42a6080d86902d51892b2518a70ec2512b",
+  "freeze_ancestry_checks": "Neon fa504217, PG17 15f57b68 + 56692dfb, AS a4bce09e all ancestor exit0"
+}

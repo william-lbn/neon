@@ -4,6 +4,15 @@
 本文件为接续入口，旧过程详见模块/TAP记录。恢复先检查Git、GitHub和真实进程，
 不能重复已有构建或apply stash；未完成全部业务前不得标记Goal complete。
 
+## 最新验证：最终开放尚未发送的异常关闭已完成Mac阶段
+
+AS `3c4e12b9ea695a31e0894ea908be63d5c609b4fa`已推当前自有功能分支并核完整远程SHA，本仓发行锁准确采用。完整Finalize及资源前驱Completed后、Resume仍为空Planned时，先前准入也可能继续开放；现复核完整生产来源，异常后先原生fence，再UID/RV写前CAS执行独立真实关闭。Journal v14以完整Active摘要保留未发送步骤及预算，不补造原开放、Finish、释放或缩VM。来源恢复/SDK重建/更高owner接续均保持原关闭。
+
+Mac -race Journal 21顶层137记录通过，新v14占4顶层22记录；四生产恢复模式按子树去重1顶层5记录通过，含两种丢回复及真实Lease失效。已发送开放两模式、完整正常结案含嵌套检查通过；三包vet/增量lint0，消费者仅编译。原代码overlay真实失败、沙箱监听失败和强化接管测试误用旧Root worker的失败均保留，修测试后只复测接管通过。精确采用、摘要和环境边界见[阶段验收](DSGA-未发送最终开放异常关闭-Mac验收-20261029.md)及[机器收据](DSGA-未发送最终开放异常关闭-Mac收据-20261029.json)。PG17 gitlink/两份锁仍准确325a，冻结祖先检查通过；Neon CI 218项中13通过/205环境skip，不把skip记为业务通过。
+
+这只关闭最终Planned稳定边界的代码缺口。Finalize前其他在途、坏缺日志关闭、受控重开/重复生命周期、normal/私有后台持续上界与活性、其他出生/无Wait/分区/跨boot迁移、Monitor/WSS/配额/RW-RO及可信CPU/全部写者仍须代码。Linux/K8s/KVM/NeonVM/HugeTLB/物理与性能后验，本批PG/Rust未改且没有新Linux执行或ELF编译。整体仍未完成，Goal active；PG17全面实现、Mac验证及远程归档后才暂停，不自动进入18/16，不改独立控制面、不建镜像/部署/合main。
+
+
 ## 最新验证：最终开放异常关闭已通过Mac阶段（2026-10-29）
 
 新增v13保护完整Finalize已永久持有、前驱均Completed且最终Resume已Start的
