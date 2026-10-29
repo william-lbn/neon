@@ -1,0 +1,3916 @@
+{
+  "schema": 1,
+  "date": "2026-10-30",
+  "scope": "R2关联缺陷：更高owner独立预算结算后两类取消的epoch校验；R2类别16～18及R3～R8仍未完成",
+  "autoscaling_parent": "6578fa4d2d6a2cc9f51bc88220a4321e1fe38afd",
+  "pg17_sha": "79367196a74eef82e67cac917877d2e6271d3e70",
+  "execution": {
+    "platform": "darwin/arm64",
+    "go": "/Users/williamlee/go/bin/go",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOCACHE": "/Users/williamlee/github/neon-self-dev/build/go-cache",
+    "network": "所有者已授权本机TLS/HTTP/Unix socket测试",
+    "adoption": "只采用列出的整包完成结果；中断批次仅采用五个独立完整包，journal定向整包另验。按package/test去重。"
+  },
+  "logs": [
+    {
+      "path": "build/dsga-abort-settlement-regression.jsonl",
+      "sha256": "ec3c5f6cf934f16b4ce2ba18c7c630570df13efda606da778aa030e7b188fa70",
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-mod=readonly",
+        "-count=1",
+        "-json",
+        "./pkg/dsga/budget",
+        "./pkg/dsga/journal",
+        "./pkg/dsga/admissionexec",
+        "./pkg/dsga/budgetclaims",
+        "./pkg/dsga/hostguard",
+        "./pkg/dsga/vmguard"
+      ],
+      "adopted_packages": [
+        "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+        "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+        "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+        "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+        "github.com/neondatabase/autoscaling/pkg/dsga/vmguard"
+      ],
+      "complete_package_passes": [
+        {
+          "Time": "2026-10-30T05:19:15.080552+08:00",
+          "Action": "pass",
+          "Package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+          "Elapsed": 1.733
+        },
+        {
+          "Time": "2026-10-30T05:19:15.630046+08:00",
+          "Action": "pass",
+          "Package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+          "Elapsed": 2.289
+        },
+        {
+          "Time": "2026-10-30T05:19:16.927421+08:00",
+          "Action": "pass",
+          "Package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+          "Elapsed": 5.308
+        },
+        {
+          "Time": "2026-10-30T05:19:39.054594+08:00",
+          "Action": "pass",
+          "Package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+          "Elapsed": 25.707
+        },
+        {
+          "Time": "2026-10-30T05:19:57.35939+08:00",
+          "Action": "pass",
+          "Package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+          "Elapsed": 44.012
+        }
+      ],
+      "excluded": "journal未变大矩阵主动SIGTERM，不采用该包；改用journal-final整包定向结果"
+    },
+    {
+      "path": "build/dsga-abort-settlement-journal-final.jsonl",
+      "sha256": "b2d91801ed269398229c1039342102cf6df2b1cfc1d826bd233ae58425ef409e",
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-mod=readonly",
+        "-count=1",
+        "-timeout=6m",
+        "-json",
+        "./pkg/dsga/journal",
+        "-run",
+        "^(TestCommittedAbort|TestUnchangedAbort|TestCleanupServiceClosure|TestStoreCleanupServiceClosure)"
+      ],
+      "adopted_packages": [
+        "github.com/neondatabase/autoscaling/pkg/dsga/journal"
+      ],
+      "complete_package_passes": [
+        {
+          "Time": "2026-10-30T05:26:28.993003+08:00",
+          "Action": "pass",
+          "Package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+          "Elapsed": 105.126
+        }
+      ],
+      "excluded": null
+    },
+    {
+      "path": "build/dsga-abort-settlement-owner-regression.jsonl",
+      "sha256": "ea35e874730d8acea6739ba357c3bbe90b4933f0f7cddf49eaf91b81f91c0b75",
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-mod=readonly",
+        "-count=1",
+        "-json",
+        "./pkg/dsga/owner",
+        "-run",
+        "^TestProductionAgentRunnerShrinkRechecksGateAndOriginalObserve$/(abort-committed|restore-prior|restore-prior-replies)$"
+      ],
+      "adopted_packages": [
+        "github.com/neondatabase/autoscaling/pkg/dsga/owner"
+      ],
+      "complete_package_passes": [
+        {
+          "Time": "2026-10-30T05:22:05.36771+08:00",
+          "Action": "pass",
+          "Package": "github.com/neondatabase/autoscaling/pkg/dsga/owner",
+          "Elapsed": 64.134
+        }
+      ],
+      "excluded": null
+    },
+    {
+      "path": "build/dsga-abort-settlement-production-final.jsonl",
+      "sha256": "7884c597d7a5e2c384ee17f072e8da7fd99a67134840e4dff6bcd4b604ae817f",
+      "argv": [
+        "go",
+        "test",
+        "-race",
+        "-mod=readonly",
+        "-count=1",
+        "-json",
+        "./pkg/dsga/owner",
+        "-run",
+        "^TestProductionRecoveredBudgetThenUnchangedCancel$"
+      ],
+      "adopted_packages": [
+        "github.com/neondatabase/autoscaling/pkg/dsga/owner"
+      ],
+      "complete_package_passes": [
+        {
+          "Time": "2026-10-30T05:26:49.6195+08:00",
+          "Action": "pass",
+          "Package": "github.com/neondatabase/autoscaling/pkg/dsga/owner",
+          "Elapsed": 125.712
+        }
+      ],
+      "excluded": null
+    }
+  ],
+  "records": [
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/committed/future-settlement",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/committed/before-issuer",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/committed/wrong-floor",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/committed/missing-settlement",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/committed",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-readonly/future-settlement",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-readonly/before-issuer",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-readonly/wrong-floor",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-readonly/missing-settlement",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-readonly",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-reopen/future-settlement",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-reopen/before-issuer",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-reopen/wrong-floor",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-reopen/missing-settlement",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch/unchanged-reopen",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortCommandsRespectIndependentSettlementEpoch",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/committed/original-response",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/committed/takeover-query",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/committed",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/unchanged-readonly/original-response",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/unchanged-readonly/takeover-query",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/unchanged-readonly",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/unchanged-reopen/original-response",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/unchanged-reopen/takeover-query",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover/unchanged-reopen",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestAbortReceiptsKeepOriginalSettlementAcrossReadbackTakeover",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortWireRequiresCompleteOriginalAndStrictFields",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch/target",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch/hash",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch/budget",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch/generation",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch/closed",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch/old-epoch",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch/new-epoch",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch/readonly-new-setter",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestCommittedAbortCommandRejectsChangedContextOrReboundEpoch",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/version",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/missing-sources",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/uppercase-digest",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/short-digest",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/different-vm",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/unenforced-aggregate",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/missing-host-uid",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/incomplete-pg",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/missing-protocol_version",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/missing-finalized",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/missing-prepared_sha256",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/missing-guest_sha256",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources/missing-vm_sha256",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizationCommandPreservesOriginalWireAndRejectsPartialSources",
+      "elapsed_seconds": 0.21,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizedBudgetRequiresFullBindingsAndDistinctEnforcedBounds/independent-settlement-owner",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestFinalizedBudgetRequiresFullBindingsAndDistinctEnforcedBounds",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/not-found",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/different-budget",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/different-root-floor",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/different-vm",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/insufficient-guest",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/new-pg-generation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/not-a-query",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/expired",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt/different-observation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialAdmissionRequiresCompleteOriginalNativeReceipt",
+      "elapsed_seconds": 0.18,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetContainsStartupAndOutsideWithoutSyntheticResize",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/already-open",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/unstable-prefix",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/stale-floor",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/guest-too-small",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/outside-duplicate",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/outside-is-rss",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/host-too-small",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/missing-qualification",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/not-first-generation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/external-gate-revision",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/unknown-allocation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/outside-missing",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/host-overflow",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments/vm-permit",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestInitialBudgetRejectsRestartGrowthUnknownAndIncompleteCommitments",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/legacy-protocol",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/missing-boot",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/missing-initial",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/mixed-native",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/wrong-instance",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/wrong-birth",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/wrong-identity",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/wrong-memory",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire/missing-state",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialVMUsesExclusiveBootSourceAndStrictWire",
+      "elapsed_seconds": 0.33,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside/unknown_tail",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside/old_generation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside/permit",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside/underquoted",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside/overlapping",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside/observed_outside",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside/outside_mismatch",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside/guest_overcommitted",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestPreparedGrowBudgetUsesRetainedPrefixesAndCompleteOutside",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/overflow",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/no-held-lifetime",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/legacy-pids",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/system-not-covered",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/sum-mismatch",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/repeated-size",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/unknown-bootstrap",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/legacy-system",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets/usable-exceeded",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestQualificationRejectsUnqualifiedOrUnderfundedTargets",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestOutsideV2RequiresExactRetainedQualification",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/valid",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/wrong-uid",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/changed-body",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/releasing",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/mutable",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/unprotected",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/missing",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/wrong-pod",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift/wrong-node",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budgetclaims",
+      "test": "TestOutsideQualificationReaderRejectsReplacementAndLifetimeDrift",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/applied",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/queried-after-takeover",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/generic-completed",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancelBeforeSendSealsOriginalAndRejectsLateReplay/unseen",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestContinuousQuiesceKeepsRetainedCostsAndRejectsUnprovedLowerLimit",
+      "elapsed_seconds": 0.16,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/old-format",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/different-command",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancelBeforeSendSealsOriginalAndRejectsLateReplay/prepared",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsidePreservesOriginalWithoutSyntheticRequest",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/wrong-root-bound",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/missing-floor",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancelBeforeSendSealsOriginalAndRejectsLateReplay/not-sent",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/legacy-protocol",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/missing-initial",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/different-floor",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/mixed-outside",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/VM-drift",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/Guest-too-small",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/unconfirmed",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancelBeforeSendSealsOriginalAndRejectsLateReplay/takeover",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/changed-root",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/different-birth",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/pending-fence",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/changed-generation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal/invented-before",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancelBeforeSendSealsOriginalAndRejectsLateReplay/expired",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledInitialOutsideRejectsProjectionAndChangedOriginal",
+      "elapsed_seconds": 0.17,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/new-generation",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/unknown-field",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/VM-grown-PG-unchanged/VM-drift",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/missing-query",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/VM-grown-PG-unchanged/new-generation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancelBeforeSendSealsOriginalAndRejectsLateReplay/noop",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancelBeforeSendSealsOriginalAndRejectsLateReplay",
+      "elapsed_seconds": 0.38,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/VM-grown-PG-unchanged/new-PG-operation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/null-query",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/VM-grown-PG-unchanged/unknown-allocation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer/duplicate-query",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/VM-grown-PG-unchanged/floor",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/VM-grown-PG-unchanged",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestCompletionAuditRequiresOriginalCommandBudgetAndIssuer",
+      "elapsed_seconds": 0.48,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledEligibilityNeverCrossesAnyOriginalUnknownOrFinalization/prepare_budget",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledEligibilityNeverCrossesAnyOriginalUnknownOrFinalization/reserve_host",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledEligibilityNeverCrossesAnyOriginalUnknownOrFinalization/resize_vm",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledEligibilityNeverCrossesAnyOriginalUnknownOrFinalization/guest_ready",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledEligibilityNeverCrossesAnyOriginalUnknownOrFinalization/resize_pg",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledEligibilityNeverCrossesAnyOriginalUnknownOrFinalization/finalize_budget",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledEligibilityNeverCrossesAnyOriginalUnknownOrFinalization/resume_admission",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledEligibilityNeverCrossesAnyOriginalUnknownOrFinalization",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationCannotEraseMayHaveSentOrCompleted",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/PG-shrunk-VM-cancelled/VM-drift",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledOutsideSelectsExactActualVMAndRetainsOriginalReference",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/PG-shrunk-VM-cancelled/new-generation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationRechecksAuthorityBeforeDurableClosure/removed",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledOpeningRequiresServiceSelectionAndUsesActualGeneration",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/PG-shrunk-VM-cancelled/new-PG-operation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationRechecksAuthorityBeforeDurableClosure/new-owner",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/PG-shrunk-VM-cancelled/unknown-allocation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/PG-shrunk-VM-cancelled/floor",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget/PG-shrunk-VM-cancelled",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRetainsActualCapacityInsteadOfOriginalTarget",
+      "elapsed_seconds": 0.2,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationRechecksAuthorityBeforeDurableClosure/old-sequence",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledOwnQuiesceDoesNotOverrideNewerOrChangedClosure/newer-close",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledOwnQuiesceDoesNotOverrideNewerOrChangedClosure/changed-budget",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledOwnQuiesceDoesNotOverrideNewerOrChangedClosure/changed-root",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/small-VM-outside",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledOwnQuiesceDoesNotOverrideNewerOrChangedClosure/unconfirmed",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledOwnQuiesceDoesNotOverrideNewerOrChangedClosure/wrong-target",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/admissionexec",
+      "test": "TestReconciledOwnQuiesceDoesNotOverrideNewerOrChangedClosure",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationRechecksAuthorityBeforeDurableClosure/source-error",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/short-Host-peak",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationRechecksAuthorityBeforeDurableClosure/actual-drift",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationRechecksAuthorityBeforeDurableClosure",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/unknown-array",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/partial-Root",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/different-birth",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/overflow",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/same-source",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/oversized-PG",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/wrong-generation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/prepare-direction",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/PG-prefix-without-generation",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/future-VM",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationWaitsForOriginalSendingFileLock",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs/future-outside",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledBudgetRejectsUnqualifiedOrIncompleteInputs",
+      "elapsed_seconds": 0.2,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledAggregateDoesNotChargeHugePoolToNormalAgain",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationV2RejectsMalformedWitnessAndPreservesVersion/old-record-version",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationV2RejectsMalformedWitnessAndPreservesVersion/missing-witness",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationV2RejectsMalformedWitnessAndPreservesVersion/possible-send",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationV2RejectsMalformedWitnessAndPreservesVersion/wrong-actual",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationV2RejectsMalformedWitnessAndPreservesVersion/wrong-owner",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationV2RejectsMalformedWitnessAndPreservesVersion/empty-sequence",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationV2RejectsMalformedWitnessAndPreservesVersion/ordinary-kind",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerCancellationV2RejectsMalformedWitnessAndPreservesVersion",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostActualCapacitySettlementRetainsCancelledShrinkBefore",
+      "elapsed_seconds": 1.21,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCapacityReaderKeepsCompletedAndUnsentCancelledDistinct/grow-completed",
+      "elapsed_seconds": 0.46,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestReconciledAbortRequiresOriginalActualBudgetAndStrictWire",
+      "elapsed_seconds": 0.59,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestRootAggregateUsesConfirmedDomainOnceAndNeverPromotesOutside",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestRootAggregateKeepsOriginalHeldReferenceAcrossUnknownAndReplacement",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestRootAggregateRejectsPartialKernelOrUnboundSourceAndStrictTampering",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestRootAggregateFiniteTasksBindSourceWithoutAddingBytes",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestRootAggregateAddressSpaceBindsBirthWithoutAddingOrSubtractingBytes",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSettlementClaimsKeepLifetimeIdentityAndHostOverhead/overflow",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSettlementClaimsKeepLifetimeIdentityAndHostOverhead/new-runner",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSettlementClaimsKeepLifetimeIdentityAndHostOverhead/release-on-expiry",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSettlementClaimsKeepLifetimeIdentityAndHostOverhead/no-overhead",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSettlementClaimsKeepLifetimeIdentityAndHostOverhead/guest-only",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSettlementClaimsKeepLifetimeIdentityAndHostOverhead",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSettlementStrictSourcesPreserveLegacyAndRejectPartialClaims",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSystemChargedUsesOwnDomainOnceAndSurvivesPGResourceChange",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestSystemChargedRejectsUnknownPlacementDriftAndScopeTampering",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/read-only/new-target-budget",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/read-only/same-key",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/read-only/different-source",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/read-only/closed-gate",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/read-only/new-pg-generation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/read-only/different-epoch",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/read-only/invented-mutation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/read-only",
+      "elapsed_seconds": 0.18,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/reopen/new-target-budget",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/reopen/same-key",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/reopen/different-source",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/reopen/closed-gate",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/reopen/new-pg-generation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/reopen/different-epoch",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/reopen/invented-mutation",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources/reopen",
+      "elapsed_seconds": 0.25,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/budget",
+      "test": "TestUnchangedAbortRequiresOldBudgetAndOriginalCancellationSources",
+      "elapsed_seconds": 0.43,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCapacityReaderKeepsCompletedAndUnsentCancelledDistinct/shrink-cancelled",
+      "elapsed_seconds": 0.66,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCapacityReaderKeepsCompletedAndUnsentCancelledDistinct/may-have-sent",
+      "elapsed_seconds": 0.28,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCapacityReaderKeepsCompletedAndUnsentCancelledDistinct",
+      "elapsed_seconds": 1.4,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthProcessHelper",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/legacy-intent",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/missing-owner",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/wrong-owner",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/wrong-pod",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/wrong-node",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/intent-symlink",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/launch-present",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/bad-state",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/advanced-state",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/state-replaced",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/binding-replaced",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/state-checkpoint-missing",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/state-checkpoint-symlink",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence/sources-checkpoint-bad",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRejectsChangedSelectionAndExecutionEvidence",
+      "elapsed_seconds": 1.6,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthClosureSerializesAgainstReturnedRunnerStart",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthLegacySealedFailureKeepsOriginalClosure",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostActualCapacityCannotRegressOrLoseUnknownSettlement",
+      "elapsed_seconds": 2.8,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRecoversOnlyOriginalNoStartAndBlocksLateStart/before-state-create",
+      "elapsed_seconds": 0.16,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRecoversOnlyOriginalNoStartAndBlocksLateStart/state-create-unknown",
+      "elapsed_seconds": 0.16,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialHostSettlementRequiresV8AndPreservesComparableSource",
+      "elapsed_seconds": 0.42,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/same-key-target",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/same-key-deadline",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/older-key",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/same-slot-new-operation",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/same-pod-new-pg",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/vm-name-alias",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/incarnation-alias",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/zero-overhead",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/overflow",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow/bad-direction",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRecoversOnlyOriginalNoStartAndBlocksLateStart/after-state-checkpoint",
+      "elapsed_seconds": 0.15,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRecoversOnlyOriginalNoStartAndBlocksLateStart/binding-create-unknown",
+      "elapsed_seconds": 0.16,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRecoversOnlyOriginalNoStartAndBlocksLateStart/before-returned-runner-start",
+      "elapsed_seconds": 0.18,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestCrashedBirthRecoversOnlyOriginalNoStartAndBlocksLateStart",
+      "elapsed_seconds": 0.81,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerOriginalExecutionDurabilityAndNoop/noop=false",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerOriginalExecutionDurabilityAndNoop/noop=true",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerOriginalExecutionDurabilityAndNoop",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerLostReplyRetainsOriginalAcrossTakeover",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/original-replay",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/target",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/nonce",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/host",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/journal",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/owner",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/baseline",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/expired",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/same-replay",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/receipt-uid",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay/unpublished",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerPreparedCrashNeedsExplicitUnchangedReplay",
+      "elapsed_seconds": 0.72,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerReplayCannotCycleOldSelectionAfterAnotherNotSent",
+      "elapsed_seconds": 0.15,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerSecondAuthorityCheckAndDefinitePrewriteFailure/authority-changes-after-prepare",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerSecondAuthorityCheckAndDefinitePrewriteFailure/native-proof-before-qom-set",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerSecondAuthorityCheckAndDefinitePrewriteFailure",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerExclusiveLockCoversNativeWriteAndFloor",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerRejectsLostOrReplacedStateAndExhaustion/missing",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerRejectsLostOrReplacedStateAndExhaustion/symlink-file",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerRejectsLostOrReplacedStateAndExhaustion/symlink-dir",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerRejectsLostOrReplacedStateAndExhaustion/permissions",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerRejectsLostOrReplacedStateAndExhaustion/new-runner",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerRejectsLostOrReplacedStateAndExhaustion/new-node",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerRejectsLostOrReplacedStateAndExhaustion/sequence-exhausted",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerRejectsLostOrReplacedStateAndExhaustion",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/command-hash",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/journal-hash",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/nonce",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/before",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/identity",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/owner",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/hwm",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/stage",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/unknown-field",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/duplicate-field",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/missing-field",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields/null-field",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerStrictRecordRejectsChangedOriginalAndDuplicateFields",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthSealsOriginalNonceAndPublishesOnlyNoStart/state-create",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthSealsOriginalNonceAndPublishesOnlyNoStart/state-readback",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthSealsOriginalNonceAndPublishesOnlyNoStart/binding-create",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthSealsOriginalNonceAndPublishesOnlyNoStart/binding-readback",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthSealsOriginalNonceAndPublishesOnlyNoStart",
+      "elapsed_seconds": 0.39,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthRetainsStateCheckpointAcrossRepeatedBindingFailure/original",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthRetainsStateCheckpointAcrossRepeatedBindingFailure/replaced",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthRetainsStateCheckpointAcrossRepeatedBindingFailure/deleted",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthRetainsStateCheckpointAcrossRepeatedBindingFailure",
+      "elapsed_seconds": 0.18,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthRejectsReplacedConfirmedSourceAndUnknownLocalExecution/confirmed-state-replaced",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthRejectsReplacedConfirmedSourceAndUnknownLocalExecution/launch-exists",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthRejectsReplacedConfirmedSourceAndUnknownLocalExecution/malformed-state",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestFailedBirthRejectsReplacedConfirmedSourceAndUnknownLocalExecution",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerFailedStartClosesOriginalBirthWithoutInventingWait/missing-executable",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerFailedStartClosesOriginalBirthWithoutInventingWait/not-executable",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerFailedStartClosesOriginalBirthWithoutInventingWait/invalid-format",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerFailedStartClosesOriginalBirthWithoutInventingWait/cancelled-command",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerFailedStartClosesOriginalBirthWithoutInventingWait/lost-publish-reply",
+      "elapsed_seconds": 0.18,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerFailedStartClosesOriginalBirthWithoutInventingWait",
+      "elapsed_seconds": 0.51,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerLaunchPersistenceFailureNeverStartsOrPublishesNoStart",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerWaitChildHelper",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessWaitClosesOriginalWAL/success",
+      "elapsed_seconds": 1.18,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessWaitClosesOriginalWAL/error",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessWaitClosesOriginalWAL/signal",
+      "elapsed_seconds": 0.18,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessWaitClosesOriginalWAL",
+      "elapsed_seconds": 1.51,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/uuid",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/monitor",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/duplicate",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/powerdown-duplicate",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/powerdown-options",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/daemon",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/migration",
+      "elapsed_seconds": 0.15,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/program",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerStrictSourcesAndBoundNeverEvictHeldMemory",
+      "elapsed_seconds": 5.53,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestCompletePlacementsMultiWriterCASAndUnknownRecovery",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement/pod",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement/vm",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement/incarnation",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement/memory",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement/protection",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement/node",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement/legacy",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement/profile",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestInitialVMRequiresOriginalCompletePlacement",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestBoundHostElectionPreservesOriginalUIDAndEpoch",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart/wrapper",
+      "elapsed_seconds": 0.11,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessRejectsAlternateCommandBeforeStart",
+      "elapsed_seconds": 0.93,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestPlacementSchemaBoundsAndRoundTripRemainStrict/folded-profile",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestPlacementSchemaBoundsAndRoundTripRemainStrict/folded-placement",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestPlacementSchemaBoundsAndRoundTripRemainStrict/missing-memory",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestPlacementSchemaBoundsAndRoundTripRemainStrict/unknown-profile",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestPlacementSchemaBoundsAndRoundTripRemainStrict",
+      "elapsed_seconds": 0.17,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublishedClaimKeepsOriginalUIDAndIndependentCopies",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind/different-claim-uid",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind/different-source",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind/different-before",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind/node-recreated",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind/ledger-missing",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind/origin-missing",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind/protection-missing",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind/capacity-reduced",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet/complete",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet/running",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet/missing-init",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet/waiting",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet/different-id",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet/reversed-time",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet/duplicate",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet/ephemeral",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestTerminalPodProofRequiresCompleteContainerSet",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestSuccessfulSettlementPreservesRetirementVersionBarrier",
+      "elapsed_seconds": 0.21,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessAcceptsFixedPowerdownAlongsideOriginalMemoryMonitor",
+      "elapsed_seconds": 1.17,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostSettlementDropsOnlyClosedPeakAndCannotReopenExecution",
+      "elapsed_seconds": 1.62,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessExitLocalFirstAndLostReplyRecovery",
+      "elapsed_seconds": 1.23,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessCloseRejectsDamagedFileAndNeverResets",
+      "elapsed_seconds": 1.13,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostSettlementUnknownCASAndNewGrantRemainConservative/budget",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostSettlementUnknownCASAndNewGrantRemainConservative/claim",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostSettlementUnknownCASAndNewGrantRemainConservative/target",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostSettlementUnknownCASAndNewGrantRemainConservative/owner",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostSettlementUnknownCASAndNewGrantRemainConservative",
+      "elapsed_seconds": 1.61,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostSettlementCompactsBeyondOperationBoundButKeepsWatermark",
+      "elapsed_seconds": 0.33,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerOriginalHoldLostRepliesAndReadOnlyRetry",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerCountsSameVMByPeakAndRetainsOldPod",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerConcurrentCASNeverGrantsSameCapacityTwice",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerTakeoverPreservesHoldAndFencesLateOldPatch",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/lost-ledger",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/lost-origin",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/empty-ledger",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/lost-protection",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/new-node-uid",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/new-lease-uid",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/expired-lease",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/capacity-lowered",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources/node-deleting",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProcessExitPreservesMayHaveSentAction",
+      "elapsed_seconds": 1.15,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestOriginalProcessFileCannotOverwriteOrFollowLinks/same",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestOriginalProcessFileCannotOverwriteOrFollowLinks/different",
+      "elapsed_seconds": 0.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestOriginalProcessFileCannotOverwriteOrFollowLinks/symlink",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestOriginalProcessFileCannotOverwriteOrFollowLinks/public",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestOriginalProcessFileCannotOverwriteOrFollowLinks/oversize",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestOriginalProcessFileCannotOverwriteOrFollowLinks/path",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestOriginalProcessFileCannotOverwriteOrFollowLinks",
+      "elapsed_seconds": 0.03,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPEngineGrowShrinkLostReplyAndExactReadback",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/wrong-qemu",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/wrong-device",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/wrong-block",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/wrong-maximum",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/wrong-base",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/extra-device",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/missing-size",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/numeric-string",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/wrong-response-id",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/return-and-error",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/duplicate-field",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/oversized",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames/endless-events",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPRejectsAmbiguousIdentityGeometryAndFrames",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPExactLargeIntegersFixedSizeAndDeadlines/beyond-float64",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPExactLargeIntegersFixedSizeAndDeadlines/no-virtio-device",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPExactLargeIntegersFixedSizeAndDeadlines/deadline-no-background-write",
+      "elapsed_seconds": 0.25,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestPrivateQMPExactLargeIntegersFixedSizeAndDeadlines",
+      "elapsed_seconds": 0.25,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerReaderWaitsOnlyForOriginalStartupAndLaggingFloor/first-qmp",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerReaderWaitsOnlyForOriginalStartupAndLaggingFloor/lease-not-yet-pinned",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerReaderWaitsOnlyForOriginalStartupAndLaggingFloor/lagging-floor",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerReaderWaitsOnlyForOriginalStartupAndLaggingFloor/conflicting-holder",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerReaderWaitsOnlyForOriginalStartupAndLaggingFloor/wrong-lease",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerReaderWaitsOnlyForOriginalStartupAndLaggingFloor/malformed-publication",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerReaderWaitsOnlyForOriginalStartupAndLaggingFloor",
+      "elapsed_seconds": 0.34,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerInitialHostDenialPrecedesBirthAndSourceWrites/missing",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerInitialHostDenialPrecedesBirthAndSourceWrites/unprotected",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerInitialHostDenialPrecedesBirthAndSourceWrites/replacement-node",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerInitialHostDenialPrecedesBirthAndSourceWrites/short-memory",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerInitialHostDenialPrecedesBirthAndSourceWrites",
+      "elapsed_seconds": 0.19,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionShrinkRequiresOriginalCompleteSafetySources/complete",
+      "elapsed_seconds": 0.61,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionShrinkRequiresOriginalCompleteSafetySources/short-host-hold",
+      "elapsed_seconds": 0.48,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionShrinkRequiresOriginalCompleteSafetySources/unverified-pg-release",
+      "elapsed_seconds": 0.5,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionShrinkRequiresOriginalCompleteSafetySources/wrong-root-limit",
+      "elapsed_seconds": 0.5,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionShrinkRequiresOriginalCompleteSafetySources/wrong-fence",
+      "elapsed_seconds": 0.5,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionShrinkRequiresOriginalCompleteSafetySources",
+      "elapsed_seconds": 2.58,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughSettlesCancelledPeakAndRejectsDelayedReserve",
+      "elapsed_seconds": 4.01,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionPullPublishLostRepliesAndOriginalReceipt",
+      "elapsed_seconds": 0.38,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite/outside-uid",
+      "elapsed_seconds": 0.23,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite/host-releasing",
+      "elapsed_seconds": 0.22,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughRejectsForgedOrNonMonotonicWitness/missing-key",
+      "elapsed_seconds": 0.19,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite/runner-uid",
+      "elapsed_seconds": 0.21,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughRejectsForgedOrNonMonotonicWitness/same-key",
+      "elapsed_seconds": 0.4,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite/node-uid",
+      "elapsed_seconds": 0.21,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite/lease-replaced",
+      "elapsed_seconds": 0.23,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughRejectsForgedOrNonMonotonicWitness/other-boot",
+      "elapsed_seconds": 0.4,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite/lease-expired",
+      "elapsed_seconds": 0.21,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite/birth-replaced",
+      "elapsed_seconds": 0.21,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughRejectsForgedOrNonMonotonicWitness/old-sequence",
+      "elapsed_seconds": 0.4,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite/state-replaced",
+      "elapsed_seconds": 0.21,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerProductionRejectsChangedSourcesBeforeNativeWrite",
+      "elapsed_seconds": 1.74,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughRejectsForgedOrNonMonotonicWitness/changed-budget",
+      "elapsed_seconds": 0.4,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughRejectsForgedOrNonMonotonicWitness/alias-key",
+      "elapsed_seconds": 0.4,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughRejectsForgedOrNonMonotonicWitness",
+      "elapsed_seconds": 2.8,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/hostguard",
+      "test": "TestHostClosedThroughUnknownCASPreservesFenceAndFutureBudget",
+      "elapsed_seconds": 2.81,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerBirthRefusesMissingWALOrSameNameNewProcess/same-state",
+      "elapsed_seconds": 10.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerBirthRefusesMissingWALOrSameNameNewProcess/missing-state",
+      "elapsed_seconds": 10.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerBirthRefusesMissingWALOrSameNameNewProcess/new-empty-directory",
+      "elapsed_seconds": 0.1,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerBirthRefusesMissingWALOrSameNameNewProcess",
+      "elapsed_seconds": 20.23,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestNoWaitQEMUChildHelper",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestNoWaitLauncherHelper",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodRecoversActualLauncherDeathWithoutWait",
+      "elapsed_seconds": 0.2,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceIsIndependentOfWaitAndPreservesRunnerWAL",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/pod-uid",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/owner",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/restart-policy",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/restart-count",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/running",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/sidecar",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/init",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/container-id",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/node-during-get",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination/missing-pod",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRejectsChangedIdentityAndIncompleteTermination",
+      "elapsed_seconds": 0.64,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceStrictDecodingAndRetainedProof/source-kind",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceStrictDecodingAndRetainedProof/mutable",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceStrictDecodingAndRetainedProof/unprotected",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceStrictDecodingAndRetainedProof/birth",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceStrictDecodingAndRetainedProof/source-owner",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceStrictDecodingAndRetainedProof/termination",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceStrictDecodingAndRetainedProof/node",
+      "elapsed_seconds": 0,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceStrictDecodingAndRetainedProof",
+      "elapsed_seconds": 0.09,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestWholeStoppedPodSourceRecoversLostCreateAndConfirmation",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosurePreservesWALAndFencesLateStart",
+      "elapsed_seconds": 0.08,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureRetriesOnlyOriginalAfterPublishFailure",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureAllowsOriginalDeletingPod",
+      "elapsed_seconds": 0.07,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureDoesNotReplaceLaunchOrMissingSource/launch-exists",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureDoesNotReplaceLaunchOrMissingSource/missing-state",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureDoesNotReplaceLaunchOrMissingSource/malformed-state",
+      "elapsed_seconds": 0.04,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureDoesNotReplaceLaunchOrMissingSource/exit-symlink",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureDoesNotReplaceLaunchOrMissingSource/launch-symlink",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureDoesNotReplaceLaunchOrMissingSource/replaced-pod",
+      "elapsed_seconds": 0.05,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureDoesNotReplaceLaunchOrMissingSource",
+      "elapsed_seconds": 0.28,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/vmguard",
+      "test": "TestRunnerUnlaunchedClosureSerializesAgainstActualStart",
+      "elapsed_seconds": 0.06,
+      "log": "build/dsga-abort-settlement-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/committed/opening-false/settled-false",
+      "elapsed_seconds": 1.21,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/committed/opening-false/settled-true",
+      "elapsed_seconds": 2.15,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/committed/opening-true/settled-false",
+      "elapsed_seconds": 1.07,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/committed/opening-true/settled-true",
+      "elapsed_seconds": 2,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/actual/opening-false/settled-false",
+      "elapsed_seconds": 1.71,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/actual/opening-false/settled-true",
+      "elapsed_seconds": 2.28,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/actual/opening-true/settled-false",
+      "elapsed_seconds": 1.73,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/actual/opening-true/settled-true",
+      "elapsed_seconds": 2.43,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/unchanged/opening-false/settled-false",
+      "elapsed_seconds": 1.62,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/unchanged/opening-false/settled-true",
+      "elapsed_seconds": 2.16,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/unchanged/opening-true/settled-false",
+      "elapsed_seconds": 1.63,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries/unchanged/opening-true/settled-true",
+      "elapsed_seconds": 2.32,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRetainsThreeOriginalBudgetBoundaries",
+      "elapsed_seconds": 22.31,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/committed/generation",
+      "elapsed_seconds": 0.16,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/committed/target-budget",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/committed/open",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/committed/instance",
+      "elapsed_seconds": 0.14,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/committed/revision",
+      "elapsed_seconds": 0.16,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/actual/generation",
+      "elapsed_seconds": 0.15,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/actual/target-budget",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/actual/open",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/actual/instance",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/actual/revision",
+      "elapsed_seconds": 0.15,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/unchanged/generation",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/unchanged/target-budget",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/unchanged/open",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/unchanged/instance",
+      "elapsed_seconds": 0.12,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal/unchanged/revision",
+      "elapsed_seconds": 0.13,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureRejectsChangedCapacityBudgetAndOriginal",
+      "elapsed_seconds": 4.45,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureContinuationKeepsOriginalCapacityAndUnknown/committed",
+      "elapsed_seconds": 1.12,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureContinuationKeepsOriginalCapacityAndUnknown/actual",
+      "elapsed_seconds": 1.78,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureContinuationKeepsOriginalCapacityAndUnknown/unchanged",
+      "elapsed_seconds": 1.68,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureContinuationKeepsOriginalCapacityAndUnknown",
+      "elapsed_seconds": 4.58,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-false/ok",
+      "elapsed_seconds": 2.22,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-false/lost-start",
+      "elapsed_seconds": 1.75,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-false/lost-record",
+      "elapsed_seconds": 2.22,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-false/stale-rv",
+      "elapsed_seconds": 1.54,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-false/recreated-vm",
+      "elapsed_seconds": 1.54,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-false",
+      "elapsed_seconds": 9.27,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-true/ok",
+      "elapsed_seconds": 2.33,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-true/lost-start",
+      "elapsed_seconds": 1.79,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-true/lost-record",
+      "elapsed_seconds": 2.21,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-true/stale-rv",
+      "elapsed_seconds": 1.54,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-true/recreated-vm",
+      "elapsed_seconds": 1.53,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS/opening-true",
+      "elapsed_seconds": 9.41,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureStoreRequiresConfirmedCAS",
+      "elapsed_seconds": 18.67,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureWithoutPermanentHeaderStaysSafetyOnly/opening-false",
+      "elapsed_seconds": 1.31,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureWithoutPermanentHeaderStaysSafetyOnly/opening-true",
+      "elapsed_seconds": 1.32,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCleanupServiceClosureWithoutPermanentHeaderStaysSafetyOnly",
+      "elapsed_seconds": 2.63,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortClosesActualCapacityAndSurvivesExpiredHistory/before-open",
+      "elapsed_seconds": 10.9,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortClosesActualCapacityAndSurvivesExpiredHistory/already-open",
+      "elapsed_seconds": 11.04,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortClosesActualCapacityAndSurvivesExpiredHistory/takeover-query",
+      "elapsed_seconds": 10.87,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortClosesActualCapacityAndSurvivesExpiredHistory",
+      "elapsed_seconds": 32.82,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/wrong-budget",
+      "elapsed_seconds": 0.34,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/wrong-finalization",
+      "elapsed_seconds": 0.35,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/wrong-floor",
+      "elapsed_seconds": 0.34,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/old-gate",
+      "elapsed_seconds": 0.34,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/closed-gate",
+      "elapsed_seconds": 0.34,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/changed-root",
+      "elapsed_seconds": 0.35,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/rebound-setter",
+      "elapsed_seconds": 0.41,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/partial-capacity",
+      "elapsed_seconds": 0.26,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission/dummy-cleanup",
+      "elapsed_seconds": 0.29,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestCommittedAbortRejectsBorrowedBudgetPartialAndSupersededAdmission",
+      "elapsed_seconds": 3.24,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortRestoresCapturedBudgetThroughTakeoverAndHistoryExpiry",
+      "elapsed_seconds": 9.59,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup/missing-prior",
+      "elapsed_seconds": 0.19,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup/old-version",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup/wrong-prior-budget",
+      "elapsed_seconds": 0.21,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup/future-prior",
+      "elapsed_seconds": 0.02,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup/wrong-vm-receipt",
+      "elapsed_seconds": 0.24,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup/closed-gate",
+      "elapsed_seconds": 0.24,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup/wrong-source",
+      "elapsed_seconds": 0.24,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup/dummy-cleanup",
+      "elapsed_seconds": 0.2,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+      "test": "TestUnchangedAbortCannotRestoreFromMissingProofOrInvalidCleanup",
+      "elapsed_seconds": 2.36,
+      "log": "build/dsga-abort-settlement-journal-final.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/owner",
+      "test": "TestProductionAgentRunnerShrinkRechecksGateAndOriginalObserve/abort-committed",
+      "elapsed_seconds": 9.41,
+      "log": "build/dsga-abort-settlement-owner-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/owner",
+      "test": "TestProductionAgentRunnerShrinkRechecksGateAndOriginalObserve/restore-prior",
+      "elapsed_seconds": 18.35,
+      "log": "build/dsga-abort-settlement-owner-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/owner",
+      "test": "TestProductionAgentRunnerShrinkRechecksGateAndOriginalObserve/restore-prior-replies",
+      "elapsed_seconds": 34.86,
+      "log": "build/dsga-abort-settlement-owner-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/owner",
+      "test": "TestProductionAgentRunnerShrinkRechecksGateAndOriginalObserve",
+      "elapsed_seconds": 62.62,
+      "log": "build/dsga-abort-settlement-owner-regression.jsonl"
+    },
+    {
+      "package": "github.com/neondatabase/autoscaling/pkg/dsga/owner",
+      "test": "TestProductionRecoveredBudgetThenUnchangedCancel",
+      "elapsed_seconds": 121.21,
+      "log": "build/dsga-abort-settlement-production-final.jsonl"
+    }
+  ],
+  "totals": {
+    "top_level": 124,
+    "records_with_parents": 606,
+    "fail": 0,
+    "skip": 0,
+    "meaning": "包含父子及普通go test执行的fuzz种子，非独立E2E次数"
+  },
+  "quality": [
+    {
+      "path": "build/dsga-abort-settlement-vet-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0,
+      "compiled_packages": null
+    },
+    {
+      "path": "build/dsga-abort-settlement-lint-release.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "exit_code": 0,
+      "compiled_packages": null
+    },
+    {
+      "path": "build/dsga-abort-settlement-consumers.log",
+      "sha256": "4e6e2c5d4442b5ac683e645ec56cab1b65e11a78828253d5722f23ecbf4b278f",
+      "exit_code": 0,
+      "compiled_packages": 37
+    }
+  ],
+  "production_seconds": 121.21,
+  "source_sha256": [
+    {
+      "path": "pkg/dsga/budget/abort_settlement_test.go",
+      "sha256": "35fee735e2837caad6947bca1ae2b89e83712c0905ddda57aa51f00ea9ba52bf"
+    },
+    {
+      "path": "pkg/dsga/budget/committed_abort.go",
+      "sha256": "eb8aa26f244c7598ad8909e13671114924c8ea0e915583da655ff6711181964d"
+    },
+    {
+      "path": "pkg/dsga/budget/unchanged_abort.go",
+      "sha256": "639ea8e0b34b3b0a0600463d3ae199cc9177cb2683af2710ffc8b176ecb64284"
+    },
+    {
+      "path": "pkg/dsga/owner/initial_service_test.go",
+      "sha256": "97f270a18645331c0ffc684916dccb585243bc32b0c04275b2d4112f03fd5f52"
+    },
+    {
+      "path": "pkg/dsga/owner/recovered_budget_cancel_test.go",
+      "sha256": "6a71c70283c028e47cdd81c06a5832907ea9a1727952748f3a0c31548e350bcd"
+    }
+  ],
+  "preserved_attempts": [
+    {
+      "path": "build/dsga-abort-settlement-before.jsonl",
+      "sha256": "e2c1c58f1ca33c5568f6a4781d124e8eecc6d00a90c12095b7a4b6e21bbee52a",
+      "reason": "新增领域测试在旧实现上复现有效独立结算预算被拒绝，预期失败"
+    },
+    {
+      "path": "build/dsga-abort-settlement-production-first.jsonl",
+      "sha256": "6e1f8bb4a3a7d5cc329443f1e0c8c3f1a82664dff447c6c9740eb8849883c4bf",
+      "reason": "新测试未使用导入，编译失败"
+    },
+    {
+      "path": "build/dsga-abort-settlement-production-second.jsonl",
+      "sha256": "8af5e1dec2b3addcf42feafb0f42303b6054cfab5762437e567ec706dec176b9",
+      "reason": "新组合重复初始化原Host租约，夹具错误；已改为复用原Node账本和原Lease"
+    },
+    {
+      "path": "build/dsga-abort-settlement-production-third.jsonl",
+      "sha256": "c14adcee793ff3f5b6f91ffdf77d233861a56ae3b72ac74cee2de2320f18a79f",
+      "reason": "新组合后继Grow未增加Buffer，正确被原生产quote拒绝；已改为合法2048 Buffer目标"
+    },
+    {
+      "path": "build/dsga-abort-settlement-production-fourth.jsonl",
+      "sha256": "a744cef5b998e9c95bba895a100f94ee0515b934ba9075ff6a2db0798a1e514f",
+      "reason": "完整组合通过120.78秒；后续追加当前预算读者及来源水位断言，以production-final作为最终采用结果"
+    },
+    {
+      "path": "build/dsga-abort-settlement-journal-focused.jsonl",
+      "sha256": "d783471db8c1ceb052b8e86eb4a2412bf60ae5d60420fa2f8d7debd27403f3fd",
+      "reason": "受限沙箱不允许Store httptest监听本机端口，整包失败；在已授权本机网络环境重跑journal-final"
+    },
+    {
+      "path": "build/dsga-abort-settlement-regression.jsonl",
+      "sha256": "ec3c5f6cf934f16b4ce2ba18c7c630570df13efda606da778aa030e7b188fa70",
+      "reason": "五个包完整通过；journal未变大矩阵主动中断，不将中断包计入通过"
+    },
+    {
+      "path": "build/dsga-abort-settlement-lint.log",
+      "sha256": "2ceeda314c745cc6f24a1b909cdab88cc221ed753aef3561a3e2b1826bbb04d2",
+      "reason": "新测试导入分组不满足gci，已修复并最终lint0"
+    }
+  ],
+  "unverified": [
+    "R2类别16/17资源在途恢复与18三类取消清理服务恢复",
+    "R3～R8核心功能和PG17总体验收",
+    "Linux/K8s/KVM/NeonVM/CRI/cgroup/HugeTLB真实物理返还、规模及性能",
+    "本批PG/Rust/原生HTTP未改，未重跑未变原生PG17矩阵"
+  ],
+  "autoscaling_commit": "94c3c797001a48046756352a5b79e94016a9fe37",
+  "remote_verification": {
+    "repository": "git@github.com:william-lbn/autoscaling.git",
+    "ref": "refs/heads/codex/dsga-autoscaling-20261019",
+    "sha": "94c3c797001a48046756352a5b79e94016a9fe37",
+    "method": "git ls-remote --exit-code origin refs/heads/codex/dsga-autoscaling-20261019"
+  },
+  "neon_binding_validation": {
+    "argv": [
+      "python3",
+      "ci/compute.py",
+      "validate",
+      "--source-ref",
+      "index",
+      "--require-pg-checkout",
+      "v17"
+    ],
+    "exit_code": 0,
+    "log": "build/dsga-abort-settlement-neon-binding.log",
+    "sha256": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "output": "Validated 18 binaries, 4 pinned PG versions, 39 extension stages\n"
+  }
+}
