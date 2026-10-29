@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-29",
+  "neon_parent": "35c489c1f54b97c7c41e8e523b37f4eb217d1952",
+  "autoscaling": "a29c79f825732352e4aac04d2974d28feb5a016b",
+  "autoscaling_remote_checked": {
+    "branch": "codex/dsga-autoscaling-20261019",
+    "sha": "a29c79f825732352e4aac04d2974d28feb5a016b"
+  },
+  "pg17": {
+    "checkout": "325aeb42a6080d86902d51892b2518a70ec2512b",
+    "index_gitlink": "325aeb42a6080d86902d51892b2518a70ec2512b",
+    "distribution": "325aeb42a6080d86902d51892b2518a70ec2512b",
+    "revisions": "325aeb42a6080d86902d51892b2518a70ec2512b",
+    "working_tree": ""
+  },
+  "frozen_ancestry": [
+    {
+      "repository": "repos/neon",
+      "frozen_sha": "fa504217c61bbcaf5c512d75830564541f917f8f",
+      "is_ancestor": true
+    },
+    {
+      "repository": "repos/autoscaling",
+      "frozen_sha": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f",
+      "is_ancestor": true
+    },
+    {
+      "repository": "repos/neon/vendor/postgres-v17",
+      "frozen_sha": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+      "is_ancestor": true
+    },
+    {
+      "repository": "repos/neon/vendor/postgres-v17",
+      "frozen_sha": "15f57b683d236b7dad4d57d03d8b7bac0e63a204",
+      "is_ancestor": true
+    }
+  ],
+  "index_validation": {
+    "command": "python3 ci/compute.py validate --source-ref index --require-pg-checkout v17",
+    "log_sha256": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015",
+    "output": "Validated 18 binaries, 4 pinned PG versions, 39 extension stages\n",
+    "exit_code": 0
+  },
+  "unchanged_ci_evidence": "前批218项13通过205环境skip；本阶段未重复执行",
+  "limits": "没有新PG/Rust构建/测试或Linux执行、镜像/部署；整体未完成Goal active"
+}

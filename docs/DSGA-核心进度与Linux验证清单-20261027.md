@@ -5,6 +5,14 @@
 **先完成PG17全部核心实现、Mac可执行验证及远程归档，然后暂停**；PG18→PG16
 留待所有者恢复，PG14/15与独立控制面边界不变。2026-10-26上游冻结继续生效，不重新追新，不重复未变功能。
 
+## 最新验证：资源完成而最终结算未确认的异常关闭已完成Mac阶段
+
+AS `a29c79f825732352e4aac04d2974d28feb5a016b`已推当前自有功能分支并核完整远程SHA，本仓发行锁准确采用。全部资源前驱Completed、Finalize尚Planned/Unconfirmed、Resume仍空Planned时，复用正式结算来源审计，异常后原生fence、同boot/原目标容量核验及UID/RV写前CAS执行独立关闭；同轮覆盖Start后来源漂移。Journal v15固定完整Active，关闭仅引用原目标承诺，不生成成功预算，旧永久头、Finalize/Resize未知和空Resume均保留。来源恢复、SDK重建及更高owner接续保持关闭。
+
+Mac -race Journal 25顶层159含父子记录通过，新增v15占4顶层22记录；五生产恢复模式按子树去重1顶层6记录、v14受影响1顶层2记录、完整正常结案含两项嵌套检查1顶层3记录、原预算及旧v2完整30子模式/1顶层31记录均通过，0fail/skip。三包vet、最终增量lint0，消费者18包pass/6包无测试文件仅编译。原代码overlay、首次正常链、旧预算矩阵和lint失败分别保留；修夹具与测试总期限后采用完整通过矩阵，生产期限和校验未放宽。详见[阶段验收](DSGA-结算未确认异常关闭-Mac验收-20261029.md)、[机器收据](DSGA-结算未确认异常关闭-Mac收据-20261029.json)及本仓版本核验。
+
+PG17三处仍准确325a；未改PG/Rust，不新增原生/Linux执行、ELF编译、镜像或部署；未变Neon CI逻辑按范围复用218项13通过205环境skip，准确index版本另验。更早资源在途、坏缺日志独立关闭、受控重开/有界重复生命周期、normal/私有后台持续上界与活性、其他出生/无Wait/分区/跨boot迁移、Monitor/WSS/配额/RW-RO及可信CPU/全部写者仍须代码。Linux/K8s/KVM/NeonVM/HugeTLB/物理/性能另验；不能将代码缺口列为平台后验。整体未完成，Goal active，所有者AGENTS原改动不stage；PG17全面实现、Mac验证及远程归档后才暂停接续，不进入PG18/16，不追新上游或独立控制面、不合main。
+
 ## 最新验证：最终开放尚未发送的异常关闭已完成Mac阶段
 
 AS `3c4e12b9ea695a31e0894ea908be63d5c609b4fa`已推当前自有功能分支并核完整远程SHA，本仓发行锁准确采用。完整Finalize及资源前驱Completed后、Resume仍为空Planned时，先前准入也可能继续开放；现复核完整生产来源，异常后先原生fence，再UID/RV写前CAS执行独立真实关闭。Journal v14以完整Active摘要保留未发送步骤及预算，不补造原开放、Finish、释放或缩VM。来源恢复/SDK重建/更高owner接续均保持原关闭。
