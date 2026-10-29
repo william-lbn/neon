@@ -228,6 +228,30 @@ impl DsgSqlClient<'static> {
 }
 
 impl<'a> DsgSqlClient<'a> {
+    /// 此CAS不清SDK未知栅栏。丢回复只能重新观察，外层核验完整来源后再选择
+    /// 下一次CAS；过期后的普通续租永远不能转换成恢复或开放。
+    pub async fn admission_lease(
+        &self,
+        request: &crate::dsg_admission_lease::DsgAdmissionLeaseRequest,
+    ) -> Result<crate::dsg_admission_lease::DsgAdmissionLeaseResponse> {
+        request.validate()?;
+        ensure!(
+            request.instance == self.instance,
+            "admission lease targets another bound instance"
+        );
+        self.formal_function("neon_dsg_admission_lease", 1).await?;
+        let payload = serde_json::to_string(request)?;
+        let response: crate::dsg_admission_lease::DsgAdmissionLeaseResponse = self
+            .call(
+                &self.observer,
+                &self.observer_schema,
+                "neon_dsg_admission_lease",
+                &payload,
+            )
+            .await?;
+        response.validate_for(request, &self.instance)?;
+        Ok(response)
+    }
     pub async fn bind(
         execution: &'a Client,
         observer: &'a Client,

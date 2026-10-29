@@ -57,6 +57,134 @@ async fn invoke(
     ))
 }
 
+/// 真实Router→正式SDK→Neon SQL→PG17租约。签名只认证owner，不能据此
+/// 续租另一实例或清SDK未知；真实物理回收/预算来源仍由独立领域测试承担。
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn native_admission_lease_http_cas_expiry_and_explicit_rearm() -> Result<()> {
+    use compute_api::dsg_admission_lease::{
+        DsgAdmissionLeaseAction as A, DsgAdmissionLeaseRequest, DsgAdmissionLeaseResponse,
+    };
+    let signer = Signer::new();
+    let (mut cluster, _, _) = support::native_connections(&signer).await?;
+    cluster
+        .connect()
+        .await?
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.16'")
+        .await?;
+    let mut conf = std::fs::OpenOptions::new()
+        .append(true)
+        .open(cluster.data.join("postgresql.conf"))?;
+    writeln!(
+        conf,
+        "dynamic_shared_buffers_admission_lease_timeout='1s'\nbgwriter_delay='20ms'"
+    )?;
+    drop(conf);
+    cluster.restart()?;
+    let compute = node(signer.jwks.clone(), true, Some(&cluster));
+    let app = router(&compute);
+    let mut claims = signer.claims();
+    claims["issuer_epoch"] = json!("2");
+    let token = signer.token(&claims);
+    let state = memory(&app, &token).await?.observed;
+    let mut request = DsgAdmissionLeaseRequest {
+        protocol_version: 1,
+        instance: state.instance.clone(),
+        issuer_epoch: DsgUint64::new(2),
+        expected_capacity_generation: state.capacity_generation,
+        expected_admission_revision: DsgUint64::new(0),
+        expected_deadline_ns: DsgUint64::new(0),
+        action: A::Observe,
+    };
+    async fn lease(
+        app: &Router,
+        token: &str,
+        request: &DsgAdmissionLeaseRequest,
+    ) -> Result<DsgAdmissionLeaseResponse> {
+        let (code, body) = invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission/lease",
+            Some(token),
+            Some(&serde_json::to_string(request)?),
+        )
+        .await?;
+        ensure!(code == StatusCode::OK, "lease HTTP status {code}");
+        let fact: DsgAdmissionLeaseResponse = serde_json::from_str(&body)?;
+        fact.validate_for(request, &request.instance)?;
+        Ok(fact)
+    }
+    assert!(!lease(&app, &token, &request).await?.armed);
+    let fence = json!({"protocol_version":1,"instance":state.instance,"issuer_epoch":"2"});
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            Some(&token),
+            Some(&fence.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::OK
+    );
+    let observed = lease(&app, &token, &request).await?;
+    assert!(observed.armed);
+    request.action = A::Renew;
+    request.expected_deadline_ns = observed.deadline_ns;
+    let renewed = lease(&app, &token, &request).await?;
+    assert!(renewed.renewed);
+    let replay = lease(&app, &token, &request).await?;
+    assert!(!replay.renewed);
+    assert_eq!(replay.deadline_ns, renewed.deadline_ns);
+    let mut wrong = request.clone();
+    wrong.issuer_epoch = DsgUint64::new(3);
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission/lease",
+            Some(&token),
+            Some(&serde_json::to_string(&wrong)?)
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    sleep(Duration::from_millis(1150)).await;
+    request.action = A::Observe;
+    let expired = lease(&app, &token, &request).await?;
+    assert!(expired.expired);
+    assert!(!expired.observed.admission_open);
+    request.action = A::Renew;
+    request.expected_deadline_ns = expired.deadline_ns;
+    assert!(!lease(&app, &token, &request).await?.renewed);
+    request.action = A::Rearm;
+    assert!(!lease(&app, &token, &request).await?.renewed);
+    claims["issuer_epoch"] = json!("3");
+    let next_token = signer.token(&claims);
+    let fence = json!({"protocol_version":1,"instance":state.instance,"issuer_epoch":"3"});
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/issuer/fence",
+            Some(&next_token),
+            Some(&fence.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::OK
+    );
+    request.issuer_epoch = DsgUint64::new(3);
+    let recovered = lease(&app, &next_token, &request).await?;
+    assert!(recovered.renewed);
+    assert!(!recovered.expired);
+    assert!(!recovered.observed.admission_open);
+    cluster.passed = true;
+    Ok(())
+}
+
 /// 本批只检查新增资源路由的正式认证/spec绑定。valid+query在连接固定UDS前
 /// 拒绝，不依赖本机特权socket；实际UDS转发由同批独立单元测试覆盖。
 #[tokio::test]
@@ -813,6 +941,7 @@ async fn admission_routes_require_execution_scope_and_strict_original_intents() 
     for path in [
         "/dsg/v1/admission",
         "/dsg/v1/admission/status",
+        "/dsg/v1/admission/lease",
         "/dsg/v1/admission/close-original",
         "/dsg/v1/admission/close-original/status",
         "/dsg/v1/admission/continue-close",

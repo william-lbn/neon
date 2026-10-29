@@ -3,6 +3,24 @@ info:
   title: Neon DSGA PG management API
   version: "1"
 paths:
+  /dsg/v1/admission/lease:
+    post:
+      operationId: maintainDsgAdmissionLease
+      summary: 观察或严格CAS续租原生准入期限，失联后PG独立关闭
+      description: observe不续租；renew不能复活过期租约。rearm须明确恢复选择和更高owner，仅恢复续租能力，准入仍关闭。普通floor提升不续租；不清原SDK未知或释放预算，不产生VM许可。
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/AdmissionLeaseRequest"}
+      responses:
+        "200":
+          description: 同点原生期限/CAS和完整快照；renewed=false不确认续租，no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/AdmissionLeaseResponse"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/initialization:
     get:
       operationId: getDsgInitialization
@@ -386,6 +404,33 @@ components:
         startup_main_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
         startup_arrays_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
         current_main_and_arrays_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
+        observed: {$ref: "#/components/schemas/Snapshot"}
+    AdmissionLeaseRequest:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, instance, issuer_epoch, expected_capacity_generation, expected_admission_revision, expected_deadline_ns, action]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        instance: {$ref: "#/components/schemas/Instance"}
+        issuer_epoch: {$ref: "#/components/schemas/PositiveU64"}
+        expected_capacity_generation: {$ref: "#/components/schemas/PositiveU64"}
+        expected_admission_revision: {$ref: "#/components/schemas/U64"}
+        expected_deadline_ns: {$ref: "#/components/schemas/U64"}
+        action: {type: string, enum: [observe, renew, rearm]}
+    AdmissionLeaseResponse:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, request, renewed, armed, expired, deadline_ns, lease_epoch, timeout_ms, observed]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        request: {$ref: "#/components/schemas/AdmissionLeaseRequest"}
+        renewed: {type: boolean}
+        armed: {type: boolean}
+        expired: {type: boolean}
+        deadline_ns: {$ref: "#/components/schemas/U64"}
+        lease_epoch: {$ref: "#/components/schemas/U64"}
+        timeout_ms: {type: integer, minimum: 1000, maximum: 60000}
         observed: {$ref: "#/components/schemas/Snapshot"}
     AdmissionRequest:
       type: object

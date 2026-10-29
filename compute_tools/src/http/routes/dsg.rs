@@ -67,6 +67,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/issuer/fence", post(fence))
         .route("/dsg/v1/admission", post(admission))
         .route("/dsg/v1/admission/status", post(admission_status))
+        .route("/dsg/v1/admission/lease", post(admission_lease))
         .route("/dsg/v1/admission/close-original", post(admission_close))
         .route(
             "/dsg/v1/admission/close-original/status",
@@ -84,6 +85,33 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         )))
         // 能力/观察结果与boot和当前事实绑定，禁止中间缓存重放旧状态；认证失败亦不缓存。
         .layer(axum::middleware::map_response(no_store))
+}
+
+// 固定当前签名owner，禁止只读创建凭据/旧owner借续租维持服务。失联后PG
+// 自行关闭，网关错误不清SDK在途状态；新期限也不是任何资源动作的许可。
+async fn admission_lease(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<compute_api::dsg_admission_lease::DsgAdmissionLeaseRequest>,
+) -> Response {
+    if request.validate().is_err() {
+        return failure(StatusCode::BAD_REQUEST, "invalid_request", None);
+    }
+    let owner = DsgIssuerFenceRequest {
+        protocol_version: 1,
+        instance: request.instance.clone(),
+        issuer_epoch: request.issuer_epoch,
+    };
+    if claims.authorize_fence(&owner).is_err() {
+        return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
+    }
+    match client(&compute, &claims).await {
+        Ok(client) => match client.admission_lease(&request).await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(_) => failure(StatusCode::CONFLICT, "lease_unconfirmed", None),
+        },
+        Err(error) => error,
+    }
 }
 
 async fn no_store(mut response: Response) -> Response {

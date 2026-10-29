@@ -76,6 +76,11 @@ admission = unittest.defaultTestLoader.discover('.', pattern='test_dsg_neon_admi
 if admission.countTestCases() < 2:
     raise SystemExit('DSGA formal Neon admission suite is missing required cases')
 suite.addTests(admission)
+admission_lease = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission_lease.py')
+# 失联关闭必须由真实PG后台触发；缺套件或环境skip不能被旧准入测试掩盖。
+if admission_lease.countTestCases() < 6:
+    raise SystemExit('DSGA native admission lease suite is missing required cases')
+suite.addTests(admission_lease)
 admission_status = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission_status.py')
 if admission_status.countTestCases() < 2:
     raise SystemExit('DSGA readonly admission reconciliation suite is missing required cases')

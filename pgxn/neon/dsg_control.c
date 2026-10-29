@@ -57,6 +57,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_memory_status);
 PG_FUNCTION_INFO_V1(neon_dsg_fence_issuer);
 PG_FUNCTION_INFO_V1(neon_dsg_set_admission);
 PG_FUNCTION_INFO_V1(neon_dsg_admission_status);
+PG_FUNCTION_INFO_V1(neon_dsg_admission_lease);
 PG_FUNCTION_INFO_V1(neon_dsg_shared_cost);
 PG_FUNCTION_INFO_V1(neon_dsg_work_state);
 PG_FUNCTION_INFO_V1(neon_dsg_connection_state);
@@ -1037,4 +1038,63 @@ Datum
 neon_dsg_admission_status(PG_FUNCTION_ARGS)
 {
 	return NeonDsgAdmission(PG_GETARG_TEXT_PP(0), true);
+}
+
+/*-
+ * 独立原生失联防线：严格有类型身份及deadline CAS，observe不延长服务；renew
+ * 不开放准入，rearm还须外层明确恢复授权。升级SQL可撤回，但撤回不撤销已启动
+ * 的内核期限，不能以扩展降级洗掉关闭事实。错误不包含凭据或完整请求原文。
+ */
+Datum
+neon_dsg_admission_lease(PG_FUNCTION_ARGS)
+{
+	NeonDsgCheckAdministrator();
+#if defined(NEON_DSG_ADMISSION_LEASE_API_VERSION) && NEON_DSG_ADMISSION_LEASE_API_VERSION == 1
+	{
+		Jsonb *input = NeonDsgParseRaw(PG_GETARG_TEXT_PP(0));
+		JsonbContainer *root = &input->root;
+		JsonbContainer *instance;
+		DsgAdmissionLeaseRequest request;
+		DsgAdmissionLeaseResponse response;
+		StringInfoData output;
+		char *action;
+		char *vm_uid;
+		char *compute_id;
+
+		NeonDsgCheckEnabled();
+		NeonDsgObject(root, 7);
+		if (NeonDsgInteger(root, "protocol_version") != 1)
+			ereport(ERROR, (errmsg("unsupported DSGA admission lease protocol")));
+		instance = NeonDsgChild(root, "instance", 3);
+		vm_uid = NeonDsgId(instance, "vm_uid");
+		compute_id = NeonDsgId(instance, "compute_instance_id");
+		MemSet(&request, 0, sizeof(request));
+		request.boot_id = NeonDsgUint64(instance, "pg_boot_id");
+		request.issuer_epoch = NeonDsgUint64(root, "issuer_epoch");
+		request.expected_generation = NeonDsgUint64(root, "expected_capacity_generation");
+		request.expected_revision = NeonDsgUint64(root, "expected_admission_revision");
+		request.expected_deadline_ns = NeonDsgUint64(root, "expected_deadline_ns");
+		action = NeonDsgId(root, "action");
+		request.rearm = strcmp(action, "rearm") == 0;
+		if (strcmp(vm_uid, dsg_vm_uid) != 0 || strcmp(compute_id, dsg_compute_instance_id) != 0 ||
+			request.boot_id != DSBCtrl->boot_id || request.issuer_epoch == 0 || request.expected_generation == 0 ||
+			(strcmp(action, "observe") != 0 && strcmp(action, "renew") != 0 && !request.rearm) ||
+			(strcmp(action, "observe") != 0 && request.expected_deadline_ns == 0))
+			ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("invalid DSGA admission lease identity or action")));
+		DsgBufferAdmissionLease(strcmp(action, "observe") == 0 ? NULL : &request, &response);
+		initStringInfo(&output);
+		appendStringInfoString(&output, "{\"protocol_version\":1,\"vm_shrink_permit\":false,\"request\":");
+		appendStringInfoString(&output, JsonbToCString(NULL, root, VARSIZE(input)));
+		appendStringInfo(&output, ",\"renewed\":%s,\"armed\":%s,\"expired\":%s,\"deadline_ns\":\"" UINT64_FORMAT
+						 "\",\"lease_epoch\":\"" UINT64_FORMAT "\",\"timeout_ms\":%d,\"observed\":",
+						 response.renewed ? "true" : "false", response.armed ? "true" : "false",
+						 response.expired ? "true" : "false", response.deadline_ns, response.lease_epoch, response.timeout_ms);
+		NeonDsgAppendSnapshot(&output, &response.observed);
+		appendStringInfoChar(&output, '}');
+		PG_RETURN_DATUM(NeonDsgJson(&output));
+	}
+#else
+	ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("this build lacks native DSGA admission lease support")));
+	PG_RETURN_NULL();
+#endif
 }
