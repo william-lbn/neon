@@ -59,6 +59,11 @@ admission = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission
 if admission.countTestCases() < 3:
     raise SystemExit('DSGA fenced admission suite is missing required cases')
 suite.addTests(admission)
+closure = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission_closure.py')
+# 关闭必须能封住未到达的原开放；此项使用真实内核，不由模型回执替代。
+if closure.countTestCases() < 1:
+    raise SystemExit('DSGA original admission closure suite is missing required cases')
+suite.addTests(closure)
 frames = unittest.defaultTestLoader.discover('.', pattern='test_dsg_admission_frames.py')
 # 大帧在完整读取前的内存边界不能由旧准入回执测试替代；漏打包须明确失败。
 if frames.countTestCases() < 5:

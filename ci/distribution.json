@@ -1,13 +1,13 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "d12f533bb2e35ad933a178a6d1186234c0bbad12",
+  "autoscaling_commit": "d0a38da5b4d0513d4c28913517195795aa68e1b0",
   "postgres_repository": "william-lbn/postgres",
   "postgres": {
     "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",
     "v15": "2aaab3bb4a13557aae05bb2ae0ef0a132d0c4f85",
     "v16": "a42351fcd41ea01edede1daed65f651e838988fc",
-    "v17": "b078736a4cfdfccce69914feefb5b5e56560c1e8"
+    "v17": "325aeb42a6080d86902d51892b2518a70ec2512b"
   },
   "core_binaries": [
     "pageserver", "safekeeper", "proxy", "pg_sni_router", "storage_broker",

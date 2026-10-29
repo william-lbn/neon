@@ -5,11 +5,157 @@ use compute_api::dsg_admission::{
     DsgAdmissionContinuationRequest as Request, DsgAdmissionDisposition as D, DsgAdmissionRequest,
 };
 use compute_api::dsg_client::DsgSqlClient;
-use compute_api::dsg_control::DsgUint64;
+use compute_api::dsg_control::{DsgIssuerFenceRequest, DsgUint64};
 use std::time::Duration;
 #[path = "support/dsg_cluster.rs"]
 mod dsg_cluster;
 use dsg_cluster::{COMPUTE, Cluster, VM};
+
+// 原开放可能在网络中，也可能永远没有投递。关门必须一次封住两种历史，
+// 不能先补发原开放来凑连续revision，更不能把NotFound当旧命令无效证明。
+// 本用例真实运行PG/Neon扩展/SDK；不证明外层预算恢复或目标平台物理回收。
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn closure_overtakes_unreceived_open_without_replaying_or_skipping_open_revisions()
+-> Result<()> {
+    let mut cluster = Cluster::new()?;
+    let execution = cluster.connect().await?;
+    let observer = cluster.connect().await?;
+    execution
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.10'")
+        .await?;
+    let client =
+        DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, Duration::from_secs(5)).await?;
+    client
+        .fence_issuer(&DsgIssuerFenceRequest {
+            protocol_version: 1,
+            instance: client.instance().clone(),
+            issuer_epoch: DsgUint64::new(1),
+        })
+        .await?;
+    let mut original = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: client.instance().clone(),
+        issuer_epoch: DsgUint64::new(1),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: DsgUint64::new(1),
+        open: true,
+        budget_commitment_id: "native-unreceived-open-budget".into(),
+    };
+    client.restore_admission_pending(&original, None)?;
+    assert_eq!(
+        client.admission_status(&original).await?.disposition,
+        D::NotFound
+    );
+    let mut close = original.clone();
+    close.open = false;
+    close.revision = DsgUint64::new(2);
+    let proof = client
+        .close_admission_over_original(&original, &close)
+        .await?;
+    assert!(proof.prior_may_have_applied && !proof.vm_shrink_permit);
+    assert!(!proof.closed_by.observed.admission_open);
+    assert_eq!(proof.closed_by.observed.admission_revision.get(), 2);
+    assert_eq!(proof.closed_by.observed.capacity_generation.get(), 1);
+    assert_eq!(client.pending_admission()?, (None, None));
+
+    // 重建只读完整回执；迟到旧开放在相同owner下也必须被revision水位拒绝。
+    let recovered =
+        DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, Duration::from_secs(5)).await?;
+    recovered.restore_admission_pending(&original, Some(&close))?;
+    assert_eq!(
+        recovered
+            .admission_closure_status(&original, &close)
+            .await?
+            .closed_by
+            .disposition,
+        D::Replayed
+    );
+    assert_eq!(client.set_admission(&original).await?.disposition, D::Stale);
+    let mut alias = close.clone();
+    alias.open = true;
+    let rejected =
+        DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, Duration::from_secs(5)).await?;
+    assert_eq!(
+        rejected.set_admission(&alias).await?.disposition,
+        D::Conflict
+    );
+
+    // 两个独立SDK/连接真实并发，接受旧开放先到或关闭先到的合法调度。
+    // 无论谁先取得status_lock，最终必须关闭；不要求旧开放从未发生。
+    let late_execution = cluster.connect().await?;
+    let late_observer = cluster.connect().await?;
+    let late = DsgSqlClient::bind(
+        &late_execution,
+        &late_observer,
+        VM,
+        COMPUTE,
+        Duration::from_secs(5),
+    )
+    .await?;
+    original.revision = DsgUint64::new(3);
+    close.revision = DsgUint64::new(4);
+    let (opened, closed) = tokio::join!(
+        late.set_admission(&original),
+        recovered.close_admission_over_original(&original, &close)
+    );
+    assert!(matches!(opened?.disposition, D::Applied | D::Stale));
+    assert!(!closed?.closed_by.observed.admission_open);
+    assert_eq!(
+        recovered.admission_status(&close).await?.disposition,
+        D::Replayed
+    );
+
+    // 开放仍必须精确消费下一revision。新规则只放宽关闭的单调前进，
+    // floor、boot、容量代次和同revision完整上下文检查全部保持。
+    let guarded =
+        DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, Duration::from_secs(5)).await?;
+    let mut gap_open = original.clone();
+    gap_open.revision = DsgUint64::new(6);
+    assert_eq!(
+        guarded.set_admission(&gap_open).await?.disposition,
+        D::Conflict
+    );
+    let mut bad_capacity = close.clone();
+    bad_capacity.revision = DsgUint64::new(7);
+    bad_capacity.expected_capacity_generation = DsgUint64::new(2);
+    let rejected_capacity =
+        DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, Duration::from_secs(5)).await?;
+    assert_eq!(
+        rejected_capacity
+            .set_admission(&bad_capacity)
+            .await?
+            .disposition,
+        D::Stale
+    );
+    close.revision = DsgUint64::new(7);
+    assert!(
+        guarded
+            .close_admission_over_original(&gap_open, &close)
+            .await?
+            .prior_may_have_applied
+    );
+    let mut maximum = close.clone();
+    maximum.revision = DsgUint64::new(u64::MAX);
+    assert_eq!(
+        guarded.set_admission(&maximum).await?.disposition,
+        D::Applied
+    );
+    assert_eq!(
+        guarded.set_admission(&maximum).await?.disposition,
+        D::Replayed
+    );
+    assert_eq!(late.set_admission(&original).await?.disposition, D::Stale);
+    assert!(
+        !guarded
+            .admission_status(&maximum)
+            .await?
+            .observed
+            .admission_open
+    );
+    cluster.passed = true;
+    Ok(())
+}
 
 #[tokio::test]
 #[ignore = "strict gate creates a real isolated Neon PG cluster"]
