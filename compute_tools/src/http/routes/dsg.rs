@@ -68,6 +68,10 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/admission", post(admission))
         .route("/dsg/v1/admission/status", post(admission_status))
         .route("/dsg/v1/admission/lease", post(admission_lease))
+        .route(
+            "/dsg/v1/admission/lease/rearm/status",
+            post(admission_rearm_status),
+        )
         .route("/dsg/v1/admission/close-original", post(admission_close))
         .route(
             "/dsg/v1/admission/close-original/status",
@@ -109,6 +113,30 @@ async fn admission_lease(
         Ok(client) => match client.admission_lease(&request).await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(StatusCode::CONFLICT, "lease_unconfirmed", None),
+        },
+        Err(error) => error,
+    }
+}
+
+// 更高签名owner只读原rearm；不会借查询调用setter/fence，HTTP/SQL双层
+// 固定只读入口。缺回执是未知，不能补造NoEffect或接受当前deadline代替。
+async fn admission_rearm_status(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<compute_api::dsg_admission_lease::DsgAdmissionLeaseRequest>,
+) -> Response {
+    if request.validate().is_err()
+        || request.action != compute_api::dsg_admission_lease::DsgAdmissionLeaseAction::Rearm
+    {
+        return failure(StatusCode::BAD_REQUEST, "invalid_request", None);
+    }
+    if claims.authorize_rearm_status(&request).is_err() {
+        return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
+    }
+    match client(&compute, &claims).await {
+        Ok(client) => match client.admission_rearm_status(&request).await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(_) => failure(StatusCode::CONFLICT, "rearm_status_unconfirmed", None),
         },
         Err(error) => error,
     }

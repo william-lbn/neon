@@ -228,8 +228,36 @@ impl DsgSqlClient<'static> {
 }
 
 impl<'a> DsgSqlClient<'a> {
-    /// 此CAS不清SDK未知栅栏。丢回复只能重新观察，外层核验完整来源后再选择
-    /// 下一次CAS；过期后的普通续租永远不能转换成恢复或开放。
+    /// 固定只读SQL入口查询完整原CAS。不会重发rearm，不改SDK未知；即便
+    /// 命中历史，也必须另外审计当前lease/预算/owner才能决定后继开放。
+    pub async fn admission_rearm_status(
+        &self,
+        request: &crate::dsg_admission_lease::DsgAdmissionLeaseRequest,
+    ) -> Result<crate::dsg_admission_lease::DsgAdmissionRearmStatus> {
+        request.validate()?;
+        ensure!(
+            request.instance == self.instance
+                && request.action == crate::dsg_admission_lease::DsgAdmissionLeaseAction::Rearm,
+            "rearm status requires original rearm for bound instance"
+        );
+        self.formal_function("neon_dsg_admission_rearm_status", 1)
+            .await?;
+        let payload = serde_json::to_string(request)?;
+        let response: crate::dsg_admission_lease::DsgAdmissionRearmStatus = self
+            .call(
+                &self.observer,
+                &self.observer_schema,
+                "neon_dsg_admission_rearm_status",
+                &payload,
+            )
+            .await?;
+        response.validate_for(request, &self.instance)?;
+        Ok(response)
+    }
+
+    /// 此CAS不清SDK未知栅栏。renew丢回复只能重新观察，核验完整来源后再
+    /// 选择后继续租；rearm须保留外层原WAL并查询admission_rearm_status，
+    /// 不能把变新的当前deadline当作原命令回执。普通续租不能复活或开放。
     pub async fn admission_lease(
         &self,
         request: &crate::dsg_admission_lease::DsgAdmissionLeaseRequest,

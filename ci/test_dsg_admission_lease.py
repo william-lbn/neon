@@ -57,6 +57,118 @@ class DsgAdmissionLease(unittest.TestCase):
     def lease(self, request=None):
         return self.call("neon_dsg_admission_lease", request or self.lease_request())
 
+    def rearm_status(self, request):
+        return self.call("neon_dsg_admission_rearm_status", request)
+
+    def applied_rearm(self):
+        self.fence()
+        time.sleep(1.1)
+        expired = self.lease()
+        self.assertTrue(expired["expired"])
+        self.fence(2)
+        request = self.lease_request(expired, "rearm", 2)
+        before = self.rearm_status(request)
+        self.assertFalse(before["retained"])
+        self.assertEqual(before["applied_deadline_ns"], "0")
+        self.assertEqual(before["current"]["deadline_ns"], expired["deadline_ns"])
+        applied = self.lease(request)
+        self.assertTrue(applied["renewed"])
+        return request, applied
+
+    def test_original_rearm_receipt_survives_renew_expiry_and_higher_floor(self):
+        request, applied = self.applied_rearm()
+        first = self.rearm_status(request)
+        self.assertEqual(first["request"], request)
+        self.assertTrue(first["retained"])
+        self.assertEqual(first["applied_deadline_ns"], applied["deadline_ns"])
+        self.assertFalse(first["current"]["renewed"])
+        self.assertFalse(first["current"]["observed"]["admission_open"])
+        renewed = self.lease(self.lease_request(applied, "renew", 2))
+        self.assertTrue(renewed["renewed"])
+        self.fence(3)
+        for _ in range(3):
+            read = self.rearm_status(request)
+            self.assertTrue(read["retained"])
+            self.assertEqual(read["applied_deadline_ns"], applied["deadline_ns"])
+            self.assertEqual(read["current"]["deadline_ns"], renewed["deadline_ns"])
+            self.assertEqual(read["current"]["observed"]["issuer_floor_epoch"], "3")
+        self.assertFalse(self.lease(request)["renewed"], "原重发不能再次延长期限")
+        time.sleep(1.1)
+        expired = self.rearm_status(request)
+        self.assertTrue(expired["retained"], "历史成功与当前过期同时成立")
+        self.assertTrue(expired["current"]["expired"])
+        self.assertFalse(expired["current"]["observed"]["admission_open"])
+        second = self.lease_request(expired["current"], "rearm", 3)
+        new = self.lease(second)
+        self.assertTrue(new["renewed"])
+        self.assertFalse(self.rearm_status(request)["retained"], "单槽淘汰只表示未知")
+        self.assertEqual(self.rearm_status(request)["applied_deadline_ns"], "0")
+        self.assertEqual(self.rearm_status(second)["applied_deadline_ns"], new["deadline_ns"])
+
+    def test_original_rearm_status_requires_every_cas_field_and_strict_sql(self):
+        request, applied = self.applied_rearm()
+        for field in ("issuer_epoch", "expected_capacity_generation", "expected_admission_revision", "expected_deadline_ns"):
+            with self.subTest(field=field):
+                bad = {**request, field: str(int(request[field]) + 1)}
+                missing = self.rearm_status(bad)
+                self.assertFalse(missing["retained"])
+                self.assertEqual(missing["applied_deadline_ns"], "0")
+                self.assertEqual(missing["current"]["deadline_ns"], applied["deadline_ns"])
+        for action in ("observe", "renew"):
+            self.assertNotEqual(self.call("neon_dsg_admission_rearm_status", {**request, "action": action}, check=False).returncode, 0)
+        for part in ("vm_uid", "compute_instance_id", "pg_boot_id"):
+            bad = copy.deepcopy(request)
+            bad["instance"][part] = "999" if part == "pg_boot_id" else "other-instance"
+            self.assertNotEqual(self.call("neon_dsg_admission_rearm_status", bad, check=False).returncode, 0)
+        raw = json.dumps(request)
+        invalid = [raw[:-1] + ',"extra":true}', raw.replace('"rearm"', '"rearm","action":"rearm"'),
+                   raw.replace('"issuer_epoch": "2"', '"issuer_epoch": 2')]
+        for value in invalid:
+            self.assertNotEqual(self.pg.sql(f"SELECT neon_dsg_admission_rearm_status('{self.pg.quote(value)}')", check=False).returncode, 0)
+        self.assertEqual(self.pg.sql("SELECT has_function_privilege('dsg_app','neon_dsg_admission_rearm_status(text)','EXECUTE')").stdout.strip(), "f")
+        self.pg.sql("GRANT EXECUTE ON FUNCTION neon_dsg_admission_rearm_status(text) TO dsg_app")
+        result = self.pg.sql(f"SET SESSION AUTHORIZATION dsg_app; SELECT neon_dsg_admission_rearm_status('{self.pg.quote(raw)}')", check=False)
+        self.assertNotEqual(result.returncode, 0, "授予EXECUTE仍须SU session")
+
+    def test_rearm_receipt_survives_sql_downgrade_but_not_new_boot(self):
+        request, applied = self.applied_rearm()
+        self.pg.sql("ALTER EXTENSION neon UPDATE TO '1.16'")
+        self.assertEqual(self.pg.sql("SELECT to_regprocedure('neon_dsg_admission_rearm_status(text)') IS NULL").stdout.strip(), "t")
+        self.pg.sql("ALTER EXTENSION neon UPDATE TO '1.17'")
+        self.assertEqual(self.rearm_status(request)["applied_deadline_ns"], applied["deadline_ns"])
+        self.pg.stop()
+        self.pg.start()
+        self.instance = self.value("SELECT neon_dsg_capabilities()")["instance"]
+        self.assertNotEqual(self.instance, request["instance"])
+        self.assertNotEqual(self.call("neon_dsg_admission_rearm_status", request, check=False).returncode, 0)
+        rebound = {**request, "instance": self.instance}
+        missing = self.rearm_status(rebound)
+        self.assertFalse(missing["retained"])
+        self.assertFalse(missing["current"]["armed"])
+
+    def test_concurrent_original_rearm_applies_once_and_query_never_renews(self):
+        self.fence()
+        time.sleep(1.1)
+        expired = self.lease()
+        self.fence(2)
+        request = self.lease_request(expired, "rearm", 2)
+        raw = self.pg.quote(json.dumps(request))
+        processes = [self.pg.background_sql(f"SELECT neon_dsg_admission_lease('{raw}')", f"dsg-rearm-race-{n}") for n in range(2)]
+        for process in processes:
+            process.wait(timeout=15)
+        # 在读取两个调用的stdout前，独立连接已经可以查询原应用结果。
+        history = self.rearm_status(request)
+        self.assertTrue(history["retained"])
+        replies = []
+        for process in processes:
+            out, err = process.communicate(timeout=15)
+            self.assertEqual(process.returncode, 0, err)
+            replies.append(json.loads(out.strip().splitlines()[-1]))
+        self.assertEqual(sum(int(reply["renewed"]) for reply in replies), 1)
+        self.assertEqual({reply["deadline_ns"] for reply in replies}, {history["applied_deadline_ns"]})
+        for _ in range(5):
+            self.assertEqual(self.rearm_status(request)["current"]["deadline_ns"], history["applied_deadline_ns"])
+
     def open(self, **kwargs):
         return self.call("neon_dsg_set_admission", self.opened(**kwargs))
 

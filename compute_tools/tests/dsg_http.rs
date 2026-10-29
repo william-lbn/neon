@@ -29,6 +29,87 @@ use tower::ServiceExt;
 
 const LIMIT: Duration = Duration::from_secs(10);
 
+#[tokio::test]
+async fn rearm_status_route_rejects_unauthorized_and_duplicate_original_fields() -> Result<()> {
+    let signer = Signer::new();
+    let app = router(&node(signer.jwks.clone(), true, None));
+    let mut claims = signer.claims();
+    claims["issuer_epoch"] = json!("3");
+    let token = signer.token(&claims);
+    let request = json!({
+        "protocol_version":1, "instance":{"vm_uid":"dsg-vm-1","compute_instance_id":"dsg-compute-1","pg_boot_id":"1"},
+        "issuer_epoch":"2", "expected_capacity_generation":"1", "expected_admission_revision":"0", "expected_deadline_ns":"100", "action":"rearm"
+    });
+    let raw = request.to_string();
+    // 中间件在进入handler前拒绝非控制scope，沿用正式401语义。
+    for scope in ["compute_ctl:dsga_initialization", "unrelated"] {
+        let mut bad = claims.clone();
+        bad["scope"] = json!(scope);
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                "/dsg/v1/admission/lease/rearm/status",
+                Some(&signer.token(&bad)),
+                Some(&raw)
+            )
+            .await?
+            .0,
+            StatusCode::UNAUTHORIZED
+        );
+    }
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission/lease/rearm/status",
+            None,
+            Some(&raw)
+        )
+        .await?
+        .0,
+        StatusCode::UNAUTHORIZED
+    );
+    let mut future = request.clone();
+    future["issuer_epoch"] = json!("4");
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission/lease/rearm/status",
+            Some(&token),
+            Some(&future.to_string())
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    for raw in [
+        raw.replace(
+            "\"action\":\"rearm\"",
+            "\"action\":\"rearm\",\"action\":\"rearm\"",
+        ),
+        raw.replace(
+            "\"expected_deadline_ns\":\"100\"",
+            "\"expected_deadline_ns\":100",
+        ),
+    ] {
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                "/dsg/v1/admission/lease/rearm/status",
+                Some(&token),
+                Some(&raw)
+            )
+            .await?
+            .0,
+            StatusCode::UNPROCESSABLE_ENTITY
+        );
+    }
+    Ok(())
+}
+
 #[path = "support/dsg_http.rs"]
 mod support;
 use support::{COMPUTE, Cluster, Signer, VM, native, node, router};
@@ -64,13 +145,14 @@ async fn invoke(
 async fn native_admission_lease_http_cas_expiry_and_explicit_rearm() -> Result<()> {
     use compute_api::dsg_admission_lease::{
         DsgAdmissionLeaseAction as A, DsgAdmissionLeaseRequest, DsgAdmissionLeaseResponse,
+        DsgAdmissionRearmStatus,
     };
     let signer = Signer::new();
     let (mut cluster, _, _) = support::native_connections(&signer).await?;
     cluster
         .connect()
         .await?
-        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.16'")
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.17'")
         .await?;
     let mut conf = std::fs::OpenOptions::new()
         .append(true)
@@ -181,6 +263,71 @@ async fn native_admission_lease_http_cas_expiry_and_explicit_rearm() -> Result<(
     assert!(recovered.renewed);
     assert!(!recovered.expired);
     assert!(!recovered.observed.admission_open);
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/admission/lease/rearm/status",
+        Some(&next_token),
+        Some(&serde_json::to_string(&request)?),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK);
+    let history: DsgAdmissionRearmStatus = serde_json::from_str(&body)?;
+    history.validate_for(&request, &request.instance)?;
+    assert!(history.retained);
+    assert_eq!(history.applied_deadline_ns, recovered.deadline_ns);
+    assert_eq!(history.current.deadline_ns, recovered.deadline_ns);
+    assert!(!history.current.renewed);
+    // 当前owner提高后仍可查原请求，但setter必须保持原owner拒绝语义。
+    claims["issuer_epoch"] = json!("4");
+    let later_token = signer.token(&claims);
+    let mut future = request.clone();
+    future.issuer_epoch = DsgUint64::new(5);
+    for (credential, original, expected) in [
+        (&later_token, &request, StatusCode::OK),
+        (&token, &request, StatusCode::FORBIDDEN),
+        (&later_token, &future, StatusCode::FORBIDDEN),
+    ] {
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                "/dsg/v1/admission/lease/rearm/status",
+                Some(credential),
+                Some(&serde_json::to_string(original)?),
+            )
+            .await?
+            .0,
+            expected
+        );
+    }
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission/lease",
+            Some(&later_token),
+            Some(&serde_json::to_string(&request)?),
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    sleep(Duration::from_millis(1150)).await;
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        "/dsg/v1/admission/lease/rearm/status",
+        Some(&later_token),
+        Some(&serde_json::to_string(&request)?),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK);
+    let expired_history: DsgAdmissionRearmStatus = serde_json::from_str(&body)?;
+    expired_history.validate_for(&request, &request.instance)?;
+    assert!(expired_history.retained && expired_history.current.expired);
+    assert_eq!(expired_history.applied_deadline_ns, recovered.deadline_ns);
+    assert!(!expired_history.current.observed.admission_open);
     cluster.passed = true;
     Ok(())
 }

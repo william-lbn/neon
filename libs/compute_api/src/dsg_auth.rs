@@ -28,6 +28,24 @@ pub struct DsgHttpClaims {
 }
 
 impl DsgHttpClaims {
+    /// 新owner可查询原rearm，旧owner不能查询未来请求；独立只读入口不能
+    /// 使用初始化token，也不能将更早epoch重写成当前epoch再执行setter。
+    pub fn authorize_rearm_status(
+        &self,
+        request: &crate::dsg_admission_lease::DsgAdmissionLeaseRequest,
+    ) -> Result<()> {
+        request.validate()?;
+        ensure!(
+            self.scope == DSG_HTTP_SCOPE
+                && request.action == crate::dsg_admission_lease::DsgAdmissionLeaseAction::Rearm
+                && request.instance.vm_uid == self.vm_uid
+                && request.instance.compute_instance_id == self.compute_instance_id
+                && request.issuer_epoch <= self.issuer_epoch,
+            "DSGA rearm status instance, action or epoch is not authorized"
+        );
+        Ok(())
+    }
+
     /// 普通准入执行必须等于已验签的当前epoch；原意图只读对账允许更早epoch。
     /// boot由绑定实际PG的SDK再次核对；本方法不能把签名当作预算、租约或排空证明。
     pub fn authorize_admission(

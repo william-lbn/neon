@@ -109,3 +109,54 @@ impl DsgAdmissionLeaseResponse {
         Ok(())
     }
 }
+
+/// 原rearm的历史应用事实与当前期限分开保存。单槽被后继成功rearm替换后
+/// retained=false只表示结果未知；查询不会续租，历史命中也不授权重新服务。
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct DsgAdmissionRearmStatus {
+    pub protocol_version: u32,
+    pub vm_shrink_permit: bool,
+    pub request: DsgAdmissionLeaseRequest,
+    pub retained: bool,
+    pub applied_deadline_ns: DsgUint64,
+    pub current: DsgAdmissionLeaseResponse,
+}
+
+impl DsgAdmissionRearmStatus {
+    pub fn validate_for(
+        &self,
+        request: &DsgAdmissionLeaseRequest,
+        bound: &DsgInstanceIdentity,
+    ) -> Result<()> {
+        self.current.validate_for(request, bound)?;
+        ensure!(
+            request.action == DsgAdmissionLeaseAction::Rearm
+                && self.protocol_version == 1
+                && !self.vm_shrink_permit
+                && self.request == *request
+                && !self.current.renewed,
+            "rearm status differs from original read-only selection"
+        );
+        if self.retained {
+            ensure!(
+                self.applied_deadline_ns > request.expected_deadline_ns
+                    && self.applied_deadline_ns <= self.current.deadline_ns
+                    && self.current.armed
+                    && self.current.lease_epoch >= request.issuer_epoch
+                    && self.current.observed.issuer_floor_epoch >= request.issuer_epoch
+                    && self.current.observed.capacity_generation
+                        >= request.expected_capacity_generation
+                    && self.current.observed.admission_revision
+                        >= request.expected_admission_revision,
+                "retained rearm contradicts native monotonic lifetime"
+            );
+        } else {
+            ensure!(
+                self.applied_deadline_ns.get() == 0,
+                "unknown rearm contains an applied deadline"
+            );
+        }
+        Ok(())
+    }
+}

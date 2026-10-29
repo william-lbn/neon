@@ -3,6 +3,24 @@ info:
   title: Neon DSGA PG management API
   version: "1"
 paths:
+  /dsg/v1/admission/lease/rearm/status:
+    post:
+      operationId: getDsgAdmissionRearmStatus
+      summary: 只读查询完整原rearm的历史应用回执及当前期限
+      description: 更高owner可查询原请求，不重发setter或延长期限。单槽未命中只表示未知，历史成功不授权当前开放，不清原资源未知或预算。
+      security: [{DsgJWT: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/AdmissionLeaseRequest"}
+      responses:
+        "200":
+          description: 历史应用deadline和独立当前事实；retained=false不是NoEffect，no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/AdmissionRearmStatus"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/admission/lease:
     post:
       operationId: maintainDsgAdmissionLease
@@ -405,6 +423,17 @@ components:
         startup_arrays_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
         current_main_and_arrays_upper_bytes: {$ref: "#/components/schemas/PositiveU64"}
         observed: {$ref: "#/components/schemas/Snapshot"}
+    AdmissionRearmStatus:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, vm_shrink_permit, request, retained, applied_deadline_ns, current]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        vm_shrink_permit: {type: boolean, enum: [false]}
+        request: {$ref: "#/components/schemas/AdmissionLeaseRequest"}
+        retained: {type: boolean}
+        applied_deadline_ns: {$ref: "#/components/schemas/U64"}
+        current: {$ref: "#/components/schemas/AdmissionLeaseResponse"}
     AdmissionLeaseRequest:
       type: object
       additionalProperties: false

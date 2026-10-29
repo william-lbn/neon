@@ -58,6 +58,7 @@ PG_FUNCTION_INFO_V1(neon_dsg_fence_issuer);
 PG_FUNCTION_INFO_V1(neon_dsg_set_admission);
 PG_FUNCTION_INFO_V1(neon_dsg_admission_status);
 PG_FUNCTION_INFO_V1(neon_dsg_admission_lease);
+PG_FUNCTION_INFO_V1(neon_dsg_admission_rearm_status);
 PG_FUNCTION_INFO_V1(neon_dsg_shared_cost);
 PG_FUNCTION_INFO_V1(neon_dsg_work_state);
 PG_FUNCTION_INFO_V1(neon_dsg_connection_state);
@@ -1045,17 +1046,20 @@ neon_dsg_admission_status(PG_FUNCTION_ARGS)
  * 不开放准入，rearm还须外层明确恢复授权。升级SQL可撤回，但撤回不撤销已启动
  * 的内核期限，不能以扩展降级洗掉关闭事实。错误不包含凭据或完整请求原文。
  */
-Datum
-neon_dsg_admission_lease(PG_FUNCTION_ARGS)
+static Datum
+NeonDsgAdmissionLease(text *raw, bool query_rearm)
 {
 	NeonDsgCheckAdministrator();
 #if defined(NEON_DSG_ADMISSION_LEASE_API_VERSION) && NEON_DSG_ADMISSION_LEASE_API_VERSION == 1
 	{
-		Jsonb *input = NeonDsgParseRaw(PG_GETARG_TEXT_PP(0));
+		Jsonb *input = NeonDsgParseRaw(raw);
 		JsonbContainer *root = &input->root;
 		JsonbContainer *instance;
 		DsgAdmissionLeaseRequest request;
 		DsgAdmissionLeaseResponse response;
+#if defined(NEON_DSG_ADMISSION_REARM_STATUS_API_VERSION) && NEON_DSG_ADMISSION_REARM_STATUS_API_VERSION == 1
+		DsgAdmissionRearmStatus status;
+#endif
 		StringInfoData output;
 		char *action;
 		char *vm_uid;
@@ -1081,8 +1085,30 @@ neon_dsg_admission_lease(PG_FUNCTION_ARGS)
 			(strcmp(action, "observe") != 0 && strcmp(action, "renew") != 0 && !request.rearm) ||
 			(strcmp(action, "observe") != 0 && request.expected_deadline_ns == 0))
 			ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("invalid DSGA admission lease identity or action")));
-		DsgBufferAdmissionLease(strcmp(action, "observe") == 0 ? NULL : &request, &response);
+		/*- 查询入口固定只读语义；不能用renew/observe选择别的原请求。 */
+		if (query_rearm)
+		{
+#if defined(NEON_DSG_ADMISSION_REARM_STATUS_API_VERSION) && NEON_DSG_ADMISSION_REARM_STATUS_API_VERSION == 1
+			if (!request.rearm)
+				ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE), errmsg("rearm status requires original rearm request")));
+			DsgBufferAdmissionRearmStatus(&request, &status);
+			response = status.current;
+#else
+			ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("this build lacks native DSGA rearm status support")));
+#endif
+		}
+		else
+			DsgBufferAdmissionLease(strcmp(action, "observe") == 0 ? NULL : &request, &response);
 		initStringInfo(&output);
+		if (query_rearm)
+		{
+#if defined(NEON_DSG_ADMISSION_REARM_STATUS_API_VERSION) && NEON_DSG_ADMISSION_REARM_STATUS_API_VERSION == 1
+			appendStringInfoString(&output, "{\"protocol_version\":1,\"vm_shrink_permit\":false,\"request\":");
+			appendStringInfoString(&output, JsonbToCString(NULL, root, VARSIZE(input)));
+			appendStringInfo(&output, ",\"retained\":%s,\"applied_deadline_ns\":\"" UINT64_FORMAT "\",\"current\":",
+							 status.retained ? "true" : "false", status.applied_deadline_ns);
+#endif
+		}
 		appendStringInfoString(&output, "{\"protocol_version\":1,\"vm_shrink_permit\":false,\"request\":");
 		appendStringInfoString(&output, JsonbToCString(NULL, root, VARSIZE(input)));
 		appendStringInfo(&output, ",\"renewed\":%s,\"armed\":%s,\"expired\":%s,\"deadline_ns\":\"" UINT64_FORMAT
@@ -1091,10 +1117,25 @@ neon_dsg_admission_lease(PG_FUNCTION_ARGS)
 						 response.expired ? "true" : "false", response.deadline_ns, response.lease_epoch, response.timeout_ms);
 		NeonDsgAppendSnapshot(&output, &response.observed);
 		appendStringInfoChar(&output, '}');
+		if (query_rearm)
+			appendStringInfoChar(&output, '}');
 		PG_RETURN_DATUM(NeonDsgJson(&output));
 	}
 #else
 	ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("this build lacks native DSGA admission lease support")));
 	PG_RETURN_NULL();
 #endif
+}
+
+Datum
+neon_dsg_admission_lease(PG_FUNCTION_ARGS)
+{
+	return NeonDsgAdmissionLease(PG_GETARG_TEXT_PP(0), false);
+}
+
+/*- 完整原rearm查询独立于setter，不续租、不生成准入或物理回收许可。 */
+Datum
+neon_dsg_admission_rearm_status(PG_FUNCTION_ARGS)
+{
+	return NeonDsgAdmissionLease(PG_GETARG_TEXT_PP(0), true);
 }
