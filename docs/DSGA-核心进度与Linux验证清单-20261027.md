@@ -5,6 +5,31 @@
 **先完成PG17全部核心实现、Mac可执行验证及远程归档，然后暂停**；PG18→PG16
 留待所有者恢复，PG14/15与独立控制面边界不变。2026-10-26上游冻结继续生效，不重新追新，不重复未变功能。
 
+## 最新验证：PG尚未派发的资源在途异常关闭已完成Mac阶段
+
+AS `3f8528c2427cd470c6ec657044e8fda081eec130`已推既有自有功能分支并核完整远程SHA，本仓发行锁准确采用。
+Prepare/Host/VM/Guest在途、PG仍Planned时，正式PGWorker区分合法原命令未知与
+来源失效，认证原Root/出生/资格/Runner/永久头及Prepare/Host来源。异常先fence、
+UID/RV写前CAS再独立关闭；Journal v16固定完整Active、原步骤/预算/历史，未知
+Quiesce逐字保存原Close并封住迟到写，丢回复/SDK重建/高owner接续不丢原选择。
+ReadActiveHeld只读认证原永久头及Start前保存的关闭链，解决取消实际预算进入
+后继Active被误关的问题；旧ReadCurrent全局结清条件保持，原来源保护丢失仍拒绝。
+
+Mac race采用32顶层/180含父子记录通过，0fail/skip，新增6顶层39记录。包含
+Journal25顶层147记录、九个新生产恢复模式、两种Guest真实失租接管/取消结清/
+后继Prepare及原Host保护拒绝、完整自动Grow→Shrink生产Finish/Host结清和QMP
+peer实际值1GiB读回；三包vet/最终增量lint0，共享消费者仅编译。原HEAD overlay、
+静态Lease/组合期限/非法初始预算及原永久头读者误用的真实失败保留，准确采用
+见[阶段验收](DSGA-资源在途异常关闭-Mac验收-20261029.md)及
+[机器收据](DSGA-资源在途异常关闭-Mac收据-20261029.json)。不是完整产品E2E。
+
+PG已派发/跨容量与Cleanup、坏缺日志关闭、受控重开/重复生命周期、安全降normal/
+私有后台持续边界、出生无屏障/Runner无Wait/分区跨boot、Monitor/WSS/配额/RW-RO/
+可信CPU及全部写者仍须代码，不能转列Linux后验。PG17三锁/实际源码325a及冻结
+上游保持；未改PG/Rust、不重复未变原生大矩阵，不建镜像/部署/合main。Linux/
+真实Kube/KVM/NeonVM/HugeTLB/物理/性能另验。Goal active，PG17全面代码/Mac/
+远程归档后才暂停自动接续，不进入PG18/16，不追新上游或独立控制面。
+
 ## 最新验证：原Runner出生失败关闭与整Pod结清已完成Mac阶段
 
 AS `4bbcdba6fc668ee571591bc093961136da1244a3`已推既有自有功能分支并核完整远程SHA，本仓发行锁准确采用。
