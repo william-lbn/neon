@@ -130,6 +130,48 @@ class DsgAdmissionLease(unittest.TestCase):
         result = self.pg.sql(f"SET SESSION AUTHORIZATION dsg_app; SELECT neon_dsg_admission_rearm_status('{self.pg.quote(raw)}')", check=False)
         self.assertNotEqual(result.returncode, 0, "授予EXECUTE仍须SU session")
 
+    def test_reclosed_service_repeated_expiry_requires_higher_owner_before_reopen(self):
+        # 对应Autoscaling的新组合：原开放即使已应用丢回复，完整再关闭仍
+        # 先推进独立revision；后续恢复期限不改变它，更不直接开放业务。
+        # 此处只证明真实PG/Neon原生边界，不证明外层预算或VM物理返还。
+        self.fence()
+        self.open()
+        self.assertEqual(self.open(revision=2, opened=False)["disposition"], "applied")
+        self.open(revision=3)  # 调用者丢失回复，不能据此将外层Unknown改成功。
+        self.assertEqual(self.open(revision=4, opened=False)["disposition"], "applied")
+        time.sleep(1.1)
+        expired = self.lease()
+        previous = None
+        for epoch in (2, 3, 4):
+            with self.subTest(epoch=epoch):
+                self.assertTrue(expired["expired"])
+                old_deadline = expired["deadline_ns"]
+                self.fence(epoch)
+                fenced = self.lease(self.lease_request(epoch=epoch))
+                self.assertEqual(fenced["deadline_ns"], old_deadline, "接管fence不续租")
+                self.assertFalse(self.lease(self.lease_request(expired, "rearm", epoch - 1))["renewed"])
+                request = self.lease_request(expired, "rearm", epoch)
+                applied = self.lease(request)
+                self.assertTrue(applied["renewed"])
+                self.assertFalse(applied["observed"]["admission_open"])
+                self.assertEqual(applied["observed"]["admission_revision"], "4")
+                retained = self.rearm_status(request)
+                self.assertTrue(retained["retained"])
+                self.assertEqual(retained["applied_deadline_ns"], applied["deadline_ns"])
+                if previous is not None:
+                    self.assertFalse(self.rearm_status(previous)["retained"], "单槽覆盖仅表示未知")
+                self.assertFalse(self.lease(request)["renewed"], "同一CAS重放不延长")
+                previous = request
+                if epoch < 4:
+                    time.sleep(1.1)
+                    history = self.rearm_status(request)
+                    self.assertTrue(history["retained"], "历史成功与当前再次过期可以同时成立")
+                    expired = history["current"]
+        self.assertEqual(self.open(epoch=4, revision=5)["disposition"], "applied")
+        self.assertEqual(self.open(epoch=1, revision=3)["disposition"], "stale")
+        self.assertEqual(self.lease(self.lease_request(epoch=4))["observed"]["admission_revision"], "5")
+        self.assertEqual(self.pg.sql("SET SESSION AUTHORIZATION dsg_app; SELECT 1").stdout.strip(), "1")
+
     def test_rearm_receipt_survives_sql_downgrade_but_not_new_boot(self):
         request, applied = self.applied_rearm()
         self.pg.sql("ALTER EXTENSION neon UPDATE TO '1.16'")
