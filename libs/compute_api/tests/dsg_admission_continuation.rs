@@ -26,6 +26,31 @@ fn continuation_vectors_and_independent_digests() {
     assert_eq!(vectors.len(), 26);
     for v in vectors {
         let req = serde_json::from_value::<Request>(v.request);
+        // 历史v1读者仍明确拒绝2；新增v2能力由独立表验证，不改历史向量。
+        let valid = req
+            .as_ref()
+            .is_ok_and(|r| r.protocol_version == 1 && r.validate().is_ok());
+        assert_eq!(valid, v.valid, "{}", v.name);
+        if v.valid {
+            assert_eq!(
+                req.unwrap().context_sha256().unwrap(),
+                v.context_sha256.unwrap(),
+                "{}",
+                v.name
+            );
+        }
+    }
+}
+
+#[test]
+fn continuation_capacity_vectors_and_independent_digests() {
+    let vectors: Vec<Vector> = serde_json::from_str(include_str!(
+        "../testdata/dsg_admission_continuation_v2.json"
+    ))
+    .unwrap();
+    assert_eq!(vectors.len(), 37);
+    for v in vectors {
+        let req = serde_json::from_value::<Request>(v.request);
         let valid = req.as_ref().is_ok_and(|r| r.validate().is_ok());
         assert_eq!(valid, v.valid, "{}", v.name);
         if v.valid {
@@ -37,6 +62,33 @@ fn continuation_vectors_and_independent_digests() {
             );
         }
     }
+}
+
+#[test]
+fn continuation_capacity_proof_requires_selected_version() {
+    let (mut req, mut proof) = fixture();
+    req.protocol_version = 2;
+    req.close.expected_capacity_generation =
+        DsgUint64::new(req.close.expected_capacity_generation.get() + 1);
+    proof.protocol_version = 2;
+    proof.request = req.clone();
+    proof.context_sha256 = req.context_sha256().unwrap();
+    proof.closed_by.request = req.close.clone();
+    proof.closed_by.context_sha256 = req.close.context_sha256().unwrap();
+    proof.closed_by.observed.capacity_generation = req.close.expected_capacity_generation;
+    proof
+        .validate_for(&req, &req.close.instance, false)
+        .unwrap();
+    let mut bad = proof.clone();
+    bad.protocol_version = 1;
+    assert!(bad.validate_for(&req, &req.close.instance, false).is_err());
+    proof.closed_by.disposition = D::Replayed;
+    proof.closed_by.observed.capacity_generation =
+        DsgUint64::new(req.close.expected_capacity_generation.get() + 1);
+    proof.validate_for(&req, &req.close.instance, true).unwrap();
+    proof.closed_by.observed.capacity_generation =
+        DsgUint64::new(req.close.expected_capacity_generation.get() - 1);
+    assert!(proof.validate_for(&req, &req.close.instance, true).is_err());
 }
 
 fn fixture() -> (Request, Response) {

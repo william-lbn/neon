@@ -11,6 +11,173 @@ use std::time::Duration;
 mod dsg_cluster;
 use dsg_cluster::{COMPUTE, Cluster, VM};
 
+// 真实PG执行先停在Grow准备门禁，证明关闭不等resize锁；提交前后分别核
+// 原关闭回执和容量竞态恢复。仅保留/查询原Resize，不把关门称为资源完成。
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn continuation_capacity_race_recovers_same_owner_and_preserves_resize() -> Result<()> {
+    use compute_api::dsg_control::DsgResizeRequest;
+    use compute_api::dsg_state::DsgPhase;
+    use tokio::time::{sleep, timeout};
+    let mut cluster = Cluster::new()?;
+    let execution = cluster.connect().await?;
+    let observer = cluster.connect().await?;
+    execution
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.10'")
+        .await?;
+    let client =
+        DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, Duration::from_secs(5)).await?;
+    let mut resize: DsgResizeRequest =
+        serde_json::from_str(include_str!("../testdata/dsg_request_v1.json"))?;
+    resize.key.instance = client.instance().clone();
+    resize.key.issuer_epoch = DsgUint64::new(1);
+    resize.key.revision = DsgUint64::new(1);
+    resize.expected_capacity_generation = DsgUint64::new(1);
+    resize.target_buffers = 1024;
+    execution
+        .query_one("SELECT public.dsg_control('arm_pause')", &[])
+        .await?;
+    let mut original = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: client.instance().clone(),
+        issuer_epoch: DsgUint64::new(1),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: DsgUint64::new(1),
+        open: false,
+        budget_commitment_id: "capacity-race-budget".into(),
+    };
+    {
+        let running = client.request_resize(&resize);
+        tokio::pin!(running);
+        let ready = timeout(Duration::from_secs(5), async {
+            loop {
+                let r = observer
+                    .query_one("SELECT public.dsg_control('prepare_waiting')", &[])
+                    .await?;
+                if r.get::<_, &str>(0) == "yes" {
+                    return Ok::<_, anyhow::Error>(());
+                }
+                sleep(Duration::from_millis(10)).await;
+            }
+        });
+        tokio::select! {
+            result = &mut running => anyhow::bail!("resize did not enter native gate: {result:?}"),
+            ready = ready => ready??,
+        }
+        let closed = timeout(Duration::from_secs(2), client.set_admission(&original)).await??;
+        assert_eq!(closed.disposition, D::Applied);
+        assert_eq!(
+            closed.observed.operation.as_ref().unwrap().phase,
+            DsgPhase::Preparing
+        );
+    } // Drop执行future，SDK保留原Resize未知；PG仍停在原生准备门禁。
+    observer
+        .query_one("SELECT public.dsg_control('release_prepare')", &[])
+        .await?;
+    timeout(Duration::from_secs(5), async {
+        loop {
+            let state = client.memory_status().await?.observed;
+            if state.capacity_generation.get() == 2 {
+                assert_eq!(state.operation.as_ref().unwrap().phase, DsgPhase::Committed);
+                return Ok::<_, anyhow::Error>(());
+            }
+            sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await??;
+    let retained = client.admission_status(&original).await?;
+    assert_eq!(retained.disposition, D::Replayed);
+    assert_eq!(retained.observed.capacity_generation.get(), 2);
+    assert!(!retained.observed.admission_open);
+
+    // 模拟写前所选旧容量关闭恰好晚于真实提交到达。PG返回Stale，SDK必须
+    // 留原未知；同owner仅凭容量严格前进和更高revision选择v2后继关闭。
+    original.revision = DsgUint64::new(2);
+    assert_eq!(client.set_admission(&original).await?.disposition, D::Stale);
+    assert_eq!(client.pending_admission()?.0, Some(original.clone()));
+    let mut selection = Request {
+        protocol_version: 2,
+        original: original.clone(),
+        previous_close: original.clone(),
+        close: original.clone(),
+    };
+    selection.close.revision = DsgUint64::new(3);
+    selection.close.expected_capacity_generation = DsgUint64::new(2);
+    let proof = client.continue_admission_closure(&selection).await?;
+    assert_eq!(proof.protocol_version, 2);
+    assert_eq!(proof.closed_by.disposition, D::Applied);
+    assert!(!proof.closed_by.observed.admission_open);
+    let recovered =
+        DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, Duration::from_secs(5)).await?;
+    recovered.restore_admission_continuation(&selection)?;
+    let proof = recovered.admission_continuation_status(&selection).await?;
+    assert_eq!(proof.protocol_version, 2);
+    assert_eq!(proof.closed_by.disposition, D::Replayed);
+    let mut different = resize.clone();
+    different.key.revision = DsgUint64::new(2);
+    different.key.operation_id.low = DsgUint64::new(2);
+    different.expected_capacity_generation = DsgUint64::new(2);
+    different.target_buffers = 2048;
+    assert!(
+        matches!(
+            client.request_resize(&different).await,
+            Err(compute_api::dsg_client::DsgCallError::NotSent(_))
+        ),
+        "关闭不能清掉原Resize未知"
+    );
+    assert!(recovered.pending_admission_continuation()?.is_none());
+
+    // 容量相同的下一跳在单次协议上可合法v1，但已恢复v2的SDK不得降级。
+    let mut same = selection.clone();
+    same.original = selection.close.clone();
+    same.previous_close = same.original.clone();
+    same.close.issuer_epoch = DsgUint64::new(2);
+    let downgrade_guard =
+        DsgSqlClient::bind(&execution, &observer, VM, COMPUTE, Duration::from_secs(5)).await?;
+    downgrade_guard.restore_admission_continuation(&same)?;
+    let mut downgrade = same.clone();
+    downgrade.protocol_version = 1;
+    downgrade.previous_close = same.close.clone();
+    downgrade.close.issuer_epoch = DsgUint64::new(3);
+    assert!(downgrade.validate().is_ok());
+    assert!(
+        downgrade_guard
+            .continue_admission_closure(&downgrade)
+            .await
+            .is_err()
+    );
+    assert_eq!(
+        downgrade_guard.pending_admission_continuation()?,
+        Some(same)
+    );
+    assert_eq!(
+        client
+            .memory_status()
+            .await?
+            .observed
+            .issuer_floor_epoch
+            .get(),
+        1
+    );
+    for vector in serde_json::from_str::<Vec<serde_json::Value>>(include_str!(
+        "../testdata/dsg_admission_continuation_v2.json"
+    ))? {
+        if vector["valid"] == true {
+            let raw = serde_json::to_string(&vector["request"])?;
+            let digest: String = observer
+                .query_one(
+                    "SELECT encode(sha256(($1::text::jsonb)::text::bytea),'hex')",
+                    &[&raw],
+                )
+                .await?
+                .get(0);
+            assert_eq!(Some(digest.as_str()), vector["context_sha256"].as_str());
+        }
+    }
+    cluster.passed = true;
+    Ok(())
+}
+
 // 原开放可能在网络中，也可能永远没有投递。关门必须一次封住两种历史，
 // 不能先补发原开放来凑连续revision，更不能把NotFound当旧命令无效证明。
 // 本用例真实运行PG/Neon扩展/SDK；不证明外层预算恢复或目标平台物理回收。

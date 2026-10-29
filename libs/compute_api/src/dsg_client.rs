@@ -817,7 +817,7 @@ impl<'a> DsgSqlClient<'a> {
             .await
             .map_err(|e| admission_unconfirmed(&request.close, e))?;
         let proof = DsgAdmissionContinuationResponse {
-            protocol_version: 1,
+            protocol_version: request.protocol_version,
             vm_shrink_permit: false,
             request: request.clone(),
             context_sha256: request
@@ -844,7 +844,7 @@ impl<'a> DsgSqlClient<'a> {
             .map_err(DsgAdmissionCallError::NotSent)?;
         let native = self.admission_status(&request.close).await?;
         let proof = DsgAdmissionContinuationResponse {
-            protocol_version: 1,
+            protocol_version: request.protocol_version,
             vm_shrink_permit: false,
             request: request.clone(),
             context_sha256: request
@@ -906,7 +906,8 @@ impl<'a> DsgSqlClient<'a> {
             ensure!(
                 prior == request
                     || (prior.original == request.original
-                        && prior.close == request.previous_close),
+                        && prior.close == request.previous_close
+                        && request.protocol_version >= prior.protocol_version),
                 "continuation changed immediate predecessor"
             );
         } else if let Some(close) = &state.admission_close {
@@ -920,8 +921,9 @@ impl<'a> DsgSqlClient<'a> {
                 "continuation lacks original predecessor"
             );
         }
-        // 最初未知永不改写；新的选择保留直接前驱。更早前驱通过严格递增epoch
-        // 和固定boot/容量/预算被传递封住，无需无限累积链表，也不声称它们未执行。
+        // 最初未知永不改写；新的选择保留直接前驱。更早前驱通过提高epoch，
+        // 或v2同epoch时严格提高容量与revision被传递封住；boot/预算固定。已保留v2不能降回
+        // v1，即使本跳代次相同；显式v1→v2升级仍须保留完整直接前驱和原始未知。
         let predecessor = RetainedAdmission {
             original: state.admission_pending.clone(),
             close: state.admission_close.clone(),

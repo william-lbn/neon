@@ -1035,6 +1035,97 @@ async fn native_admission_http_original_receipts_and_fenced_closure() -> Result<
 
 #[tokio::test]
 #[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn native_admission_capacity_continuation_http_preserves_version_and_owner() -> Result<()> {
+    use compute_api::dsg_admission::{
+        DsgAdmissionContinuationRequest, DsgAdmissionContinuationResponse,
+    };
+    let signer = Signer::new();
+    let (mut cluster, _compute, app) = native(&signer).await?;
+    cluster
+        .connect()
+        .await?
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.10'")
+        .await?;
+    let mut claims = signer.claims();
+    let token = signer.token(&claims);
+    let before = memory(&app, &token).await?;
+    let original = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: before.observed.instance.clone(),
+        issuer_epoch: DsgUint64::new(1),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: before.observed.capacity_generation,
+        open: false,
+        budget_commitment_id: "http-capacity-continuation-budget".into(),
+    };
+    let resize = resize_request(&before, 1, 1024, DsgResizeKind::Grow);
+    let committed = control(&app, &token, "/dsg/v1/resize", &resize).await?;
+    assert_eq!(
+        committed.observed.capacity_generation.get(),
+        original.expected_capacity_generation.get() + 1
+    );
+    let mut selection = DsgAdmissionContinuationRequest {
+        protocol_version: 2,
+        original: original.clone(),
+        previous_close: original.clone(),
+        close: original,
+    };
+    selection.close.expected_capacity_generation = committed.observed.capacity_generation;
+    selection.close.revision = DsgUint64::new(2);
+    let path = "/dsg/v1/admission/continue-close";
+    let raw = serde_json::to_string(&selection)?;
+    claims["issuer_epoch"] = json!("2");
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            path,
+            Some(&signer.token(&claims)),
+            Some(&raw)
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    let mut downgraded = selection.clone();
+    downgraded.protocol_version = 1;
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            path,
+            Some(&token),
+            Some(&serde_json::to_string(&downgraded)?)
+        )
+        .await?
+        .0,
+        StatusCode::BAD_REQUEST
+    );
+    let (code, body) = invoke(app.clone(), Method::POST, path, Some(&token), Some(&raw)).await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let proof: DsgAdmissionContinuationResponse = serde_json::from_str(&body)?;
+    proof.validate_for(&selection, &selection.close.instance, false)?;
+    assert_eq!(proof.protocol_version, 2);
+    assert_eq!(proof.closed_by.protocol_version, 1);
+    assert!(!proof.closed_by.observed.admission_open);
+    let (code, body) = invoke(
+        app,
+        Method::POST,
+        "/dsg/v1/admission/continue-close/status",
+        Some(&token),
+        Some(&raw),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let proof: DsgAdmissionContinuationResponse = serde_json::from_str(&body)?;
+    proof.validate_for(&selection, &selection.close.instance, true)?;
+    assert_eq!(proof.protocol_version, 2);
+    cluster.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
 async fn native_admission_continuation_http_checks_owner_and_retained_predecessor() -> Result<()> {
     use compute_api::dsg_admission::{
         DsgAdmissionContinuationRequest, DsgAdmissionContinuationResponse,

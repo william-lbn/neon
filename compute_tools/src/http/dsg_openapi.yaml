@@ -238,11 +238,13 @@ paths:
   /dsg/v1/admission/continue-close:
     post:
       operationId: continueDsgAdmissionClosure
-      summary: 新owner显式接续未确认关闭，保留最初与前驱意图
+      summary: 接续未确认关闭，保留最初与直接前驱完整意图
       description: >-
-        同boot、容量和预算；新epoch严格高于前驱，revision不回退。
+        同boot和预算；v1固定容量并要求更高epoch，v2允许容量代次单调前进。
+        同epoch仅v2容量严格前进且revision严格提高时允许；其他情况要求更高epoch。
+        外层Journal另行限制原Resize的前后两代，协议不授予任意容量或预算释放。
         写前持久选择后，Compute先取得PG原生fence再发送关闭；不重放旧owner。
-        失败保留完整选择，不能自动改revision。关闭不证明旧工作排空，不释放预算或Host。
+        失败保留完整选择；同代次未知不能自动改revision。关闭不证明旧工作排空，不释放预算或Host。
       security: [{DsgJWT: []}]
       requestBody:
         required: true
@@ -431,7 +433,7 @@ components:
       additionalProperties: false
       required: [protocol_version, original, previous_close, close]
       properties:
-        protocol_version: {type: integer, enum: [1]}
+        protocol_version: {type: integer, enum: [1, 2]}
         original: {$ref: "#/components/schemas/AdmissionRequest"}
         previous_close: {$ref: "#/components/schemas/AdmissionRequest"}
         close: {$ref: "#/components/schemas/AdmissionRequest"}
@@ -440,7 +442,7 @@ components:
       additionalProperties: false
       required: [protocol_version, vm_shrink_permit, request, context_sha256, closed_by, prior_may_have_applied]
       properties:
-        protocol_version: {type: integer, enum: [1]}
+        protocol_version: {type: integer, enum: [1, 2], description: 必须等于所选request的protocol_version}
         vm_shrink_permit: {type: boolean, enum: [false]}
         request: {$ref: "#/components/schemas/AdmissionContinuationRequest"}
         context_sha256: {type: string, pattern: '^[0-9a-f]{64}$'}

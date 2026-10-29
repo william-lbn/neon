@@ -188,7 +188,8 @@ impl DsgAdmissionCloseRequest {
 
 /// 接管者选择空闲服务关闭的后继：保留最初意图及最近关闭，不改写旧owner。
 /// 本类型只描述写前选择；实际派发仍需UID/RV WAL、当前Session和原生PG fence。
-/// 只允许同boot/容量/预算继续关闭，不能用于跨容量、跨boot或重新开放。
+/// v1固定容量，v2允许同boot/预算的容量代次单调前进，子请求仍为v1。
+/// 外层Journal必须独立限制原Resize允许的有限代次；这里不授予资源派发/释放。
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct DsgAdmissionContinuationRequest {
@@ -201,7 +202,7 @@ pub struct DsgAdmissionContinuationRequest {
 impl DsgAdmissionContinuationRequest {
     pub fn validate(&self) -> Result<()> {
         ensure!(
-            self.protocol_version == 1,
+            self.protocol_version == 1 || self.protocol_version == 2,
             "unsupported admission continuation protocol"
         );
         self.original.validate()?;
@@ -217,13 +218,31 @@ impl DsgAdmissionContinuationRequest {
         next.closes_over(previous)?;
         ensure!(
             previous.revision >= original.revision
-                && next.issuer_epoch > previous.issuer_epoch
+                && next.issuer_epoch >= previous.issuer_epoch
                 && next.revision >= previous.revision
                 && original.budget_commitment_id == previous.budget_commitment_id
-                && original.budget_commitment_id == next.budget_commitment_id
-                && original.expected_capacity_generation == previous.expected_capacity_generation
-                && original.expected_capacity_generation == next.expected_capacity_generation,
-            "continuation changes retained idle boundary or fails to fence predecessor"
+                && original.budget_commitment_id == next.budget_commitment_id,
+            "continuation changes retained boundary or fails to fence predecessor"
+        );
+        // 不做加法，最大u64也不能回绕。容量前进不证明原Resize已完成或无
+        // 效果；仅完整Close原生回执可以关闭本选择，原预算与未知事实保留。
+        ensure!(
+            if self.protocol_version == 1 {
+                original.expected_capacity_generation == previous.expected_capacity_generation
+                    && previous.expected_capacity_generation == next.expected_capacity_generation
+            } else {
+                original.expected_capacity_generation <= previous.expected_capacity_generation
+                    && previous.expected_capacity_generation <= next.expected_capacity_generation
+            },
+            "continuation violates selected capacity protocol"
+        );
+        // 同owner仅在v2容量严格前进时接续；closes_over还要求revision严格
+        // 提高，因此旧关闭即使迟到也不能覆盖。没有容量进展必须更高owner。
+        ensure!(
+            next.issuer_epoch != previous.issuer_epoch
+                || (self.protocol_version == 2
+                    && next.expected_capacity_generation > previous.expected_capacity_generation),
+            "same owner continuation requires capacity progress"
         );
         Ok(())
     }
@@ -255,7 +274,7 @@ impl DsgAdmissionContinuationResponse {
         query: bool,
     ) -> Result<()> {
         ensure!(
-            self.protocol_version == 1
+            self.protocol_version == request.protocol_version
                 && !self.vm_shrink_permit
                 && self.prior_may_have_applied
                 && self.request == *request
