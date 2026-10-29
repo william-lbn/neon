@@ -5,6 +5,28 @@
 阶段性通过不能替代完整交付。默认关闭，不合
 自有主分支，不构建镜像、不部署K8s、不发布。
 
+## 最新验证：原Runner出生失败关闭与整Pod结清已完成Mac阶段
+
+AS `4bbcdba6fc668ee571591bc093961136da1244a3`已推既有自有功能分支并核完整远程SHA，本仓发行锁准确采用。
+Initialize已fsync nonce但State/Binding创建或读回失败时，先持原flock永久封存，
+同nonce补齐仅供关闭的原来源也始终返回nil/error。已确认State UID独立fsync，
+后续失败不得同名换UID；原WAL保留，迟到Tick/Start拒绝。Scheduler仍要求完整
+Pod终态与原Node CAS，sidecar运行保留成本，丢回复保留保护并重读结清。
+
+Mac Runner全包-race41顶层177含父子记录通过；Scheduler首轮43pass/1fail，
+旧v8未知断言改为v9后两项定向通过，成功子树去重17顶层44记录。合计去重
+58顶层221记录，新增4顶层14记录；不是221次产品E2E。两包vet/最终增量lint0，
+Mac共享消费者仅编译、Runner双Linux架构仅交叉编译exit0。首轮和基线真实失败
+完整保留，准确采用与平台边界见[阶段验收](DSGA-出生失败关闭-Mac验收-20261029.md)
+及[机器收据](DSGA-出生失败关闭-Mac收据-20261029.json)。PG17三处仍准确325a，
+未改PG/Rust、不重复未变原生大矩阵；Linux/QEMU/KVM/物理/性能未执行。
+
+仅同一次Initialize尚存活且可封存的出生失败窗口完成。崩溃无失败屏障、Runner
+无Wait/分区/跨boot迁移、更早资源在途及坏缺日志独立关闭、受控重开/有界重复
+生命周期、normal/私有后台持续上界与活性、Monitor/WSS/配额/RW-RO及可信CPU/
+全部最终写者仍须代码，不能转列Linux后验。Goal active，PG17全面完成/Mac验证/
+远程归档后才暂停，不进入18/16、不追新上游/独立控制面、不建镜像/部署/合main。
+
 ## 最新验证：资源完成而最终结算未确认的异常关闭已完成Mac阶段
 
 AS `a29c79f825732352e4aac04d2974d28feb5a016b`已推当前自有功能分支并核完整远程SHA，本仓发行锁准确采用。全部资源前驱Completed、Finalize尚Planned/Unconfirmed、Resume仍空Planned时，复用正式结算来源审计，异常后原生fence、同boot/原目标容量核验及UID/RV写前CAS执行独立关闭；同轮覆盖Start后来源漂移。Journal v15固定完整Active，关闭仅引用原目标承诺，不生成成功预算，旧永久头、Finalize/Resize未知和空Resume均保留。来源恢复、SDK重建及更高owner接续保持关闭。
