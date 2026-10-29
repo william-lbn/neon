@@ -185,3 +185,84 @@ impl DsgAdmissionCloseRequest {
         self.close.closes_over(&self.original)
     }
 }
+
+/// 接管者选择空闲服务关闭的后继：保留最初意图及最近关闭，不改写旧owner。
+/// 本类型只描述写前选择；实际派发仍需UID/RV WAL、当前Session和原生PG fence。
+/// 只允许同boot/容量/预算继续关闭，不能用于跨容量、跨boot或重新开放。
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DsgAdmissionContinuationRequest {
+    pub protocol_version: u32,
+    pub original: DsgAdmissionRequest,
+    pub previous_close: DsgAdmissionRequest,
+    pub close: DsgAdmissionRequest,
+}
+
+impl DsgAdmissionContinuationRequest {
+    pub fn validate(&self) -> Result<()> {
+        ensure!(
+            self.protocol_version == 1,
+            "unsupported admission continuation protocol"
+        );
+        self.original.validate()?;
+        self.previous_close.validate()?;
+        self.close.validate()?;
+        let (original, previous, next) = (&self.original, &self.previous_close, &self.close);
+        // 首次接续可逐字引用原关闭；否则必须保留一个更高关闭。revision是
+        // 同boot全局水位，换owner不重置；使用比较而非加法，避免u64溢出。
+        ensure!(!previous.open, "continuation predecessor must close");
+        if previous != original {
+            previous.closes_over(original)?;
+        }
+        next.closes_over(previous)?;
+        ensure!(
+            previous.revision >= original.revision
+                && next.issuer_epoch > previous.issuer_epoch
+                && next.revision >= previous.revision
+                && original.budget_commitment_id == previous.budget_commitment_id
+                && original.budget_commitment_id == next.budget_commitment_id
+                && original.expected_capacity_generation == previous.expected_capacity_generation
+                && original.expected_capacity_generation == next.expected_capacity_generation,
+            "continuation changes retained idle boundary or fails to fence predecessor"
+        );
+        Ok(())
+    }
+
+    pub fn context_sha256(&self) -> Result<String> {
+        self.validate()?;
+        canonical_context_sha256(self)
+    }
+}
+
+/// 原始/前驱/后继的选择摘要与PG原生关闭回执同时固定。包装不能合成PG事实，
+/// prior_may_have_applied必须保持true；原预算/已开始工作仍需独立对账，不授予VM许可。
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct DsgAdmissionContinuationResponse {
+    pub protocol_version: u32,
+    pub vm_shrink_permit: bool,
+    pub request: DsgAdmissionContinuationRequest,
+    pub context_sha256: String,
+    pub closed_by: DsgAdmissionResponse,
+    pub prior_may_have_applied: bool,
+}
+
+impl DsgAdmissionContinuationResponse {
+    pub fn validate_for(
+        &self,
+        request: &DsgAdmissionContinuationRequest,
+        bound: &DsgInstanceIdentity,
+        query: bool,
+    ) -> Result<()> {
+        ensure!(
+            self.protocol_version == 1
+                && !self.vm_shrink_permit
+                && self.prior_may_have_applied
+                && self.request == *request
+                && self.context_sha256 == request.context_sha256()?
+                && self.closed_by.confirms(),
+            "continuation lacks retained selection or complete native close"
+        );
+        self.closed_by.validate_for(&request.close, bound, query)
+    }
+}

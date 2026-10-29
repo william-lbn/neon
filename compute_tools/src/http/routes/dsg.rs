@@ -9,7 +9,9 @@ use axum::{
     response::Response,
     routing::{get, post},
 };
-use compute_api::dsg_admission::{DsgAdmissionCloseRequest, DsgAdmissionRequest};
+use compute_api::dsg_admission::{
+    DsgAdmissionCloseRequest, DsgAdmissionContinuationRequest, DsgAdmissionRequest,
+};
 use compute_api::dsg_auth::DsgHttpClaims;
 use compute_api::dsg_client::{
     DsgAdmissionCallError, DsgCallError, DsgFenceCallError, DsgSqlClient,
@@ -69,6 +71,11 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route(
             "/dsg/v1/admission/close-original/status",
             post(admission_close_status),
+        )
+        .route("/dsg/v1/admission/continue-close", post(admission_continue))
+        .route(
+            "/dsg/v1/admission/continue-close/status",
+            post(admission_continue_status),
         )
         // 原始有类型JSON直接反序列化，不经Value/map去重；不得放入URL query或日志。
         .layer(DefaultBodyLimit::max(16 * 1024))
@@ -439,6 +446,53 @@ async fn admission_close_operation(
             client
                 .close_admission_over_original(&request.original, &request.close)
                 .await
+        }),
+        Err(error) => error,
+    }
+}
+
+async fn admission_continue(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<DsgAdmissionContinuationRequest>,
+) -> Response {
+    admission_continue_operation(&compute, &claims, request, false).await
+}
+
+async fn admission_continue_status(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(request): Json<DsgAdmissionContinuationRequest>,
+) -> Response {
+    admission_continue_operation(&compute, &claims, request, true).await
+}
+
+async fn admission_continue_operation(
+    compute: &ComputeNode,
+    claims: &DsgHttpClaims,
+    request: DsgAdmissionContinuationRequest,
+    query: bool,
+) -> Response {
+    if request.validate().is_err() {
+        return failure(StatusCode::BAD_REQUEST, "invalid_request", None);
+    }
+    // 旧两份请求只读授权；新关闭必须恰为当前签名epoch。不能借未来floor或
+    // 原owner签名发送接续；SDK还会先取得PG原生fence，并保留全部未知选择。
+    if claims
+        .authorize_admission(&request.original, false)
+        .is_err()
+        || claims
+            .authorize_admission(&request.previous_close, false)
+            .is_err()
+        || claims.authorize_admission(&request.close, !query).is_err()
+    {
+        return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
+    }
+    match client(compute, claims).await {
+        Ok(client) => admission_result(if query {
+            client.admission_continuation_status(&request).await
+        } else {
+            client.continue_admission_closure(&request).await
         }),
         Err(error) => error,
     }

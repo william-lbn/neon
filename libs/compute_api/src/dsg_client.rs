@@ -14,7 +14,10 @@ use serde::de::DeserializeOwned;
 use tokio::time::timeout;
 use tokio_postgres::Client;
 
-use crate::dsg_admission::{DsgAdmissionClosure, DsgAdmissionRequest, DsgAdmissionResponse};
+use crate::dsg_admission::{
+    DsgAdmissionClosure, DsgAdmissionContinuationRequest, DsgAdmissionContinuationResponse,
+    DsgAdmissionRequest, DsgAdmissionResponse,
+};
 
 use crate::dsg_control::{
     DsgInstanceIdentity, DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery,
@@ -98,6 +101,7 @@ struct ExecutionState {
     in_flight: bool,
     admission_pending: Option<DsgAdmissionRequest>,
     admission_close: Option<DsgAdmissionRequest>,
+    admission_continuation: Option<DsgAdmissionContinuationRequest>,
     admission_in_flight: bool,
 }
 
@@ -124,14 +128,31 @@ impl std::error::Error for DsgAdmissionCallError {}
 struct AdmissionFlight<'a> {
     state: &'a Mutex<ExecutionState>,
     resolved: bool,
+    predecessor: Option<RetainedAdmission>,
+    fenced_out: bool,
+}
+
+// 仅接续派发保存前一完整本地状态。原生fence明确返回Stale时，后继setter
+// 尚未发送，且该旧epoch已被封住；只恢复此前状态，绝不清除此前已有未知。
+struct RetainedAdmission {
+    original: Option<DsgAdmissionRequest>,
+    close: Option<DsgAdmissionRequest>,
+    continuation: Option<DsgAdmissionContinuationRequest>,
 }
 impl Drop for AdmissionFlight<'_> {
     fn drop(&mut self) {
         if let Ok(mut state) = self.state.lock() {
             state.admission_in_flight = false;
-            if self.resolved {
+            if self.fenced_out {
+                if let Some(previous) = self.predecessor.take() {
+                    state.admission_pending = previous.original;
+                    state.admission_close = previous.close;
+                    state.admission_continuation = previous.continuation;
+                }
+            } else if self.resolved {
                 state.admission_pending = None;
                 state.admission_close = None;
+                state.admission_continuation = None;
             }
         }
     }
@@ -499,6 +520,10 @@ impl<'a> DsgSqlClient<'a> {
             "cannot restore over an in-flight call"
         );
         ensure!(
+            state.admission_continuation.is_none(),
+            "continuation requires complete restore"
+        );
+        ensure!(
             state.admission_pending.is_none() || state.admission_pending.as_ref() == Some(original),
             "restore differs from retained admission"
         );
@@ -656,7 +681,8 @@ impl<'a> DsgSqlClient<'a> {
         let mut state = self.execution_state.lock().map_err(|_| {
             DsgAdmissionCallError::NotSent(anyhow::anyhow!("DSGA execution fence is poisoned"))
         })?;
-        if state.admission_in_flight
+        if state.admission_continuation.is_some()
+            || state.admission_in_flight
             || state
                 .admission_pending
                 .as_ref()
@@ -692,6 +718,227 @@ impl<'a> DsgSqlClient<'a> {
         Ok(())
     }
 
+    /// 返回完整接续选择的副本，不提供清空入口。重连/进程恢复必须使用外层
+    /// 写前WAL的同一值，不能只按最新revision重建而丢掉最初未知和直接前驱。
+    pub fn pending_admission_continuation(
+        &self,
+    ) -> Result<Option<DsgAdmissionContinuationRequest>> {
+        Ok(self
+            .execution_state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("DSGA execution fence is poisoned"))?
+            .admission_continuation
+            .clone())
+    }
+
+    pub fn restore_admission_continuation(
+        &self,
+        request: &DsgAdmissionContinuationRequest,
+    ) -> Result<()> {
+        request.validate()?;
+        self.check_admission_binding(&request.close, false)?;
+        let mut state = self
+            .execution_state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("DSGA execution fence is poisoned"))?;
+        ensure!(
+            !state.in_flight && !state.admission_in_flight,
+            "cannot restore an in-flight call"
+        );
+        ensure!(
+            state
+                .admission_pending
+                .as_ref()
+                .is_none_or(|p| p == &request.original)
+                && state
+                    .admission_close
+                    .as_ref()
+                    .is_none_or(|p| p == &request.close)
+                && state
+                    .admission_continuation
+                    .as_ref()
+                    .is_none_or(|p| p == request),
+            "restore changes retained continuation"
+        );
+        state.admission_pending = Some(request.original.clone());
+        state.admission_close = Some(request.close.clone());
+        state.admission_continuation = Some(request.clone());
+        Ok(())
+    }
+
+    /// 显式接续关闭：先在同一Mutex内保留原始/前驱/当前选择，再释放锁并经独立
+    /// observer取得新epoch的原生fence，最后才发送关闭。future取消/任何网络错误
+    /// 只退出in_flight，保留完整选择；floor推进本身不关闭门禁、不释放原预算。
+    pub async fn continue_admission_closure(
+        &self,
+        request: &DsgAdmissionContinuationRequest,
+    ) -> Result<DsgAdmissionContinuationResponse, DsgAdmissionCallError> {
+        request.validate().map_err(DsgAdmissionCallError::NotSent)?;
+        self.check_admission_binding(&request.close, false)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        self.admission_function("neon_dsg_set_admission")
+            .await
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        let payload = serde_json::to_string(&request.close)
+            .map_err(|e| DsgAdmissionCallError::NotSent(e.into()))?;
+        let mut guard = self
+            .reserve_admission_continuation(request)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        let fence = self
+            .fence_issuer(&DsgIssuerFenceRequest {
+                protocol_version: 1,
+                instance: request.close.instance.clone(),
+                issuer_epoch: request.close.issuer_epoch,
+            })
+            .await
+            .map_err(|e| admission_unconfirmed(&request.close, e.into()))?;
+        if fence.disposition == crate::dsg_state::DsgIssuerFenceDisposition::Stale {
+            // 完整原生Stale证明本次关闭尚未发送且旧epoch不能迟到生效。
+            // 只回退本次新增的SDK保留，原始/前驱未知仍由旧状态及外层WAL保留。
+            // 否则过期owner可在新关闭完成后凭尚未到期的签名永久占住共享SDK。
+            guard.fenced_out = true;
+            return Err(DsgAdmissionCallError::NotSent(anyhow::anyhow!(
+                "continuation issuer was already fenced out"
+            )));
+        }
+        if fence.disposition != crate::dsg_state::DsgIssuerFenceDisposition::Fenced {
+            return Err(admission_unconfirmed(
+                &request.close,
+                anyhow::anyhow!("continuation issuer is not fenced"),
+            ));
+        }
+        let response: DsgAdmissionResponse = self
+            .call(
+                &self.observer,
+                &self.observer_schema,
+                "neon_dsg_set_admission",
+                &payload,
+            )
+            .await
+            .map_err(|e| admission_unconfirmed(&request.close, e))?;
+        let proof = DsgAdmissionContinuationResponse {
+            protocol_version: 1,
+            vm_shrink_permit: false,
+            request: request.clone(),
+            context_sha256: request
+                .context_sha256()
+                .map_err(|e| admission_unconfirmed(&request.close, e))?,
+            closed_by: response,
+            prior_may_have_applied: true,
+        };
+        proof
+            .validate_for(request, &self.instance, false)
+            .map_err(|e| admission_unconfirmed(&request.close, e))?;
+        guard.resolved = true;
+        Ok(proof)
+    }
+
+    /// 只读核验最新完整选择，旧选择/普通close-original查询不能清除本地更新后的
+    /// 栅栏。没有原生关闭回执时保持未知；不重发setter或合成NotFound/NoEffect。
+    pub async fn admission_continuation_status(
+        &self,
+        request: &DsgAdmissionContinuationRequest,
+    ) -> Result<DsgAdmissionContinuationResponse, DsgAdmissionCallError> {
+        request.validate().map_err(DsgAdmissionCallError::NotSent)?;
+        self.check_admission_binding(&request.close, false)
+            .map_err(DsgAdmissionCallError::NotSent)?;
+        let native = self.admission_status(&request.close).await?;
+        let proof = DsgAdmissionContinuationResponse {
+            protocol_version: 1,
+            vm_shrink_permit: false,
+            request: request.clone(),
+            context_sha256: request
+                .context_sha256()
+                .map_err(|e| admission_unconfirmed(&request.close, e))?,
+            closed_by: native,
+            prior_may_have_applied: true,
+        };
+        proof
+            .validate_for(request, &self.instance, true)
+            .map_err(|e| admission_unconfirmed(&request.close, e))?;
+        let mut state = self.execution_state.lock().map_err(|_| {
+            DsgAdmissionCallError::NotSent(anyhow::anyhow!("DSGA execution fence is poisoned"))
+        })?;
+        if state.admission_in_flight
+            || state
+                .admission_pending
+                .as_ref()
+                .is_some_and(|p| p != &request.original)
+            || state
+                .admission_close
+                .as_ref()
+                .is_some_and(|p| p != &request.close)
+            || state
+                .admission_continuation
+                .as_ref()
+                .is_some_and(|p| p != request)
+        {
+            return Err(DsgAdmissionCallError::NotSent(anyhow::anyhow!(
+                "local continuation differs from proof"
+            )));
+        }
+        state.admission_pending = None;
+        state.admission_close = None;
+        state.admission_continuation = None;
+        Ok(proof)
+    }
+
+    fn reserve_admission_continuation(
+        &self,
+        request: &DsgAdmissionContinuationRequest,
+    ) -> Result<AdmissionFlight<'_>> {
+        let mut state = self
+            .execution_state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("DSGA execution fence is poisoned"))?;
+        ensure!(
+            !state.admission_in_flight,
+            "another admission call is in flight"
+        );
+        ensure!(
+            state
+                .admission_pending
+                .as_ref()
+                .is_none_or(|p| p == &request.original),
+            "different original admission"
+        );
+        if let Some(prior) = &state.admission_continuation {
+            ensure!(
+                prior == request
+                    || (prior.original == request.original
+                        && prior.close == request.previous_close),
+                "continuation changed immediate predecessor"
+            );
+        } else if let Some(close) = &state.admission_close {
+            ensure!(
+                close == &request.previous_close,
+                "continuation changed predecessor close"
+            );
+        } else if state.admission_pending.is_some() {
+            ensure!(
+                request.previous_close == request.original,
+                "continuation lacks original predecessor"
+            );
+        }
+        // 最初未知永不改写；新的选择保留直接前驱。更早前驱通过严格递增epoch
+        // 和固定boot/容量/预算被传递封住，无需无限累积链表，也不声称它们未执行。
+        let predecessor = RetainedAdmission {
+            original: state.admission_pending.clone(),
+            close: state.admission_close.clone(),
+            continuation: state.admission_continuation.clone(),
+        };
+        state.admission_pending = Some(request.original.clone());
+        state.admission_close = Some(request.close.clone());
+        state.admission_continuation = Some(request.clone());
+        state.admission_in_flight = true;
+        Ok(AdmissionFlight {
+            state: &self.execution_state,
+            resolved: false,
+            predecessor: Some(predecessor),
+            fenced_out: false,
+        })
+    }
+
     fn reserve_admission(
         &self,
         original: &DsgAdmissionRequest,
@@ -704,6 +951,10 @@ impl<'a> DsgSqlClient<'a> {
         ensure!(
             !state.admission_in_flight,
             "another admission request is in flight"
+        );
+        ensure!(
+            state.admission_continuation.is_none(),
+            "complete continuation requires its own endpoint"
         );
         if let Some(pending) = &state.admission_pending {
             ensure!(
@@ -729,6 +980,8 @@ impl<'a> DsgSqlClient<'a> {
         Ok(AdmissionFlight {
             state: &self.execution_state,
             resolved: false,
+            predecessor: None,
+            fenced_out: false,
         })
     }
 

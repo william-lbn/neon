@@ -815,6 +815,8 @@ async fn admission_routes_require_execution_scope_and_strict_original_intents() 
         "/dsg/v1/admission/status",
         "/dsg/v1/admission/close-original",
         "/dsg/v1/admission/close-original/status",
+        "/dsg/v1/admission/continue-close",
+        "/dsg/v1/admission/continue-close/status",
     ] {
         for credential in [None, Some(signer.token(&creation))] {
             assert_eq!(
@@ -1027,6 +1029,154 @@ async fn native_admission_http_original_receipts_and_fenced_closure() -> Result<
         DsgUint64::new(3)
     );
     assert!(fact.prior_may_have_applied);
+    cluster.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn native_admission_continuation_http_checks_owner_and_retained_predecessor() -> Result<()> {
+    use compute_api::dsg_admission::{
+        DsgAdmissionContinuationRequest, DsgAdmissionContinuationResponse,
+    };
+    let signer = Signer::new();
+    let (mut cluster, _compute, app) = native(&signer).await?;
+    cluster
+        .connect()
+        .await?
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.10'")
+        .await?;
+    let mut claims = signer.claims();
+    let token = signer.token(&claims);
+    let observed = memory(&app, &token).await?.observed;
+    let original = DsgAdmissionRequest {
+        protocol_version: 1,
+        instance: observed.instance,
+        issuer_epoch: DsgUint64::new(1),
+        revision: DsgUint64::new(1),
+        expected_capacity_generation: observed.capacity_generation,
+        open: false,
+        budget_commitment_id: "http-continuation-budget".into(),
+    };
+    let mut first = DsgAdmissionContinuationRequest {
+        protocol_version: 1,
+        original: original.clone(),
+        previous_close: original.clone(),
+        close: original,
+    };
+    first.close.issuer_epoch = DsgUint64::new(2);
+    let first_raw = serde_json::to_string(&first)?;
+    let path = "/dsg/v1/admission/continue-close";
+    // 旧签名不能派发新epoch；未见查询只有503，不能借默认closed凑成功。
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            path,
+            Some(&token),
+            Some(&first_raw)
+        )
+        .await?
+        .0,
+        StatusCode::FORBIDDEN
+    );
+    claims["issuer_epoch"] = json!("2");
+    let token = signer.token(&claims);
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission/continue-close/status",
+            Some(&token),
+            Some(&first_raw)
+        )
+        .await?
+        .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        path,
+        Some(&token),
+        Some(&first_raw),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let proof: DsgAdmissionContinuationResponse = serde_json::from_str(&body)?;
+    proof.validate_for(&first, &first.close.instance, false)?;
+    assert_eq!(proof.closed_by.observed.issuer_floor_epoch.get(), 2);
+    // 已应用前驱再选相同revision会得到真实Conflict并保留完整选择；旧请求只读
+    // 即使仍有回执也不能清掉新未知。下一owner显式保留该前驱、选择next revision。
+    let mut second = first.clone();
+    second.previous_close = first.close.clone();
+    second.close.issuer_epoch = DsgUint64::new(3);
+    claims["issuer_epoch"] = json!("3");
+    let token = signer.token(&claims);
+    let second_raw = serde_json::to_string(&second)?;
+    assert_eq!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            path,
+            Some(&token),
+            Some(&second_raw)
+        )
+        .await?
+        .0,
+        StatusCode::SERVICE_UNAVAILABLE
+    );
+    assert_ne!(
+        invoke(
+            app.clone(),
+            Method::POST,
+            "/dsg/v1/admission/continue-close/status",
+            Some(&token),
+            Some(&first_raw)
+        )
+        .await?
+        .0,
+        StatusCode::OK
+    );
+    let mut final_close = second.clone();
+    final_close.previous_close = second.close.clone();
+    final_close.close.issuer_epoch = DsgUint64::new(4);
+    final_close.close.revision = DsgUint64::new(2);
+    claims["issuer_epoch"] = json!("4");
+    let token = signer.token(&claims);
+    let raw = serde_json::to_string(&final_close)?;
+    let (code, body) = invoke(app.clone(), Method::POST, path, Some(&token), Some(&raw)).await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let proof: DsgAdmissionContinuationResponse = serde_json::from_str(&body)?;
+    proof.validate_for(&final_close, &final_close.close.instance, false)?;
+    claims["issuer_epoch"] = json!("2");
+    let old_token = signer.token(&claims);
+    let (code, body) = invoke(
+        app.clone(),
+        Method::POST,
+        path,
+        Some(&old_token),
+        Some(&first_raw),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::CONFLICT, "{body}");
+    // 旧owner被原生fence明确拒绝且setter尚未发送，不得把共享SDK永久占住。
+    let (code, body) = invoke(app.clone(), Method::POST, path, Some(&token), Some(&raw)).await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    let (code, body) = invoke(
+        app,
+        Method::POST,
+        "/dsg/v1/admission/continue-close/status",
+        Some(&token),
+        Some(&raw),
+    )
+    .await?;
+    assert_eq!(code, StatusCode::OK, "{body}");
+    serde_json::from_str::<DsgAdmissionContinuationResponse>(&body)?.validate_for(
+        &final_close,
+        &final_close.close.instance,
+        true,
+    )?;
     cluster.passed = true;
     Ok(())
 }

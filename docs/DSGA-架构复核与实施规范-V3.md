@@ -1986,3 +1986,24 @@ WAL、写前CAS、原SDK查询/显式原重放及管理栅栏已闭合。来源�
 物理/性能和独立控制面后续统一E2E仍后验，缺失业务不转列为Linux待测。
 原Goal工具的额度blocked记录保留，本轮按用户恢复授权执行并沿用原heartbeat；
 未将目标标complete或paused。下方旧阻塞状态为历史，不覆盖本段实际验证。
+
+### 8.68 关闭接续协议与SDK的原生边界（2026-10-29）
+
+AS `ca15c2bd410e42a1c3eb8d1771465a5d5c0a0835`已推既有自有功能分支并核完整
+远程SHA，本仓锁采用同一依赖。新增原始/直接前驱/当前关闭的完整选择，固定
+同boot/容量/预算，严格递增owner、revision不回退；Rust先取得原生Fenced再关闭，
+超时保留未知。原生Stale且setter未发送仅回退本次SDK保留，不清已有未知，避免
+迟到owner占住共享SDK。Go恢复完整选择；旧回执/legacy路径不得清新选择。
+
+Mac Go合同-race5顶层43记录、SDK TLS-race3项；Rust合同6项、准确冻结PG17
+原生组合1项、真实Router受影响3项及resize观察关闭1项均通过。26向量两仓逐字
+一致，四份有效摘要另由真实PG JSONB/SHA核验。原生重启拒绝改绑已验。vet/
+增量lint/Clippy通过，已有依赖27warnings和初轮夹具/生成器失败如实保留。
+详细边界及复现证据见[本阶段验收](DSGA-关闭接续协议与SDK-Mac验收-20261029.md)
+和[机器收据](DSGA-关闭接续协议与SDK-Mac收据-20261029.json)。
+
+**下一步仍须代码**：外层Journal独立接续WAL/UID-RV写前CAS、PGWorker/Session
+完整恢复与管理入口及Mac业务组合。本批没有改变v10外层模型，不能称完整新owner
+恢复或仅待Linux验收。其他normal/持续约束、异常生命周期、Monitor/CPU与
+PG18→PG16缺口不减。PG17三处b078冻结点不变，不追上游/独立控制面；默认关闭，
+不构建镜像/部署/合main/发布生产。Goal active，阶段归档不等于整体完成。
