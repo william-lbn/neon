@@ -2007,3 +2007,19 @@ Mac Go合同-race5顶层43记录、SDK TLS-race3项；Rust合同6项、准确冻
 恢复或仅待Linux验收。其他normal/持续约束、异常生命周期、Monitor/CPU与
 PG18→PG16缺口不减。PG17三处b078冻结点不变，不追上游/独立控制面；默认关闭，
 不构建镜像/部署/合main/发布生产。Goal active，阶段归档不等于整体完成。
+
+### 8.69 关闭接续持久WAL与生产管理选择（2026-10-29）
+
+AS依赖`d12f533bb2e35ad933a178a6d1186234c0bbad12`已推原自有功能分支并核远程，本仓发行锁准确绑定。
+
+采用Journal v11独立Continuation，原关闭owner/请求/写前序列/预算/Unconfirmed
+永不改写。接续只由更高当前owner明确选择最近完整SHA，先原生Fenced再观察
+同boot/容量revision，原UID/RV写前CAS确认后派发。重建完整恢复原始、最近关闭
+和完整直接前驱；普通轮询只查询，明确重放不换revision，后继确认不等于旧请求
+未执行或可释放/缩VM。后继Settled仍保留服务关闭，不自动重开。
+
+Mac新生产组合真实Session失租/重复接管及各丢回复通过；PG/Root/Kube/平台为
+peer，管理执行直接走正式executeControl，未声称新管理HTTP网络E2E。原模型/
+协议、受影响旧v10/绑定、vet/lint与消费者只编译的准确证据及首轮测试断言失败
+见[阶段验收](DSGA-关闭接续持久WAL-Mac验收-20261029.md)。仍须在途/首次开放
+未知、坏缺日志关闭/受控重开及其他核心；PG17全面完成后暂停，PG18/16留后续。
