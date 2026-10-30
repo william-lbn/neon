@@ -1,0 +1,90 @@
+{
+  "schema": "pg17-mac-close-linux-handoff-v1",
+  "recorded_at": "2026-10-30T19:26:58.718990+08:00",
+  "purpose": "Owner-requested Mac stage closure; continue missing implementation and validation on Linux.",
+  "pg17_feature_complete": false,
+  "linux_validated_this_session": false,
+  "mac_auto_continuation_after_archive": false,
+  "autoscaling": {
+    "repository": "william-lbn/autoscaling",
+    "branch": "codex/dsga-autoscaling-20261019",
+    "code_checkpoint": "00eda3d5e5fc6ecb76e6e01fcbbf569e85609bda",
+    "archive_commit": "02a1b0c90e58e3dfed2bb9f2c7c44e98a207ca28"
+  },
+  "neon": {
+    "repository": "william-lbn/neon",
+    "branch": "codex/dsga-neon-v3-20261019",
+    "code_checkpoint": "e98faf368732f5406b385834ce7ff96dacdf6f5d",
+    "archive_commit_identity": "containing commit; avoid circular self-hash"
+  },
+  "pg17": {
+    "repository": "william-lbn/postgres",
+    "branch": "codex/dsga-pg17-v3-20261019",
+    "commit": "79367196a74eef82e67cac917877d2e6271d3e70",
+    "checkout_gitlink_and_two_locks_match": true,
+    "remote_head_verified": true
+  },
+  "archive_only": {
+    "production_changes": false,
+    "new_business_test_runs": 0,
+    "checks": [
+      "git diff --check",
+      "handoff relative links",
+      "draft body SHA preserved",
+      "latest receipt 54 referenced hashes",
+      "PG17 checkout/gitlink/two version locks",
+      "frozen ancestor checks",
+      "self-fork branch remote SHA"
+    ]
+  },
+  "preserved_evidence": {
+    "receipt": "docs/DSGA-早期原预算恢复闭环-Mac收据-20261030.json",
+    "sha256": "811f60d00b9c930c3c7bdf543270208dc17ccc13af73508c5bb50a8135572a62",
+    "referenced_hashes_verified": 54,
+    "source_files_verified": 24,
+    "race_unique_roots": 42,
+    "race_unique_parent_child_records": 263,
+    "race_fail": 0,
+    "race_skip": 0,
+    "native_rust_roots": 1,
+    "native_go_race_processes": 1,
+    "note": "Previously executed Mac results, re-audited without rerunning business tests; not whole PG17 acceptance."
+  },
+  "unimplemented_node_barrier": {
+    "runtime_integrated": false,
+    "current_host_ledger_max_version": 8,
+    "design": "https://github.com/william-lbn/autoscaling/blob/02a1b0c90e58e3dfed2bb9f2c7c44e98a207ca28/docs/PG17-Linux接续-Node屏障设计-20261030.md",
+    "draft_only_original_sha256": "e2620195cd1220addcb44b4c6ba4d72525d9f540df1072507c4f3397053d7cb5",
+    "draft_in_compiled_package": false,
+    "prior_draft_check": "compile-only, no tests to run; no feature validation"
+  },
+  "remaining_implementation": [
+    "P1: Prepared Completed/missing Host serial Node barrier, category18 and successor consumers",
+    "P2: continuous private/background budgets and proven safe normal limit decrease",
+    "P3: changed Agent/Monitor/LFC policy and real configuration wiring",
+    "P4: affected exact-PG17 final combinations and source-bound evidence"
+  ],
+  "linux_acceptance": [
+    "changed PG17 kernel and affected native semantics",
+    "changed Neon extension, Compute API/SDK/Monitor",
+    "changed Autoscaling services and final memory writers",
+    "actual cgroup/KVM/NeonVM/CRI/HugeTLB/physical return and relevant performance"
+  ],
+  "constraints": {
+    "frozen_baseline": true,
+    "no_new_upstream_fetch_merge": true,
+    "no_images": true,
+    "no_deployment": true,
+    "no_main_merge": true,
+    "no_pg18_pg16": true,
+    "unchanged_unaffected_components_not_tested": true,
+    "independent_control_plane_unchanged": true,
+    "user_dirty_autoscaling_AGENTS_preserved": true
+  },
+  "frozen_ancestors": {
+    "community17": "15f57b683d236b7dad4d57d03d8b7bac0e63a204",
+    "neon17": "56692dfb680281a963c7470fc7f0fec7f65ecfd4",
+    "neon": "fa504217c61bbcaf5c512d75830564541f917f8f",
+    "autoscaling": "a4bce09e4d6bd7932ea634a1ed79afe26a9cfd1f"
+  }
+}
