@@ -10,6 +10,14 @@
 
 
 
+## 最新归档：VM在途独立对账与关闭后Runner最终写入隔离
+
+AS `aea5507f433b236cea9bed2866a97f7b659054d9` 已推自有既有功能分支并核完整远程SHA，发行锁准确引用。关闭后来源恢复不得新Dispatch/消费旧not_sent重放；Runner仍可在原flock观察may_have_sent或封存明确未发送选择。独立选择/准确NativeCapacity/取消见证UID/RV保存，原Active Unknown、Abort、预算与关闭不改，接管须原Runner持久确认新floor。
+
+Mac采用定向race按package/test去重22顶层/122含父子记录，0fail/skip；新增VM五模式、六个真实Elector接管窗口、Grow/Shrink模型、双处CAS四窗口及受影响Guest/PG/Runner取消路径通过。四包vet、最终增量lint0、33消费者仅编译；overlay禁用闭门gate确定失败，原源码未改且同项再通过。原夹具/断言和lint失败分别保留，采用子树与替换子根在[机器收据](DSGA-VM在途独立对账-Mac收据-20261030.json)精确固定。详见[阶段验收](DSGA-VM在途独立对账-Mac验收-20261030.md)。PG/SQL/Rust产品未改，准确79367196原生证据复用，不重跑未变矩阵。
+
+Guest/PG/VM单领域证明已有，P1完整实际预算/Host结清、实际容量代次重开、类别18永久预算消费者及后继请求仍需代码；P2安全降normal/持续预算、P3直接接线、P4最终准确PG17组合继续。只验自身修改及直接受影响路径，独立审查/验证并行，源码变更及最终依赖验收保持顺序。PG17整体未完成，Goal active；全面完成并远程归档后暂停，不进18/16。以下为历史归档。
+
 ## 最新归档：PG在途与历史淘汰独立对账，P1继续完整资源恢复
 
 AS `5767124c3aca9a04a5d39b9d8fece2eccdb4bbfc` 已推自有既有功能分支并核完整远程SHA，发行锁准确引用。完整原生终态与严格更高floor隔离分别认证：FENCED串行权/稳定实际容量/完整原Key，独立证明UID/RV保存后再Fence/查询才清同一SDK Pending。原Active Unknown/原回执、Abort、预算和关闭不改；空Pending仍核当前门禁。原关闭后晚到提交另存实际容量，不改原关闭expected代次，也不冒充旧预算覆盖了当前资源。
