@@ -539,3 +539,49 @@ async fn native_go_quiesce_consumes_real_close_and_keeps_retained_costs() -> Res
     cluster.passed = true;
     Ok(())
 }
+
+#[tokio::test]
+#[ignore = "strict retained service gate requires exact PG17 and a precompiled Go race binary"]
+async fn native_go_retained_budget_reopens_original_id_and_fences_late_close() -> Result<()> {
+    let binary = std::env::var("NEON_TEST_DSG_GO_BIN")?;
+    ensure!(
+        std::path::Path::new(&binary).is_file(),
+        "Go binary is missing"
+    );
+    let signer = Signer::new();
+    // 本根实际启用连接门禁及有限原生期限，不以领域peer代替PG开放。
+    // 仅为本私有PG升级到同时提供SharedCost与有限期限正式成员的1.16；
+    // 不改生产扩展或旧矩阵，也不能把缺SQL成员的503当作期限检查通过。
+    let (mut cluster, _compute, app) = support::native_connections(&signer).await?;
+    cluster
+        .connect()
+        .await?
+        .batch_execute("ALTER EXTENSION neon UPDATE TO '1.16'")
+        .await?;
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
+    let address = listener.local_addr()?;
+    let _server = HttpTask(tokio::spawn(async move {
+        axum::serve(listener, app).await.unwrap();
+    }));
+    let token = signer.token(&signer.claims());
+    let initial = reqwest::Client::builder()
+        .no_proxy()
+        .build()?
+        .get(format!("http://{address}/dsg/v1/memory"))
+        .bearer_auth(&token)
+        .send()
+        .await?
+        .error_for_status()?
+        .json::<DsgMemoryResponse>()
+        .await?;
+    let input = json!({"http_base_url":format!("http://{address}"),
+        "instance":initial.observed.instance,"issuer_epoch":"1","token":token});
+    run_go_test(
+        &binary,
+        &serde_json::to_vec(&input)?,
+        "TestNativeRetainedServiceUsesOriginalBudgetWithoutResize",
+    )
+    .await?;
+    cluster.passed = true;
+    Ok(())
+}
