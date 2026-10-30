@@ -40,7 +40,7 @@ class DsgConnectionGateLifecycle(unittest.TestCase):
         self.pg.sql(f"CREATE FUNCTION dsg_connections() RETURNS text AS '{self.pg.quote(self.pg.library)}', "
                     "'test_dsg_connection_snapshot' LANGUAGE C VOLATILE PARALLEL UNSAFE")
         self.revision = 0
-        self.observer = self.peer(self.private, os.environ.get("USER", "williamlee"))
+        self.observer = self.peer(self.private, lifecycle.native_database_user())
         self.wait(acknowledged=True, requested_open=False, public_connections_blocked=True)
 
     def peer(self, directory=None, user="dsg_app"):
@@ -174,7 +174,7 @@ class DsgConnectionGateLifecycle(unittest.TestCase):
         finally:
             self.private.chmod(0o700)
         self.assertTrue(self.fact()["private_management_ready"])
-        restored = self.peer(self.private, os.environ.get("USER", "williamlee"))
+        restored = self.peer(self.private, lifecycle.native_database_user())
         self.assertEqual(self.row(restored.exchange([(b"Q", b"SELECT 42\0")])), "42")
 
     def test_crash_rebuild_does_not_inherit_old_open_ack(self):
@@ -189,7 +189,7 @@ class DsgConnectionGateLifecycle(unittest.TestCase):
         deadline = time.monotonic() + 15
         while time.monotonic() < deadline:
             try:
-                observer = lifecycle.PgWireConnection(self.private, os.environ.get("USER", "williamlee"), self.port)
+                observer = lifecycle.PgWireConnection(self.private, lifecycle.native_database_user(), self.port)
                 self.addCleanup(observer.close)
                 self.observer = observer
                 fact = self.fact()

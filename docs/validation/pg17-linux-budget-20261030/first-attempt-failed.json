@@ -1,0 +1,172 @@
+{
+  "protocol_version": 1,
+  "layer": "single-service",
+  "suite": "budget-boundaries",
+  "platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.36",
+  "python": "3.11.2",
+  "pg_configure": "'CFLAGS=-fsigned-char -O2 -g3 ' 'LDFLAGS=' '--enable-debug' '--enable-cassert' '--enable-injection-points' '--with-openssl' '--with-libseccomp' '--with-icu' 'ICU_CFLAGS=-I/usr/local/icu/include -DU_STATIC_IMPLEMENTATION' 'ICU_LIBS=-L/usr/local/icu/lib -L/usr/local/icu/lib64 -licui18n -licuuc -licudata -lstdc++ -Wl,-Bdynamic -lm' 'INSTALL=/home/nonroot/scripts/ninstall.sh -C' '--with-extra-version= (79367196a74eef82e67cac917877d2e6271d3e70)' '--prefix=/home/nonroot/pg_install/v17'",
+  "postgres_version": "postgres (PostgreSQL) 17.11 (79367196a74eef82e67cac917877d2e6271d3e70)",
+  "binary_sha256": {
+    "postgres": {
+      "path": "/home/nonroot/pg_install/v17/bin/postgres",
+      "sha256": "3855dd3c5a1445b3f1ccc2dd0e4170fcc2275974d92b8874eaf369f611062e33"
+    },
+    "NEON_TEST_DSG_LIBRARY": {
+      "path": "/home/nonroot/pg_install/v17/lib/postgresql/test_dsg_region.so",
+      "sha256": "a1198e058dcc2095f3d6c93e7e557c6c55e1d3937c1e69e1254e7a02cea39d3c"
+    },
+    "NEON_TEST_RMGR_LIBRARY": {
+      "path": "/home/nonroot/pg_install/v17/lib/postgresql/neon_rmgr.so",
+      "sha256": "d83d845b3e44f8e23ffb968a6e50ace3f0b017e37976925b49c476adc271e556"
+    },
+    "NEON_TEST_NEON_LIBRARY": {
+      "path": "/home/nonroot/pg_install/v17/lib/postgresql/neon.so",
+      "sha256": "85060c44babaef951677f0f26a205dff9786cd44d5897721353595c2d42f0c03"
+    }
+  },
+  "test_source_sha256": {
+    "test_dsg_address_space.py": "8b4de6be5c264a767246a3b5aa2c1da352ea0eeec3d03bb2a974710533b6a021",
+    "test_dsg_address_space_source.py": "7630ea21e35551f43a14a761048b7b40a08cc5a5cffdc0777653936113e974af",
+    "test_dsg_admission.py": "4dd3991cbddc1aa7e969ffa6a84913219642635b3763d2305a7a758a7c65c7f3",
+    "test_dsg_admission_closure.py": "dd2ec7cad25c7fd7fa6f0a598c6a429e3a2d39c25cbf028e886dfc5f1754dcc0",
+    "test_dsg_admission_frames.py": "c3383782a9be2c62238a8ad35205ef9ed756fcf944bcaa88a84b29bc53f4815d",
+    "test_dsg_admission_lease.py": "a18bbead265be6ca03a73467f6965f882f863bcd04e161174de667a2e04341ee",
+    "test_dsg_admission_status.py": "57c0a9eaa957c644c61c3ed5832d14bca31c7279854ddafee261790de737a969",
+    "test_dsg_connection_gate.py": "28eb3217ddada167761f11b649afb92df4c3c996453f3281bb928f7dd1a5b3dc",
+    "test_dsg_control.py": "c3ef19c59de43050c91884a8c03c7355f826c8271d11af661268592f5212a749",
+    "test_dsg_creation_plan.py": "023950ee5e9b810159623fa289422ef77a0a653f9e72d3edfbd0b84849752f8b",
+    "test_dsg_dsm.py": "d1bac44f7920fdda5efa1055611e5d05ff7996f22b0be38cbe7009b129c4e700",
+    "test_dsg_neon_admission.py": "a14f9dcd8c88ebb882126293daf9185c2bcd50d844ba2cf80adb468098c1f6d4",
+    "test_dsg_neon_control.py": "0967465f26df6fe6639b6104414c934b50223ff922c7e5cb74a1fac61cf5d520",
+    "test_dsg_neon_extension.py": "67bbff772779fab1d927bedeabb8d808db9ab79918dbaa89d0ef56f23a0c744a",
+    "test_dsg_nonshmem_child.py": "ce01aa946e2a28b42486fcf422de5901ddcf4a9a2fff0b984f808785a1df0446",
+    "test_dsg_postgres.py": "c9bd0b6284d7da8443d1e053864602495339fd02f1967a978fa043460b0d5f73",
+    "test_dsg_prepared.py": "8c866925ee62111bac4b2077f8fb9329f2aedf003d63b17be02a2dad3890f7e6",
+    "test_dsg_prestart.py": "bd3046ced386aac7bce0cfcd6aa75786ab86d07b1b771ddbe9ff5ae3747a91b5",
+    "test_dsg_renderer.py": "2ea818fb47db8ddc36b1cb9088f6c0a2aa87b496db2a3802f820af7ad7f64cc7",
+    "test_dsg_replication.py": "45a7dbb9ec30f20371352944e3341937a37d7823c17eea4f620db950d24d1b4e",
+    "test_dsg_shared_cost.py": "245417abfed571f7faa2b90afb2dc8266007ed446d2f89bb2329b799ca22f285",
+    "test_dsg_transaction_finish.py": "83c0d644137211eb67b7a3a4c80ca542fcd7a33493726cfa7ff1f3596a8053f8",
+    "test_dsg_twophase_checkpoint.py": "787723f1a407cd6d70f9bb824533257d41e1ae49531aa43ab4726ebed74edde5",
+    "test_dsg_upstream_partition_index.py": "c9ea5251802769d16c910b2b5dab24c2bbcefed521fd9bb9fc0060ece2ea4b77",
+    "test_dsg_work.py": "3a3c0db8e824fc5f5cc1aa91fdc89ae5235ffab56acc1dd520b6359f56f907f3"
+  },
+  "catalog_sha256": "75e03ef203f3e03341957f25ca45d9eb5eef88901e03312a98b028a141a3128c",
+  "runner_sha256": "2fb2f393d84238169d6a7eafa1922c52aa9f16fb910727b6e71efcf46dda4b7e",
+  "not_proven": [
+    "KVM",
+    "guest cgroup/HugeTLB物理归还",
+    "owner到VM端到端",
+    "Kubernetes"
+  ],
+  "tests": [
+    {
+      "id": "PG17-S-PG-009",
+      "test": "test_dsg_admission_closure.DsgAdmissionClosure.test_close_consumes_missing_open_and_retains_native_guards",
+      "result": "PASS",
+      "details": [],
+      "subtests": 0,
+      "elapsed_seconds": 1.551222
+    },
+    {
+      "id": "PG17-S-PG-010",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_pre_os_reservation_is_visible_and_actual_cancel_has_no_allocation",
+      "result": "ERROR",
+      "details": [
+        "Traceback (most recent call last):\n  File \"/workspace/neon/ci/test_dsg_dsm.py\", line 26, in setUp\n    self.control.setUp()\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 43, in setUp\n    self.observer = self.peer(self.private, os.environ.get(\"USER\", \"williamlee\"))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 47, in peer\n    peer = lifecycle.PgWireConnection(directory or self.public, user, self.port)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 40, in __init__\n    startup = self.receive_ready()\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 62, in receive_ready\n    kind = self.receive_exact(1)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 55, in receive_exact\n    raise RuntimeError(\"PG协议测试连接提前断开\")\nRuntimeError: PG协议测试连接提前断开\n"
+      ],
+      "subtests": 0,
+      "elapsed_seconds": 1.131687
+    },
+    {
+      "id": "PG17-S-PG-011",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_pinned_segment_survives_creator_exit_and_counts_backing_once",
+      "result": "ERROR",
+      "details": [
+        "Traceback (most recent call last):\n  File \"/workspace/neon/ci/test_dsg_dsm.py\", line 26, in setUp\n    self.control.setUp()\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 43, in setUp\n    self.observer = self.peer(self.private, os.environ.get(\"USER\", \"williamlee\"))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 47, in peer\n    peer = lifecycle.PgWireConnection(directory or self.public, user, self.port)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 40, in __init__\n    startup = self.receive_ready()\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 62, in receive_ready\n    kind = self.receive_exact(1)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 55, in receive_exact\n    raise RuntimeError(\"PG协议测试连接提前断开\")\nRuntimeError: PG协议测试连接提前断开\n"
+      ],
+      "subtests": 0,
+      "elapsed_seconds": 1.218608
+    },
+    {
+      "id": "PG17-S-PG-012",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_concurrent_create_cannot_spend_same_last_budget_and_reuses_after_real_destroy",
+      "result": "ERROR",
+      "details": [
+        "Traceback (most recent call last):\n  File \"/workspace/neon/ci/test_dsg_dsm.py\", line 26, in setUp\n    self.control.setUp()\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 43, in setUp\n    self.observer = self.peer(self.private, os.environ.get(\"USER\", \"williamlee\"))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 47, in peer\n    peer = lifecycle.PgWireConnection(directory or self.public, user, self.port)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 40, in __init__\n    startup = self.receive_ready()\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 62, in receive_ready\n    kind = self.receive_exact(1)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 55, in receive_exact\n    raise RuntimeError(\"PG协议测试连接提前断开\")\nRuntimeError: PG协议测试连接提前断开\n"
+      ],
+      "subtests": 0,
+      "elapsed_seconds": 1.302292
+    },
+    {
+      "id": "PG17-S-PG-013",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_failed_destroy_keeps_real_os_segment_and_unknown_budget",
+      "result": "ERROR",
+      "details": [
+        "Traceback (most recent call last):\n  File \"/workspace/neon/ci/test_dsg_dsm.py\", line 26, in setUp\n    self.control.setUp()\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 43, in setUp\n    self.observer = self.peer(self.private, os.environ.get(\"USER\", \"williamlee\"))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 47, in peer\n    peer = lifecycle.PgWireConnection(directory or self.public, user, self.port)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 40, in __init__\n    startup = self.receive_ready()\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 62, in receive_ready\n    kind = self.receive_exact(1)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 55, in receive_exact\n    raise RuntimeError(\"PG协议测试连接提前断开\")\nRuntimeError: PG协议测试连接提前断开\n"
+      ],
+      "subtests": 0,
+      "elapsed_seconds": 1.126176
+    },
+    {
+      "id": "PG17-S-PG-014",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_prepared_survives_backend_exit_and_foreground_idle",
+      "result": "ERROR",
+      "details": [
+        "Traceback (most recent call last):\n  File \"/workspace/neon/ci/test_dsg_prepared.py\", line 19, in setUp\n    self.control.setUp()\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 43, in setUp\n    self.observer = self.peer(self.private, os.environ.get(\"USER\", \"williamlee\"))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 47, in peer\n    peer = lifecycle.PgWireConnection(directory or self.public, user, self.port)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 40, in __init__\n    startup = self.receive_ready()\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 62, in receive_ready\n    kind = self.receive_exact(1)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 55, in receive_exact\n    raise RuntimeError(\"PG协议测试连接提前断开\")\nRuntimeError: PG协议测试连接提前断开\n"
+      ],
+      "subtests": 0,
+      "elapsed_seconds": 1.156267
+    },
+    {
+      "id": "PG17-S-PG-015",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_reserved_before_valid_and_close_race_remains_visible",
+      "result": "ERROR",
+      "details": [
+        "Traceback (most recent call last):\n  File \"/workspace/neon/ci/test_dsg_prepared.py\", line 19, in setUp\n    self.control.setUp()\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 43, in setUp\n    self.observer = self.peer(self.private, os.environ.get(\"USER\", \"williamlee\"))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 47, in peer\n    peer = lifecycle.PgWireConnection(directory or self.public, user, self.port)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 40, in __init__\n    startup = self.receive_ready()\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 62, in receive_ready\n    kind = self.receive_exact(1)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 55, in receive_exact\n    raise RuntimeError(\"PG协议测试连接提前断开\")\nRuntimeError: PG协议测试连接提前断开\n"
+      ],
+      "subtests": 0,
+      "elapsed_seconds": 1.376079
+    },
+    {
+      "id": "PG17-S-PG-016",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_crash_rebuild_recovers_wal_or_disk_but_not_unlogged_reserved_slot",
+      "result": "ERROR",
+      "details": [
+        "Traceback (most recent call last):\n  File \"/workspace/neon/ci/test_dsg_prepared.py\", line 19, in setUp\n    self.control.setUp()\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 43, in setUp\n    self.observer = self.peer(self.private, os.environ.get(\"USER\", \"williamlee\"))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_connection_gate.py\", line 47, in peer\n    peer = lifecycle.PgWireConnection(directory or self.public, user, self.port)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 40, in __init__\n    startup = self.receive_ready()\n              ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 62, in receive_ready\n    kind = self.receive_exact(1)\n           ^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/neon/ci/test_dsg_postgres.py\", line 55, in receive_exact\n    raise RuntimeError(\"PG协议测试连接提前断开\")\nRuntimeError: PG协议测试连接提前断开\n"
+      ],
+      "subtests": 0,
+      "elapsed_seconds": 1.758383
+    },
+    {
+      "id": "PG17-S-PG-017",
+      "test": "test_dsg_shared_cost.DsgSharedCost.test_shared_cost_deduplicates_boot_arrays_and_keeps_runtime_charges",
+      "result": "PASS",
+      "details": [],
+      "subtests": 0,
+      "elapsed_seconds": 2.064552
+    },
+    {
+      "id": "PG17-S-PG-018",
+      "test": "test_dsg_shared_cost.DsgSharedCost.test_shared_cost_observes_actual_prepare_without_waiting_for_resize",
+      "result": "PASS",
+      "details": [],
+      "subtests": 0,
+      "elapsed_seconds": 1.208032
+    },
+    {
+      "id": "PG17-S-PG-019",
+      "test": "test_dsg_address_space.DsgAddressSpaceStartup.test_noncanonical_or_unbounded_values_fail_before_any_mode",
+      "result": "PASS",
+      "details": [],
+      "subtests": 32,
+      "elapsed_seconds": 0.106302
+    }
+  ],
+  "tests_run": 11,
+  "expected_tests": 11,
+  "passed": false,
+  "skipped": 0,
+  "errors": 7,
+  "failures": 0
+}

@@ -1,0 +1,157 @@
+{
+  "protocol_version": 1,
+  "pg_major": 17,
+  "scope": "只覆盖PG17内存自动扩缩容新增或直接受影响逻辑",
+  "cases": [
+    {
+      "id": "PG17-S-PG-001",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_control.DsgNeonControl.test_capabilities_and_installed_sql_contract",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-002",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_control.DsgNeonControl.test_grow_shrink_regrow_and_historical_receipt",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-003",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_control.DsgNeonControl.test_formal_fence_advances_epoch_without_resizing_or_authorizing_vm",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-004",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_writes_dirty_tail_and_regrow_preserves_real_data",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-005",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_pin_timeout_restores_allocation_then_retry_succeeds",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-006",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_waits_for_real_pin_and_completes_after_release",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-007",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_admission.DsgNeonAdmission.test_formal_upgrade_receipt_full_context_and_administrator_isolation",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-008",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_admission.DsgNeonAdmission.test_formal_strict_request_identity_and_reversible_sql_upgrade",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-009",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_admission_closure.DsgAdmissionClosure.test_close_consumes_missing_open_and_retains_native_guards",
+      "scope": "关闭先到时封住迟到开放并保留原生门禁"
+    },
+    {
+      "id": "PG17-S-PG-010",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_pre_os_reservation_is_visible_and_actual_cancel_has_no_allocation",
+      "scope": "DSM创建前预留及真实取消"
+    },
+    {
+      "id": "PG17-S-PG-011",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_pinned_segment_survives_creator_exit_and_counts_backing_once",
+      "scope": "真实pin保留与DSM backing去重"
+    },
+    {
+      "id": "PG17-S-PG-012",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_concurrent_create_cannot_spend_same_last_budget_and_reuses_after_real_destroy",
+      "scope": "并发DSM不得重复花最后额度"
+    },
+    {
+      "id": "PG17-S-PG-013",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_failed_destroy_keeps_real_os_segment_and_unknown_budget",
+      "scope": "真实销毁失败保留未知预算"
+    },
+    {
+      "id": "PG17-S-PG-014",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_prepared_survives_backend_exit_and_foreground_idle",
+      "scope": "前台空闲仍保留2PC"
+    },
+    {
+      "id": "PG17-S-PG-015",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_reserved_before_valid_and_close_race_remains_visible",
+      "scope": "2PC登记与关闭竞态可见"
+    },
+    {
+      "id": "PG17-S-PG-016",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_crash_rebuild_recovers_wal_or_disk_but_not_unlogged_reserved_slot",
+      "scope": "崩溃后重建已持久2PC"
+    },
+    {
+      "id": "PG17-S-PG-017",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_shared_cost.DsgSharedCost.test_shared_cost_deduplicates_boot_arrays_and_keeps_runtime_charges",
+      "scope": "共享成本去重且保留运行时费用"
+    },
+    {
+      "id": "PG17-S-PG-018",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_shared_cost.DsgSharedCost.test_shared_cost_observes_actual_prepare_without_waiting_for_resize",
+      "scope": "扩缩在途时仍能观察成本"
+    },
+    {
+      "id": "PG17-S-PG-019",
+      "layer": "single-service",
+      "suite": "budget-boundaries",
+      "test": "test_dsg_address_space.DsgAddressSpaceStartup.test_noncanonical_or_unbounded_values_fail_before_any_mode",
+      "scope": "PG最早启动阶段拒绝非规范或无界AS值"
+    }
+  ],
+  "pending_end_to_end": [
+    {
+      "id": "PG17-E-001",
+      "description": "生产owner自动策略→PG→Guest资源→VM→Host→Finalize完整Grow/Shrink",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "PG17-E-002",
+      "description": "真实KVM/HugeTLB与normal物理资源读回、无新增OOM/重启",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "PG17-E-003",
+      "description": "仅117/118/119的Helm安装及PG17扩缩回归",
+      "status": "NOT_RUN"
+    }
+  ]
+}

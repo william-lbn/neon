@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "scope": "PG17自定义预算/准入/DSM/2PC原生单服务；不包含VM/cgroup物理归还",
+  "passed": true,
+  "roots": 11,
+  "subcases": 34,
+  "skip": 0,
+  "raw_report": "/data/neon-build/validation/native-pg/budget-boundaries-20261030T133624Z",
+  "tests": [
+    {
+      "id": "PG17-S-PG-009",
+      "test": "test_dsg_admission_closure.DsgAdmissionClosure.test_close_consumes_missing_open_and_retains_native_guards",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-010",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_pre_os_reservation_is_visible_and_actual_cancel_has_no_allocation",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-011",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_pinned_segment_survives_creator_exit_and_counts_backing_once",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-012",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_concurrent_create_cannot_spend_same_last_budget_and_reuses_after_real_destroy",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-013",
+      "test": "test_dsg_dsm.DsgDsmLifecycle.test_failed_destroy_keeps_real_os_segment_and_unknown_budget",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-014",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_prepared_survives_backend_exit_and_foreground_idle",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-015",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_reserved_before_valid_and_close_race_remains_visible",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-016",
+      "test": "test_dsg_prepared.DsgPreparedLifecycle.test_crash_rebuild_recovers_wal_or_disk_but_not_unlogged_reserved_slot",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-017",
+      "test": "test_dsg_shared_cost.DsgSharedCost.test_shared_cost_deduplicates_boot_arrays_and_keeps_runtime_charges",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-018",
+      "test": "test_dsg_shared_cost.DsgSharedCost.test_shared_cost_observes_actual_prepare_without_waiting_for_resize",
+      "result": "PASS"
+    },
+    {
+      "id": "PG17-S-PG-019",
+      "test": "test_dsg_address_space.DsgAddressSpaceStartup.test_noncanonical_or_unbounded_values_fail_before_any_mode",
+      "result": "PASS"
+    }
+  ],
+  "source_sha256": {
+    "ci/test_dsg_postgres.py": "46b4824475a8ef608d222a4583aa9b54c093fa9cf2d149e6127c7b587070a91b",
+    "ci/test_dsg_connection_gate.py": "d549b437a90268b2f4bd5ab47bb1520554f38996f08ed49091de5d5adc8bb9ea",
+    "ci/test_dsg_dsm.py": "14ada83757ab72fbf65cdf7e2a1f41f6e7ac2791e7e07c22454aa1afb9b59d25",
+    "ci/test_dsg_prepared.py": "b1851b4e519feacca4ecf2339475d4c1aceb846166d20116680132da49680e15",
+    "ci/pg17_memory_cases.json": "75e03ef203f3e03341957f25ca45d9eb5eef88901e03312a98b028a141a3128c"
+  },
+  "runner_sha256": "2fb2f393d84238169d6a7eafa1922c52aa9f16fb910727b6e71efcf46dda4b7e",
+  "catalog_sha256": "75e03ef203f3e03341957f25ca45d9eb5eef88901e03312a98b028a141a3128c",
+  "pg17_sha": "79367196a74eef82e67cac917877d2e6271d3e70",
+  "first_attempt": {
+    "passed": 4,
+    "errors": 7,
+    "raw_report": "/data/neon-build/validation/native-pg/budget-boundaries-20261030T133245Z",
+    "cause": "custom fixtures used USER environment or Mac username instead of actual initdb effective UID"
+  },
+  "verification": "final run deliberately set USER and LOGNAME to a nonexistent fixture user; all 11 still pass via effective UID",
+  "not_proven": [
+    "continuous private/kernel upper needed for P2 normal decrease",
+    "real root cgroup writes",
+    "KVM/Guest/VM/Host whole E2E",
+    "Helm deployment"
+  ]
+}

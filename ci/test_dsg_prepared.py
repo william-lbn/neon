@@ -41,7 +41,7 @@ class DsgPreparedLifecycle(unittest.TestCase):
 
     def peer(self, admin=False):
         if admin:
-            return self.control.peer(self.control.private, os.environ.get("USER", "williamlee"))
+            return self.control.peer(self.control.private, lifecycle.native_database_user())
         return self.control.peer()
 
     @staticmethod

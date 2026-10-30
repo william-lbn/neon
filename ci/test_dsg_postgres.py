@@ -23,6 +23,14 @@ if _CONFIGURED_ENV and len(_CONFIGURED_ENV) != len(_REQUIRED_ENV):
     raise RuntimeError("生命周期测试环境不完整，必须同时提供 " + ", ".join(_REQUIRED_ENV))
 
 
+def native_database_user():
+    """与initdb默认角色相同的实际有效UID；不接受调用环境的用户名猜测。"""
+    # Docker USER不保证同时设置USER/LOGNAME；Mac用户名也不属于Linux镜像。
+    # initdb未指定-U时按有效UID建初始角色，测试私有管理连接必须采用同一来源。
+    import pwd
+    return pwd.getpwuid(os.geteuid()).pw_name
+
+
 class PgWireConnection:
     """直接发送真实简单/扩展/FastPath消息，验证门禁没有漏掉协议入口。
 

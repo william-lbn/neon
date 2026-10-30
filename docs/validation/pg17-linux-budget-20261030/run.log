@@ -1,0 +1,16 @@
+test_close_consumes_missing_open_and_retains_native_guards (test_dsg_admission_closure.DsgAdmissionClosure.test_close_consumes_missing_open_and_retains_native_guards) ... ok
+test_pre_os_reservation_is_visible_and_actual_cancel_has_no_allocation (test_dsg_dsm.DsgDsmLifecycle.test_pre_os_reservation_is_visible_and_actual_cancel_has_no_allocation) ... ok
+test_pinned_segment_survives_creator_exit_and_counts_backing_once (test_dsg_dsm.DsgDsmLifecycle.test_pinned_segment_survives_creator_exit_and_counts_backing_once) ... ok
+test_concurrent_create_cannot_spend_same_last_budget_and_reuses_after_real_destroy (test_dsg_dsm.DsgDsmLifecycle.test_concurrent_create_cannot_spend_same_last_budget_and_reuses_after_real_destroy) ... ok
+test_failed_destroy_keeps_real_os_segment_and_unknown_budget (test_dsg_dsm.DsgDsmLifecycle.test_failed_destroy_keeps_real_os_segment_and_unknown_budget) ... ok
+test_prepared_survives_backend_exit_and_foreground_idle (test_dsg_prepared.DsgPreparedLifecycle.test_prepared_survives_backend_exit_and_foreground_idle) ... ok
+test_reserved_before_valid_and_close_race_remains_visible (test_dsg_prepared.DsgPreparedLifecycle.test_reserved_before_valid_and_close_race_remains_visible) ... ok
+test_crash_rebuild_recovers_wal_or_disk_but_not_unlogged_reserved_slot (test_dsg_prepared.DsgPreparedLifecycle.test_crash_rebuild_recovers_wal_or_disk_but_not_unlogged_reserved_slot) ... ok
+test_shared_cost_deduplicates_boot_arrays_and_keeps_runtime_charges (test_dsg_shared_cost.DsgSharedCost.test_shared_cost_deduplicates_boot_arrays_and_keeps_runtime_charges) ... ok
+test_shared_cost_observes_actual_prepare_without_waiting_for_resize (test_dsg_shared_cost.DsgSharedCost.test_shared_cost_observes_actual_prepare_without_waiting_for_resize) ... ok
+test_noncanonical_or_unbounded_values_fail_before_any_mode (test_dsg_address_space.DsgAddressSpaceStartup.test_noncanonical_or_unbounded_values_fail_before_any_mode) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 16.278s
+
+OK

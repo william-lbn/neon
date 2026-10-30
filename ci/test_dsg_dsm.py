@@ -1,7 +1,6 @@
 """真实外部DSM分配前额度/原生pin生命周期及失败预算，不是物理缩容证明。"""
 import concurrent.futures
 import json
-import os
 import struct
 import threading
 import time
@@ -68,7 +67,7 @@ class DsgDsmLifecycle(unittest.TestCase):
                            ("reserved_upper_bytes", "external_segments", "pending_creations", "unknown_segments")})
 
     def peer(self):
-        return self.control.peer(self.control.private, os.environ.get("USER", "williamlee"))
+        return self.control.peer(self.control.private, lifecycle.native_database_user())
 
     @staticmethod
     def query(peer, query):
