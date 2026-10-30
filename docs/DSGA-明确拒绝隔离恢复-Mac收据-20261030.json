@@ -1,0 +1,280 @@
+{
+  "schema": 1,
+  "date": "2026-10-30 12:55:10.841738+08:00",
+  "scope": "方案收敛复核与P1明确Busy/Rejected缺原生终态的独立高floor隔离；不宣称PG17或16/17在途恢复完成",
+  "autoscaling_parent": "ee3decb5ee38082a94f34981c0ae08751f924e9b",
+  "autoscaling_commit": "ff346368c7fbbe811274b4b0ac217311a0b77761",
+  "remote_verification": {
+    "method": "git ls-remote origin refs/heads/codex/dsga-autoscaling-20261019",
+    "sha": "ff346368c7fbbe811274b4b0ac217311a0b77761"
+  },
+  "neon_parent": "d57a8a1f0c581b3e217b2f4180aa3d34f15bb71f",
+  "pg17_sha": "79367196a74eef82e67cac917877d2e6271d3e70",
+  "go_race": {
+    "top_level": 10,
+    "parent_child_records": 64,
+    "fail": 0,
+    "skip": 0,
+    "roots": [
+      "github.com/neondatabase/autoscaling/pkg/dsga/compute:TestRejectedReconcileRequiresRetainedBarrierAndFreshExactRead",
+      "github.com/neondatabase/autoscaling/pkg/dsga/compute:TestTerminalReconcileRequiresCompleteOriginalAndCurrentFloor",
+      "github.com/neondatabase/autoscaling/pkg/dsga/journal:TestServiceCleanupRecoveryKeepsThreeOriginalCancellationBoundaries",
+      "github.com/neondatabase/autoscaling/pkg/dsga/journal:TestServicePGRejectionKeepsOriginalAndCompletesActualBudget",
+      "github.com/neondatabase/autoscaling/pkg/dsga/journal:TestServicePGRejectionRejectsChangedProofAndProjection",
+      "github.com/neondatabase/autoscaling/pkg/dsga/journal:TestStoreServicePGRejectionCASDoesNotChangeOriginal",
+      "github.com/neondatabase/autoscaling/pkg/dsga/owner:TestProductionCleanupServiceRecovery",
+      "github.com/neondatabase/autoscaling/pkg/dsga/pgexec:TestExplicitReplayRejectsUndispatchedDeletingAbortedAndNonNativeRejection",
+      "github.com/neondatabase/autoscaling/pkg/dsga/pgexec:TestResizeIsWriteAheadAndLostReplyRecoversOnlyByFullIntentQuery",
+      "github.com/neondatabase/autoscaling/pkg/dsga/pgexec:TestServicePGRejectionRecoveryPersistsBeforeSDKReconcile"
+    ],
+    "adoption": "首次混包仅采用compute包完整通过，journal编译失败未采用。SDK首批后仅作等价错误零值显式初始化/gci；最终原生门禁使用最终compute源码。Model后补同epoch/异holder断言并以origin-final根验证，未重跑未变组合。"
+  },
+  "native": {
+    "strict_gate": "native_go_rejected_resize_barrier_preserves_original",
+    "go_test": "TestNativeRejectedResizeBarrier",
+    "passed": 1,
+    "ignored": 0,
+    "elapsed_seconds": 4.72,
+    "path": "Go race TLS→实际Router/JWT/管理SQL→准确PG17",
+    "actual_case": "过期请求原生明确Rejected无结果；真实较高floor后的只读对账；刻意晚到原请求Stale且容量不变",
+    "limit": "并发Busy由协议peer验证；该组不认证Guest/VM物理返还或完整新拒绝服务E2E"
+  },
+  "quality": {
+    "vet_packages": 5,
+    "lint_issues": 0,
+    "consumers_compile_only": 33,
+    "clippy_no_deps_exit": 0,
+    "clippy_existing_dependency_warnings": 27,
+    "rustfmt_exact_toolchain": "1.88.0-aarch64-apple-darwin",
+    "rustfmt_exit": 0
+  },
+  "sources": [
+    {
+      "repo": "autoscaling",
+      "path": "pkg/api/dsga/rejected_barrier.go",
+      "sha256": "d65be114f2b16d29a33c2381517d136b10e91e0dc4c4ffcd0a46f1e6f282e62e"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/compute/native_rejected_test.go",
+      "sha256": "19a357bde72e8b5cd9257d6197d8e0372d16e6dce515b551fa4f368bc2609d75"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/compute/rejected.go",
+      "sha256": "8b1f2cfd406729aaa4416e1121cb3d3848b802c847f7b5ec262fe76237244140"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/compute/rejected_test.go",
+      "sha256": "a0ca0c458e991ad9af16feaa97db3e4d9eb29a56466835a9c86f1d735e57661c"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/journal/model.go",
+      "sha256": "12de72154ab6975b901770a27aeff37b6081fe52db1cf6f672bc0044071a5047"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/journal/service_cleanup_recovery.go",
+      "sha256": "e777cf92af5c12fa26947b5c3c6d62105a6fb8947785babd3450e0fb58cdf48b"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/journal/service_closure.go",
+      "sha256": "e4549ef8f527549514fedc65bf0105cb91922e21171c502e2c05304dfd43df6f"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/journal/service_pg_rejection.go",
+      "sha256": "858a102a6cd5c72d49c2b6f32408a452963490375d795af877462f9f6964203a"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/journal/service_pg_rejection_test.go",
+      "sha256": "f35f3c363b5d5823d673021246fc13cf70691d7e9588e7aa63cd2a745ccbba6c"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/owner/service_reopen_dispatch.go",
+      "sha256": "ca3fc54e84d065637fe13d512294064447913cc7b06ea4f3dd9a9295a344157e"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/pgexec/executor_test.go",
+      "sha256": "0297e410a57c7f48e200b5e528782dd607e2c960acc3cca36549fd636cd1ea4d"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/pgexec/reconcile.go",
+      "sha256": "fea8377a010a583e44b5505351966de8d481437b989e3954ef38007a082ec24c"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/pgexec/service_rejection.go",
+      "sha256": "c632f79609bab5912dbf03dbfbfcd205753f0a9b9375ac4a4afdf431e22bdb09"
+    },
+    {
+      "repo": "autoscaling",
+      "path": "pkg/dsga/pgexec/service_rejection_test.go",
+      "sha256": "3bdc5fc2bf0a09a9a677a5c117e60c283b338fd26635a8f4850dea010cd8eefd"
+    },
+    {
+      "repo": "neon",
+      "path": "compute_tools/tests/dsg_go_http.rs",
+      "sha256": "be44b5c82a6eb22b5b4d46808e7fb7c68f42995d6829f07eab91ef3a33789433"
+    }
+  ],
+  "logs": [
+    {
+      "path": "build/dsga-pg-rejection-first.jsonl",
+      "sha256": "e239976d566c905b964b5cce3c3c215af528b0978959b1d228b63d57caf6bde5",
+      "adopted_package_filter": "compute only; journal build failure is excluded",
+      "passed_records": 20,
+      "package_passes": [
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/compute",
+          "elapsed_seconds": 3.63
+        }
+      ]
+    },
+    {
+      "path": "build/dsga-pg-rejection-model-first.jsonl",
+      "sha256": "b27380090a40e8ea3a8ae1f97d31f2b48dc297e5ea3a6c3e61e8986307b353b7",
+      "adopted_package_filter": "all package terminal pass",
+      "passed_records": 16,
+      "package_passes": [
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+          "elapsed_seconds": 24.706
+        }
+      ]
+    },
+    {
+      "path": "build/dsga-pg-rejection-executor-third.jsonl",
+      "sha256": "8b425dc54204b78759ed91b15ad860cf0b6a8096926e07660d0308b11f554d64",
+      "adopted_package_filter": "all package terminal pass",
+      "passed_records": 6,
+      "package_passes": [
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/pgexec",
+          "elapsed_seconds": 23.38
+        }
+      ]
+    },
+    {
+      "path": "build/dsga-pg-rejection-affected.jsonl",
+      "sha256": "91d18afd7f715bbefdf48ddc8123eefd567066fdf54837e5364d85e4b1461bd3",
+      "adopted_package_filter": "all package terminal pass",
+      "passed_records": 18,
+      "package_passes": [
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+          "elapsed_seconds": 1.9140000000000001
+        },
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/compute",
+          "elapsed_seconds": 3.454
+        },
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/pgexec",
+          "elapsed_seconds": 11.382
+        }
+      ]
+    },
+    {
+      "path": "build/dsga-pg-rejection-owner-legacy.jsonl",
+      "sha256": "a19b2d5cdd1fecc29a56478a298acf7f020953dfa4f2e34b477c9cfab5e5744c",
+      "adopted_package_filter": "all package terminal pass",
+      "passed_records": 2,
+      "package_passes": [
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/owner",
+          "elapsed_seconds": 59.861
+        }
+      ]
+    },
+    {
+      "path": "build/dsga-pg-rejection-legacy-actual.jsonl",
+      "sha256": "0729f842a38dff6bb1e142bfe335673739f008aa41e67da6594a67f375d25011",
+      "adopted_package_filter": "all package terminal pass",
+      "passed_records": 2,
+      "package_passes": [
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+          "elapsed_seconds": 9.827
+        }
+      ]
+    },
+    {
+      "path": "build/dsga-pg-rejection-origin-final.jsonl",
+      "sha256": "ab77c1823b5a6e14ea03e6925f4bb1701e7600d70e2a1df080c9ef3367746930",
+      "adopted_package_filter": "all package terminal pass",
+      "passed_records": 1,
+      "package_passes": [
+        {
+          "package": "github.com/neondatabase/autoscaling/pkg/dsga/journal",
+          "elapsed_seconds": 24.504
+        }
+      ]
+    },
+    {
+      "path": "build/dsga-pg-rejection-native-first.log",
+      "sha256": "a7ca0ffa3695429d9a5ffd0290adbfe4c7c5f4239bd7dda070e06b33b541f4ba",
+      "exit_code": 0
+    },
+    {
+      "path": "build/dsga-pg-rejection-native-build-fixed.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0
+    },
+    {
+      "path": "build/dsga-pg-rejection-lint-final.log",
+      "sha256": "e92606b0bf483111dff0a120c315ea165821348f31365020e2468a0059095c47",
+      "exit_code": 0
+    },
+    {
+      "path": "build/dsga-pg-rejection-vet.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0
+    },
+    {
+      "path": "build/dsga-pg-rejection-consumers-final.log",
+      "sha256": "6f49b77556da72d854ddb3fe15d01cf2d7f3c3d963e08aed0de6cee3d9ad9755",
+      "exit_code": 0
+    },
+    {
+      "path": "build/dsga-pg-rejection-clippy.log",
+      "sha256": "c0180fa57ca7bf7c2d8404fdcd2f3eabcf7aca7ab1b638eb3408eb2fee342000",
+      "exit_code": 0
+    },
+    {
+      "path": "build/dsga-pg-rejection-rustfmt-exact.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 0
+    }
+  ],
+  "preserved_failures": [
+    "compile-first.log: 未用import",
+    "first.jsonl: journal新夹具误用Owner字段；仅compute包采用",
+    "executor-first.jsonl: 原旧夹具缺首次PG/预算绑定，被正确拒绝",
+    "executor-second.jsonl: 新测试初始化变量命名冲突",
+    "native-build.log: 新夹具Deadline字段命名错误",
+    "lint-first.log: 显式零值初始化及格式/局部错误函数返回修正",
+    "consumers-first.log: 初次命令使用不存在cmd路径；最终按既有真实33包编译",
+    "rustfmt.log/rustfmt-final.log: 本机rustfmt旧入口不识别--check；最终准确toolchain检查通过"
+  ],
+  "remaining": [
+    "16/17原PG/Guest/VM在途、原执行Unknown/结果淘汰的恢复",
+    "新拒绝完整服务/后继资源组合留P4",
+    "P2安全降normal及持续私有/后台预算；P3直接服务接线；P4修改范围PG17组合",
+    "Linux/K8s/KVM/NeonVM/CRI/cgroup/HugeTLB物理/性能后验；不建镜像/不部署/不合main"
+  ],
+  "binding_validation": {
+    "command": "python3 ci/compute.py validate --source-ref index --require-pg-checkout v17",
+    "exit_code": 0,
+    "output": "Validated 18 binaries, 4 pinned PG versions, 39 extension stages",
+    "path": "build/dsga-pg-rejection-binding.log",
+    "sha256": "5b3f902293ddc5c379b85698a19cd19019a4cdede29b2e715b3ee406e4b35015"
+  }
+}
