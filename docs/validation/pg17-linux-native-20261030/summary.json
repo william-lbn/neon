@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "scope": "PG17内存自动扩缩容Linux阶段验证；不代表全部功能/VM/集群完成",
+  "recorded_at_utc": "2026-10-30T13:14:08.236707+00:00",
+  "branch": "codex/dsga-neon-v3-20261019",
+  "base_head": "3aa86c056ee34bf2c8d4bda1659e897fdbf9e0d9",
+  "pg17_sha": "79367196a74eef82e67cac917877d2e6271d3e70",
+  "source_files_sha256": {
+    "control_plane/src/endpoint.rs": "df8d46840691624162507b3cbb47f6407f95936d644aa0ce18fe9739959f58c3",
+    "pgxn/neon/dsg_control.c": "342aa6dfbd28615e9e5c39f338bf0744ce3cc74d48c2177deb1b45360ca27fdd",
+    "pgxn/neon_walredo/inmem_smgr.c": "d994530cca52a195276906c998b654cad1ae2af73f9485561e22ebb041b625f6",
+    "ci/pg17_memory_cases.json": "4352d0d07ef705178bae3fd047978b037d7480b0f86249a7ff4c8af4eca93b7c",
+    "ci/run_pg17_memory_cases.py": "2fb2f393d84238169d6a7eafa1922c52aa9f16fb910727b6e71efcf46dda4b7e"
+  },
+  "single_service": {
+    "passed": true,
+    "roots": 8,
+    "skipped": 0,
+    "raw_directory": "/data/neon-build/validation/native-pg/injection-20261030T125244Z",
+    "receipt": "single-service.json"
+  },
+  "compile": {
+    "id": "PG17-B-001",
+    "target": "neon_local only",
+    "passed": true,
+    "raw_directory": "/data/neon-build/validation/neon-local-compile/20261030T130306Z",
+    "binary_sha256": "bb885d233f83f84aa583af65d984fe5fec07ad2d2959a18e420957c06675f307",
+    "source_sha256": "df8d46840691624162507b3cbb47f6407f95936d644aa0ce18fe9739959f58c3",
+    "note": "reuse previously built PG14/15/16 headers required by Rust FFI; no PG14/15/16 tests or new feature work"
+  },
+  "feature_cross_language_service": {
+    "id": "PG17-S-P2-004",
+    "passed": true,
+    "archive_in_autoscaling": "docs/validation/pg17-u-p2p3-linux-20261030/native-service.json",
+    "note": "same one service check, not double-counted as E2E"
+  },
+  "first_attempt": {
+    "failed": 3,
+    "passed": 5,
+    "skipped": 0,
+    "reason": "release PG lacked required injection points; recompiled exact PG17 test kernel with cassert/injection points; failure retained"
+  },
+  "not_verified": [
+    "P1 full final production integration (in progress)",
+    "P2 continuous safe normal-limit decrease is not implemented",
+    "KVM/guest Linux6.12/HugeTLB physical return and actual normal cgroup writes",
+    "Helm installation and 117/118/119 runtime regression"
+  ],
+  "image_note": "30 old baseline images remain visible in Docker; current test images are development tools, not final release images"
+}

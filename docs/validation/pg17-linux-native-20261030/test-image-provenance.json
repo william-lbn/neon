@@ -1,0 +1,80 @@
+{
+  "buildx.build.provenance": {
+    "builder": {
+      "id": ""
+    },
+    "buildType": "https://mobyproject.org/buildkit@v1",
+    "materials": [
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/pg17-native-test@79367196-linux-v1?platform=linux%2Famd64",
+        "digest": {
+          "sha256": "4928462188cd107091a81f640e03506462f96510d431318af8c229105a5f1bb5"
+        }
+      },
+      {
+        "uri": "pkg:docker/docker/dockerfile@1.7",
+        "digest": {
+          "sha256": "a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e"
+        }
+      }
+    ],
+    "invocation": {
+      "configSource": {
+        "entryPoint": "Dockerfile-injection"
+      },
+      "parameters": {
+        "frontend": "gateway.v0",
+        "args": {
+          "build-arg:HTTPS_PROXY": "http://127.0.0.1:7890",
+          "build-arg:HTTP_PROXY": "http://127.0.0.1:7890",
+          "build-arg:NO_PROXY": "localhost,127.0.0.1,::1",
+          "build-arg:http_proxy": "http://127.0.0.1:7890",
+          "build-arg:https_proxy": "http://127.0.0.1:7890",
+          "build-arg:no_proxy": "localhost,127.0.0.1,::1",
+          "cmdline": "docker/dockerfile:1.7",
+          "force-network-mode": "host",
+          "source": "docker/dockerfile:1.7"
+        },
+        "locals": [
+          {
+            "name": "context"
+          },
+          {
+            "name": "dockerfile"
+          }
+        ],
+        "root": {
+          "configSource": {
+            "path": "Dockerfile-injection"
+          },
+          "request": {
+            "args": {
+              "build-arg:HTTPS_PROXY": "http://127.0.0.1:7890",
+              "build-arg:HTTP_PROXY": "http://127.0.0.1:7890",
+              "build-arg:NO_PROXY": "localhost,127.0.0.1,::1",
+              "build-arg:http_proxy": "http://127.0.0.1:7890",
+              "build-arg:https_proxy": "http://127.0.0.1:7890",
+              "build-arg:no_proxy": "localhost,127.0.0.1,::1",
+              "force-network-mode": "host",
+              "vcs:localdir:context": ".",
+              "vcs:revision": "3aa86c056ee34bf2c8d4bda1659e897fdbf9e0d9",
+              "vcs:source": "https://github.com/william-lbn/neon.git"
+            }
+          }
+        },
+        "compatibilityVersion": 30
+      },
+      "environment": {
+        "platform": "linux/amd64"
+      }
+    }
+  },
+  "buildx.build.ref": "neon-data/neon-data0/4795d2uvrdur44akwk5wn2o8a",
+  "containerimage.descriptor": {
+    "mediaType": "application/vnd.oci.image.index.v1+json",
+    "digest": "sha256:b2c2014bee547ed105d299429771124b626cf5464fa8d640f5eca38e6601af71",
+    "size": 856
+  },
+  "containerimage.digest": "sha256:b2c2014bee547ed105d299429771124b626cf5464fa8d640f5eca38e6601af71",
+  "image.name": "127.0.0.1:5001/neon/pg17-native-test:79367196-injection-v1"
+}

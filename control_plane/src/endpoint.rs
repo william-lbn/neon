@@ -768,6 +768,7 @@ impl Endpoint {
         let config = {
             let mut spec = ComputeSpec {
                 skip_pg_catalog_updates: self.skip_pg_catalog_updates,
+                dynamic_shared_buffers: None, // 本地测试入口保持缺省关闭；受管实例须显式提供完整预算。
                 format_version: 1.0,
                 operation_uuid: None,
                 features: self.features.clone(),

@@ -1,0 +1,64 @@
+{
+  "buildx.build.provenance": {
+    "builder": {
+      "id": ""
+    },
+    "buildType": "https://mobyproject.org/buildkit@v1",
+    "materials": [
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/neon@pg17-7bbabd0f9869?platform=linux%2Famd64",
+        "digest": {
+          "sha256": "17e4322dfbe985234940955984b4e7ebcd72071cebd130a1993fab1121f3318e"
+        }
+      },
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/pg17-native-test@79367196-injection-v1?platform=linux%2Famd64",
+        "digest": {
+          "sha256": "b2c2014bee547ed105d299429771124b626cf5464fa8d640f5eca38e6601af71"
+        }
+      }
+    ],
+    "invocation": {
+      "configSource": {
+        "entryPoint": "Dockerfile"
+      },
+      "parameters": {
+        "frontend": "dockerfile.v0",
+        "args": {
+          "build-arg:GIT_VERSION": "3aa86c056ee34bf2c8d4bda1659e897fdbf9e0d9",
+          "build-arg:VALIDATION_NONCE": "1793365386963875357",
+          "force-network-mode": "host"
+        },
+        "locals": [
+          {
+            "name": "context"
+          },
+          {
+            "name": "dockerfile"
+          }
+        ],
+        "root": {
+          "configSource": {
+            "path": "Dockerfile"
+          },
+          "request": {
+            "args": {
+              "build-arg:GIT_VERSION": "3aa86c056ee34bf2c8d4bda1659e897fdbf9e0d9",
+              "build-arg:VALIDATION_NONCE": "1793365386963875357",
+              "force-network-mode": "host",
+              "vcs:localdir:context": ".",
+              "vcs:revision": "3aa86c056ee34bf2c8d4bda1659e897fdbf9e0d9",
+              "vcs:source": "https://github.com/william-lbn/neon.git"
+            }
+          }
+        },
+        "compatibilityVersion": 30
+      },
+      "environment": {
+        "dockerfileVersion": "1.28.0",
+        "platform": "linux/amd64"
+      }
+    }
+  },
+  "buildx.build.ref": "neon-data/neon-data0/k0wrqogou79e5prtiavog0pd9"
+}

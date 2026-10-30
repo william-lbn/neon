@@ -1,0 +1,80 @@
+{
+  "protocol_version": 1,
+  "pg_major": 17,
+  "scope": "只覆盖PG17内存自动扩缩容新增或直接受影响逻辑",
+  "cases": [
+    {
+      "id": "PG17-S-PG-001",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_control.DsgNeonControl.test_capabilities_and_installed_sql_contract",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-002",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_control.DsgNeonControl.test_grow_shrink_regrow_and_historical_receipt",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-003",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_control.DsgNeonControl.test_formal_fence_advances_epoch_without_resizing_or_authorizing_vm",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-004",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_writes_dirty_tail_and_regrow_preserves_real_data",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-005",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_pin_timeout_restores_allocation_then_retry_succeeds",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-006",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_waits_for_real_pin_and_completes_after_release",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-007",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_admission.DsgNeonAdmission.test_formal_upgrade_receipt_full_context_and_administrator_isolation",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    },
+    {
+      "id": "PG17-S-PG-008",
+      "layer": "single-service",
+      "suite": "core-smoke",
+      "test": "test_dsg_neon_admission.DsgNeonAdmission.test_formal_strict_request_identity_and_reversible_sql_upgrade",
+      "scope": "PG17 DSGA自定义内核/Neon正式SQL"
+    }
+  ],
+  "pending_end_to_end": [
+    {
+      "id": "PG17-E-001",
+      "description": "生产owner自动策略→PG→Guest资源→VM→Host→Finalize完整Grow/Shrink",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "PG17-E-002",
+      "description": "真实KVM/HugeTLB与normal物理资源读回、无新增OOM/重启",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "PG17-E-003",
+      "description": "仅117/118/119的Helm安装及PG17扩缩回归",
+      "status": "NOT_RUN"
+    }
+  ]
+}

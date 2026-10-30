@@ -1024,7 +1024,7 @@ NeonDsgAdmission(text *raw, bool query)
 	}
 #else
 	ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("this Neon build does not support DSGA admission protocol 1")));
-	PG_RETURN_NULL();
+	return (Datum) 0; /* 内部helper没有fcinfo；上方ERROR始终抛错，不返回SQL空值。 */
 #endif
 }
 
@@ -1123,7 +1123,7 @@ NeonDsgAdmissionLease(text *raw, bool query_rearm)
 	}
 #else
 	ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED), errmsg("this build lacks native DSGA admission lease support")));
-	PG_RETURN_NULL();
+	return (Datum) 0; /* 内部helper没有fcinfo；上方ERROR始终抛错，不返回SQL空值。 */
 #endif
 }
 

@@ -1,0 +1,13 @@
+test_capabilities_and_installed_sql_contract (test_dsg_neon_control.DsgNeonControl.test_capabilities_and_installed_sql_contract) ... ok
+test_grow_shrink_regrow_and_historical_receipt (test_dsg_neon_control.DsgNeonControl.test_grow_shrink_regrow_and_historical_receipt) ... ok
+test_formal_fence_advances_epoch_without_resizing_or_authorizing_vm (test_dsg_neon_control.DsgNeonControl.test_formal_fence_advances_epoch_without_resizing_or_authorizing_vm) ... ok
+test_shrink_writes_dirty_tail_and_regrow_preserves_real_data (test_dsg_postgres.DsgPostgresLifecycle.test_shrink_writes_dirty_tail_and_regrow_preserves_real_data) ... ok
+test_shrink_pin_timeout_restores_allocation_then_retry_succeeds (test_dsg_postgres.DsgPostgresLifecycle.test_shrink_pin_timeout_restores_allocation_then_retry_succeeds) ... ok
+test_shrink_waits_for_real_pin_and_completes_after_release (test_dsg_postgres.DsgPostgresLifecycle.test_shrink_waits_for_real_pin_and_completes_after_release) ... ok
+test_formal_upgrade_receipt_full_context_and_administrator_isolation (test_dsg_neon_admission.DsgNeonAdmission.test_formal_upgrade_receipt_full_context_and_administrator_isolation) ... ok
+test_formal_strict_request_identity_and_reversible_sql_upgrade (test_dsg_neon_admission.DsgNeonAdmission.test_formal_strict_request_identity_and_reversible_sql_upgrade) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 11.252s
+
+OK

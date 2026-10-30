@@ -395,7 +395,7 @@ static const struct f_smgr inmem_smgr =
 	.smgr_start_unlogged_build = NULL,
 	.smgr_finish_unlogged_build_phase_1 = NULL,
 	.smgr_end_unlogged_build = NULL,
-	.smgr_read_slru_segment = NULL,
+	/*- PG17已移除此结构成员；其它版本未列出的可选回调按C静态初始化保持NULL。 */
 };
 
 const f_smgr *
