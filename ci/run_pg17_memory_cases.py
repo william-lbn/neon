@@ -30,8 +30,18 @@ def main():
     cases = [row for row in catalog['cases'] if row['suite'] == args.suite]
     names = [row['test'] for row in cases]
     ids = [row['id'] for row in cases]
-    if not cases or len(names) != len(set(names)) or len(ids) != len(set(ids)) or any(row['layer'] != 'single-service' for row in cases):
+    early_birth = args.suite == 'early-birth'
+    allowed_layers = {'unit-native', 'single-service'} if early_birth else {'single-service'}
+    if not cases or len(names) != len(set(names)) or len(ids) != len(set(ids)) or any(row['layer'] not in allowed_layers for row in cases):
         parser.error('单服务目录必须非空且测试名称/编号唯一')
+    if early_birth:
+        import ctypes
+        expected = {'PG17-U-BIRTH-001', 'PG17-U-BIRTH-002', 'PG17-S-BIRTH-001',
+                    'PG17-S-BIRTH-002', 'PG17-S-BIRTH-003', 'PG17-S-BIRTH-004'}
+        if len(cases) != 6 or set(ids) != expected:
+            parser.error('early-birth必须准确包含六根编号，不能删缺失用例变绿')
+        if ctypes.CDLL(None).prctl(39, 0, 0, 0, 0) != 0:
+            parser.error('early-birth父进程须NNP=0以实际执行负例；正例单独设置NNP，不能skip')
     required = ['NEON_TEST_PG_BIN', 'NEON_TEST_DSG_LIBRARY', 'NEON_TEST_RMGR_LIBRARY', 'NEON_TEST_NEON_LIBRARY']
     if any(not os.environ.get(name) for name in required):
         parser.error('须显式指定准确PG及全部配套库，不能通过跳过缺失能力')
@@ -44,6 +54,7 @@ def main():
     binaries = {'postgres': pg_bin / 'postgres', **{name: Path(os.environ[name]) for name in required[1:]}}
     rows = []
     lookup = {row['test']: row['id'] for row in cases}
+    layers = {row['test']: row['layer'] for row in cases}
 
     class Result(unittest.TextTestResult):
         # 每个根只保存一条结果；任何subTest失败都回写其根，保留完整traceback。
@@ -51,6 +62,8 @@ def main():
         def startTest(self, test):
             self.started = time.monotonic()
             self.current = {'id': lookup.get(test.id(), 'UNMAPPED'), 'test': test.id(), 'result': 'PASS', 'details': [], 'subtests': 0}
+            if early_birth:
+                self.current['layer'] = layers.get(test.id(), 'UNMAPPED')
             super().startTest(test)
         def stopTest(self, test):
             self.current['elapsed_seconds'] = round(time.monotonic() - self.started, 6)
@@ -79,7 +92,7 @@ def main():
     suite = unittest.TestSuite(unittest.defaultTestLoader.loadTestsFromName(name) for name in names)
     result = unittest.TextTestRunner(verbosity=2, resultclass=Result).run(suite)
     passed = result.testsRun == len(cases) and len(rows) == len(cases) and result.wasSuccessful() and all(row['result'] == 'PASS' and row['id'] != 'UNMAPPED' for row in rows)
-    evidence = {'protocol_version': 1, 'layer': 'single-service', 'suite': args.suite, 'platform': platform.platform(),
+    evidence = {'protocol_version': 1, 'layer': 'mixed-native' if early_birth else 'single-service', 'suite': args.suite, 'platform': platform.platform(),
                 'python': platform.python_version(), 'pg_configure': configure,
                 'postgres_version': subprocess.check_output([str(pg_bin / 'postgres'), '--version'], text=True).strip(),
                 'binary_sha256': {name: {'path': str(path), 'sha256': digest(path)} for name, path in binaries.items()},
@@ -88,6 +101,10 @@ def main():
                 'not_proven': ['KVM', 'guest cgroup/HugeTLB物理归还', 'owner到VM端到端', 'Kubernetes'],
                 'tests': rows, 'tests_run': result.testsRun, 'expected_tests': len(cases),
                 'passed': passed, 'skipped': len(result.skipped), 'errors': len(result.errors), 'failures': len(result.failures)}
+    if early_birth:
+        native_source = HERE.parent / 'vendor/postgres-v17/src/test/modules/test_dsg_region/t/test_early_arrays.py'
+        evidence['native_test_source_sha256'] = {str(native_source.relative_to(HERE.parent)): digest(native_source)}
+        evidence['not_proven'] += ['Root出生封存', 'seccomp/syscall边界', '完整持续收费包络', '安全normal降限']
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n')
     return 0 if passed else 1

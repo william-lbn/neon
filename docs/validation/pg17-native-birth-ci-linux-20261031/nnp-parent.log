@@ -1,0 +1,3 @@
+usage: run_pg17_memory_cases.py [-h] [--catalog CATALOG] --output OUTPUT
+                                [--suite SUITE]
+run_pg17_memory_cases.py: error: early-birth父进程须NNP=0以实际执行负例；正例单独设置NNP，不能skip

@@ -1,0 +1,3 @@
+usage: run_pg17_memory_cases.py [-h] [--catalog CATALOG] --output OUTPUT
+                                [--suite SUITE]
+run_pg17_memory_cases.py: error: 单服务目录必须非空且测试名称/编号唯一

@@ -1,0 +1,3 @@
+usage: run_pg17_memory_cases.py [-h] [--catalog CATALOG] --output OUTPUT
+                                [--suite SUITE]
+run_pg17_memory_cases.py: error: early-birth必须准确包含六根编号，不能删缺失用例变绿

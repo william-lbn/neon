@@ -135,6 +135,48 @@
       "suite": "budget-boundaries",
       "test": "test_dsg_address_space.DsgAddressSpaceStartup.test_noncanonical_or_unbounded_values_fail_before_any_mode",
       "scope": "PG最早启动阶段拒绝非规范或无界AS值"
+    },
+    {
+      "id": "PG17-U-BIRTH-001",
+      "layer": "unit-native",
+      "suite": "early-birth",
+      "test": "test_dsg_early_arrays.EarlyArrays.test_PG17_U_BIRTH_001_explicit_invalid_modes_and_original_as",
+      "scope": "显式test-only模式及原AS/完整占位失败拒绝"
+    },
+    {
+      "id": "PG17-U-BIRTH-002",
+      "layer": "unit-native",
+      "suite": "early-birth",
+      "test": "test_dsg_early_arrays.EarlyArrays.test_PG17_U_BIRTH_002_no_nnp_cannot_enable",
+      "scope": "真实NNP=0不能启用早期占位"
+    },
+    {
+      "id": "PG17-S-BIRTH-001",
+      "layer": "single-service",
+      "suite": "early-birth",
+      "test": "test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_001_default_disabled_real_pg",
+      "scope": "默认关闭真实PG且不伪造Root资格"
+    },
+    {
+      "id": "PG17-S-BIRTH-002",
+      "layer": "single-service",
+      "suite": "early-birth",
+      "test": "test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_002_configuration_cannot_drift",
+      "scope": "实际配置最大值及动态开关漂移拒绝"
+    },
+    {
+      "id": "PG17-S-BIRTH-003",
+      "layer": "single-service",
+      "suite": "early-birth",
+      "test": "test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_003_real_logger_and_recovery_keep_r",
+      "scope": "真实logger及三次内部恢复保R弃旧共享引用"
+    },
+    {
+      "id": "PG17-S-BIRTH-004",
+      "layer": "single-service",
+      "suite": "early-birth",
+      "test": "test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_004_extension_and_native_acl",
+      "scope": "实际CREATE EXTENSION普通角色及GRANT绕过拒绝"
     }
   ],
   "pending_end_to_end": [

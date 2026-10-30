@@ -1,0 +1,194 @@
+PG17及后续内核：测试用例总表
+2026-10-30T16:50:57.013902+00:00
+按每项实际源码快照归档，不是当前全部工作树或整体产品统一认证；原始失败与未执行保留
+首版必须完成安全normal降限、单机和真实K8s全部E2E；之后最新控制面对接与后续内核适配
+
+已归档：PG17核心Go单元89根；原生PG单服务27根、原生binary单元2根；跨语言真实PG单服务1根；kernel/loader/wire独立组件3根；peer单服务1根、协议集成4根。
+Helm：12个单元门槛、4个配置/类型门槛；真实PG/Guest/VM/K8s E2E通过=0。
+各类计数不混算；单元/配置通过不表示可封版。详细来源/命令/失败见JSON指向的各仓库收据。
+
+protocol-integration
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-I-P1-001 | PASS | TestPG17EP1InitialSealBeforeReserve | /data/neon-build/validation/go-1793366835559849241
+PG17-I-P1-002 | PASS | TestPG17EP1InitialReservedHostCreateLate | /data/neon-build/validation/go-1793366835559849241
+PG17-I-P1-003 | PASS | TestPG17EP1FinalizedBoundHostAndRealSuccessor | /data/neon-build/validation/go-1793367551253478994
+PG17-I-P1-004 | PASS | TestPG17SP1SchedulerCompletesMissedActivePlacement | /data/neon-build/validation/go-1793366829587828168
+
+service-integration
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-S-P1-001 | PASS | TestPG17SP1PublisherSealAndReadOnlyConsumer | /data/neon-build/validation/go-1793366835559849241
+
+unit
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-U-P1-001 | PASS | TestPG17UP1SealBeforeReserveAndPlacementBarrier | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-002 | PASS | TestPG17UP1ReservedSealUnknownAndLateBind | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-003 | PASS | TestPG17UP1BoundSealPreservesRetainedBudgetAndSettlement | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-004 | PASS | TestPG17UP1LatestBarrierRetiresTrustedInitialPrefix | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-005 | PASS | TestPG17UP1BarrierCodecCloneAndSourceDrift | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-006 | PASS | TestPG17UP1SealRejectsChangedNodeLeaseAndOwner | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-007 | PASS | TestPG17UP1KeyedPlacementHonorsClosedThroughWithoutSeal | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-01 | PASS | TestHostActualCapacitySettlementRetainsCancelledShrinkBefore | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-02 | PASS | TestHostActualCapacityCannotRegressOrLoseUnknownSettlement | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-03 | PASS | TestInitialHostSettlementRequiresV8AndPreservesComparableSource | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-04 | PASS | TestNodeLedgerRejectsChangedAliasesBootsAndOverflow | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-05 | PASS | TestNodeLedgerStrictSourcesAndBoundNeverEvictHeldMemory | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-06 | PASS | TestCompletePlacementsMultiWriterCASAndUnknownRecovery | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-07 | PASS | TestInitialVMRequiresOriginalCompletePlacement | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-08 | PASS | TestBoundHostElectionPreservesOriginalUIDAndEpoch | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-09 | PASS | TestPlacementSchemaBoundsAndRoundTripRemainStrict | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-10 | PASS | TestNodeLedgerPublishedClaimKeepsOriginalUIDAndIndependentCopies | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-11 | PASS | TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-12 | PASS | TestSuccessfulSettlementPreservesRetirementVersionBarrier | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-13 | PASS | TestHostSettlementDropsOnlyClosedPeakAndCannotReopenExecution | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-14 | PASS | TestHostSettlementUnknownCASAndNewGrantRemainConservative | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-15 | PASS | TestHostSettlementCompactsBeyondOperationBoundButKeepsWatermark | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-16 | PASS | TestNodeLedgerOriginalHoldLostRepliesAndReadOnlyRetry | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-17 | PASS | TestNodeLedgerCountsSameVMByPeakAndRetainsOldPod | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-18 | PASS | TestNodeLedgerConcurrentCASNeverGrantsSameCapacityTwice | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-19 | PASS | TestNodeLedgerTakeoverPreservesHoldAndFencesLateOldPatch | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-20 | PASS | TestNodeLedgerNeverResetsLostChangedOrExpiredSources | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-21 | PASS | TestHostClosedThroughSettlesCancelledPeakAndRejectsDelayedReserve | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-22 | PASS | TestHostClosedThroughRejectsForgedOrNonMonotonicWitness | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-008-23 | PASS | TestHostClosedThroughUnknownCASPreservesFenceAndFutureBudget | /data/neon-build/validation/go-1793363224278729296
+PG17-U-P1-009 | PASS | TestPG17UP1CompletedPrepareRequiresIndependentBarrier | /data/neon-build/validation/go-1793366828642808795
+PG17-U-P1-010 | PASS | TestPG17UP1CompletedBarrierSurvivesRealHistoryExpiryAndBudgetReplacement | /data/neon-build/validation/go-1793366828642808795
+PG17-U-P1-011 | PASS | TestInitialCollectionProgressIsIndependentAndRestartsAfterBoundedScan | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-012 | PASS | TestPG17UP1SealBeforeProofTakeoverKeepsConfirmedSelection | /data/neon-build/validation/go-1793367344028361292
+PG17-U-P1-013-01 | PASS | TestCollectionProgressDiscardsOnlyDiscoveryOnWatermarkOrVMChange | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-02 | PASS | TestInitialSourceCandidatesUseRetiredKeyAndNeverCollectRunnerReceipts | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-03 | PASS | TestInitialSourceCollectionPagesYieldResumeAndDiscoverLateOutside | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-04 | PASS | TestRetainedSourceNamesPreserveSingleSlotAcrossHistoryExpiryAndBudgetReplacement | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-05 | PASS | TestSchedulerLegacyApprovalHoldsTargetBeforeOriginalVMCAS | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-06 | PASS | TestSchedulerManagedFirstPlacementAndLegacyBypassExclusion | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-07 | PASS | TestSchedulerRestoresAllWorkloadsAndCanonicalVMBeforeFirstGrant | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-08 | PASS | TestSchedulerWorkExpiredDiscoveryDoesNotResetOriginalLedger | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-09 | PASS | TestSchedulerWorkPagesClosedHistoryWithoutLedgerExhaustion | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-10 | PASS | TestSchedulerWorkRetainsUnattemptedTailAcrossDeadline | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-11 | PASS | TestSourceCollectionDeleteKeepsExactUIDDigestAndUnknownReplies | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-12 | PASS | TestSourceCollectionProgressSurvivesPublisherRebuildAndRemainsBounded | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P1-013-13 | PASS | TestSourceCollectionThroughKeyNeverOrdersConflictingOperationID | /data/neon-build/validation/go-1793366833080767154
+PG17-U-P3-001 | PASS | 策略窗口、冷却、低压客户端约束、资格与采样失效 | /data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json
+PG17-U-P3-002 | PASS | 未接受Begin原CAS迟到屏障、原身份和恢复 | /data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json
+PG17-U-P3-003 | PASS | 同一正式owner自动Grow/Shrink控制组合及来源失效 | /data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json
+PG17-U-P3-004 | PASS | Agent可信自动配置入口与UDS缺省关闭 | /data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json
+PG17-U-P2-001 | PASS | 无证明normal下降写前拒绝、旧未知可Observe而不可Replay | /data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json
+PG17-U-P2-002 | PASS | 持续聚合保留成本和无证明降限拒绝 | /data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json
+PG17-U-P2-003 | PASS | 原关闭命令/持续聚合接线保留其他成本 | /data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json
+PG17-U-VM-001 | PASS | TestPG17DSGAPlacementCannotBypassRequiredNodeAllowlist | /data/neon-build/validation/go-1793365826775420789
+PG17-U-VM-002 | PASS | TestPG17DSGAPlacementPreservesEmptyAndConflictingSelectors | /data/neon-build/validation/go-1793365826775420789
+PG17-U-VM-003 | PASS | TestPG17DSGARunnerPodKeepsPlacementWithoutMutatingVM | /data/neon-build/validation/go-1793365826775420789
+PG17-U-P2-004 | PASS | TestPhysicalKernelObservationParsers | /data/neon-build/src/autoscaling/docs/validation/pg17-physical-kernel-component-20261030/summary.json
+PG17-U-P2-005 | PASS | TestPhysicalKernelObservationMatchRejectsDrift | /data/neon-build/src/autoscaling/docs/validation/pg17-physical-kernel-component-20261030/summary.json
+PG17-U-P2-006 | PASS | TestPhysicalKernelObservationRejectsSummedCapacityOverflow | /data/neon-build/src/autoscaling/docs/validation/pg17-physical-kernel-component-20261030/summary.json
+PG17-U-EXEC-001 | PASS | TestPostgresExecEnvironmentRemovesPreMainInjectionAndCallerProfile | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/summary.json
+PG17-U-EXEC-002 | PASS | TestPostgresExecEnvironmentRejectsAmbiguityAndMalformedInput | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/summary.json
+PG17-U-EXEC-003 | PASS | TestPostgresExecEnvironmentFixedByteBoundary | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/summary.json
+PG17-U-AS-001 | PASS | TestAddressSpaceBootstrapRejectsIncompleteFactsBeforeCreatingWAL | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-AS-002 | PASS | TestAddressSpaceBootstrapUnknownRetainsOriginalAndLegacyCannotUpgrade | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-AS-003 | PASS | TestAddressSpaceCancellationAndUnknownOriginalKeepExactSource | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-AS-004 | PASS | TestAddressSpaceDriftBlocksWriteReadbackAndRepair | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-AS-005 | PASS | TestAddressSpaceDurableBirthOriginalHeldAndCancellationRejectFieldRemoval | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-AS-006 | PASS | TestAddressSpaceFreezeBirthAndRuntimeBeforeWAL | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-AS-007 | PASS | TestAddressSpaceOriginalSourceAndEnvironment | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-AS-008 | PASS | TestAddressSpacePIDListsAndBoundedStableObservation | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-AS-009 | PASS | TestAddressSpaceProcStrictPrivilegesAndExistingMappings | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/adopted-tests.json
+PG17-U-WIRE-001 | PASS | TestNativeBirthWireExactOriginalContextAndRanges | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-linux-20261031/summary.json
+PG17-U-WIRE-002 | PASS | TestNativeBirthWireRejectsForgedOrAmbiguousFrames | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-linux-20261031/summary.json
+PG17-U-WIRE-003 | PASS | TestNativeBirthWireRequiresIndependentOriginalGeometry | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-linux-20261031/summary.json
+PG17-U-P2-007 | PASS | TestPhysicalKernelOriginCapturesAndKeepsOriginal | /data/neon-build/src/autoscaling/docs/validation/pg17-physical-kernel-origin-20261031/summary.json
+PG17-U-P2-008 | PASS | TestPhysicalKernelOriginRejectsSourceAndHistoryDrift | /data/neon-build/src/autoscaling/docs/validation/pg17-physical-kernel-origin-20261031/summary.json
+PG17-U-P2-009 | PASS | TestPhysicalKernelOriginPendingRequiresExplicitOriginalReplay | /data/neon-build/src/autoscaling/docs/validation/pg17-physical-kernel-origin-20261031/summary.json
+PG17-U-P2-010 | PASS | TestPhysicalKernelOriginSerializesWithOriginalResourceLock | /data/neon-build/src/autoscaling/docs/validation/pg17-physical-kernel-origin-20261031/summary.json
+
+single-service
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-S-P2-004 | PASS | TestNativeQuiesceConsumptionKeepsRetainedPayload | /data/neon-build/validation/pg17-s-p2-004-http-20261030T125326Z
+PG17-S-PG-001 | PASS | test_dsg_neon_control.DsgNeonControl.test_capabilities_and_installed_sql_contract | /data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json
+PG17-S-PG-002 | PASS | test_dsg_neon_control.DsgNeonControl.test_grow_shrink_regrow_and_historical_receipt | /data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json
+PG17-S-PG-003 | PASS | test_dsg_neon_control.DsgNeonControl.test_formal_fence_advances_epoch_without_resizing_or_authorizing_vm | /data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json
+PG17-S-PG-004 | PASS | test_dsg_postgres.DsgPostgresLifecycle.test_shrink_writes_dirty_tail_and_regrow_preserves_real_data | /data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json
+PG17-S-PG-005 | PASS | test_dsg_postgres.DsgPostgresLifecycle.test_shrink_pin_timeout_restores_allocation_then_retry_succeeds | /data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json
+PG17-S-PG-006 | PASS | test_dsg_postgres.DsgPostgresLifecycle.test_shrink_waits_for_real_pin_and_completes_after_release | /data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json
+PG17-S-PG-007 | PASS | test_dsg_neon_admission.DsgNeonAdmission.test_formal_upgrade_receipt_full_context_and_administrator_isolation | /data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json
+PG17-S-PG-008 | PASS | test_dsg_neon_admission.DsgNeonAdmission.test_formal_strict_request_identity_and_reversible_sql_upgrade | /data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json
+PG17-S-PG-009 | PASS | test_dsg_admission_closure.DsgAdmissionClosure.test_close_consumes_missing_open_and_retains_native_guards | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-010 | PASS | test_dsg_dsm.DsgDsmLifecycle.test_pre_os_reservation_is_visible_and_actual_cancel_has_no_allocation | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-011 | PASS | test_dsg_dsm.DsgDsmLifecycle.test_pinned_segment_survives_creator_exit_and_counts_backing_once | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-012 | PASS | test_dsg_dsm.DsgDsmLifecycle.test_concurrent_create_cannot_spend_same_last_budget_and_reuses_after_real_destroy | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-013 | PASS | test_dsg_dsm.DsgDsmLifecycle.test_failed_destroy_keeps_real_os_segment_and_unknown_budget | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-014 | PASS | test_dsg_prepared.DsgPreparedLifecycle.test_prepared_survives_backend_exit_and_foreground_idle | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-015 | PASS | test_dsg_prepared.DsgPreparedLifecycle.test_reserved_before_valid_and_close_race_remains_visible | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-016 | PASS | test_dsg_prepared.DsgPreparedLifecycle.test_crash_rebuild_recovers_wal_or_disk_but_not_unlogged_reserved_slot | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-017 | PASS | test_dsg_shared_cost.DsgSharedCost.test_shared_cost_deduplicates_boot_arrays_and_keeps_runtime_charges | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-018 | PASS | test_dsg_shared_cost.DsgSharedCost.test_shared_cost_observes_actual_prepare_without_waiting_for_resize | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-PG-019 | PASS | test_dsg_address_space.DsgAddressSpaceStartup.test_noncanonical_or_unbounded_values_fail_before_any_mode | /data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json
+PG17-S-BIRTH-001 | PASS | test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_001_default_disabled_real_pg | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json
+PG17-S-BIRTH-002 | PASS | test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_002_configuration_cannot_drift | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json
+PG17-S-BIRTH-003 | PASS | test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_003_real_logger_and_recovery_keep_r | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json
+PG17-S-BIRTH-004 | PASS | test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_004_extension_and_native_acl | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json
+PG17-S-BIRTH-REG-001 | PASS | test_dsg_nonshmem_child.DsgNonShmemChildLifecycle.test_initial_logger_detaches_only_its_arrays | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/v1-regression-result.json
+PG17-S-BIRTH-REG-002 | PASS | test_dsg_nonshmem_child.DsgNonShmemChildLifecycle.test_restarted_logger_after_real_grow_does_not_inherit_arrays | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/v1-regression-result.json
+PG17-S-BIRTH-REG-003 | PASS | test_dsg_nonshmem_child.DsgNonShmemChildLifecycle.test_logger_survives_internal_pg_boot_without_stale_array_backing | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/v1-regression-result.json
+PG17-S-BIRTH-REG-004 | PASS | test_dsg_address_space.DsgAddressSpaceStartup.test_absent_source_still_runs_real_pg_and_survives_restart | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/v1-regression-result.json
+PG17-S-NORMAL-001 | REQUIRED_IN_PROGRESS | 安全降低同一PG工作域normal硬上限；持续私有/后台、文件、kernel/IO及在途包络尚未完整实现 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
+
+single-service-component
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-S-KERNEL-001 | PASS_COMPONENT_ONLY | TestPG17NativePhysicalKernelComponent | /data/neon-build/validation/pg17-s-kernel-001-20261030T154132Z
+PG17-S-EXEC-001 | PASS_COMPONENT_ONLY | TestNativePostgresExecEnvironmentBlocksActualPreMainLoader | /data/neon-build/src/autoscaling/docs/validation/pg17-exec-environment-linux-20261031/summary.json
+PG17-S-WIRE-001 | PASS_COMPONENT_ONLY | TestNativeBirthWireKernelPeerAndMalformedFrames | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-linux-20261031/summary.json
+
+unit-native
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-U-BIRTH-001 | PASS | test_dsg_early_arrays.EarlyArrays.test_PG17_U_BIRTH_001_explicit_invalid_modes_and_original_as | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json
+PG17-U-BIRTH-002 | PASS | test_dsg_early_arrays.EarlyArrays.test_PG17_U_BIRTH_002_no_nnp_cannot_enable | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json
+
+build-component
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-B-PERM-001 | PASS_BUILD_LAYER_COMPONENT_ONLY | 正式Dockerfile v17条件与实际权限层执行 | /data/neon-build/src/neon/docs/validation/pg17-compute-entrypoint-permissions-20261031/summary.json
+
+platform-retest
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-S-WIRE-001@kernel-6.12.26 | RETEST_PENDING | 旧KVM失败保留；仅fixture同步已修/Host PASS，待新准确Guest结果 | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-01/result.json
+
+unit-gate
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-U-H01 | PASS | 七个 chart 拒绝空、缺项、重复、116、未知节点及未知 placement 字段 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-U-H02 | PASS | 即使移除测试副本 schema，模板也拒绝越界节点 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-U-H03 | PASS | 静态 VM 参数只接受整数 PG17 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-U-H04 | PASS | 外部 device-plugin digest 可覆盖且 tag 被拒绝 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-U-H05 | PASS | 节点快照防错及 VM 独立 selector 的 OR 绕过保护 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-U-H06 | PASS | 准确 AS 三 CRD/schema/CEL 与保留 webhook 的来源比对 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-U-H07 | PASS | DSGA Agent CA/token/PodUID 与 Scheduler 精确原输入渲染接线 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json
+PG17-U-H08 | PASS | PG17/专用身份/原域/精确预算/策略非法输入与不完整启用拒绝 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json
+PG17-U-H09 | PASS | 新增运行角色只写明确节点/VM namespace/原 Host Lease，停用撤销 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json
+PG17-U-H10 | PASS | 准确 AS 运行接口与真实 Node UID 来源锁 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json
+PG17-U-H11 | PASS | 原Node/Lease快照检查拒绝同名重建、owner/marker/RV漂移和不完整快照 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json
+PG17-U-H13 | PASS | 仓库Node24源码/锁/10 chart静态策略 | docs/acceptance/pg17-helm-linux-20261030/node-source-check.json
+
+configuration-contract
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-S-H01 | PASS | 七个相关 chart 的严格离线 lint | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-S-H02 | PASS | 所有基本 PodSpec/VM/hook selector 与每个 affinity 分支及反亲和 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-S-H03 | PASS | 仅离线启用旧可选分支以穷尽 PodSpec/hook；本轮运行不启用这些功能 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json
+PG17-S-H06 | PASS | 真实 Linux/Go1.24 Agent.ReadConfig 与 Host Config.Validate、无PodUID拒绝 | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json
+
+environment
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-ENV-H01 | PASS | 只预取准确模块，不运行测试 | artifacts/pg17-dsga-cache/20261030T133051.735805Z
+
+runtime-prerequisite
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-S-H04 | NOT_READY | not-prepared: actual pool labels absent | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json
+PG17-S-H07 | NOT_READY | not-executed: original Host Lease/profile/system budget and per-VM qualifications absent | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json
+PG17-S-H08 | NOT_READY | not-executed: full Host ordinary-Pod hard-limit and protection scope unresolved | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json
+PG17-S-H09 | NOT_READY | not-executed: gateway/Runner/RBAC/CA/token/PG17 memory E2E requires single-machine gate first | /data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json
+
+real-end-to-end
+编号 | 结果 | 覆盖/用例 | 证据
+PG17-E-001 | NOT_RUN | 正式owner→PG→Guest资源→VM→Host→Finalize自动Grow/Shrink/Regrow | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
+PG17-E-002 | NOT_RUN | 实际Linux/KVM/cgroup/HugeTLB/normal下降及无新增OOM/重启 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
+PG17-E-003 | NOT_RUN | 仅117/118/119的Helm真实部署与故障恢复完整回归 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
+PG17-E-004 | NOT_RUN | PG17 K8s通过后，对接届时最新控制面的联合端到端 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
+PG18-E-001 | NOT_RUN | 后续PG18内核适配及相同上层合同全量联合回归 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
+PG16-E-001 | NOT_RUN | 后续PG16独立内核适配与全量联合回归 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt

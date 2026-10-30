@@ -105,6 +105,11 @@ replication = unittest.defaultTestLoader.discover('.', pattern='test_dsg_replica
 if replication.countTestCases() < 6:
     raise SystemExit('DSGA replication boundary suite is missing required cases')
 suite.addTests(replication)
+early_birth = unittest.defaultTestLoader.discover('.', pattern='test_dsg_early_arrays.py')
+# 此套件真实覆盖NNP=0拒绝、早期R、logger恢复和扩展ACL，漏源或漏装不能绿色。
+if early_birth.countTestCases() != 6:
+    raise SystemExit('PG17 early birth suite must contain exactly six required native cases')
+suite.addTests(early_birth)
 if suite.countTestCases() == 0:
     raise SystemExit('DSGA lifecycle suite contains zero tests')
 result = unittest.TextTestRunner(verbosity=2).run(suite)
