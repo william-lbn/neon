@@ -10,6 +10,14 @@
 
 
 
+## 最新归档：完整实际预算、服务重开与永久来源生命周期
+
+AS `d7946ec6175d2905d081c76685fc51726432190e` 已按预算合同、SDK、服务恢复三实现模块及缩容验证模块提交并推自有既有功能分支，核完整远程SHA。原Prepare/Host完整的16/17以v4明确区分原PG未派发与已派发独立事实，按当前Root及实际VM规格/Outside/usable/Host峰值保存完整预算。新开放用实际容量代次，完成CAS同时安装v3实际永久头、原Unknown覆盖/独立Outcome和预算水位，后继Host/Scheduler/GC通过统一严格来源读取，不伪造Cleanup或目标成功。
+
+采用Mac定向race52顶层/278含父子记录0fail/skip，七完整恢复窗口含一新增真实Lease接管、原生终态缓存淘汰/SDK重建、旧关闭后PG迟到下一代、InitialVM、Complete丢回复及Host/正常后继；额外新永久头后继读取及资格同名换UID拒绝。原单域受影响四根保留六次真实选主接管；原生SDK准确PG17/Router/JWT/SQL/SharedCost 1 Rust根/3 Go race进程9.88秒通过，8旧根过滤，非PG预算域为明确夹具。12包vet、普通/native tag增量lint0，33消费者仅编译；GC overlay反向失败/原源码复验通过。准确源码/用例/失败分别记录在[验收](DSGA-完整实际预算与服务恢复-Mac验收-20261030.md)与[机器收据](DSGA-完整实际预算与服务恢复-Mac收据-20261030.json)。
+
+本批PG/SQL/Rust产品未改，PG17实际/gitlink/两锁仍79367196；仅目标Rust夹具为SharedCost升级临时Neon1.11，不改变正式成员认证。P1早期16缺完整Prepare/本请求Host、类别18及后继永久预算剩余接线/组合仍需代码；P2安全降normal/持续预算、P3直接接线、P4最终准确PG17组合继续，不能归为仅待Linux。PG17整体未完成，Goal active；全面完成远程归档后暂停，不进入18/16。以下为历史归档。
+
 ## 最新归档：VM在途独立对账与关闭后Runner最终写入隔离
 
 AS `aea5507f433b236cea9bed2866a97f7b659054d9` 已推自有既有功能分支并核完整远程SHA，发行锁准确引用。关闭后来源恢复不得新Dispatch/消费旧not_sent重放；Runner仍可在原flock观察may_have_sent或封存明确未发送选择。独立选择/准确NativeCapacity/取消见证UID/RV保存，原Active Unknown、Abort、预算与关闭不改，接管须原Runner持久确认新floor。

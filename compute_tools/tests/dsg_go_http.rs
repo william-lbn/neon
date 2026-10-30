@@ -265,6 +265,13 @@ async fn native_go_resize_recovery_keeps_unknown_and_isolates_expired_result() -
         // JWT只走匿名stdin，原生恢复不授予Guest/VM/Host释放许可。
         let signer = Signer::new();
         let (mut cluster, _compute, app) = native(&signer).await?;
+        // 本根新增完整实际预算的SharedCost读回；基础夹具仍从1.8启动，
+        // 只为本根升级到提供正式扩展成员函数的最小1.11，不放宽SDK发现。
+        cluster
+            .connect()
+            .await?
+            .batch_execute("ALTER EXTENSION neon UPDATE TO '1.11'")
+            .await?;
         let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await?;
         let address = listener.local_addr()?;
         let _server = HttpTask(tokio::spawn(async move {
