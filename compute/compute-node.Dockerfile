@@ -2010,9 +2010,9 @@ COPY --from=postgres-cleanup-layer --chown=postgres /usr/local/pgsql /usr/local
 # PG17受管资源执行器将原出生PID与固定PG文件读回比对。官方COPY把PG程序也交
 # 给postgres；必须保护程序及可替换它的父目录，不能只锁文件而允许同目录rename。
 # 这里只收紧当前PG17的可执行入口，保留lib/share和扩展下载目录的既有权限。
-# 产品构建源接线，本轮Mac不构建镜像；其他PG版本的功能移植另行实施。
+# 真实构建参数与vendor/postgres-${PG_VERSION}均使用v17；不能只在本地覆盖层修正。
 ARG PG_VERSION
-RUN if [ "${PG_VERSION:?}" = "17" ]; then \
+RUN if [ "${PG_VERSION:?}" = "v17" ]; then \
       chown root:root /usr/local /usr/local/bin /usr/local/bin/postgres && \
       chmod go-w /usr/local /usr/local/bin /usr/local/bin/postgres; \
     fi

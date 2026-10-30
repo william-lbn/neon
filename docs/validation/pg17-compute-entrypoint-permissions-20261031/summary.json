@@ -1,0 +1,26 @@
+{
+  "id": "PG17-B-PERM-001",
+  "status": "PASS_BUILD_LAYER_COMPONENT_ONLY",
+  "source_file": "compute/compute-node.Dockerfile",
+  "source_sha256": "753d0d8b9a7df66a7e38e037230520553df8f5c52a0375c70c8ef9188d8504c6",
+  "actual_run_block_sha256": "ff3bc84d2db75958df553daa9c33cc13062ef8ce884e09fdb1ee29adfbcab2a8",
+  "runtime_deps_image": "sha256:b35896e81f3c9be7bf6dd3ec2206ef465c3d67985b1980c6775a54d87a784020",
+  "source_base": "b82d1b9e95ceb9387e0be6e280cd2eed4eca299c",
+  "results": [
+    {
+      "version": "v17",
+      "exit_code": 0,
+      "output": "0:0 755 /usr/local\n0:0 755 /usr/local/bin\n0:0 755 /usr/local/bin/postgres\n"
+    },
+    {
+      "version": "v16",
+      "exit_code": 0,
+      "output": "1000:1000 777 /usr/local\n1000:1000 777 /usr/local/bin\n1000:1000 777 /usr/local/bin/postgres\n"
+    }
+  ],
+  "real_pg_started": false,
+  "final_compute_image_built": false,
+  "normal_or_vm_or_k8s": false,
+  "ci_renderer_passed": true,
+  "rendered_sha256": "544800b0945eb9018623322bc4f0949946436df95b05f1d07e3f7e9a63e53f0e"
+}
