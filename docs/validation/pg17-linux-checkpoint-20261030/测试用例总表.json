@@ -1,0 +1,1182 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-10-30T15:00:03.780226+00:00",
+  "meaning": "按每项实际源码快照归档，不是当前全部工作树或整体产品统一认证；原始失败与未执行保留",
+  "release_gate": "首版必须完成安全normal降限、单机和真实K8s全部E2E；之后最新控制面对接与后续内核适配",
+  "versions_at_index_capture": {
+    "neon": {
+      "head": "590200b0179d104a0d1748814156f7854f10d2bf",
+      "branch": "codex/dsga-neon-v3-20261019",
+      "worktree_status": [
+        " M ci/distribution.json",
+        "?? \"docs/PG17\\350\\207\\263PG18-\\346\\234\\200\\347\\273\\210\\345\\256\\236\\346\\226\\275\\350\\256\\241\\345\\210\\222-20261030.txt\"",
+        "?? docs/validation/pg17-linux-checkpoint-20261030/"
+      ]
+    },
+    "autoscaling": {
+      "head": "79ec6501da167e6ae7abb47a48065e722865e611",
+      "branch": "codex/dsga-autoscaling-20261019",
+      "worktree_status": [
+        "?? pkg/dsga/resourceguard/physical_kernel_profile.go",
+        "?? pkg/dsga/resourceguard/physical_kernel_profile_linux.go",
+        "?? pkg/dsga/resourceguard/physical_kernel_profile_test.go"
+      ]
+    },
+    "neon-helm": {
+      "head": "42cc51cb2d338655ff4e8603c63c52aa4a22f3e3",
+      "branch": "codex/dsga-neon-helm-v3-20261019",
+      "worktree_status": []
+    },
+    "control-plane": {
+      "head": "be30ba5e8d774781ff76194128720dd6f5d6e045",
+      "branch": "codex/dsga-control-plane-v3-20261020",
+      "worktree_status": []
+    }
+  },
+  "evidence_files": [
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-p1-node-chain-linux-20261030/catalog.json",
+      "sha256": "970cb9c9b7a7009f8910a56d4409b551bfad531b462b5aff93c2cbae74f3879e"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json",
+      "sha256": "198a5b134e01eefaf8f80f6286d56d8f2911db5e1bdbd0c5f11ba1ec1a8b9894"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/native-service.json",
+      "sha256": "6d0078485405c4db7a9ede5817e8e4965e8d44e6d4984c279d2162442d0585f4"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-vm-placement-20261030/summary.json",
+      "sha256": "a8222acdc395b6e7acea881ad32dc73001b88f02ba11db5abb95b5467a30cc5b"
+    },
+    {
+      "path": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "sha256": "7b63ce382c4ff522b78c050bdf08ebe8d5f0b03de64640089f9a963a03e68d50"
+    },
+    {
+      "path": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "sha256": "71784a3bf4eb40c1558850f49a77ea548999b3e20ee086037bc573b69c1ddecc"
+    },
+    {
+      "path": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json",
+      "sha256": "695de0a2f8a2f8ba0f54895256276aff09ba63a492b2e64105005dbbc4bd639b"
+    },
+    {
+      "path": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "sha256": "961d7a6bc9c0a36fd90f4eeec67386e9f788c518081a0c7925d3176c80ebc4d0"
+    },
+    {
+      "path": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json",
+      "sha256": "79cef0728283d5a6d66a0573cbb9920128173134fb259fcf837a1f580377e504"
+    }
+  ],
+  "cases": [
+    {
+      "id": "PG17-I-P1-001",
+      "layer": "protocol-integration",
+      "status": "PASS",
+      "description": "TestPG17EP1InitialSealBeforeReserve",
+      "evidence": "/data/neon-build/validation/go-1793366835559849241",
+      "root_count": 1,
+      "scope": "Production Prepare/Session/SDK/WAL/typed VM CAS/Publisher/Node HTTP CAS/reopen/Complete/retirement; PG/Root/QMP/other Kube are peers",
+      "race": true,
+      "overall_run_exit_code": 1
+    },
+    {
+      "id": "PG17-I-P1-002",
+      "layer": "protocol-integration",
+      "status": "PASS",
+      "description": "TestPG17EP1InitialReservedHostCreateLate",
+      "evidence": "/data/neon-build/validation/go-1793366835559849241",
+      "root_count": 1,
+      "scope": "Same production chain; Reserve first, late original Host CREATE, Seal lost reply, old/fresh Bind blocked, Initial prefix retirement and exact GC",
+      "race": true,
+      "overall_run_exit_code": 1
+    },
+    {
+      "id": "PG17-I-P1-003",
+      "layer": "protocol-integration",
+      "status": "PASS",
+      "description": "TestPG17EP1FinalizedBoundHostAndRealSuccessor",
+      "evidence": "/data/neon-build/validation/go-1793367551253478994",
+      "root_count": 1,
+      "scope": "Bound original Claim with outer Host Planned, old budget proof/reopen/Complete, source-read faults and real 1024-to-2048 eight-action successor; peers remain explicit",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-I-P1-004",
+      "layer": "protocol-integration",
+      "status": "PASS",
+      "description": "TestPG17SP1SchedulerCompletesMissedActivePlacement",
+      "evidence": "/data/neon-build/validation/go-1793366829587828168",
+      "root_count": 1,
+      "scope": "Same full chain without race, real client-go Host Lease natural expiry/election/fence, owner-only NoActive settlement then keyless retention; production 10s reconcile limit unchanged",
+      "race": false,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-S-P1-001",
+      "layer": "service-integration",
+      "status": "PASS",
+      "description": "TestPG17SP1PublisherSealAndReadOnlyConsumer",
+      "evidence": "/data/neon-build/validation/go-1793366835559849241",
+      "root_count": 1,
+      "scope": "Actual Scheduler owner election -> Publisher Seal -> fixed Agent read-only Node/Lease certification; no recovery/open/resource action in measured Host boundary",
+      "race": true,
+      "overall_run_exit_code": 1
+    },
+    {
+      "id": "PG17-U-P1-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1SealBeforeReserveAndPlacementBarrier",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1ReservedSealUnknownAndLateBind",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1BoundSealPreservesRetainedBudgetAndSettlement",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1LatestBarrierRetiresTrustedInitialPrefix",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-005",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1BarrierCodecCloneAndSourceDrift",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-006",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1SealRejectsChangedNodeLeaseAndOwner",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-007",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1KeyedPlacementHonorsClosedThroughWithoutSeal",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-01",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestHostActualCapacitySettlementRetainsCancelledShrinkBefore",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-02",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestHostActualCapacityCannotRegressOrLoseUnknownSettlement",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-03",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestInitialHostSettlementRequiresV8AndPreservesComparableSource",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-04",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerRejectsChangedAliasesBootsAndOverflow",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-05",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerStrictSourcesAndBoundNeverEvictHeldMemory",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-06",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestCompletePlacementsMultiWriterCASAndUnknownRecovery",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-07",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestInitialVMRequiresOriginalCompletePlacement",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-08",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestBoundHostElectionPreservesOriginalUIDAndEpoch",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-09",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPlacementSchemaBoundsAndRoundTripRemainStrict",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-10",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerPublishedClaimKeepsOriginalUIDAndIndependentCopies",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-11",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerPublicationLostReplyAndSourceFailuresNeverRebind",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-12",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSuccessfulSettlementPreservesRetirementVersionBarrier",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-13",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestHostSettlementDropsOnlyClosedPeakAndCannotReopenExecution",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-14",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestHostSettlementUnknownCASAndNewGrantRemainConservative",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-15",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestHostSettlementCompactsBeyondOperationBoundButKeepsWatermark",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-16",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerOriginalHoldLostRepliesAndReadOnlyRetry",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-17",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerCountsSameVMByPeakAndRetainsOldPod",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-18",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerConcurrentCASNeverGrantsSameCapacityTwice",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-19",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerTakeoverPreservesHoldAndFencesLateOldPatch",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-20",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNodeLedgerNeverResetsLostChangedOrExpiredSources",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-21",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestHostClosedThroughSettlesCancelledPeakAndRejectsDelayedReserve",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-22",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestHostClosedThroughRejectsForgedOrNonMonotonicWitness",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-008-23",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestHostClosedThroughUnknownCASPreservesFenceAndFutureBudget",
+      "evidence": "/data/neon-build/validation/go-1793363224278729296",
+      "root_count": 1,
+      "scope": "Node model/Store HTTP RFC6902, explicit VM closure input; no physical/E2E claim",
+      "race": true,
+      "overall_run_exit_code": null
+    },
+    {
+      "id": "PG17-U-P1-009",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1CompletedPrepareRequiresIndependentBarrier",
+      "evidence": "/data/neon-build/validation/go-1793366828642808795",
+      "root_count": 1,
+      "scope": "Journal raw-Prepare/operation/closed selection and mandatory independent barrier contract",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-010",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1CompletedBarrierSurvivesRealHistoryExpiryAndBudgetReplacement",
+      "evidence": "/data/neon-build/validation/go-1793366828642808795",
+      "root_count": 1,
+      "scope": "Real Model history eviction, repeated completed recovery/slot replacement and new budget audit-only boundary",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-011",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestInitialCollectionProgressIsIndependentAndRestartsAfterBoundedScan",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-012",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17UP1SealBeforeProofTakeoverKeepsConfirmedSelection",
+      "evidence": "/data/neon-build/validation/go-1793367344028361292",
+      "root_count": 1,
+      "scope": "Seal-before-VM-proof takeover: confirmed original/confirmed continuation both reject another continuation and retain exact old barrier",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-01",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestCollectionProgressDiscardsOnlyDiscoveryOnWatermarkOrVMChange",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-02",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestInitialSourceCandidatesUseRetiredKeyAndNeverCollectRunnerReceipts",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-03",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestInitialSourceCollectionPagesYieldResumeAndDiscoverLateOutside",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-04",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRetainedSourceNamesPreserveSingleSlotAcrossHistoryExpiryAndBudgetReplacement",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-05",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSchedulerLegacyApprovalHoldsTargetBeforeOriginalVMCAS",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-06",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSchedulerManagedFirstPlacementAndLegacyBypassExclusion",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-07",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSchedulerRestoresAllWorkloadsAndCanonicalVMBeforeFirstGrant",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-08",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSchedulerWorkExpiredDiscoveryDoesNotResetOriginalLedger",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-09",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSchedulerWorkPagesClosedHistoryWithoutLedgerExhaustion",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-10",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSchedulerWorkRetainsUnattemptedTailAcrossDeadline",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-11",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSourceCollectionDeleteKeepsExactUIDDigestAndUnknownReplies",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-12",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSourceCollectionProgressSurvivesPublisherRebuildAndRemainsBounded",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P1-013-13",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestSourceCollectionThroughKeyNeverOrdersConflictingOperationID",
+      "evidence": "/data/neon-build/validation/go-1793366833080767154",
+      "root_count": 1,
+      "scope": "Directly affected existing GC/Scheduler regression only",
+      "race": true,
+      "overall_run_exit_code": 0
+    },
+    {
+      "id": "PG17-U-P3-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "策略窗口、冷却、低压客户端约束、资格与采样失效",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json",
+      "root_count": 6,
+      "root_names": [
+        "TestMemoryPolicyRejectsAmbiguousConfiguration",
+        "TestMemoryPolicyWindowsClientsCooldownAndEmergency",
+        "TestMemoryPolicyResetsOnChangedOrInterruptedFacts",
+        "TestMemoryPolicyRejectsStaleContradictoryAndRepeatedSamples",
+        "TestMemoryPolicyExactBoundsAndSliceIsolation",
+        "TestMemoryPolicySelectsNearestEligibleAndRestartsAfterNeutralLoad"
+      ]
+    },
+    {
+      "id": "PG17-U-P3-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "未接受Begin原CAS迟到屏障、原身份和恢复",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json",
+      "root_count": 2,
+      "root_names": [
+        "TestUnacceptedBeginFenceOrdersDelayedCASAndRecoversLostReply",
+        "TestUnacceptedBeginFenceRejectsUnexpiredAndDifferentIdentityWithoutWrite"
+      ]
+    },
+    {
+      "id": "PG17-U-P3-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "同一正式owner自动Grow/Shrink控制组合及来源失效",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json",
+      "root_count": 3,
+      "root_names": [
+        "TestProductionAutomaticMemoryPolicyUsesOriginalOwnerAndBudgetChain",
+        "TestProductionAutomaticMemoryKeepsOriginalAddressSpaceAcrossGrowShrink",
+        "TestAutomaticMemoryPendingRejectsLostSessionBeforeAnyIO"
+      ]
+    },
+    {
+      "id": "PG17-U-P3-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "Agent可信自动配置入口与UDS缺省关闭",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json",
+      "root_count": 2,
+      "root_names": [
+        "TestDSGAAutomaticPolicyConfigRequiresExplicitTargetsAndOriginalQualification",
+        "TestDSGALocalControlConfigKeepsDefaultOffAndRejectsUnsafePaths"
+      ]
+    },
+    {
+      "id": "PG17-U-P2-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "无证明normal下降写前拒绝、旧未知可Observe而不可Replay",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json",
+      "root_count": 2,
+      "root_names": [
+        "TestProductionNormalDecreaseRejectsBeforeIntentAndKernelWrite",
+        "TestLegacyPendingNormalDecreaseRemainsObservableWithoutReplay"
+      ]
+    },
+    {
+      "id": "PG17-U-P2-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "持续聚合保留成本和无证明降限拒绝",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json",
+      "root_count": 1,
+      "root_names": [
+        "TestContinuousQuiesceKeepsRetainedCostsAndRejectsUnprovedLowerLimit"
+      ]
+    },
+    {
+      "id": "PG17-U-P2-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "原关闭命令/持续聚合接线保留其他成本",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-u-p2p3-linux-20261030/summary.json",
+      "root_count": 1,
+      "root_names": [
+        "TestPGWorkerContinuousQuiesceUsesOriginalCloseAndRetainsAllOtherCosts"
+      ]
+    },
+    {
+      "id": "PG17-S-P2-004",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "TestNativeQuiesceConsumptionKeepsRetainedPayload",
+      "evidence": "/data/neon-build/validation/pg17-s-p2-004-http-20261030T125326Z",
+      "root_count": 1,
+      "scope": "真实隔离PG17→正式SQL→生产Rust Router/JWT→Go客户端；保留实际2PC/DSM并消费同点Quiesce。Root/Outside是明确Go模型；0 resize，不是物理normal cap下降或KVM/VM E2E。"
+    },
+    {
+      "id": "PG17-U-VM-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17DSGAPlacementCannotBypassRequiredNodeAllowlist",
+      "evidence": "/data/neon-build/validation/go-1793365826775420789",
+      "root_count": 1
+    },
+    {
+      "id": "PG17-U-VM-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17DSGAPlacementPreservesEmptyAndConflictingSelectors",
+      "evidence": "/data/neon-build/validation/go-1793365826775420789",
+      "root_count": 1
+    },
+    {
+      "id": "PG17-U-VM-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPG17DSGARunnerPodKeepsPlacementWithoutMutatingVM",
+      "evidence": "/data/neon-build/validation/go-1793365826775420789",
+      "root_count": 1
+    },
+    {
+      "id": "PG17-S-PG-001",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_neon_control.DsgNeonControl.test_capabilities_and_installed_sql_contract",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-002",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_neon_control.DsgNeonControl.test_grow_shrink_regrow_and_historical_receipt",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-003",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_neon_control.DsgNeonControl.test_formal_fence_advances_epoch_without_resizing_or_authorizing_vm",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-004",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_writes_dirty_tail_and_regrow_preserves_real_data",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-005",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_pin_timeout_restores_allocation_then_retry_succeeds",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-006",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_postgres.DsgPostgresLifecycle.test_shrink_waits_for_real_pin_and_completes_after_release",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-007",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_neon_admission.DsgNeonAdmission.test_formal_upgrade_receipt_full_context_and_administrator_isolation",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-008",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_neon_admission.DsgNeonAdmission.test_formal_strict_request_identity_and_reversible_sql_upgrade",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-native-20261030/single-service.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-009",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_admission_closure.DsgAdmissionClosure.test_close_consumes_missing_open_and_retains_native_guards",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-010",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_dsm.DsgDsmLifecycle.test_pre_os_reservation_is_visible_and_actual_cancel_has_no_allocation",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-011",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_dsm.DsgDsmLifecycle.test_pinned_segment_survives_creator_exit_and_counts_backing_once",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-012",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_dsm.DsgDsmLifecycle.test_concurrent_create_cannot_spend_same_last_budget_and_reuses_after_real_destroy",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-013",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_dsm.DsgDsmLifecycle.test_failed_destroy_keeps_real_os_segment_and_unknown_budget",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-014",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_prepared.DsgPreparedLifecycle.test_prepared_survives_backend_exit_and_foreground_idle",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-015",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_prepared.DsgPreparedLifecycle.test_reserved_before_valid_and_close_race_remains_visible",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-016",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_prepared.DsgPreparedLifecycle.test_crash_rebuild_recovers_wal_or_disk_but_not_unlogged_reserved_slot",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-017",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_shared_cost.DsgSharedCost.test_shared_cost_deduplicates_boot_arrays_and_keeps_runtime_charges",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-018",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_shared_cost.DsgSharedCost.test_shared_cost_observes_actual_prepare_without_waiting_for_resize",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-S-PG-019",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_dsg_address_space.DsgAddressSpaceStartup.test_noncanonical_or_unbounded_values_fail_before_any_mode",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/result.json",
+      "root_count": 1,
+      "scope": "准确Linux PG17与Neon原生服务；无QEMU/VM物理资源证明"
+    },
+    {
+      "id": "PG17-U-H01",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "七个 chart 拒绝空、缺项、重复、116、未知节点及未知 placement 字段",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H02",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "即使移除测试副本 schema，模板也拒绝越界节点",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H03",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "静态 VM 参数只接受整数 PG17",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H04",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "外部 device-plugin digest 可覆盖且 tag 被拒绝",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H05",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "节点快照防错及 VM 独立 selector 的 OR 绕过保护",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H06",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "准确 AS 三 CRD/schema/CEL 与保留 webhook 的来源比对",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-H01",
+      "layer": "configuration-contract",
+      "status": "PASS",
+      "description": "七个相关 chart 的严格离线 lint",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-H02",
+      "layer": "configuration-contract",
+      "status": "PASS",
+      "description": "所有基本 PodSpec/VM/hook selector 与每个 affinity 分支及反亲和",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-H03",
+      "layer": "configuration-contract",
+      "status": "PASS",
+      "description": "仅离线启用旧可选分支以穷尽 PodSpec/hook；本轮运行不启用这些功能",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/foundation-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H07",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "DSGA Agent CA/token/PodUID 与 Scheduler 精确原输入渲染接线",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H08",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "PG17/专用身份/原域/精确预算/策略非法输入与不完整启用拒绝",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H09",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "新增运行角色只写明确节点/VM namespace/原 Host Lease，停用撤销",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H10",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "准确 AS 运行接口与真实 Node UID 来源锁",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H11",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "原Node/Lease快照检查拒绝同名重建、owner/marker/RV漂移和不完整快照",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-H06",
+      "layer": "configuration-contract",
+      "status": "PASS",
+      "description": "真实 Linux/Go1.24 Agent.ReadConfig 与 Host Config.Validate、无PodUID拒绝",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-U-H13",
+      "layer": "unit-gate",
+      "status": "PASS",
+      "description": "仓库Node24源码/锁/10 chart静态策略",
+      "evidence": "docs/acceptance/pg17-helm-linux-20261030/node-source-check.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-ENV-H01",
+      "layer": "environment",
+      "status": "PASS",
+      "description": "只预取准确模块，不运行测试",
+      "evidence": "artifacts/pg17-dsga-cache/20261030T133051.735805Z",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-H04",
+      "layer": "runtime-prerequisite",
+      "status": "NOT_READY",
+      "description": "not-prepared: actual pool labels absent",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-H07",
+      "layer": "runtime-prerequisite",
+      "status": "NOT_READY",
+      "description": "not-executed: original Host Lease/profile/system budget and per-VM qualifications absent",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-H08",
+      "layer": "runtime-prerequisite",
+      "status": "NOT_READY",
+      "description": "not-executed: full Host ordinary-Pod hard-limit and protection scope unresolved",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-H09",
+      "layer": "runtime-prerequisite",
+      "status": "NOT_READY",
+      "description": "not-executed: gateway/Runner/RBAC/CA/token/PG17 memory E2E requires single-machine gate first",
+      "evidence": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030.json",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-NORMAL-001",
+      "layer": "single-service",
+      "status": "REQUIRED_IN_PROGRESS",
+      "description": "安全降低同一PG工作域normal硬上限；持续私有/后台、文件、kernel/IO及在途包络尚未完整实现",
+      "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
+      "root_count": null
+    },
+    {
+      "id": "PG17-E-001",
+      "layer": "real-end-to-end",
+      "status": "NOT_RUN",
+      "description": "正式owner→PG→Guest资源→VM→Host→Finalize自动Grow/Shrink/Regrow",
+      "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
+      "root_count": null
+    },
+    {
+      "id": "PG17-E-002",
+      "layer": "real-end-to-end",
+      "status": "NOT_RUN",
+      "description": "实际Linux/KVM/cgroup/HugeTLB/normal下降及无新增OOM/重启",
+      "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
+      "root_count": null
+    },
+    {
+      "id": "PG17-E-003",
+      "layer": "real-end-to-end",
+      "status": "NOT_RUN",
+      "description": "仅117/118/119的Helm真实部署与故障恢复完整回归",
+      "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
+      "root_count": null
+    },
+    {
+      "id": "PG17-E-004",
+      "layer": "real-end-to-end",
+      "status": "NOT_RUN",
+      "description": "PG17 K8s通过后，对接届时最新控制面的联合端到端",
+      "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
+      "root_count": null
+    },
+    {
+      "id": "PG18-E-001",
+      "layer": "real-end-to-end",
+      "status": "NOT_RUN",
+      "description": "后续PG18内核适配及相同上层合同全量联合回归",
+      "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
+      "root_count": null
+    },
+    {
+      "id": "PG16-E-001",
+      "layer": "real-end-to-end",
+      "status": "NOT_RUN",
+      "description": "后续PG16独立内核适配与全量联合回归",
+      "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
+      "root_count": null
+    }
+  ],
+  "counts": {
+    "core_unit_roots_archived": 67,
+    "native_pg_single_service_roots": 19,
+    "cross_language_pg_single_service_roots": 1,
+    "peer_service_integration_roots": 1,
+    "peer_protocol_integration_roots": 4,
+    "helm_unit_gates": 12,
+    "helm_configuration_gates": 4,
+    "real_end_to_end_passed": 0
+  },
+  "preliminary_control_plane_archive": {
+    "head": "be30ba5e8d774781ff76194128720dd6f5d6e045",
+    "unit_roots": 12,
+    "metadata_service_roots": 5,
+    "reference": "control-plane/docs/validation/pg17-frozen-placement-linux-20261030",
+    "note": "前期最小VM修复；不是最终最新控制面对接基线，不计当前真实E"
+  },
+  "visible_images": "docker images | grep pg17-7bbabd0f9869 (30 old baseline images, not final release)",
+  "not_release_certified": true
+}
