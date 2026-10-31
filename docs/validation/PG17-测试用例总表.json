@@ -1,28 +1,28 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-10-30T16:50:57.013902+00:00",
+  "updated_utc": "2026-10-31T00:24:12.649886+00:00",
   "meaning": "按每项实际源码快照归档，不是当前全部工作树或整体产品统一认证；原始失败与未执行保留",
-  "release_gate": "首版必须完成安全normal降限、单机和真实K8s全部E2E；之后最新控制面对接与后续内核适配",
+  "release_gate": "首版安全normal降限；单机用于快速定位和回滚，最终117/118/119真实Helm K8s E2E；之后最新控制面以PG17后端补齐官方全部功能，PG18独立并行后联合回归",
   "versions_at_index_capture": {
     "neon": {
-      "head": "8a0f29b85928d33a88850062fcbf302e72e8d34a",
+      "head": "31605707a4e4f20b5736ef371448cc321d6250ba",
       "branch": "codex/dsga-neon-v3-20261019",
-      "worktree_status": [
-        " M ci/distribution.json",
-        " M ci/pg17_memory_cases.json",
-        " M ci/run_pg17_memory_cases.py",
-        " M ci/test-dsg-postgres.sh",
-        " M vendor/postgres-v17",
-        " M vendor/revisions.json",
-        "?? ci/test_dsg_early_arrays.py"
-      ]
+      "worktree_status": []
     },
     "autoscaling": {
-      "head": "7ed9356424474f64489dec1f92a9eb864aaead71",
+      "head": "31a04d385750e24a268e9ceba31a89be6b858f93",
       "branch": "codex/dsga-autoscaling-20261019",
       "worktree_status": [
+        " M pkg/dsga/resourceguard/prebootstrap_system.go",
+        " M pkg/dsga/resourceguard/prebootstrap_system_linux.go",
+        " M pkg/dsga/resourceguard/prebootstrap_system_test.go",
         "?? \"docs/PG17-normal\\351\\231\\215\\351\\231\\220\\345\\217\\227\\351\\231\\220profile-\\346\\235\\245\\346\\272\\220\\345\\220\\210\\345\\220\\214-20261030.md\"",
-        "?? neonvm-kernel/profiles/"
+        "?? docs/plans/",
+        "?? docs/validation/pg17-split-charge-kvm-component-20261031/",
+        "?? pkg/dsga/resourceguard/native_birth_tracer_linux.go",
+        "?? pkg/dsga/resourceguard/native_birth_tracer_linux_test.go",
+        "?? pkg/dsga/resourceguard/native_birth_tracer_native_test.go",
+        "?? pkg/dsga/resourceguard/prebootstrap_system_native_test.go"
       ]
     },
     "neon-helm": {
@@ -34,6 +34,22 @@
       "head": "be30ba5e8d774781ff76194128720dd6f5d6e045",
       "branch": "codex/dsga-control-plane-v3-20261020",
       "worktree_status": []
+    },
+    "postgres-v18": {
+      "head": "ca6d4765233be2af79eeeba3499c76ab95c0e603",
+      "branch": "codex/dsga-pg18-v1-20261031",
+      "worktree_status": [
+        " M src/backend/postmaster/launch_backend.c",
+        " M src/backend/storage/buffer/Makefile",
+        " M src/backend/storage/buffer/buf_init.c",
+        " M src/backend/storage/buffer/bufmgr.c",
+        " M src/backend/storage/buffer/meson.build",
+        " M src/test/modules/test_dsg_region18/test_dsg_region18--1.0.sql",
+        " M src/test/modules/test_dsg_region18/test_dsg_region18.c",
+        "?? src/backend/storage/buffer/dsg_buffer_arrays.c",
+        "?? src/include/storage/dsg_buffer_arrays.h",
+        "?? src/test/modules/test_dsg_region18/t/test_arrays18.py"
+      ]
     }
   },
   "evidence_files": [
@@ -108,6 +124,34 @@
     {
       "path": "/data/neon-build/src/neon-helm/docs/acceptance/pg17-helm-linux-20261030/dsga-summary.json",
       "sha256": "79cef0728283d5a6d66a0573cbb9920128173134fb259fcf837a1f580377e504"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-prebootstrap-system-20261031/validation.json",
+      "sha256": "9603cc4ad638debb9cdac12b66ebb6f1728ef2e7fb093d173e5d64b515129252"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "sha256": "19f506e678aa2a5ba5e03bae6c12b4adb745dcb07c06bd958a404dd31720b6b3"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/go/unit.json",
+      "sha256": "cf2133a905e1e716428e60062ac9022e7ded991b7cb5e7a5efa566793edd0826"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "sha256": "03d10e1c4b7d6f5c18f1abba4e8f7b187461692d900bc8a9802aef9f8eacc9d4"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/native-filter-audit-go-20261031/catalog.json",
+      "sha256": "3bd38d058c20393e249ddffd527c4485080b7500060174de90a8cbf9bca8500e"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "sha256": "d9f508693a9ad8f41a265911d20a46ea3cb1a78ea0dc934e4d1434bb24df7ae8"
+    },
+    {
+      "path": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "sha256": "ff9c7b718c314035615e4c045ca058b62d8616299929ee45795b4bcd2ae14a74"
     }
   ],
   "cases": [
@@ -1502,7 +1546,7 @@
       "id": "PG17-E-004",
       "layer": "real-end-to-end",
       "status": "NOT_RUN",
-      "description": "PG17 K8s通过后，对接届时最新控制面的联合端到端",
+      "description": "PG17 K8s通过后，以PG17后端接入届时最新控制面并补齐全部官方功能的联合验收",
       "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
       "root_count": null
     },
@@ -1510,7 +1554,7 @@
       "id": "PG18-E-001",
       "layer": "real-end-to-end",
       "status": "NOT_RUN",
-      "description": "后续PG18内核适配及相同上层合同全量联合回归",
+      "description": "独立并行PG18内核适配及相同上层合同全量联合回归",
       "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
       "root_count": null
     },
@@ -1521,12 +1565,643 @@
       "description": "后续PG16独立内核适配与全量联合回归",
       "evidence": "/data/neon-build/plan/PG17至PG18-最终实施计划.txt",
       "root_count": null
+    },
+    {
+      "id": "PG17-U-PRESYS-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemRecordsOnlyOriginalStageBeforeFullBudget",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-prebootstrap-system-20261031/validation.json",
+      "root_count": 1,
+      "scope": "原552 PreSys模型kernel/ISO+真实flock/fsync；后续369修复另有快照，不冒称E"
+    },
+    {
+      "id": "PG17-U-PRESYS-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemUnknownRequiresSameOriginalReplay",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-prebootstrap-system-20261031/validation.json",
+      "root_count": 1,
+      "scope": "原552 PreSys模型kernel/ISO+真实flock/fsync；后续369修复另有快照，不冒称E"
+    },
+    {
+      "id": "PG17-U-PRESYS-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemRejectsHistoryAndSourceDriftWithoutWrites",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-prebootstrap-system-20261031/validation.json",
+      "root_count": 1,
+      "scope": "原552 PreSys模型kernel/ISO+真实flock/fsync；后续369修复另有快照，不冒称E"
+    },
+    {
+      "id": "PG17-U-PRESYS-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemKeepsPendingOnEarlyMovableOrCorruptFiles",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-prebootstrap-system-20261031/validation.json",
+      "root_count": 1,
+      "scope": "原552 PreSys模型kernel/ISO+真实flock/fsync；后续369修复另有快照，不冒称E"
+    },
+    {
+      "id": "PG17-U-PRESYS-005",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemSerializesOriginalWALAndAllowsOnlyPostCompleteGrowth",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-prebootstrap-system-20261031/validation.json",
+      "root_count": 1,
+      "scope": "原552 PreSys模型kernel/ISO+真实flock/fsync；后续369修复另有快照，不冒称E"
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-a5620d69",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelBuildLookupKeepsExactReference",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-cd7cf19a",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelBuildLookupRejectsAliases",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-a605fc5c",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelHardPIDBootPolicy",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-5f0a7b85",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelHardPIDJSONAndHistory",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-32fd1d73",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelHardPIDObservationBoundaries",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-40ad9f2d",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelHardPIDSourceDrift",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-7a04292b",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelNormalV1BuildAndObservation",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-2265c0c9",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelNormalV1OriginBindsBuildAndKeepsHistory",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-aacc027d",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelNormalV1RejectsSourceDrift",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-a552aa6b",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelNormalV1StrictJSONAndBootPolicy",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-4489001e",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelReviewedHardPIDBuilds",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-PHYSBUILD-8fa37e74",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPhysicalKernelReviewedOriginHardPIDBuilds",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "四个准确内核来源；已登记旧根自动去重；200实际节点包含直接回归",
+      "race": true
+    },
+    {
+      "id": "PG17-U-KERNELPREP-6524f4a0",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalKernelBootstrapCanonicalPolicyAndMarker",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "原内核准备模型kernel/ISO+真实持久WAL；原nonce与恢复",
+      "race": true
+    },
+    {
+      "id": "PG17-U-KERNELPREP-edd9ceec",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalKernelBootstrapCompletedDriftNeverRepairs",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "原内核准备模型kernel/ISO+真实持久WAL；原nonce与恢复",
+      "race": true
+    },
+    {
+      "id": "PG17-U-KERNELPREP-d1715af4",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalKernelBootstrapKeepsOriginalOnCorruptOrThirdPartyDrift",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "原内核准备模型kernel/ISO+真实持久WAL；原nonce与恢复",
+      "race": true
+    },
+    {
+      "id": "PG17-U-KERNELPREP-6f683e65",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalKernelBootstrapPrepareObserveReplay",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "原内核准备模型kernel/ISO+真实持久WAL；原nonce与恢复",
+      "race": true
+    },
+    {
+      "id": "PG17-U-KERNELPREP-86fbaf9b",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalKernelBootstrapRejectsUnboundInitialSources",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "原内核准备模型kernel/ISO+真实持久WAL；原nonce与恢复",
+      "race": true
+    },
+    {
+      "id": "PG17-U-KERNELPREP-3b46a872",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalKernelBootstrapSerializesSingleOriginalIntent",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "原内核准备模型kernel/ISO+真实持久WAL；原nonce与恢复",
+      "race": true
+    },
+    {
+      "id": "PG17-U-KERNELPREP-1811439e",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalKernelBootstrapUnknownOnlyExplicitOriginalReplay",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/go/unit.json",
+      "root_count": 1,
+      "scope": "原内核准备模型kernel/ISO+真实持久WAL；原nonce与恢复",
+      "race": true
+    },
+    {
+      "id": "PG17-U-SPLIT-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalSplitTopologyOriginalPreparation",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "双子域模型kernel+真实flock/fsync；修复pending身份重fsync后的准确快照"
+    },
+    {
+      "id": "PG17-U-SPLIT-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalSplitTopologyPendingReplayAndUnrecordedInode",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "双子域模型kernel+真实flock/fsync；修复pending身份重fsync后的准确快照"
+    },
+    {
+      "id": "PG17-U-SPLIT-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalSplitTopologyRejectsSourceAndInitialHistory",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "双子域模型kernel+真实flock/fsync；修复pending身份重fsync后的准确快照"
+    },
+    {
+      "id": "PG17-U-SPLIT-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalSplitTopologyCompletedDriftAndVariableArrays",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "双子域模型kernel+真实flock/fsync；修复pending身份重fsync后的准确快照"
+    },
+    {
+      "id": "PG17-U-SPLIT-005",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalSplitTopologySerializesAndHonorsOriginalLock",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "双子域模型kernel+真实flock/fsync；修复pending身份重fsync后的准确快照"
+    },
+    {
+      "id": "PG17-U-SPLIT-006",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalSplitTopologyMalformedJournalNoRepair",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "双子域模型kernel+真实flock/fsync；修复pending身份重fsync后的准确快照"
+    },
+    {
+      "id": "PG17-U-SPLIT-007",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNormalSplitTopologyStrictPolicyAndFixedEntry",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "双子域模型kernel+真实flock/fsync；修复pending身份重fsync后的准确快照"
+    },
+    {
+      "id": "PG17-S-SPLIT-001",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "PG17-S-SPLIT-001",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "准确369真实cgroup/ext4/KVM；Source/ISO是明确夹具，无PG/normal许可"
+    },
+    {
+      "id": "PG17-S-SPLIT-002",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "PG17-S-SPLIT-002",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "准确369真实cgroup/ext4/KVM；Source/ISO是明确夹具，无PG/normal许可"
+    },
+    {
+      "id": "PG17-S-SPLIT-003",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "PG17-S-SPLIT-003",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "准确369真实cgroup/ext4/KVM；Source/ISO是明确夹具，无PG/normal许可"
+    },
+    {
+      "id": "PG17-S-SPLIT-004",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "PG17-S-SPLIT-004",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "准确369真实cgroup/ext4/KVM；Source/ISO是明确夹具，无PG/normal许可"
+    },
+    {
+      "id": "PG17-S-SPLIT-005",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "PG17-S-SPLIT-005",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "准确369真实cgroup/ext4/KVM；Source/ISO是明确夹具，无PG/normal许可"
+    },
+    {
+      "id": "PG17-S-SPLIT-006",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "PG17-S-SPLIT-006",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "准确369真实cgroup/ext4/KVM；Source/ISO是明确夹具，无PG/normal许可"
+    },
+    {
+      "id": "PG17-U-FILTER-AUDIT-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNativeFilterAuditDecodesOriginalGeometryAndOwnsBytes",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-filter-audit-go-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "完整BPF解码/内核链比较模型U；实际特权读者路径另验"
+    },
+    {
+      "id": "PG17-U-FILTER-AUDIT-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNativeFilterAuditRejectsMalformedABIAndOriginalDrift",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-filter-audit-go-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "完整BPF解码/内核链比较模型U；实际特权读者路径另验"
+    },
+    {
+      "id": "PG17-U-FILTER-AUDIT-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNativeFilterAuditComparesCompleteOldestFirstKernelChain",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-filter-audit-go-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "完整BPF解码/内核链比较模型U；实际特权读者路径另验"
+    },
+    {
+      "id": "PG17-U-FILTER-AUDIT-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNativeFilterAuditRejectsUnknownKernelOrPartialComparison",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-filter-audit-go-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "完整BPF解码/内核链比较模型U；实际特权读者路径另验"
+    },
+    {
+      "id": "PG17-U-QMP-GEOMETRY-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestOriginalMemoryGeometryDecodesActualQEMUSchema",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-U-QMP-GEOMETRY-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestOriginalMemoryGeometryRejectsIncompleteOrChangedSources",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-U-QMP-GEOMETRY-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestOriginalMemoryGeometryUnixReadsOnlyAndBoundsFrames",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-QMP-GEOMETRY-001",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "early-base",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-QMP-GEOMETRY-002",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "requested-is-not-actual-or-maximum",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-QMP-GEOMETRY-003",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "legacy-base",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-QMP-GEOMETRY-004",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "wrong-original-base",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-QMP-GEOMETRY-005",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "wrong-original-maximum",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-QMP-GEOMETRY-006",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "underprovisioned-backend",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-QMP-GEOMETRY-007",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "extra-backend",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-QMP-GEOMETRY-008",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "wrong-original-uuid",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "root_count": 1,
+      "scope": "真实QMP schema；S为CPU暂停QEMU/KVM，无Guest/PG，无normal许可"
+    },
+    {
+      "id": "PG17-S-ROOTWIRE-001",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_S_ROOTWIRE_001_real_exact_chain_detach",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-S-ROOTWIRE-002",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-S-ROOTWIRE-003",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_S_ROOTWIRE_003_same_uid_sigcont_cannot_release",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-S-ROOTWIRE-004",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_S_ROOTWIRE_004_wrong_tracer_tgid_and_tracer_death",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-S-ROOTWIRE-005",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_S_ROOTWIRE_005_actual_ack_timeout",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-S-ROOTWIRE-006",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_S_ROOTWIRE_006_actual_buffer_M_N0_mismatch",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-U-ROOTWIRE-001",
+      "layer": "unit-native",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_U_ROOTWIRE_001_audit_exact_root_geometry",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-U-ROOTWIRE-002",
+      "layer": "unit-native",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_U_ROOTWIRE_002_invalid_original_fields_and_198",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-U-ROOTWIRE-003",
+      "layer": "unit-native",
+      "status": "PASS",
+      "description": "__main__.RootBirth.test_PG17_U_ROOTWIRE_003_ack_frames_ancillary_and_peer",
+      "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
+      "root_count": 1,
+      "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
+      "family": "native-pg-root-component"
+    },
+    {
+      "id": "PG17-S-PHYSBUILD-3B",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "原生只读物理读者准确3b构建",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/native",
+      "root_count": 1,
+      "scope": "真实独立KVM组件，未生产接线/PG/normal资格"
+    },
+    {
+      "id": "PG17-S-PHYSBUILD-369",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "原生只读物理读者准确369构建",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/physical-four-build-20261031/native",
+      "root_count": 1,
+      "scope": "真实独立KVM组件，未生产接线/PG/normal资格"
+    },
+    {
+      "id": "PG17-S-KERNELPREP-POSITIVE",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "369真实ISO/ext4首次原内核准备",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/native",
+      "root_count": 1,
+      "scope": "真实独立KVM组件，未生产接线/PG/normal资格"
+    },
+    {
+      "id": "PG17-S-KERNELPREP-REPLAY",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "369真实写后错误与同意图重放",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/native",
+      "root_count": 1,
+      "scope": "真实独立KVM组件，未生产接线/PG/normal资格"
+    },
+    {
+      "id": "PG17-S-KERNELPREP-MODULES",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "369无原intent但已禁模块拒绝",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/native",
+      "root_count": 1,
+      "scope": "真实独立KVM组件，未生产接线/PG/normal资格"
+    },
+    {
+      "id": "PG17-S-KERNELPREP-MOVABLE",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "369初期已含Movable拒绝",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/native",
+      "root_count": 1,
+      "scope": "真实独立KVM组件，未生产接线/PG/normal资格"
     }
   ],
   "counts": {
-    "core_unit_roots_archived": 89,
-    "native_pg_single_service_roots": 27,
-    "native_pg_binary_unit_roots": 2,
+    "core_unit_roots_archived": 127,
+    "native_pg_single_service_roots": 33,
+    "native_pg_binary_unit_roots": 5,
     "cross_language_pg_single_service_roots": 1,
     "kernel_loader_wire_component_roots": 3,
     "peer_service_integration_roots": 1,
