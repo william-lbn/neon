@@ -1,0 +1,83 @@
+{
+  "recordedAtUTC": "2026-10-30T23:18:04.957100+00:00",
+  "basePGCommit": "fd2bdeb460326baa04a897d1e29a6d98d2bf031a",
+  "branch": "codex/dsga-pg17-v3-20261019",
+  "ownedFiles": 14,
+  "nativeRootComponent": {
+    "status": "PASS",
+    "roots": 9,
+    "U": 3,
+    "S": 6,
+    "seconds": 32.331,
+    "receipt": "attempt-03/test-result.json"
+  },
+  "defaultOffTestV1Compatibility": {
+    "status": "PASS",
+    "roots": 11,
+    "seconds": 34.753,
+    "receipt": "compatibility/result.json"
+  },
+  "build": {
+    "status": "PASS",
+    "networkModeForRUN": "none",
+    "image": "127.0.0.1:5001/neon/pg17-native-root-wire@sha256:af97e387041b349d0138b39b9a7c90c9d612db3ef07906fe1271db7162ee414d",
+    "imageConfigSHA256": "sha256:c8e24a735b64585afe62692c35b78cede348420d887a895f43b8f6f515b879d8",
+    "compiler": "GNU12.2.0",
+    "postgresSHA256": "c990ed4251edb270d37894036c70d90e012fea2bb441a7a48faeb0ed6375be53",
+    "librarySHA256": "00b967d942b53adad84c86e9205a98ac0a35f5fd4e958ae12231f5ad09b9ad23",
+    "actualImageSourceProof": "actual-image-source-proof.json",
+    "all7196ExpectedSourceHashesMatch": true,
+    "runtimeTestSourceOutsideImage": true,
+    "versionStringWarning": "Test-only inherited configure --with-extra-version retains old 79367196 label. It is not a source commit proof; accurate source COPY manifest and binary digest above are authoritative. Final images must rebuild with the final frozen version."
+  },
+  "hostKernel": "6.8.0-147-generic",
+  "fixture": {
+    "socketPeerAndTracer": "actual UID0 isolated Docker; native UID/GID1000+NNP",
+    "nativeSourceAndProfileDigests": "fixed synthetic 34/56 fixture values, not production immutable Root Source/Profile",
+    "rootNonce": "fixed synthetic 12 fixture nonce; production nonce issuance/replay protection remains Root Go ownership",
+    "seccompCaller": 0,
+    "capabilities": [
+      "SYS_ADMIN",
+      "SYS_PTRACE",
+      "SETUID",
+      "SETGID",
+      "KILL",
+      "CHOWN",
+      "DAC_OVERRIDE"
+    ],
+    "noHostPIDNamespace": true,
+    "network": "none",
+    "noHostCgroupOrNetworkMutation": true
+  },
+  "firstFailuresPreserved": [
+    {
+      "path": "attempt-01",
+      "status": "FAIL",
+      "cause": "recvmsg with SO_RCVTIMEO interrupted by actual Root ptrace PMbase audit; original draft treated EINTR as malformed ACK"
+    },
+    {
+      "path": "diagnostic-01b",
+      "status": "FAIL",
+      "cause": "same old image confirms native ACK rejection; cleanup additionally lacked fixture CAP_KILL"
+    },
+    {
+      "path": "attempt-02",
+      "status": "FAIL",
+      "cause": "8 roots PASS; M/N0 test stopped before PG at fixture temporary-directory chown EPERM, no CAP_CHOWN/DAC_OVERRIDE"
+    },
+    {
+      "path": "diagnostic-02-guc",
+      "status": "PASS",
+      "cause": "same frozen v2 binary, exact file-management capabilities added; actual M/N0 rejection observed"
+    }
+  ],
+  "notRunOrNotProven": [
+    "production Go Root pending/enrolled original Source nonce/replay/WAL integration",
+    "immutable executable/ELF/FS/I boundary and complete continuous cost envelope",
+    "safe normal memory.max decrease",
+    "Guest exact6.12 KVM native Root wire",
+    "Kubernetes E2E"
+  ],
+  "noNormalDenyRemoved": true,
+  "gitIndexCommitPushPerformed": false
+}

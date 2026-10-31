@@ -1,0 +1,74 @@
+test_PG17_S_ROOTWIRE_001_real_exact_chain_detach (__main__.RootBirth.test_PG17_S_ROOTWIRE_001_real_exact_chain_detach) ... 
+  test_PG17_S_ROOTWIRE_001_real_exact_chain_detach (__main__.RootBirth.test_PG17_S_ROOTWIRE_001_real_exact_chain_detach) (threaded=False) ... FAIL
+  test_PG17_S_ROOTWIRE_001_real_exact_chain_detach (__main__.RootBirth.test_PG17_S_ROOTWIRE_001_real_exact_chain_detach) (threaded=True) ... ERROR
+test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release (__main__.RootBirth.test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release) ... 
+  test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release (__main__.RootBirth.test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release) (mode='cont_only') ... FAIL
+test_PG17_S_ROOTWIRE_003_same_uid_sigcont_cannot_release (__main__.RootBirth.test_PG17_S_ROOTWIRE_003_same_uid_sigcont_cannot_release) ... ERROR
+test_PG17_U_ROOTWIRE_001_audit_exact_root_geometry (__main__.RootBirth.test_PG17_U_ROOTWIRE_001_audit_exact_root_geometry) ... ok
+test_PG17_U_ROOTWIRE_002_invalid_original_fields_and_198 (__main__.RootBirth.test_PG17_U_ROOTWIRE_002_invalid_original_fields_and_198) ... ok
+test_PG17_U_ROOTWIRE_003_ack_frames_ancillary_and_peer (__main__.RootBirth.test_PG17_U_ROOTWIRE_003_ack_frames_ancillary_and_peer) ... ok
+
+======================================================================
+ERROR: test_PG17_S_ROOTWIRE_001_real_exact_chain_detach (__main__.RootBirth.test_PG17_S_ROOTWIRE_001_real_exact_chain_detach) (threaded=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/evidence/test_root_birth.py", line 312, in test_PG17_S_ROOTWIRE_001_real_exact_chain_detach
+    rc, out, err = self.exchange(threaded=threaded)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/evidence/test_root_birth.py", line 281, in exchange
+    raise failures[0]
+  File "/evidence/test_root_birth.py", line 273, in run
+    trace()
+  File "/evidence/test_root_birth.py", line 235, in trace
+    c.send(ack)
+BrokenPipeError: [Errno 32] Broken pipe
+
+======================================================================
+ERROR: test_PG17_S_ROOTWIRE_003_same_uid_sigcont_cannot_release (__main__.RootBirth.test_PG17_S_ROOTWIRE_003_same_uid_sigcont_cannot_release)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/evidence/test_root_birth.py", line 325, in test_PG17_S_ROOTWIRE_003_same_uid_sigcont_cannot_release
+    rc, out, err = self.exchange('early_sigcont')
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/evidence/test_root_birth.py", line 283, in exchange
+    trace()
+  File "/evidence/test_root_birth.py", line 235, in trace
+    c.send(ack)
+BrokenPipeError: [Errno 32] Broken pipe
+
+======================================================================
+FAIL: test_PG17_S_ROOTWIRE_001_real_exact_chain_detach (__main__.RootBirth.test_PG17_S_ROOTWIRE_001_real_exact_chain_detach) (threaded=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/evidence/test_root_birth.py", line 312, in test_PG17_S_ROOTWIRE_001_real_exact_chain_detach
+    rc, out, err = self.exchange(threaded=threaded)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/evidence/test_root_birth.py", line 283, in exchange
+    trace()
+  File "/evidence/test_root_birth.py", line 238, in trace
+    stopped = wait_stop(p.pid, signal.SIGSTOP)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/evidence/test_root_birth.py", line 65, in wait_stop
+    raise AssertionError(f'unexpected actual trace status {status:x}, expected {signum}')
+AssertionError: unexpected actual trace status 100, expected 19
+
+======================================================================
+FAIL: test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release (__main__.RootBirth.test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release) (mode='cont_only')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/evidence/test_root_birth.py", line 319, in test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release
+    rc, out, err = self.exchange(mode)
+                   ^^^^^^^^^^^^^^^^^^^
+  File "/evidence/test_root_birth.py", line 283, in exchange
+    trace()
+  File "/evidence/test_root_birth.py", line 238, in trace
+    stopped = wait_stop(p.pid, signal.SIGSTOP)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/evidence/test_root_birth.py", line 65, in wait_stop
+    raise AssertionError(f'unexpected actual trace status {status:x}, expected {signum}')
+AssertionError: unexpected actual trace status 100, expected 19
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.286s
+
+FAILED (failures=2, errors=2)

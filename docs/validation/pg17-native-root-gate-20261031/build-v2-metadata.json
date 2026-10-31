@@ -1,0 +1,58 @@
+{
+  "buildx.build.provenance": {
+    "builder": {
+      "id": ""
+    },
+    "buildType": "https://mobyproject.org/buildkit@v1",
+    "materials": [
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/pg17-native-root-wire?digest=sha256:13eb46818a059f587921d5db09222fcce2513b7f947b62beb81d3d99062cb3d3\u0026platform=linux%2Famd64",
+        "digest": {
+          "sha256": "13eb46818a059f587921d5db09222fcce2513b7f947b62beb81d3d99062cb3d3"
+        }
+      }
+    ],
+    "invocation": {
+      "configSource": {
+        "entryPoint": "Dockerfile-v2"
+      },
+      "parameters": {
+        "frontend": "dockerfile.v0",
+        "args": {
+          "force-network-mode": "none"
+        },
+        "locals": [
+          {
+            "name": "context"
+          },
+          {
+            "name": "dockerfile"
+          }
+        ],
+        "root": {
+          "configSource": {
+            "path": "Dockerfile-v2"
+          },
+          "request": {
+            "args": {
+              "force-network-mode": "none"
+            }
+          }
+        },
+        "compatibilityVersion": 30
+      },
+      "environment": {
+        "dockerfileVersion": "1.28.0",
+        "platform": "linux/amd64"
+      }
+    }
+  },
+  "buildx.build.ref": "neon-data/neon-data0/y7qlihhle67yniqmcmpqwwq8x",
+  "containerimage.descriptor": {
+    "mediaType": "application/vnd.oci.image.index.v1+json",
+    "digest": "sha256:af97e387041b349d0138b39b9a7c90c9d612db3ef07906fe1271db7162ee414d",
+    "size": 856
+  },
+  "containerimage.digest": "sha256:af97e387041b349d0138b39b9a7c90c9d612db3ef07906fe1271db7162ee414d",
+  "image.name": "127.0.0.1:5001/neon/pg17-native-root-wire:fd2bdeb-gate-v2-TEST_ONLY"
+}

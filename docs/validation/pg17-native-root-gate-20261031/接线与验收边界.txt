@@ -1,0 +1,42 @@
+PG17原生Root出生C接线与Host组件验收；2026-10-31。
+
+本批14源基于PG fd2bdeb460326baa04a897d1e29a6d98d2bf031a，位于Linux原功能分支。
+不改Go、kernel、PG18、Git索引/提交/推送；Root统一review/commit。
+
+准确顺序：AS→四R→WirePrepare固定198→PMbase→232B请求/112B严格ACK及三摘要回显
+→close198→PMfinal→Root独立最终ptrace停点→PG内存/GUC/插件。默认缺省关闭。
+root-v1须全部原nonce/source/profile/N0且精确root-v1 filter；未知不回退test。
+Native记录SO_PEERCRED Root TGID；最终从/proc/self/status读取TracerPid TID，再从
+该TID/status核Pid/Tgid/Uid四项0。Tgid必须等于原Root peer TGID，不混同TID。
+Native设置/回读dumpable0，核同tracer，self tgkill(SIGSTOP)。Root在ACK前SEIZE+EXITKILL，
+保持同OS线程；最终signal-delivery-stop实际核BPF/AS/R/198并完成原WAL fsync后才
+PTRACE_DETACH(signal=0)。不可先CONT(SIGSTOP)转group-stop。Native返回必须再核
+TracerPid=0及dumpable0；仅CONT(0)或同UID SIGCONT均不能替代Root detach。
+Root进程/线程死亡必须由EXITKILL杀目标，不自动继续。Native不发normal许可。
+
+Root-only审计入口精确argc12，第一main分支、早于AS/PG初始化，原argv为：
+postgres --neon-dsga-audit-filter-v1 A M base0 len0 base1 len1 base2 len2 base3 len3
+真实/有效UID0；不读env几何、不安装filter，与Install共用唯一Build。stdout NDSGFP01，
+144B header及base/final/child三段完整8字节指令。Root必须按kernel oldest→newest
+逐完整指令比对并核末尾ENOENT，不信native自报hash/长度。此C输出是expected，非安装证明。
+
+首次真实失败揭示带SO_RCVTIMEO的recvmsg被ptrace中断可EINTR。已修为CLOCK_MONOTONIC
+绝对30s预算，重试只用剩余timeout，不延长预算、不放宽帧或ancillary。原失败完整保留。
+14文件源冻结及SHA见source-hashes-final.json；实际镜像7196份期望源全部逐文件hash一致。
+镜像额外.git仅继承源标识；运行Python是/evidence真实挂载新版，未谎称编入镜像。
+TEST_ONLY configure额外版本仍带旧793标签，不代表实际源；精确COPY及binarySHA为来源证据。
+
+Host9根最终PASS：真实完整两层BPF/close198/detach，含tracer线程TID≠TGID；无tracer/
+仅CONT/错TGID拒绝；同UID SIGCONT不能越停点；实际Root最终停点死亡EXITKILL；真实
+30s无ACK超时；真实PG M/N0不匹配FATAL；纯audit根/精确几何及错误输入、frame、FD拒绝。
+旧default-off/test-v1的11根全PASS，包括真实PG、logger/内部恢复、forkReady失败回收、
+线程/64bit R拒绝和ACL。新组件9根不是9条端到端；保留原3U/6S稳定ID。
+
+重要未完成：生产Go Root原Source/nonce/replay/Pending/Enrolled/WAL串联、不可变FS/ELF/I、
+持续完整成本包络、安全normal真实降限、准确6.12 Guest/KVM、K8s端到端。测试fixture的
+Source/Profile/nonce是明确合成值，仅实际UID0隔离peer；不冒充生产Root来源资格。
+所有原normal拒绝保持；本批组件通过不能签正常降限。
+
+外部完整目录：/data/neon-build/validation/pg17-native-root-gate-20261030T230349Z
+attempt-01与diagnostic-01b失败、attempt-02 fixture能力失败、diagnostic-02-guc及最终
+attempt-03和compatibility均保留。最终镜像/二进制/测试库/源码SHA见catalog-final.json。

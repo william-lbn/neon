@@ -1,0 +1,8 @@
+FROM 127.0.0.1:5001/neon/pg17-native-root-wire@sha256:13eb46818a059f587921d5db09222fcce2513b7f947b62beb81d3d99062cb3d3
+WORKDIR /home/nonroot
+COPY --chown=1000:1000 vendor/postgres-v17 vendor/postgres-v17
+RUN --mount=type=cache,id=neon-ccache-amd64,target=/home/nonroot/.cache/ccache,uid=1000,gid=1000,sharing=locked \
+ sha256sum vendor/postgres-v17/src/backend/main/main.c vendor/postgres-v17/src/backend/storage/buffer/dsg_native_birth_wire.c vendor/postgres-v17/src/backend/storage/buffer/dsg_filter_audit.c && \
+ mold -run make -C build/v17 -j3 -s && make -C build/v17 -s install && \
+ make -C build/v17/src/test/modules/test_dsg_region -j3 -s install
+WORKDIR /workspace/neon

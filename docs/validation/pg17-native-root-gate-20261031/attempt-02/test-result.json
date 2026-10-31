@@ -1,0 +1,68 @@
+{
+  "passed": false,
+  "expectedRoots": 9,
+  "testsRun": 9,
+  "tests": [
+    {
+      "test": "__main__.RootBirth.test_PG17_S_ROOTWIRE_001_real_exact_chain_detach",
+      "result": "PASS",
+      "seconds": 0.04490396899927873
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_S_ROOTWIRE_002_no_tracer_and_cont_cannot_release",
+      "result": "PASS",
+      "seconds": 0.035545924001780804
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_S_ROOTWIRE_003_same_uid_sigcont_cannot_release",
+      "result": "PASS",
+      "seconds": 0.12532854200253496
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_S_ROOTWIRE_004_wrong_tracer_tgid_and_tracer_death",
+      "result": "PASS",
+      "seconds": 0.02777404299558839
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_S_ROOTWIRE_005_actual_ack_timeout",
+      "result": "PASS",
+      "seconds": 30.488310224995075
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_S_ROOTWIRE_006_actual_buffer_M_N0_mismatch",
+      "result": "SUBTEST_FAILURE",
+      "detail": "Traceback (most recent call last):\n  File \"/evidence/test_root_birth.py\", line 498, in test_PG17_S_ROOTWIRE_006_actual_buffer_M_N0_mismatch\n    root = Path(temp);os.chown(root, 1000, 1000)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^\nPermissionError: [Errno 1] Operation not permitted: '/tmp/root-native-guc-yql26a15'\n"
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_S_ROOTWIRE_006_actual_buffer_M_N0_mismatch",
+      "result": "SUBTEST_FAILURE",
+      "detail": "Traceback (most recent call last):\n  File \"/evidence/test_root_birth.py\", line 498, in test_PG17_S_ROOTWIRE_006_actual_buffer_M_N0_mismatch\n    root = Path(temp);os.chown(root, 1000, 1000)\n                      ^^^^^^^^^^^^^^^^^^^^^^^^^^\nPermissionError: [Errno 1] Operation not permitted: '/tmp/root-native-guc-2ynyfno7'\n"
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_U_ROOTWIRE_001_audit_exact_root_geometry",
+      "result": "PASS",
+      "seconds": 0.04315076700004283
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_U_ROOTWIRE_002_invalid_original_fields_and_198",
+      "result": "PASS",
+      "seconds": 0.05416233700088924
+    },
+    {
+      "test": "__main__.RootBirth.test_PG17_U_ROOTWIRE_003_ack_frames_ancillary_and_peer",
+      "result": "PASS",
+      "seconds": 0.07542218600428896
+    }
+  ],
+  "kernel": "6.8.0-147-generic",
+  "sourceSHA256": "13e4d5ccfa60a27788afce0482a2b82028ca96b6bbee1a7b025e16bed0f5694b",
+  "postgresSHA256": "c990ed4251edb270d37894036c70d90e012fea2bb441a7a48faeb0ed6375be53",
+  "scope": "ISOLATED_COMPONENT_ROOT_FIXTURE_NOT_PRODUCTION_ROOT_WAL_OR_NORMAL",
+  "notProven": [
+    "production Root/source/WAL",
+    "full FS/I envelope",
+    "safe normal decrease",
+    "Guest KVM",
+    "Kubernetes E2E"
+  ]
+}
