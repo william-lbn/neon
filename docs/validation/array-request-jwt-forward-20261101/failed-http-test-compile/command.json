@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "docker",
+    "buildx",
+    "build",
+    "--builder",
+    "neon-data",
+    "--resource",
+    "memory=8g",
+    "--resource",
+    "memory-swap=8g",
+    "--resource",
+    "cpu-quota=400000",
+    "--progress",
+    "plain",
+    "--build-arg",
+    "NONCE=20261031T185200Z-59ddba",
+    "--metadata-file",
+    "/data/neon-build/validation/rust-array-authority-20261031T185200Z-59ddba/build-metadata.json",
+    "--output",
+    "type=local,dest=/data/neon-build/validation/rust-array-authority-20261031T185200Z-59ddba/receipt",
+    "-f",
+    "/data/neon-build/validation/rust-array-authority-20261031T185200Z-59ddba/Dockerfile",
+    "/data/neon-build/validation/rust-array-authority-20261031T185200Z-59ddba"
+  ],
+  "actual_RUN": "4CPU/8GiB/no extra swap",
+  "Cargo_jobs": 4,
+  "test_network": "none",
+  "client_limits_separate": true
+}

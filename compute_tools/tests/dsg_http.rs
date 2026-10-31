@@ -2635,3 +2635,86 @@ async fn native_dsm_state_requires_formal_member_and_retains_payload_budget() ->
     cluster.passed = true;
     Ok(())
 }
+
+/// 专用凭据只绑定原三路/原正文；所有拒绝均发生于固定UDS前，不需PG或Root服务。
+#[tokio::test]
+async fn array_authority_routes_require_signed_body_and_separate_scope() -> Result<()> {
+    let signer = Signer::new();
+    let app = router(&node(signer.jwks.clone(), true, None));
+    let raw = r#"{"original":"9007199254740993"}"#;
+    for path in [
+        "/dsg/v1/resource/array-authorize",
+        "/dsg/v1/resource/array-observe",
+        "/dsg/v1/resource/array-replay-original",
+    ] {
+        let generic = signer.token(&signer.claims());
+        assert_eq!(
+            invoke(app.clone(), Method::POST, path, Some(&generic), Some(raw))
+                .await?
+                .0,
+            StatusCode::UNAUTHORIZED
+        );
+        let mut claims = signer.claims();
+        claims["scope"] = json!(compute_api::dsg_auth::DSG_HTTP_ARRAY_AUTHORITY_SCOPE);
+        claims["request"] = json!({"protocol_version":1,"method":"POST","path":path,"body_sha256":"683cffe6fc4432b75e4fe8258a5037392eedcfac82bdb6a83315fb0c7c7fb447"});
+        let token = signer.token(&claims);
+        // 固定UDS在该隔离fixture中不存在；503证明正确原文通过本层授权到连接步骤。
+        // Root实际注册/收费资格仍必须另做真实服务链，不能把503当执行成功。
+        assert_eq!(
+            invoke(app.clone(), Method::POST, path, Some(&token), Some(raw))
+                .await?
+                .0,
+            StatusCode::SERVICE_UNAVAILABLE
+        );
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                path,
+                Some(&token),
+                Some("changed")
+            )
+            .await?
+            .0,
+            StatusCode::FORBIDDEN
+        );
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                &format!("{path}?alias=1"),
+                Some(&token),
+                Some(raw)
+            )
+            .await?
+            .0,
+            StatusCode::BAD_REQUEST
+        );
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                "/dsg/v1/resource/apply",
+                Some(&token),
+                Some(raw)
+            )
+            .await?
+            .0,
+            StatusCode::UNAUTHORIZED
+        );
+        claims["request"]["body_sha256"] = json!("not-a-digest");
+        assert_eq!(
+            invoke(
+                app.clone(),
+                Method::POST,
+                path,
+                Some(&signer.token(&claims)),
+                Some(raw)
+            )
+            .await?
+            .0,
+            StatusCode::UNAUTHORIZED
+        );
+    }
+    Ok(())
+}

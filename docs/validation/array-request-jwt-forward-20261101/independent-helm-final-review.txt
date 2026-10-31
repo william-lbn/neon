@@ -1,0 +1,45 @@
+Rust bound-JWT/array fixed proxy6 最终独立复审，2026-11-01
+审查者helm_scope_review（非作者）。结论：当前六源的专用授权/固定原文转发及所选U范围无提交阻断，可阶段提交最终8af HTTP源码与未变五源。不是Root执行/数组资格、PG、normal或E认证。本人只读源码/原始日志，未改源/Git、未重复测试。
+
+最终来源/最小变化
+固定base f89c75e5b6e83eafb1c34352a67fa60ca5940bc3 + 六源，当前每源逐SHA==533e39 source-lock；与681d7b的2316个all_snapshot_inputs比较，只有compute_tools/tests/dsg_http.rs一项变化，其余2315相同。
+最终test SHA8af5e8713661bb7e26221970c32a9cf447679238e9e2d9b74c13c446fd382258。
+681d7b→533e39差异只在已有三路循环里补有效EdDSA token+原raw的503正控；所有原负例保留。独立Python对原raw字节计算SHA=683cffe6fc4432b75e4fe8258a5037392eedcfac82bdb6a83315fb0c7c7fb447，与测试常量一致，没有为缺sha2依赖改生产规则/依赖/正文。未格式中间ecbf69只是同根历史，非新增覆盖。
+
+权限逻辑复核（静态详审原文7e7379f4...保留）
+新scope只POST array-authorize/array-observe/array-replay-original，严格EdDSA/typJWT/唯一kid+JWK/实际验签/必需exp-nbf-aud/寿命最多300秒；当前compute_id及dsg_spec VM/实例复核。旧token不能array，新scope不能apply等旧动作，Some binding不能借legacy scope。claims/request serde strict unknown/duplicate；request Option None省略，旧序列化保持。
+签名绑定method/path/16KiB以内原body SHA，字节保留不经JSON/整数/字段顺序归一化；proxy拒query、Content-Encoding与非唯一application/json。常量UDS原bearer/原body、20秒无自动重试，不把断开/503叫NoEffect；响应限制/不转Cookie等保持。Root独立重新验签和原状态/来源/WAL仍必需，网关不授予预算。
+新503正控确认本层认证和原文绑定能够放行到forward，排除“全部请求都拒”的假绿；固定隔离UDS不可用仍不是Root处理成功，更不是array授权完成。direct-forward字节测试仍是本地Unix fixture，不是正式Root来源。
+
+真实6个唯一根/来源组合
+681d7b（build/source/test均0、298.3846秒、实际2316COPY逐hash全OK）：
+1 dsg_auth::array_authority_tests::bound_array_claims_reject_invalid_binding_and_identity
+2 dsg_auth::array_authority_tests::bound_array_claims_separate_scope_and_exact_body
+3 dsg_auth::array_authority_tests::bound_array_claims_strict_json_and_legacy_wire
+4 http::routes::dsg_resource::tests::fixed_resource_proxy_preserves_original_and_closes_connection
+5 resource_routes_require_control_scope_and_frozen_instance_before_uds
+这些未变来源直接复用准确收据；没有把原旧HTTP测试的字节称成最终8af。
+533e39（build/source/test/step0均0、122.0511秒、实际2316COPY逐hash全OK）：
+6 array_authority_routes_require_signed_body_and_separate_scope
+实际日志该根PASS、1passed/0failed/0ignored；原三路各执行原raw503正控与旧token401、错body403、query400、新scope打apply401、非法digest401负控。
+所有选定根没有ignored；其他filtered out是精确过滤，不冒称全仓库测试。Rust/cargo实际1.88.0，禁网、4CPU/8GiB资源锁，所有缓存保留。编译存在原remote_storage warnings，未伪称零warning。
+
+失败历史不覆盖
+6ccc90：rustup禁网同步toolchain失败，测试前ENV；
+ec6100：安装工具链直PATH后source0但Python驱动缺失，test127，测试前ENV；
+59ddba：API3与proxy1实际先过，integration编译因测试sha2无直接依赖失败，HTTP根未运行；
+681d7b：修测试为独立固定向量，完整4命令6根PASS（其旧HTTP仅作为历史）；
+ecbf69：新正控未格式版两HTTP根PASS，历史不增计；
+533e39：最终8af格式版changed HTTP根实际PASS。
+这些与早期静态报告“当时ENV未闭”不冲突；本报告只对以上最终组合解除门槛，不事后转签旧失败。
+
+未执行边界
+未认证真实Root service/原签名来源/Node和Guest预算、数组cap/收费、CLI完整Guest正式Bootstrap、PG或normal降限、K8s E2E。正常五拒绝和原Root强制来源不由本Rust层删除。源码未知body字段仍由Root严格解析，本层仅opaque原文认证。
+
+六源SHA：
+libs/compute_api/src/dsg_auth.rs e5f97924f7512528ce14c02659b9876bc6085df391a1e21bc57470c34b5ae24a
+compute_tools/src/http/middleware/dsg_authorize.rs 15206425bb2d6d2bbf778e580e0e013fdbe6e55dbbfb2ecc28851190fbcf9ae8
+compute_tools/src/http/routes/dsg.rs 6e4f4fc513dc65d440ea5e782a169ca75ff8e070ebe72de8d263a0f8acea1c1f
+compute_tools/src/http/routes/dsg_resource.rs d93f9c51b1650e525a218aaba58893b61bca169d0fa74f376fa39e3127fb9121
+compute_tools/src/dsg_hba/tests.rs 0c7ac8a64e07d1c9c8dbbd6fd62293efd6fc1f8548cc038853f2bb9244fbfbdb
+compute_tools/tests/dsg_http.rs 8af5e8713661bb7e26221970c32a9cf447679238e9e2d9b74c13c446fd382258

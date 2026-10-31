@@ -1,0 +1,578 @@
+   Compiling libc v0.2.172
+   Compiling smallvec v1.13.2
+   Compiling bytes v1.9.0
+   Compiling zeroize_derive v1.4.2
+   Compiling tracing v0.1.41
+   Compiling libm v0.2.8
+   Compiling num-traits v0.2.19
+   Compiling zeroize v1.8.1
+   Compiling const-oid v0.9.6
+   Compiling generic-array v0.14.7
+   Compiling http v1.3.1
+   Compiling getrandom v0.2.11
+   Compiling jobserver v0.1.32
+   Compiling parking_lot_core v0.9.8
+   Compiling signal-hook-registry v1.4.1
+   Compiling cc v1.2.16
+   Compiling parking_lot v0.12.1
+   Compiling socket2 v0.5.5
+   Compiling mio v1.0.3
+   Compiling rand_core v0.6.4
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.6
+   Compiling http-body v1.0.0
+   Compiling digest v0.10.7
+   Compiling tokio v1.43.1
+   Compiling serde_json v1.0.125
+   Compiling backtrace v0.3.74
+   Compiling ring v0.17.14
+   Compiling anyhow v1.0.98
+   Compiling http-body-util v0.1.2
+   Compiling stable_deref_trait v1.2.0
+   Compiling yoke v0.7.5
+   Compiling num-integer v0.1.46
+   Compiling zerovec v0.10.4
+   Compiling rand_chacha v0.3.1
+   Compiling rand v0.8.5
+   Compiling tinystr v0.7.6
+   Compiling icu_locid v1.5.0
+   Compiling sha2-asm v0.6.3
+   Compiling itertools v0.12.1
+   Compiling icu_provider v1.5.0
+   Compiling tokio-util v0.7.10
+   Compiling hmac v0.12.1
+   Compiling http v0.2.9
+   Compiling icu_locid_transform v1.5.0
+   Compiling icu_collections v1.5.0
+   Compiling rustls-pki-types v1.12.0
+   Compiling icu_properties v1.5.1
+   Compiling sha2 v0.10.8
+   Compiling ahash v0.8.11
+   Compiling http-body v0.4.5
+   Compiling serde v1.0.215
+   Compiling base64ct v1.6.0
+   Compiling h2 v0.4.4
+   Compiling icu_normalizer v1.5.0
+   Compiling idna_adapter v1.2.0
+   Compiling idna v1.0.3
+   Compiling tower v0.4.13
+   Compiling url v2.5.4
+   Compiling spin v0.9.8
+   Compiling lazy_static v1.5.0
+   Compiling prost-derive v0.13.5
+   Compiling hyper v1.4.1
+   Compiling hyper-util v0.1.7
+   Compiling hashbrown v0.14.5
+   Compiling uuid v1.10.0
+   Compiling rustls-pemfile v2.1.1
+   Compiling thiserror v2.0.11
+   Compiling zstd-sys v2.0.9+zstd.1.5.5
+   Compiling chrono v0.4.38
+   Compiling rustls v0.22.4
+   Compiling rustls-webpki v0.102.8
+   Compiling sha1 v0.10.6
+   Compiling h2 v0.3.26
+   Compiling zstd-safe v7.0.0
+   Compiling getrandom v0.3.3
+   Compiling num-bigint v0.4.6
+   Compiling crypto-bigint v0.5.5
+   Compiling hyper v0.14.30
+   Compiling tokio-rustls v0.25.0
+   Compiling bytes-utils v0.1.3
+   Compiling rustls v0.23.29
+   Compiling prettyplease v0.2.17
+   Compiling utf8parse v0.2.1
+   Compiling aws-smithy-types v1.2.9
+   Compiling anstyle-parse v0.2.0
+   Compiling hyper-rustls v0.26.0
+   Compiling rand_core v0.9.3
+   Compiling rustls-native-certs v0.7.0
+   Compiling rustls-webpki v0.103.4
+   Compiling webpki-roots v0.26.1
+   Compiling is_terminal_polyfill v1.70.1
+   Compiling data-encoding v2.4.0
+   Compiling utf-8 v0.7.6
+   Compiling anstyle-query v1.0.0
+   Compiling colorchoice v1.0.0
+   Compiling sync_wrapper v1.0.1
+   Compiling anstyle v1.0.8
+   Compiling anstream v0.6.15
+   Compiling reqwest v0.12.4
+   Compiling tungstenite v0.26.1
+   Compiling rand_chacha v0.9.0
+   Compiling rand v0.9.1
+   Compiling tokio-tungstenite v0.26.1
+   Compiling axum-core v0.5.0
+   Compiling tower v0.5.2
+   Compiling prost v0.13.5
+   Compiling tokio-stream v0.1.16
+   Compiling matchit v0.8.4
+   Compiling overload v0.1.1
+   Compiling strsim v0.11.1
+   Compiling clap_lex v0.7.3
+   Compiling nu-ansi-term v0.46.0
+   Compiling clap_builder v4.5.22
+   Compiling axum v0.8.1
+   Compiling tokio-rustls v0.26.2
+   Compiling zstd v0.13.0
+   Compiling sharded-slab v0.1.4
+   Compiling clap_derive v4.5.18
+   Compiling tracing-log v0.2.0
+   Compiling num-iter v0.1.43
+   Compiling num-rational v0.4.1
+   Compiling tracing-subscriber v0.3.19
+   Compiling clap v4.5.22
+   Compiling rustls-native-certs v0.8.0
+   Compiling pem-rfc7468 v0.7.0
+   Compiling aws-smithy-async v1.2.1
+   Compiling der v0.6.1
+   Compiling der_derive v0.7.3
+   Compiling flagset v0.4.6
+   Compiling aws-smithy-runtime-api v1.7.3
+   Compiling spki v0.6.0
+   Compiling md-5 v0.10.5
+   Compiling der v0.7.8
+   Compiling half v2.4.1
+   Compiling num-complex v0.4.4
+   Compiling indexmap v1.9.3
+   Compiling rustix v0.38.41
+   Compiling num v0.4.1
+   Compiling pkcs8 v0.9.0
+   Compiling spki v0.7.3
+   Compiling hyper-timeout v0.5.1
+   Compiling debugid v0.8.0
+   Compiling crossbeam-channel v0.5.8
+   Compiling crossbeam-epoch v0.9.18
+   Compiling ff v0.12.1
+   Compiling crypto-bigint v0.4.9
+   Compiling bitflags v1.3.2
+   Compiling hashbrown v0.12.3
+   Compiling linux-raw-sys v0.4.14
+   Compiling rustls v0.21.12
+   Compiling sec1 v0.3.0
+   Compiling group v0.12.1
+   Compiling tonic v0.13.1
+   Compiling aws-smithy-eventstream v0.60.5
+   Compiling opentelemetry v0.30.0
+   Compiling rustls-webpki v0.101.7
+   Compiling sct v0.7.1
+   Compiling fixedbitset v0.4.2
+   Compiling base16ct v0.2.0
+   Compiling nix v0.30.1
+   Compiling serdect v0.2.0
+   Compiling postgres-protocol v0.6.6 (https://github.com/neondatabase/rust-postgres.git?branch=neon#f3cf448f)
+   Compiling petgraph v0.6.3
+   Compiling tempfile v3.14.0
+   Compiling aws-smithy-http v0.60.11
+   Compiling elliptic-curve v0.12.3
+   Compiling rfc6979 v0.3.1
+   Compiling pkcs8 v0.10.2
+   Compiling env_filter v0.1.3
+   Compiling tikv-jemalloc-sys v0.6.0+5.3.0-1-ge13ca993e8ccb9ba9847cc330696e02839f328f7
+   Compiling signature v1.6.4
+   Compiling ff v0.13.0
+   Compiling ordered-float v2.10.1
+   Compiling jiff v0.2.4
+   Compiling multimap v0.8.3
+   Compiling integer-encoding v3.0.4
+   Compiling thrift v0.17.0
+   Compiling tokio-rustls v0.24.0
+   Compiling group v0.13.0
+   Compiling ecdsa v0.14.8
+   Compiling sec1 v0.7.3
+   Compiling getrandom v0.1.16
+   Compiling opentelemetry_sdk v0.30.0
+   Compiling aws-credential-types v1.2.1
+   Compiling memoffset v0.7.1
+   Compiling seq-macro v0.3.5
+   Compiling rand_core v0.5.1
+   Compiling env_logger v0.11.7
+   Compiling elliptic-curve v0.13.8
+   Compiling hyper-rustls v0.24.0
+   Compiling p256 v0.11.1
+   Compiling sentry-types v0.37.0
+   Compiling toml_datetime v0.6.6
+   Compiling serde_spanned v0.6.6
+   Compiling indexmap v2.10.0
+   Compiling fail v0.5.1
+   Compiling minimal-lexical v0.2.1
+   Compiling toml_edit v0.22.14
+   Compiling nom v7.1.3
+   Compiling sentry-core v0.37.0
+   Compiling parquet v53.0.0
+   Compiling aws-sigv4 v1.2.6
+   Compiling aws-smithy-runtime v1.7.4
+   Compiling rand_chacha v0.2.2
+   Compiling aws-types v1.3.3
+   Compiling postgres-types v0.2.6 (https://github.com/neondatabase/rust-postgres.git?branch=neon#f3cf448f)
+   Compiling procfs-core v0.16.0
+   Compiling dashmap v5.5.0
+   Compiling hashbrown v0.13.2
+   Compiling rfc6979 v0.4.0
+   Compiling prost-derive v0.12.6
+   Compiling signature v2.2.0
+   Compiling bytemuck v1.16.3
+   Compiling rayon-core v1.11.0
+   Compiling portable-atomic v1.10.0
+   Compiling arrayvec v0.7.6
+   Compiling rgb v0.8.50
+   Compiling num-format v0.4.4
+   Compiling tokio-postgres v0.7.10 (https://github.com/neondatabase/rust-postgres.git?branch=neon#f3cf448f)
+   Compiling workspace_hack v0.1.0 (/workspace/workspace_hack)
+   Compiling ecdsa v0.16.9
+   Compiling lasso v0.7.2
+   Compiling procfs v0.16.0
+   Compiling aws-runtime v1.4.4
+   Compiling nix v0.26.4
+   Compiling rand v0.7.3
+   Compiling primeorder v0.13.6
+   Compiling opentelemetry-proto v0.30.0
+   Compiling tracing-opentelemetry v0.31.0
+   Compiling opentelemetry-http v0.30.0
+   Compiling crossbeam-deque v0.8.5
+   Compiling aws-smithy-json v0.61.1
+   Compiling filetime v0.2.22
+   Compiling num_cpus v1.16.0
+   Compiling str_stack v0.1.0
+   Compiling measured v0.0.22
+   Compiling http-types v2.12.0
+   Compiling opentelemetry-otlp v0.30.0
+   Compiling p256 v0.13.2
+   Compiling prost v0.12.6
+   Compiling sentry-backtrace v0.37.0
+   Compiling prost-types v0.13.5
+   Compiling uname v0.1.1
+   Compiling xattr v1.0.0
+   Compiling hostname v0.4.0
+   Compiling tracing-utils v0.1.0 (/workspace/libs/tracing-utils)
+   Compiling sentry-contexts v0.37.0
+   Compiling azure_core v0.21.0 (https://github.com/neondatabase/azure-sdk-for-rust.git?branch=neon#f64bd572)
+   Compiling prost-build v0.13.3
+   Compiling sentry-panic v0.37.0
+   Compiling prost-types v0.12.6
+   Compiling rayon v1.7.0
+   Compiling measured-process v0.0.22
+   Compiling prometheus v0.13.4
+   Compiling pq_proto v0.1.0 (/workspace/libs/pq_proto)
+   Compiling simple_asn1 v0.6.2
+   Compiling dashmap v6.1.0
+   Compiling quick-xml v0.37.1
+   Compiling plotters-backend v0.3.4
+   Compiling ciborium-io v0.2.2
+   Compiling crunchy v0.2.2
+   Compiling cpp_demangle v0.4.4
+   Compiling inferno v0.12.0
+   Compiling ciborium-ll v0.2.2
+   Compiling plotters-svg v0.3.3
+   Compiling jsonwebtoken v9.2.0
+   Compiling metrics v0.1.0 (/workspace/libs/metrics)
+   Compiling prost-build v0.12.6
+   Compiling sentry v0.37.0
+   Compiling tonic-build v0.13.1
+   Compiling signal-hook v0.3.15
+   Compiling tokio-tar v0.3.1
+   Compiling postgres_connection v0.1.0 (/workspace/libs/postgres_connection)
+   Compiling tracing-error v0.2.0
+   Compiling async-compression v0.4.5
+   Compiling findshlibs v0.10.2
+   Compiling is-terminal v0.4.12
+   Compiling memmap2 v0.9.3
+   Compiling equator-macro v0.2.1
+   Compiling cast v0.3.0
+   Compiling tiny-keccak v2.0.2
+   Compiling symbolic-demangle v12.12.0
+   Compiling aws-smithy-query v0.60.7
+   Compiling utils v0.1.0 (/workspace/libs/utils)
+   Compiling criterion-plot v0.5.0
+   Compiling equator v0.2.2
+   Compiling symbolic-common v12.12.0
+   Compiling pprof v0.14.0
+   Compiling pprof_util v0.7.0
+   Compiling plotters v0.3.4
+   Compiling ciborium v0.2.2
+   Compiling tinytemplate v1.2.1
+   Compiling quick-xml v0.26.0
+   Compiling syn v1.0.109
+   Compiling oorandom v11.1.3
+   Compiling anes v0.1.6
+   Compiling azure_storage v0.21.0 (https://github.com/neondatabase/azure-sdk-for-rust.git?branch=neon#f64bd572)
+   Compiling criterion v0.5.1
+   Compiling inferno v0.11.21
+   Compiling mappings v0.7.0
+   Compiling aws-smithy-checksums v0.60.13
+   Compiling aligned-vec v0.6.1
+   Compiling aws-sdk-sts v1.51.0
+   Compiling azure_svc_blobstorage v0.21.0 (https://github.com/neondatabase/azure-sdk-for-rust.git?branch=neon#f64bd572)
+   Compiling aws-sdk-sso v1.50.0
+   Compiling aws-sdk-ssooidc v1.51.0
+   Compiling tikv-jemalloc-ctl v0.6.0
+   Compiling oauth2 v4.4.2
+   Compiling hyper-rustls v0.27.5
+   Compiling aws-smithy-json v0.60.7
+   Compiling lru v0.12.3
+   Compiling tracing-futures v0.2.5
+   Compiling gcp_auth v0.12.3
+   Compiling aws-config v1.5.10
+   Compiling aws-sdk-s3 v1.65.0
+   Compiling azure_identity v0.21.0 (https://github.com/neondatabase/azure-sdk-for-rust.git?branch=neon#f64bd572)
+   Compiling jemalloc_pprof v0.7.0
+   Compiling azure_storage_blobs v0.21.0 (https://github.com/neondatabase/azure-sdk-for-rust.git?branch=neon#f64bd572)
+   Compiling const-random-macro v0.1.16
+   Compiling storage_broker v0.1.0 (/workspace/storage_broker)
+   Compiling x509-cert v0.2.5
+   Compiling routerify v3.0.0
+   Compiling serde_repr v0.1.20
+   Compiling postgres_versioninfo v0.1.0 (/workspace/libs/postgres_versioninfo)
+   Compiling http-utils v0.1.0 (/workspace/libs/http-utils)
+   Compiling enum-map-derive v0.11.0
+   Compiling const-random v0.1.17
+   Compiling dlv-list v0.5.2
+   Compiling postgres_ffi_types v0.1.0 (/workspace/libs/postgres_ffi_types)
+   Compiling enum-map v2.5.0
+   Compiling posthog_client_lite v0.1.0 (/workspace/libs/posthog_client_lite)
+   Compiling pageserver_page_api v0.1.0 (/workspace/pageserver/page_api)
+   Compiling postgres_backend v0.1.0 (/workspace/libs/postgres_backend)
+   Compiling nix v0.25.1
+   Compiling headers-core v0.3.0
+   Compiling inotify-sys v0.1.5
+   Compiling rlimit v0.10.1
+   Compiling inotify v0.9.6
+   Compiling cgroups-rs v0.3.3
+   Compiling headers v0.4.0
+   Compiling ordered-multimap v0.7.3
+   Compiling sysinfo v0.29.7
+   Compiling serde_html_form v0.2.7
+   Compiling mio v0.8.11
+   Compiling notify v6.1.1
+   Compiling axum-extra v0.10.0
+   Compiling vm_monitor v0.1.0 (/workspace/libs/vm_monitor)
+   Compiling rust-ini v0.20.0
+   Compiling postgres_initdb v0.1.0 (/workspace/libs/postgres_initdb)
+   Compiling tar v0.4.40
+   Compiling aws-sdk-kms v1.51.0
+   Compiling tower-otel v0.6.0
+   Compiling postgres v0.19.7 (https://github.com/neondatabase/rust-postgres.git?branch=neon#f3cf448f)
+   Compiling remote_storage v0.1.0 (/workspace/libs/remote_storage)
+warning: unused import: `GCSVersionListing`
+ --> libs/remote_storage/src/gcs_bucket.rs:9:5
+  |
+9 |     GCSVersionListing, 
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `azure_core::Etag`
+  --> libs/remote_storage/src/gcs_bucket.rs:12:5
+   |
+12 | use azure_core::Etag;
+   |     ^^^^^^^^^^^^^^^^
+
+warning: unused import: `bytes::BytesMut`
+  --> libs/remote_storage/src/gcs_bucket.rs:14:5
+   |
+14 | use bytes::BytesMut;
+   |     ^^^^^^^^^^^^^^^
+
+warning: unused import: `Token`
+  --> libs/remote_storage/src/gcs_bucket.rs:19:16
+   |
+19 | use gcp_auth::{Token, TokenProvider};
+   |                ^^^^^
+
+warning: unused import: `http::Method`
+  --> libs/remote_storage/src/gcs_bucket.rs:20:5
+   |
+20 | use http::Method;
+   |     ^^^^^^^^^^^^
+
+warning: unused import: `ParseIntError`
+  --> libs/remote_storage/src/gcs_bucket.rs:27:28
+   |
+27 | use std::num::{NonZeroU32, ParseIntError};
+   |                            ^^^^^^^^^^^^^
+
+warning: unused imports: `Pin` and `pin`
+  --> libs/remote_storage/src/gcs_bucket.rs:28:16
+   |
+28 | use std::pin::{Pin, pin};
+   |                ^^^  ^^^
+
+warning: unused imports: `BytesCodec` and `FramedRead`
+  --> libs/remote_storage/src/gcs_bucket.rs:33:25
+   |
+33 | use tokio_util::codec::{BytesCodec, FramedRead};
+   |                         ^^^^^^^^^^  ^^^^^^^^^^
+
+warning: unused imports: `ParseError` and `Url`
+  --> libs/remote_storage/src/gcs_bucket.rs:36:11
+   |
+36 | use url::{ParseError, Url};
+   |           ^^^^^^^^^^  ^^^
+
+warning: unused doc comment
+   --> libs/remote_storage/src/gcs_bucket.rs:700:9
+    |
+700 | /         /// We do this in two parts:
+701 | |         /// 1. Serialize the metadata of the first request to get Etag, last modified, etc
+702 | |         /// 2. We do not .await the second request pass on the pinned stream to the 'get_object'
+703 | |         ///    caller
+    | |_____________________^
+704 |           let metadata_uri_mod = "alt=json";
+    |           ---------------------------------- rustdoc does not generate documentation for statements
+    |
+    = help: use `//` for a plain comment
+    = note: `#[warn(unused_doc_comments)]` on by default
+
+warning: unused doc comment
+    --> libs/remote_storage/src/gcs_bucket.rs:1248:16
+     |
+1248 |                /// Case 1: we have a recent object outside of our restore window.
+     |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ rustdoc does not generate documentation for macro invocations
+     |
+     = help: to document an item produced by a macro, the macro must produce the documentation as part of its expansion
+
+warning: unused doc comment
+    --> libs/remote_storage/src/gcs_bucket.rs:1252:12
+     |
+1252 |              /// we get index in the array that we want whether its `v` or `e`
+     |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1253 | /            let version_to_restore_to =
+1254 | |                match versions.binary_search_by_key(&timestamp, |tpl| tpl.last_modified) {
+1255 | |                    Ok(v) => v,
+1256 | |                    Err(e) => e,
+1257 | |                };
+     | |_________________- rustdoc does not generate documentation for statements
+     |
+     = help: use `//` for a plain comment
+
+warning: variable `continuation_token` is assigned to, but never used
+   --> libs/remote_storage/src/gcs_bucket.rs:961:21
+    |
+961 |             let mut continuation_token = None;
+    |                     ^^^^^^^^^^^^^^^^^^
+    |
+    = note: consider using `_continuation_token` instead
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: value assigned to `continuation_token` is never read
+    --> libs/remote_storage/src/gcs_bucket.rs:1049:17
+     |
+1049 |                 continuation_token = match resp.next_page_token {
+     |                 ^^^^^^^^^^^^^^^^^^
+     |
+     = help: maybe it is overwritten before being read?
+     = note: `#[warn(unused_assignments)]` on by default
+
+warning: unused variable: `req_uri`
+   --> libs/remote_storage/src/gcs_bucket.rs:235:21
+    |
+235 |             let mut req_uri = versions_base_uri.clone();
+    |                     ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_req_uri`
+
+warning: variable does not need to be mutable
+   --> libs/remote_storage/src/gcs_bucket.rs:235:17
+    |
+235 |             let mut req_uri = versions_base_uri.clone();
+    |                 ----^^^^^^^
+    |                 |
+    |                 help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> libs/remote_storage/src/gcs_bucket.rs:361:13
+    |
+361 |         let mut form = reqwest::multipart::Form::new()
+    |             ----^^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: unused variable: `permit`
+   --> libs/remote_storage/src/gcs_bucket.rs:693:13
+    |
+693 |         let permit = self.owned_permit(kind, cancel).await?;
+    |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_permit`
+
+warning: unused variable: `remaining`
+   --> libs/remote_storage/src/gcs_bucket.rs:837:13
+    |
+837 |         let remaining = self.timeout.saturating_sub(started_at.elapsed());
+    |             ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_remaining`
+
+warning: variable does not need to be mutable
+   --> libs/remote_storage/src/gcs_bucket.rs:789:13
+    |
+789 |         let mut req = Client::new()
+    |             ----^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: unused variable: `from`
+   --> libs/remote_storage/src/gcs_bucket.rs:861:9
+    |
+861 |         from: &RemotePath,
+    |         ^^^^ help: if this is intentional, prefix it with an underscore: `_from`
+
+warning: unused variable: `cancel`
+   --> libs/remote_storage/src/gcs_bucket.rs:863:9
+    |
+863 |         cancel: &CancellationToken,
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_cancel`
+
+warning: unused variable: `delete_objects`
+    --> libs/remote_storage/src/gcs_bucket.rs:1170:17
+     |
+1170 |         let mut delete_objects: Vec<String> = Vec::with_capacity(paths.len());
+     |                 ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_delete_objects`
+
+warning: variable does not need to be mutable
+    --> libs/remote_storage/src/gcs_bucket.rs:1170:13
+     |
+1170 |         let mut delete_objects: Vec<String> = Vec::with_capacity(paths.len());
+     |             ----^^^^^^^^^^^^^^
+     |             |
+     |             help: remove this `mut`
+
+warning: unused import: `futures::stream::TryStreamExt`
+  --> libs/remote_storage/src/gcs_bucket.rs:17:5
+   |
+17 | use futures::stream::TryStreamExt;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   Compiling tracing-appender v0.2.3
+warning: fields `bucket` and `etag` are never read
+  --> libs/remote_storage/src/gcs_bucket.rs:58:5
+   |
+57 | struct GetObjectRequest {
+   |        ---------------- fields in this struct
+58 |     bucket: String,
+   |     ^^^^^^
+59 |     key: String,
+60 |     etag: Option<String>,
+   |     ^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `max_keys_per_delete` is never used
+   --> libs/remote_storage/src/gcs_bucket.rs:138:8
+    |
+66  | impl GCSBucket {
+    | -------------- method in this implementation
+...
+138 |     fn max_keys_per_delete(&self) -> usize {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+   Compiling tower-http v0.6.2
+   Compiling pageserver_api v0.1.0 (/workspace/libs/pageserver_api)
+warning: `remote_storage` (lib) generated 27 warnings (run `cargo fix --lib -p remote_storage` to apply 13 suggestions)
+   Compiling compute_api v0.1.0 (/workspace/libs/compute_api)
+   Compiling hostname-validator v1.1.1
+   Compiling compute_tools v0.1.0 (/workspace/compute_tools)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4m 10s
+     Running unittests src/lib.rs (/home/nonroot/target/debug/deps/compute_tools-a0cddf12b33aeba5)
+
+running 1 test
+test http::routes::dsg_resource::tests::fixed_resource_proxy_preserves_original_and_closes_connection ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.01s
+

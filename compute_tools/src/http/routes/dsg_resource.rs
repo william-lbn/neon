@@ -49,6 +49,19 @@ pub(super) async fn proxy(
     let Ok(body) = axum::body::to_bytes(body, 16 * 1024).await else {
         return deny(StatusCode::BAD_REQUEST);
     };
+    if compute_api::dsg_auth::is_array_authority_path(parts.uri.path()) {
+        if parts.headers.get_all(CONTENT_TYPE).iter().count() != 1
+            || parts
+                .headers
+                .get(CONTENT_TYPE)
+                .is_none_or(|v| v != "application/json")
+            || claims
+                .authorize_array_request(parts.method.as_str(), parts.uri.path(), &body)
+                .is_err()
+        {
+            return deny(StatusCode::FORBIDDEN);
+        }
+    }
     let result = tokio::time::timeout(
         Duration::from_secs(20),
         forward(SOCKET, parts.method, parts.uri.path(), bearer, body),
@@ -128,6 +141,9 @@ mod tests {
         check_fixed_forward("/dsg/v1/resource/observe").await;
         check_fixed_forward("/dsg/v1/resource/repair-held").await;
         check_fixed_forward("/dsg/v1/resource/cancel-original").await;
+        check_fixed_forward("/dsg/v1/resource/array-authorize").await;
+        check_fixed_forward("/dsg/v1/resource/array-observe").await;
+        check_fixed_forward("/dsg/v1/resource/array-replay-original").await;
     }
 
     // 转发保持原字节/原签名，不在Rust根据JSON重新生成恢复选择。

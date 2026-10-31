@@ -1,0 +1,57 @@
+#0 building with "neon-data" instance using remote driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.34kB done
+#1 DONE 0.8s
+
+#2 [internal] load metadata for 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [test 1/7] FROM 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020
+#4 resolve 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020 0.0s done
+#4 CACHED
+
+#5 [internal] setting cache mount permissions
+#5 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 34.40MB 0.4s done
+#6 DONE 1.9s
+
+#7 [test 2/7] RUN mkdir -p /workspace /out && chown -R 1000:1000 /workspace /out
+#7 DONE 3.3s
+
+#8 [test 3/7] WORKDIR /workspace
+#8 DONE 0.1s
+
+#9 [test 4/7] COPY --chown=1000:1000 source/ ./
+#9 DONE 1.7s
+
+#10 [test 5/7] COPY test-worker.py /test-worker.py
+#10 DONE 0.9s
+
+#11 [test 6/7] COPY test-commands.json /test-commands.json
+#11 DONE 1.4s
+
+#12 [test 7/7] RUN --network=none --mount=type=cache,id=neon-cargo-registry-amd64,target=/home/nonroot/.cargo/registry,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-cargo-git-amd64,target=/home/nonroot/.cargo/git,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-core-target-amd64,target=/home/nonroot/target,uid=1000,gid=1000,sharing=locked set -eu; test "$(cat /sys/fs/cgroup/memory.max)" = 8589934592; sha256sum -c cohort.sha256 > /out/source-check.txt; echo 0 > /out/source.rc; cp cohort.sha256 /out/actual-source.sha256; printf '%s\n' "20261031T184420Z-6ccc90" > /out/nonce.txt; cargo --version > /out/cargo-version.txt; rustc --version > /out/rustc-version.txt; set +e; python3 /test-worker.py > /out/driver.log 2>&1; echo $? > /out/test.rc
+#12 0.612 info: syncing channel updates for 1.88.0-x86_64-unknown-linux-gnu
+#12 1.078 error: could not download file from 'https://static.rust-lang.org/dist/channel-rust-1.88.0.toml.sha256' to '/home/nonroot/.rustup/tmp/ur1958mdtn1t0jla_file': error downloading file: error sending request for url (https://static.rust-lang.org/dist/channel-rust-1.88.0.toml.sha256): client error (Connect): dns error: failed to lookup address information: Temporary failure in name resolution
+#12 ERROR: process "/bin/bash -euo pipefail -c set -eu; test \"$(cat /sys/fs/cgroup/memory.max)\" = 8589934592; sha256sum -c cohort.sha256 > /out/source-check.txt; echo 0 > /out/source.rc; cp cohort.sha256 /out/actual-source.sha256; printf '%s\\n' \"$NONCE\" > /out/nonce.txt; cargo --version > /out/cargo-version.txt; rustc --version > /out/rustc-version.txt; set +e; python3 /test-worker.py > /out/driver.log 2>&1; echo $? > /out/test.rc" did not complete successfully: exit code: 1
+------
+ > [test 7/7] RUN --network=none --mount=type=cache,id=neon-cargo-registry-amd64,target=/home/nonroot/.cargo/registry,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-cargo-git-amd64,target=/home/nonroot/.cargo/git,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-core-target-amd64,target=/home/nonroot/target,uid=1000,gid=1000,sharing=locked set -eu; test "$(cat /sys/fs/cgroup/memory.max)" = 8589934592; sha256sum -c cohort.sha256 > /out/source-check.txt; echo 0 > /out/source.rc; cp cohort.sha256 /out/actual-source.sha256; printf '%s\n' "20261031T184420Z-6ccc90" > /out/nonce.txt; cargo --version > /out/cargo-version.txt; rustc --version > /out/rustc-version.txt; set +e; python3 /test-worker.py > /out/driver.log 2>&1; echo $? > /out/test.rc:
+0.612 info: syncing channel updates for 1.88.0-x86_64-unknown-linux-gnu
+ could not download file from 'https://static.rust-lang.org/dist/channel-rust-1.88.0.toml.sha256' to '/home/nonroot/.rustup/tmp/ur1958mdtn1t0jla_file': error downloading file: error sending request for url (https://static.rust-lang.org/dist/channel-rust-1.88.0.toml.sha256): client error (Connect): dns error: failed to lookup address information: Temporary failure in name resolution
+------
+Dockerfile:11
+--------------------
+   9 |     ENV CARGO_BUILD_JOBS=4 CARGO_TARGET_DIR=/home/nonroot/target CARGO_NET_OFFLINE=true GIT_VERSION=f89c75e5b6e83eafb1c34352a67fa60ca5940bc3 BUILD_TAG=TEST_ONLY_ARRAY_AUTHORITY
+  10 |     ARG NONCE
+  11 | >>> RUN --network=none --mount=type=cache,id=neon-cargo-registry-amd64,target=/home/nonroot/.cargo/registry,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-cargo-git-amd64,target=/home/nonroot/.cargo/git,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-core-target-amd64,target=/home/nonroot/target,uid=1000,gid=1000,sharing=locked set -eu; test "$(cat /sys/fs/cgroup/memory.max)" = 8589934592; sha256sum -c cohort.sha256 > /out/source-check.txt; echo 0 > /out/source.rc; cp cohort.sha256 /out/actual-source.sha256; printf '%s\n' "$NONCE" > /out/nonce.txt; cargo --version > /out/cargo-version.txt; rustc --version > /out/rustc-version.txt; set +e; python3 /test-worker.py > /out/driver.log 2>&1; echo $? > /out/test.rc
+  12 |     FROM scratch
+  13 |     COPY --from=test /out/ /
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/bash -euo pipefail -c set -eu; test \"$(cat /sys/fs/cgroup/memory.max)\" = 8589934592; sha256sum -c cohort.sha256 > /out/source-check.txt; echo 0 > /out/source.rc; cp cohort.sha256 /out/actual-source.sha256; printf '%s\\n' \"$NONCE\" > /out/nonce.txt; cargo --version > /out/cargo-version.txt; rustc --version > /out/rustc-version.txt; set +e; python3 /test-worker.py > /out/driver.log 2>&1; echo $? > /out/test.rc" did not complete successfully: exit code: 1

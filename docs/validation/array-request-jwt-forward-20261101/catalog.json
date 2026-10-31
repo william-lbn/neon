@@ -1,0 +1,69 @@
+{
+  "scope": "PG-neutral dedicated request-bound JWT and opaque fixed Root forwarding only",
+  "base": "f89c75e5b6e83eafb1c34352a67fa60ca5940bc3",
+  "final_owned": {
+    "libs/compute_api/src/dsg_auth.rs": "e5f97924f7512528ce14c02659b9876bc6085df391a1e21bc57470c34b5ae24a",
+    "compute_tools/src/http/middleware/dsg_authorize.rs": "15206425bb2d6d2bbf778e580e0e013fdbe6e55dbbfb2ecc28851190fbcf9ae8",
+    "compute_tools/src/http/routes/dsg.rs": "6e4f4fc513dc65d440ea5e782a169ca75ff8e070ebe72de8d263a0f8acea1c1f",
+    "compute_tools/src/http/routes/dsg_resource.rs": "d93f9c51b1650e525a218aaba58893b61bca169d0fa74f376fa39e3127fb9121",
+    "compute_tools/src/dsg_hba/tests.rs": "0c7ac8a64e07d1c9c8dbbd6fd62293efd6fc1f8548cc038853f2bb9244fbfbdb",
+    "compute_tools/tests/dsg_http.rs": "8af5e8713661bb7e26221970c32a9cf447679238e9e2d9b74c13c446fd382258"
+  },
+  "actual_U_roots_total": 6,
+  "new_U_roots": 4,
+  "direct_extended_or_legacy_regression_roots": 2,
+  "named_subcases_not_invented": true,
+  "cases": [
+    {
+      "id": "PG17-U-ARRAYJWT-001",
+      "root": "compute_api::dsg_auth::array_authority_tests::bound_array_claims_separate_scope_and_exact_body",
+      "cohort": "rust-array-authority-20261031T190342Z-681d7b",
+      "step": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "PG17-U-ARRAYJWT-002",
+      "root": "compute_api::dsg_auth::array_authority_tests::bound_array_claims_reject_invalid_binding_and_identity",
+      "cohort": "rust-array-authority-20261031T190342Z-681d7b",
+      "step": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "PG17-U-ARRAYJWT-003",
+      "root": "compute_api::dsg_auth::array_authority_tests::bound_array_claims_strict_json_and_legacy_wire",
+      "cohort": "rust-array-authority-20261031T190342Z-681d7b",
+      "step": 0,
+      "status": "PASS"
+    },
+    {
+      "id": "PG17-U-ARRAYJWT-004",
+      "root": "dsg_http::array_authority_routes_require_signed_body_and_separate_scope",
+      "cohort": "rust-array-authority-20261031T191154Z-533e39",
+      "step": 0,
+      "status": "PASS"
+    }
+  ],
+  "direct_regressions": [
+    {
+      "root": "http::routes::dsg_resource::tests::fixed_resource_proxy_preserves_original_and_closes_connection",
+      "cohort": "rust-array-authority-20261031T190342Z-681d7b",
+      "step": 1
+    },
+    {
+      "root": "resource_routes_require_control_scope_and_frozen_instance_before_uds",
+      "cohort": "rust-array-authority-20261031T190342Z-681d7b",
+      "step": 3
+    }
+  ],
+  "evidence_rule": "five unchanged production/mechanical paths are exact same hashes; final positive HTTP test only uses final533e39; old successful test bytes not transferred",
+  "S_new_pass": 0,
+  "E_pass": 0,
+  "normal_or_original_Root_arrays_qualification": false,
+  "failure_history": [
+    "6ccc90 rustup sync before Cargo",
+    "ec6100 missing Python before Cargo",
+    "59ddba test-only unresolved sha2 import after API3+proxy1 passed; overall101"
+  ],
+  "unchanged_warnings": "existing remote_storage warnings preserved; no unrelated edits",
+  "checked_snapshot_files_excluding_GitHub_CI": 2316
+}

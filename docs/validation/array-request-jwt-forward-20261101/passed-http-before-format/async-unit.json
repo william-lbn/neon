@@ -1,0 +1,8 @@
+{
+  "unit": "neon-rust-array-auth-20261031t191056z-ecbf69",
+  "nonce": "20261031T191056Z-ecbf69",
+  "directory": "/data/neon-build/validation/rust-array-authority-20261031T191056Z-ecbf69",
+  "actual_RUN": "4CPU/8GiB/no extra swap",
+  "source_count": 2316,
+  "source_lock_sha256": "6296dc6594032b67dbe60c72c87985c6ddb7c2cea328a8fb935e72481a41772b"
+}

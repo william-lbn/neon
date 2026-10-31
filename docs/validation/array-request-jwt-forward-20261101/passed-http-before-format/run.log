@@ -1,0 +1,59 @@
+#0 building with "neon-data" instance using remote driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.49kB done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context:
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [internal] setting cache mount permissions
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 DONE 0.0s
+
+#6 [test 1/7] FROM 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020
+#6 resolve 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020
+#6 resolve 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020 0.2s done
+#6 DONE 0.2s
+
+#4 [internal] setting cache mount permissions
+#4 CACHED
+
+#5 [internal] load build context
+#5 transferring context: 34.40MB 0.3s done
+#5 DONE 0.4s
+
+#7 [test 2/7] RUN mkdir -p /workspace /out && chown -R 1000:1000 /workspace /out
+#7 CACHED
+
+#8 [test 3/7] WORKDIR /workspace
+#8 CACHED
+
+#9 [test 4/7] COPY --chown=1000:1000 source/ ./
+#9 DONE 1.1s
+
+#10 [test 5/7] COPY test-worker.sh /test-worker.sh
+#10 DONE 0.1s
+
+#11 [test 6/7] COPY test-commands.json /test-commands.json
+#11 DONE 0.1s
+
+#12 [test 7/7] RUN --network=none --mount=type=cache,id=neon-cargo-registry-amd64,target=/home/nonroot/.cargo/registry,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-cargo-git-amd64,target=/home/nonroot/.cargo/git,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-core-target-amd64,target=/home/nonroot/target,uid=1000,gid=1000,sharing=locked set -eu; test "$(cat /sys/fs/cgroup/memory.max)" = 8589934592; sha256sum -c cohort.sha256 > /out/source-check.txt; echo 0 > /out/source.rc; cp cohort.sha256 /out/actual-source.sha256; printf '%s\n' "20261031T191056Z-ecbf69" > /out/nonce.txt; cargo --version > /out/cargo-version.txt; rustc --version > /out/rustc-version.txt; set +e; /bin/bash /test-worker.sh > /out/driver.log 2>&1; echo $? > /out/test.rc
+#12 DONE 97.8s
+
+#13 [stage-1 1/1] COPY --from=test /out/ /
+#13 DONE 0.2s
+
+#14 exporting to client directory
+#14 copying files 389.80kB done
+#14 DONE 0.0s
+
+#15 resolving provenance for metadata file
+#15 DONE 0.0s

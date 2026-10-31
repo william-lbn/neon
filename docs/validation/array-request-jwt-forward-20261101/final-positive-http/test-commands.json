@@ -1,0 +1,15 @@
+[
+  [
+    "cargo",
+    "test",
+    "--locked",
+    "--offline",
+    "-p",
+    "compute_tools",
+    "--test",
+    "dsg_http",
+    "array_authority_routes_require_signed_body_and_separate_scope",
+    "--",
+    "--nocapture"
+  ]
+]

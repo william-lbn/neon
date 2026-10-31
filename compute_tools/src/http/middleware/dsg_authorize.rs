@@ -28,7 +28,12 @@ impl DsgAuthorize {
         Self { compute_id, jwks }
     }
 
-    fn verify(&self, token: &str, initialization: bool) -> Result<DsgHttpClaims> {
+    fn verify(
+        &self,
+        token: &str,
+        initialization: bool,
+        array_authority: bool,
+    ) -> Result<DsgHttpClaims> {
         ensure!(token.len() <= 8192, "oversized DSGA credential");
         let header = decode_header(token)?;
         let kid = header
@@ -51,6 +56,12 @@ impl DsgAuthorize {
             _ => anyhow::bail!("unsupported DSGA signing algorithm"),
         };
         ensure!(header.alg == algorithm, "DSGA signing algorithm mismatch");
+        if array_authority {
+            ensure!(
+                algorithm == Algorithm::EdDSA && header.typ.as_deref() == Some("JWT"),
+                "bound Root credential requires Ed25519 JWT"
+            );
+        }
         ensure!(
             key.common
                 .public_key_use
@@ -74,7 +85,11 @@ impl DsgAuthorize {
         validation.set_required_spec_claims(&["exp", "nbf", "aud"]);
         let claims =
             decode::<DsgHttpClaims>(token, &DecodingKey::from_jwk(key)?, &validation)?.claims;
-        if initialization && claims.scope == compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE {
+        if array_authority {
+            claims.validate_array_authority_for_compute(&self.compute_id)?;
+        } else if initialization
+            && claims.scope == compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE
+        {
             claims.validate_initialization_for_compute(&self.compute_id)?;
         } else {
             claims.validate_for_compute(&self.compute_id)?;
@@ -103,8 +118,10 @@ impl AsyncAuthorizeRequest<Body> for DsgAuthorize {
             // 创建只读token仅限唯一GET路径；不能通过POST/路径别名借到执行权。
             let initialization = request.method() == http::Method::GET
                 && request.uri().path() == "/dsg/v1/initialization";
+            let array_authority = request.method() == http::Method::POST
+                && compute_api::dsg_auth::is_array_authority_path(request.uri().path());
             let claims = policy
-                .verify(bearer.token(), initialization)
+                .verify(bearer.token(), initialization, array_authority)
                 .map_err(|_| deny())?;
             request.extensions_mut().insert(claims);
             Ok(request)

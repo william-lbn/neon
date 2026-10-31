@@ -129,6 +129,7 @@ async fn native_initialization_observes_original_boot_roles_and_loaded_policy() 
     let claims = compute_api::dsg_auth::DsgHttpClaims {
         aud: compute_api::dsg_auth::DSG_HTTP_AUDIENCE.into(),
         scope: compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE.into(),
+        request: None,
         compute_id: n.params.compute_id.clone(),
         vm_uid: cluster::VM.into(),
         compute_instance_id: cluster::COMPUTE.into(),
