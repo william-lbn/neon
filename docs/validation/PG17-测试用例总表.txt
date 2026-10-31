@@ -1,11 +1,11 @@
 PG17及后续内核：测试用例总表
-2026-10-31T00:24:12.649886+00:00
+2026-10-31T14:31:27.611371+00:00
 按每项实际源码快照归档，不是当前全部工作树或整体产品统一认证；原始失败与未执行保留
 首版安全normal降限；单机用于快速定位和回滚，最终117/118/119真实Helm K8s E2E；之后最新控制面以PG17后端补齐官方全部功能，PG18独立并行后联合回归
 
-已归档：PG17核心Go单元127根；原生PG单服务33根、原生binary单元5根；跨语言真实PG单服务1根；kernel/loader/wire独立组件3根；peer单服务1根、协议集成4根。
+已归档：PG17核心Go单元164根；原生PG单服务38根、原生binary单元6根；跨语言真实PG单服务1根；kernel/loader/wire独立组件3根；peer单服务1根、协议集成4根。
 Helm：12个单元门槛、4个配置/类型门槛；真实PG/Guest/VM/K8s E2E通过=0。
-各类计数不混算；kernel/loader/wire三个根为早期类别，新增逐项single-service-component另列，不把场景数与Go根混算。单元/配置通过不表示可封版。详细来源/命令/失败见各仓库收据。
+各类计数不混算；kernel/loader/wire三个根为早期类别，包含在下列独立组件统计中，不能重复相加；组件case ID不是Go根或PG单服务根。单元/配置通过不表示可封版。详细来源/命令/失败见各仓库收据。
 
 protocol-integration
 编号 | 结果 | 覆盖/用例 | 证据
@@ -137,6 +137,32 @@ PG17-U-FILTER-AUDIT-004 | PASS | TestNativeFilterAuditRejectsUnknownKernelOrPart
 PG17-U-QMP-GEOMETRY-001 | PASS | TestOriginalMemoryGeometryDecodesActualQEMUSchema | /data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json
 PG17-U-QMP-GEOMETRY-002 | PASS | TestOriginalMemoryGeometryRejectsIncompleteOrChangedSources | /data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json
 PG17-U-QMP-GEOMETRY-003 | PASS | TestOriginalMemoryGeometryUnixReadsOnlyAndBoundsFrames | /data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json
+PG17-U-TRACER-001 | PASS | PG17-U-TRACER-001 原始根组 | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/model-v6-result.json
+PG17-U-BIRTHSOURCE-001 | PASS | PG17-U-BIRTHSOURCE-001 原始根组 | /data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json
+PG17-U-BIRTHSTAGE-001 | PASS | PG17-U-BIRTHSTAGE-001 原始根组 | /data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json
+PG17-U-BIRTHSOURCE-ELF-001 | PASS | TestNativeBirthSourceELFDynamicMetadata | /data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json
+PG17-U-PRESYS-BOOTSTRAP-001 | PASS | TestBootstrapContinuesOnlyOriginalPreSystem | /data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json
+PG17-U-PRESYS-BOOTSTRAP-002 | PASS | TestBootstrapPreSystemRejectsUnboundAndChangedStage | /data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json
+PG17-U-PRESYS-BOOTSTRAP-003 | PASS | TestBootstrapPreSystemPendingKeepsOriginalReference | /data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json
+PG17-U-PRESYS-BOOTSTRAP-004 | PASS | TestBootstrapPreSystemCompletionNeverRepairsLostSources | /data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json
+PG17-U-PRESYS-V2-001 | PASS | TestPrebootstrapSystemProfileVersionsAndOriginalMarkers | /data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json
+PG17-U-PRESYS-V2-002 | PASS | TestPrebootstrapSystemSplitProfileSameOriginalRecovery | /data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json
+PG17-U-PRESYS-V2-003 | PASS | TestPrebootstrapSystemCompletedPGRequiresAppliedOriginalBootstrap | /data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json
+PG17-U-PRESYS-V2-004 | PASS | TestPrebootstrapSystemKernelAdaptersKeepEarlyCensusAndRecursiveEmpty | /data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json
+NEON-U-MMAX-001 | PASS | TestGuestMaximumIOMemResource | /data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json
+NEON-U-MMAX-002 | PASS | TestGuestMaximumObservationValidation | /data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json
+NEON-U-MMAX-003 | PASS | TestGuestMaximumObservationMatch | /data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json
+NEON-U-MMAX-004 | PASS | TestGuestMaximumGeometryComparison | /data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json
+NEON-U-MMAX-005 | PASS | TestGuestMaximumCanonicalDevice | /data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json
+PG17-U-RUNTIME-TEMPLATES-001 | PASS | TestRuntimePolicyTemplatesRenderFullPrefixWithoutUIDCycle | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
+PG17-U-RUNTIME-TEMPLATES-002 | PASS | TestRuntimePolicyTemplatesTypedPolicyRejectsUnsupportedOrOverBudget | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
+PG17-U-RUNTIME-TEMPLATES-003 | PASS | TestRuntimePolicyTemplatesV1ExactBytesAndFieldPresence | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
+PG17-U-RUNTIME-TEMPLATES-004 | PASS | TestRuntimePolicyTemplatesStrictEnvelopeAndDependencies | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
+PG17-U-RUNTIME-TEMPLATES-005 | PASS | TestRuntimePolicyTemplatesDocumentRejectsRawDriftAndUnknownFields | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
+PG17-U-RUNTIME-TEMPLATES-006 | PASS | TestRuntimeTemplatesProducerOriginalUIDNoCycleAndAssets | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
+PG17-U-RUNTIME-TEMPLATES-007 | PASS | TestRuntimeTemplatesProducerRejectsUntrustedOrPartialInputs | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
+PG17-U-RUNTIME-TEMPLATES-008 | PASS | TestRuntimeTemplatesDecodeBindsReadyIdentityAndBounds | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
+PG17-U-RUNTIME-TEMPLATES-009 | PASS | TestRuntimeTemplatesV1ProducerRemainsByteCompatible | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json
 
 single-service
 编号 | 结果 | 覆盖/用例 | 证据
@@ -175,6 +201,11 @@ PG17-S-ROOTWIRE-003 | PASS | __main__.RootBirth.test_PG17_S_ROOTWIRE_003_same_ui
 PG17-S-ROOTWIRE-004 | PASS | __main__.RootBirth.test_PG17_S_ROOTWIRE_004_wrong_tracer_tgid_and_tracer_death | /data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json
 PG17-S-ROOTWIRE-005 | PASS | __main__.RootBirth.test_PG17_S_ROOTWIRE_005_actual_ack_timeout | /data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json
 PG17-S-ROOTWIRE-006 | PASS | __main__.RootBirth.test_PG17_S_ROOTWIRE_006_actual_buffer_M_N0_mismatch | /data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json
+PG17-S-FILTER-001 | PASS | test_filter.Filter.test_PG17_S_FILTER_001_actual_syscall_boundaries_and_threads | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json
+PG17-S-FILTER-002 | PASS | test_filter.Filter.test_PG17_S_FILTER_002_real_logger_and_internal_recovery | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json
+PG17-S-FILTER-003 | PASS | test_filter.Filter.test_PG17_S_FILTER_003_actual_extension_acl_and_definer | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json
+PG17-S-FILTER-004 | PASS | test_filter.Filter.test_PG17_S_FILTER_004_ready_edge_failures_reaped | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json
+PG17-S-MIGFILTER-001 | PASS | test_PG17_S_MIGFILTER_001_actual_native_child_denies_migration_and_import | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-result.json
 
 single-service-component
 编号 | 结果 | 覆盖/用例 | 证据
@@ -201,6 +232,22 @@ PG17-S-KERNELPREP-POSITIVE | PASS | 369真实ISO/ext4首次原内核准备 | /da
 PG17-S-KERNELPREP-REPLAY | PASS | 369真实写后错误与同意图重放 | /data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/native
 PG17-S-KERNELPREP-MODULES | PASS | 369无原intent但已禁模块拒绝 | /data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/native
 PG17-S-KERNELPREP-MOVABLE | PASS | 369初期已含Movable拒绝 | /data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/native
+PG17-S-TRACER-001 | PASS | TestNativeBirthTracerKernelSession | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json
+PG17-S-TRACER-002 | PASS | TestNativeBirthTracerKernelThreadRetirement | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json
+PG17-S-TRACER-003 | PASS | TestNativeBirthTracerKernelPidfdReaper | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json
+PG17-S-PRESYS-V2-COMPLETED-ROLES | PASS | completed-roles | /data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json
+PG17-S-PRESYS-V2-INITIAL-PRIVATE-ROLE | PASS | initial-private-role | /data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json
+PG17-S-PRESYS-V2-OVERCOMMIT-CORRECTIVE | PASS | overcommit-corrective | /data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json
+NEON-S-MMAX-001 | PASS | TestNativeGuestMemoryMaximumComponent | /data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/native/result.json
+PG17-S-CGROUP-ARRAYS-001 | PASS | 真实shmem首次触页/洞fault分别收费arrays/private | /data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json
+PG17-S-CGROUP-ARRAYS-002 | PASS | 真实pipe保活folio跨punch后收费保留直至释放 | /data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json
+PG17-S-MAPFILES-001 | PASS | actual nonroot child NNP1/caps0/AS; four exact shared PROT_NONE VMAs; Root independent maps, real O_RDWR magic FD, fstat/fstatfs and populate | /data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json
+PG17-S-MAPFILES-002 | PASS | private anonymous and wrong-span kernel lookup ENOENT; exact registry generation guard | /data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json
+PG17-S-MAPFILES-003 | PASS | Root prepopulates before child first normal mprotect/write; Root verifies all bytes via the same inode | /data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json
+PG17-S-MAPFILES-004 | PASS | real same-VA Rearm gives new inode; held old FD rejected for new mapping, old data remains live, explicit Root munmap/close | /data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json
+PG17-S-MAPFILES-005 | PASS | new generation independently opened/populated; exact all-byte visibility | /data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json
+PG17-S-MAPFILES-006 | PASS | exact child wait/reap then original exited pidfd rejected; numeric PID reuse was not forced | /data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json
+NEON-S-INFLIGHT-001 | PASS | 准确369实际31-folio uncharge→retire窗口断点 | /data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/native-retire/result.json
 
 unit-native
 编号 | 结果 | 覆盖/用例 | 证据
@@ -209,6 +256,7 @@ PG17-U-BIRTH-002 | PASS | test_dsg_early_arrays.EarlyArrays.test_PG17_U_BIRTH_00
 PG17-U-ROOTWIRE-001 | PASS | __main__.RootBirth.test_PG17_U_ROOTWIRE_001_audit_exact_root_geometry | /data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json
 PG17-U-ROOTWIRE-002 | PASS | __main__.RootBirth.test_PG17_U_ROOTWIRE_002_invalid_original_fields_and_198 | /data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json
 PG17-U-ROOTWIRE-003 | PASS | __main__.RootBirth.test_PG17_U_ROOTWIRE_003_ack_frames_ancillary_and_peer | /data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json
+PG17-U-FILTER-001 | PASS | test_filter.Filter.test_PG17_U_FILTER_001_explicit_mode_and_missing_r_fail | /data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json
 
 build-component
 编号 | 结果 | 覆盖/用例 | 证据
@@ -216,7 +264,7 @@ PG17-B-PERM-001 | PASS_BUILD_LAYER_COMPONENT_ONLY | 正式Dockerfile v17条件�
 
 platform-retest
 编号 | 结果 | 覆盖/用例 | 证据
-PG17-S-WIRE-001@kernel-6.12.26 | RETEST_PENDING | 旧KVM失败保留；仅fixture同步已修/Host PASS，待新准确Guest结果 | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-01/result.json
+PG17-S-WIRE-001@kernel-6.12.26 | PASS_COMPONENT_ONLY | 原S-WIRE-001准确KVM复测PASS；旧attempt01失败保留，coverageDelta0 | /data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-02/result.json
 
 unit-gate
 编号 | 结果 | 覆盖/用例 | 证据
@@ -243,6 +291,7 @@ PG17-S-H06 | PASS | 真实 Linux/Go1.24 Agent.ReadConfig 与 Host Config.Validat
 environment
 编号 | 结果 | 覆盖/用例 | 证据
 PG17-ENV-H01 | PASS | 只预取准确模块，不运行测试 | artifacts/pg17-dsga-cache/20261030T133051.735805Z
+PG17-ENV-RUNTIME-TEMPLATES-001 | PASS_COMPILE_ONLY | Linux上Darwin/amd64交叉编译；不计U/S，未在Mac运行 | /data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/platform-darwin-final/build.rc
 
 runtime-prerequisite
 编号 | 结果 | 覆盖/用例 | 证据
@@ -259,3 +308,12 @@ PG17-E-003 | NOT_RUN | 仅117/118/119的Helm真实部署与故障恢复完整回
 PG17-E-004 | NOT_RUN | PG17 K8s通过后，以PG17后端接入届时最新控制面并补齐全部官方功能的联合验收 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
 PG18-E-001 | NOT_RUN | 独立并行PG18内核适配及相同上层合同全量联合回归 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
 PG16-E-001 | NOT_RUN | 后续PG16独立内核适配与全量联合回归 | /data/neon-build/plan/PG17至PG18-最终实施计划.txt
+
+失败/曾通过但源码已替代的历史：见JSON failure_history_catalogs原路径与SHA，均未覆盖或删改。
+新增独立组件按稳定case ID登记：39项；其中Go/PG tracer原生组件3根跨Host/369只计一次。
+开发状态（不增加覆盖）：PG17-DEV-ARRAY-HELPER IN_PROGRESS_NOT_COVERAGE；helper S与完整normal链尚未闭。
+PG18独立模块档案（不混PG17计数；各阶段包含回归，不可直接累加）：
+/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-first-leaf-v1.json | ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE
+/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-arrays-core-v1.json | ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE
+/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-resize-core-v1.json | ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE
+/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-resize-failures-v1.json | ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE

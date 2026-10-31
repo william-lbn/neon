@@ -1,28 +1,42 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-10-31T00:24:12.649886+00:00",
+  "updated_utc": "2026-10-31T14:31:27.611371+00:00",
   "meaning": "按每项实际源码快照归档，不是当前全部工作树或整体产品统一认证；原始失败与未执行保留",
   "release_gate": "首版安全normal降限；单机用于快速定位和回滚，最终117/118/119真实Helm K8s E2E；之后最新控制面以PG17后端补齐官方全部功能，PG18独立并行后联合回归",
   "versions_at_index_capture": {
     "neon": {
-      "head": "31605707a4e4f20b5736ef371448cc321d6250ba",
+      "head": "debe936191b238916d4cd67da8b524126ab39918",
       "branch": "codex/dsga-neon-v3-20261019",
-      "worktree_status": []
+      "worktree_status": [
+        " M \"docs/validation/PG17-\\346\\265\\213\\350\\257\\225\\347\\224\\250\\344\\276\\213\\346\\200\\273\\350\\241\\250.json\"",
+        " M \"docs/validation/PG17-\\346\\265\\213\\350\\257\\225\\347\\224\\250\\344\\276\\213\\346\\200\\273\\350\\241\\250.txt\"",
+        " M docs/validation/pg17-validation-index-generator.py"
+      ]
     },
     "autoscaling": {
-      "head": "31a04d385750e24a268e9ceba31a89be6b858f93",
+      "head": "b1771c9c1f745b623aa6489d7bee8fc8c6517e26",
       "branch": "codex/dsga-autoscaling-20261019",
       "worktree_status": [
-        " M pkg/dsga/resourceguard/prebootstrap_system.go",
-        " M pkg/dsga/resourceguard/prebootstrap_system_linux.go",
-        " M pkg/dsga/resourceguard/prebootstrap_system_test.go",
+        " M neonvm-runner/cmd/disks.go",
+        " M neonvm-runner/cmd/main.go",
+        " M pkg/dsga/resourceguard/native_birth_tracer_linux.go",
+        " M pkg/dsga/resourceguard/native_birth_tracer_native_test.go",
+        "?? \"docs/PG17-home_node\\346\\213\\222\\347\\273\\235\\345\\220\\216Root-tracer\\347\\273\\204\\345\\220\\210\\345\\244\\215\\346\\265\\213-20261031.txt\"",
         "?? \"docs/PG17-normal\\351\\231\\215\\351\\231\\220\\345\\217\\227\\351\\231\\220profile-\\346\\235\\245\\346\\272\\220\\345\\220\\210\\345\\220\\214-20261030.md\"",
         "?? docs/plans/",
+        "?? docs/validation/normal-inflight-source-20261031/",
         "?? docs/validation/pg17-split-charge-kvm-component-20261031/",
-        "?? pkg/dsga/resourceguard/native_birth_tracer_linux.go",
-        "?? pkg/dsga/resourceguard/native_birth_tracer_linux_test.go",
-        "?? pkg/dsga/resourceguard/native_birth_tracer_native_test.go",
-        "?? pkg/dsga/resourceguard/prebootstrap_system_native_test.go"
+        "?? docs/validation/pg17-tracer-home-node-deny-20261031/",
+        "?? native/",
+        "?? neonvm-runner/cmd/dsga_runtime_assets.go",
+        "?? neonvm-runner/cmd/dsga_runtime_assets_test.go",
+        "?? pkg/dsga/resourceguard/native_array_populate.go",
+        "?? pkg/dsga/resourceguard/native_array_populate_elf_linux.go",
+        "?? pkg/dsga/resourceguard/native_array_populate_linux.go",
+        "?? pkg/dsga/resourceguard/native_array_populate_test.go",
+        "?? pkg/dsga/resourceguard/native_trace_target_linux.go",
+        "?? pkg/dsga/resourceguard/native_trace_target_linux_test.go",
+        "?? pkg/dsga/resourceguard/native_trace_target_native_test.go"
       ]
     },
     "neon-helm": {
@@ -36,20 +50,9 @@
       "worktree_status": []
     },
     "postgres-v18": {
-      "head": "ca6d4765233be2af79eeeba3499c76ab95c0e603",
+      "head": "15cacfb3fe1efbb54ae65ac5454f0f61c2161c6e",
       "branch": "codex/dsga-pg18-v1-20261031",
-      "worktree_status": [
-        " M src/backend/postmaster/launch_backend.c",
-        " M src/backend/storage/buffer/Makefile",
-        " M src/backend/storage/buffer/buf_init.c",
-        " M src/backend/storage/buffer/bufmgr.c",
-        " M src/backend/storage/buffer/meson.build",
-        " M src/test/modules/test_dsg_region18/test_dsg_region18--1.0.sql",
-        " M src/test/modules/test_dsg_region18/test_dsg_region18.c",
-        "?? src/backend/storage/buffer/dsg_buffer_arrays.c",
-        "?? src/include/storage/dsg_buffer_arrays.h",
-        "?? src/test/modules/test_dsg_region18/t/test_arrays18.py"
-      ]
+      "worktree_status": []
     }
   },
   "evidence_files": [
@@ -152,6 +155,254 @@
     {
       "path": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "sha256": "ff9c7b718c314035615e4c045ca058b62d8616299929ee45795b4bcd2ae14a74"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-02/result.json",
+      "sha256": "bd5562c93afe69c054a89b5f247fbcd8b3de1a11a865e50a9e045db59362c1d2"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-02/source-proof.json",
+      "sha256": "01c5179434ce05fe41d52f56cb41f530758955fd5ab8fb487c83b26bd69fdf32"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-01/result.json",
+      "sha256": "a17615d8888eb9d46fe8c6f7d73ee48564b67cc748a850199792f333652b0923"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+      "sha256": "51757cdecb8cdaa2cbf5682639f600f964d9b5e85adbb06f34824f1cafd89332"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/model-v6-result.json",
+      "sha256": "84cddfaae8972499d0d1357812c29fce77173b300c15457dae67322d444f81e9"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/model/model-test.jsonl",
+      "sha256": "12f38fb73c84d08fadf616a6ca77de88d89f24745960c82d16c175b5acd1eddb"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/cohort-410bcc-lock-v6.json",
+      "sha256": "5f2738f61ff4db208d6f2fbf774f790cc70396c123ef2206d2577adba8c0afc5"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/host/result.json",
+      "sha256": "21fc42d5a33372f4c43890235a05ca96f62fbc80e19d89ff15dd500956ed5382"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/guest-369/result.json",
+      "sha256": "43a54425a11bdfd9d170286b02bed9b7cff6dd4df6399bf756fa1b51e7641f2a"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/native-binary-source-proof-v6.json",
+      "sha256": "edd377a72571683e56f307850b0132a6fd03db84eac9bff92be62ad41c34790a"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/historical-attempts.json",
+      "sha256": "7fad7db7566ed4dc2cdadf5867804200b09a4b2637af14e286f084b77dae2fdf"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/acceptance.json",
+      "sha256": "fdfcff52d4083f877a91ac28c4e6cb2f3912d33720b350b56b4b70f8ed6b61da"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/source-combination.json",
+      "sha256": "42185f00af4e3bfb90dd6f61e6e8c047495530604648c8f7ea5152df75fea76b"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/actual-pg-elf-proof.json",
+      "sha256": "a4ea07fd90359302de48dafde91216e716592840dd8a50b6aa506ad65a9c6392"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/guest-369-attempt-03/result.json",
+      "sha256": "4b9b5b896b5691a46d73713f0df86aa051d98e5fdd19ddf754c295817780e1e8"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/acceptance.json",
+      "sha256": "0f9de1c53d99497f4aca4a5140c8046f4dffa97940d88c458c0dbfc6ac707ac3"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+      "sha256": "ab67d8252b1de40cea2f3181b96801e544bf7ad45478ca8747816d86d0f01dec"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/actual-copy-and-tests/model-test.jsonl",
+      "sha256": "64a9f49e2a99621ca8433f27b40772033139814aab66cd8a827fe1c20e513db5"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/source-lock.json",
+      "sha256": "84447a33be2c94dde28a60bdaddee016db4eb6110cba4541d4fd45b5e7e01407"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+      "sha256": "c8428a77b36b9ebc2157d3177f4e9860d4867f85aba834611d89311ca8cc0f74"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/unit/unit.json",
+      "sha256": "c897fa163cebe12f0a0f22220185411ae16aef66df128bc2ac608852024ee96e"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/source-proof.json",
+      "sha256": "a3d785c80604acb60e16b37655b7b93dcd6a38a21b6704826e793f771f029efd"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+      "sha256": "14052e809b33f238ec4f6723030c35f7377e74b1da9d063a76d662f1647f46e2"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/unit.json",
+      "sha256": "cc01d849ff2345402e30c1050cd1a478723003f253028c84508ed23dca6e5fdf"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+      "sha256": "f9ed096afd1a386d6d9b6cdb64c737b43474e47d70823dedddaea0ebdc516a29"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/source-lock.json",
+      "sha256": "bd2c2bce5fa2aaaabea0fac872a4645ea08b02b0dc23f648aab8ad80f6460379"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/failure-references.json",
+      "sha256": "59c6b67d10e3bf1d150fccf056c7fd5742077f58a689e77f8bbdb7d23a9efdca"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+      "sha256": "f9cffdd0aa3f63b88bff37dcee7b6bbd1de28103490e6e6a6920f13136eddbc9"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/source-proof.json",
+      "sha256": "e3cdf2c1097b3baad7e74203d873f37453e6c7735ab8a4a44bbbe19c76679f77"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/go/unit.json",
+      "sha256": "99cc3986747e1880b6f95dbc1bd36758c79850ddc98ab6ece9a5387b6b2f2ac5"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/native/result.json",
+      "sha256": "21fe20a594855b06b56b03a12cdcfbe9a564530f8583e7b6ab3c51855817f2c3"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/native/source-lock.json",
+      "sha256": "8ffaf545260f117572f7ec6cfdd58d0d0f60a633ae79d49d34d020dc6957cf9b"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+      "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+      "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+      "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+      "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/platform-darwin-final/build.rc",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/Dockerfile-platform-final",
+      "sha256": "7f5dd2c8beb4a1c77e2dad1b8905c8189209d600717726379da866a5bac4cfda"
+    },
+    {
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+      "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+    },
+    {
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+      "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+    },
+    {
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+      "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+    },
+    {
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+      "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+    },
+    {
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-result.json",
+      "sha256": "3251353f14e1a96b943ac6009cb013e2c256afdbaa25cfee5d2947d4e3f0eff0"
+    },
+    {
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-observations.json",
+      "sha256": "e9faa14453c22aea99319c7e507bb16de2c0378ef837c88ed0e125ee58ccbad8"
+    },
+    {
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-runner.py",
+      "sha256": "e0e535c049b94d3343af7989ccbfc534bca0dc14391584c0ab2588c0b9ba834a"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json",
+      "sha256": "464eed7ec4350638b4f7129d874075ac81adcae33801115d57165473280628bd"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/source-and-kernel-lock.json",
+      "sha256": "8450caa407faabbd13c6363cc72157fb09ae85b42d9371dfd4a3955509ad31d4"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/actual-facts.json",
+      "sha256": "f9d2047b01f3be0172ea25fe4ee8281993d59fb1a86822b174dc95f940e66b22"
+    },
+    {
+      "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+      "sha256": "914d71cc5147925f96f27a35bb89045f7324262f66e6dfc3f7023b35f07999d6"
+    },
+    {
+      "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/source-lock.json",
+      "sha256": "fa8c6a5e23bfade9c5d02e34820d62a7b4f46697b164ad2283492d97f1b53075"
+    },
+    {
+      "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/result.json",
+      "sha256": "b19e36a98e9640941e46e4f53882abc7832bdf99f7c33843a2a6f67404147b5e"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/native-retire/result.json",
+      "sha256": "653674e28ef6999f91ff69db18e0893c56a427ffc08f070483544e87020d582b"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/source-lock.json",
+      "sha256": "90a71cace6a8fb8547cab23493a3afefa4fc1d6942b0724ddfb5d7077615ca65"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/conditional-equations.json",
+      "sha256": "4549862cfbada8e299b7ddf55a488a318571806daf58f156e0e2419663425cdd"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/first-fixture-failure/result.json",
+      "sha256": "565b03588fdc8709ff09e61633eb0e916e7783e5db2b9aa74cb7e217f17d9b6e"
+    },
+    {
+      "path": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/catalog-final.json",
+      "sha256": "6e153c3ecb4b3bb6e9e2632b060e0c15d15e65c375025b1e8325b93ba298b0ad"
+    },
+    {
+      "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/failures/native-evaluator-reevaluation.json",
+      "sha256": "12a084f066d65f41fac0ec9dd874baf0355144f89e7026a8a56e850d5f694253"
+    },
+    {
+      "path": "/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-first-leaf-v1.json",
+      "sha256": "e45aca05e4d331538b48f03b042f1936475d51296b708a196ee7189accee34df"
+    },
+    {
+      "path": "/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-arrays-core-v1.json",
+      "sha256": "3026a67e508f5ee82a566051b2a5329e5d4d39b2dd7960f9e0c96c30186ca1a7"
+    },
+    {
+      "path": "/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-resize-core-v1.json",
+      "sha256": "8d9639dfe47bf5c16b88a61f6d278a75512766dcd772d7290f80e1b5068303e6"
+    },
+    {
+      "path": "/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-resize-failures-v1.json",
+      "sha256": "b19e8b6b28983263456537c0d15bcab0dd9f0c0af64795c67e44092d23e57984"
     }
   ],
   "cases": [
@@ -1198,7 +1449,30 @@
       "description": "TestNativeBirthWireKernelPeerAndMalformedFrames",
       "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-linux-20261031/summary.json",
       "root_count": 1,
-      "scope": "独立wire组件；无生产listener/maps/filter/入组/normal许可"
+      "scope": "独立wire组件；无生产listener/maps/filter/入组/normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-02/result.json",
+          "scope": "同wire原根准确0ab KVM复测；只新增环境证据，旧失败保留，无PG/normal许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-02/result.json",
+              "sha256": "bd5562c93afe69c054a89b5f247fbcd8b3de1a11a865e50a9e045db59362c1d2"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-02/source-proof.json",
+              "sha256": "01c5179434ce05fe41d52f56cb41f530758955fd5ab8fb487c83b26bd69fdf32"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-01/result.json",
+              "sha256": "a17615d8888eb9d46fe8c6f7d73ee48564b67cc748a850199792f333652b0923"
+            }
+          ],
+          "platforms": [
+            "ACCURATE_0AB_KVM"
+          ]
+        }
+      ]
     },
     {
       "id": "PG17-U-P2-007",
@@ -1243,7 +1517,28 @@
       "description": "test_dsg_early_arrays.EarlyArrays.test_PG17_U_BIRTH_001_explicit_invalid_modes_and_original_as",
       "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json",
       "root_count": 1,
-      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可"
+      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-U-BIRTH-002",
@@ -1252,7 +1547,28 @@
       "description": "test_dsg_early_arrays.EarlyArrays.test_PG17_U_BIRTH_002_no_nnp_cannot_enable",
       "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json",
       "root_count": 1,
-      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可"
+      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-BIRTH-001",
@@ -1261,7 +1577,28 @@
       "description": "test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_001_default_disabled_real_pg",
       "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json",
       "root_count": 1,
-      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可"
+      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-BIRTH-002",
@@ -1270,7 +1607,28 @@
       "description": "test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_002_configuration_cannot_drift",
       "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json",
       "root_count": 1,
-      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可"
+      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-BIRTH-003",
@@ -1279,7 +1637,28 @@
       "description": "test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_003_real_logger_and_recovery_keep_r",
       "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json",
       "root_count": 1,
-      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可"
+      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-BIRTH-004",
@@ -1288,7 +1667,28 @@
       "description": "test_dsg_early_arrays.EarlyArrays.test_PG17_S_BIRTH_004_extension_and_native_acl",
       "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/early-birth-linux-20261031/ci-definer-result.json",
       "root_count": 1,
-      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可"
+      "scope": "真实原生PG test-v1；未绑定Root；非完整normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-BIRTH-REG-001",
@@ -1337,9 +1737,9 @@
     {
       "id": "PG17-S-WIRE-001@kernel-6.12.26",
       "layer": "platform-retest",
-      "status": "RETEST_PENDING",
-      "description": "旧KVM失败保留；仅fixture同步已修/Host PASS，待新准确Guest结果",
-      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-01/result.json",
+      "status": "PASS_COMPONENT_ONLY",
+      "description": "原S-WIRE-001准确KVM复测PASS；旧attempt01失败保留，coverageDelta0",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-02/result.json",
       "root_count": null
     },
     {
@@ -2061,7 +2461,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-ROOTWIRE-002",
@@ -2071,7 +2492,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-ROOTWIRE-003",
@@ -2081,7 +2523,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-ROOTWIRE-004",
@@ -2091,7 +2554,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-ROOTWIRE-005",
@@ -2101,7 +2585,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-ROOTWIRE-006",
@@ -2111,7 +2616,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-U-ROOTWIRE-001",
@@ -2121,7 +2647,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-U-ROOTWIRE-002",
@@ -2131,7 +2678,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-U-ROOTWIRE-003",
@@ -2141,7 +2709,28 @@
       "evidence": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/attempt-03/test-result.json",
       "root_count": 1,
       "scope": "真实PG Root停点/过滤器；Host6.8隔离root夹具，不是369Guest/生产WAL/normal/K8s",
-      "family": "native-pg-root-component"
+      "family": "native-pg-root-component",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/root9-result.json",
+              "sha256": "8e0878a3a9a0385fb72902176b227b1af9745fad1b05441c61ff5f3b1d573f01"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ]
     },
     {
       "id": "PG17-S-PHYSBUILD-3B",
@@ -2196,12 +2785,2629 @@
       "evidence": "/data/neon-build/src/autoscaling/docs/validation/kernel-bootstrap-20261031/native",
       "root_count": 1,
       "scope": "真实独立KVM组件，未生产接线/PG/normal资格"
+    },
+    {
+      "id": "PG17-U-TRACER-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "PG17-U-TRACER-001 原始根组",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/model-v6-result.json",
+      "root_count": 6,
+      "root_names": [
+        "TestNativeBirthTracerModelCancellationWaitsForCleanup",
+        "TestNativeBirthTracerModelFaultsCannotReleaseOrKillReusedTarget",
+        "TestNativeBirthTracerModelPidfdWaitDecodeAndReaperReuse",
+        "TestNativeBirthTracerModelStrictStatusAndReservationMaps",
+        "TestNativeBirthTracerModelSuccessOrdering",
+        "TestNativeBirthTracerModelTentativeDAndSETOPTIONSBoundary"
+      ],
+      "scope": "模型ptrace/身份/取消/清理/复用U；不称真实内核",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/model-v6-result.json",
+          "scope": "模型ptrace/身份/取消/清理/复用U；不称真实内核",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/model-v6-result.json",
+              "sha256": "84cddfaae8972499d0d1357812c29fce77173b300c15457dae67322d444f81e9"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+              "sha256": "51757cdecb8cdaa2cbf5682639f600f964d9b5e85adbb06f34824f1cafd89332"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/cohort-410bcc-lock-v6.json",
+              "sha256": "5f2738f61ff4db208d6f2fbf774f790cc70396c123ef2206d2577adba8c0afc5"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/model/model-test.jsonl",
+              "sha256": "12f38fb73c84d08fadf616a6ca77de88d89f24745960c82d16c175b5acd1eddb"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-S-TRACER-001",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "TestNativeBirthTracerKernelSession",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+      "root_count": 1,
+      "root_names": [
+        "TestNativeBirthTracerKernelSession"
+      ],
+      "scope": "真实Go+PG ptrace组件；Source/WAL为夹具，不是生产出生/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+          "scope": "真实Go+PG ptrace组件；Source/WAL为夹具，不是生产出生/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+              "sha256": "51757cdecb8cdaa2cbf5682639f600f964d9b5e85adbb06f34824f1cafd89332"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/native-binary-source-proof-v6.json",
+              "sha256": "edd377a72571683e56f307850b0132a6fd03db84eac9bff92be62ad41c34790a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/host/result.json",
+              "sha256": "21fc42d5a33372f4c43890235a05ca96f62fbc80e19d89ff15dd500956ed5382"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/guest-369/result.json",
+              "sha256": "43a54425a11bdfd9d170286b02bed9b7cff6dd4df6399bf756fa1b51e7641f2a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/historical-attempts.json",
+              "sha256": "7fad7db7566ed4dc2cdadf5867804200b09a4b2637af14e286f084b77dae2fdf"
+            }
+          ],
+          "platforms": [
+            "HOST_DOCKER",
+            "ACCURATE369_KVM"
+          ],
+          "family": "go-pg-tracer-component"
+        },
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/acceptance.json",
+          "scope": "同三根用PG627新home_node BPF重验；不是新增根",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/acceptance.json",
+              "sha256": "fdfcff52d4083f877a91ac28c4e6cb2f3912d33720b350b56b4b70f8ed6b61da"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/source-combination.json",
+              "sha256": "42185f00af4e3bfb90dd6f61e6e8c047495530604648c8f7ea5152df75fea76b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/actual-pg-elf-proof.json",
+              "sha256": "a4ea07fd90359302de48dafde91216e716592840dd8a50b6aa506ad65a9c6392"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/guest-369-attempt-03/result.json",
+              "sha256": "4b9b5b896b5691a46d73713f0df86aa051d98e5fdd19ddf754c295817780e1e8"
+            }
+          ],
+          "platforms": [
+            "HOST_DOCKER",
+            "ACCURATE369_KVM"
+          ],
+          "coverage_delta": 0
+        }
+      ],
+      "platforms": [
+        "HOST_DOCKER",
+        "ACCURATE369_KVM"
+      ],
+      "family": "go-pg-tracer-component"
+    },
+    {
+      "id": "PG17-S-TRACER-002",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "TestNativeBirthTracerKernelThreadRetirement",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+      "root_count": 1,
+      "root_names": [
+        "TestNativeBirthTracerKernelThreadRetirement"
+      ],
+      "scope": "真实Go+PG ptrace组件；Source/WAL为夹具，不是生产出生/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+          "scope": "真实Go+PG ptrace组件；Source/WAL为夹具，不是生产出生/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+              "sha256": "51757cdecb8cdaa2cbf5682639f600f964d9b5e85adbb06f34824f1cafd89332"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/native-binary-source-proof-v6.json",
+              "sha256": "edd377a72571683e56f307850b0132a6fd03db84eac9bff92be62ad41c34790a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/host/result.json",
+              "sha256": "21fc42d5a33372f4c43890235a05ca96f62fbc80e19d89ff15dd500956ed5382"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/guest-369/result.json",
+              "sha256": "43a54425a11bdfd9d170286b02bed9b7cff6dd4df6399bf756fa1b51e7641f2a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/historical-attempts.json",
+              "sha256": "7fad7db7566ed4dc2cdadf5867804200b09a4b2637af14e286f084b77dae2fdf"
+            }
+          ],
+          "platforms": [
+            "HOST_DOCKER",
+            "ACCURATE369_KVM"
+          ],
+          "family": "go-pg-tracer-component"
+        },
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/acceptance.json",
+          "scope": "同三根用PG627新home_node BPF重验；不是新增根",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/acceptance.json",
+              "sha256": "fdfcff52d4083f877a91ac28c4e6cb2f3912d33720b350b56b4b70f8ed6b61da"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/source-combination.json",
+              "sha256": "42185f00af4e3bfb90dd6f61e6e8c047495530604648c8f7ea5152df75fea76b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/actual-pg-elf-proof.json",
+              "sha256": "a4ea07fd90359302de48dafde91216e716592840dd8a50b6aa506ad65a9c6392"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/guest-369-attempt-03/result.json",
+              "sha256": "4b9b5b896b5691a46d73713f0df86aa051d98e5fdd19ddf754c295817780e1e8"
+            }
+          ],
+          "platforms": [
+            "HOST_DOCKER",
+            "ACCURATE369_KVM"
+          ],
+          "coverage_delta": 0
+        }
+      ],
+      "platforms": [
+        "HOST_DOCKER",
+        "ACCURATE369_KVM"
+      ],
+      "family": "go-pg-tracer-component"
+    },
+    {
+      "id": "PG17-S-TRACER-003",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "TestNativeBirthTracerKernelPidfdReaper",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+      "root_count": 1,
+      "root_names": [
+        "TestNativeBirthTracerKernelPidfdReaper"
+      ],
+      "scope": "真实Go+PG ptrace组件；Source/WAL为夹具，不是生产出生/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+          "scope": "真实Go+PG ptrace组件；Source/WAL为夹具，不是生产出生/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/acceptance.json",
+              "sha256": "51757cdecb8cdaa2cbf5682639f600f964d9b5e85adbb06f34824f1cafd89332"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/native-binary-source-proof-v6.json",
+              "sha256": "edd377a72571683e56f307850b0132a6fd03db84eac9bff92be62ad41c34790a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/host/result.json",
+              "sha256": "21fc42d5a33372f4c43890235a05ca96f62fbc80e19d89ff15dd500956ed5382"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/guest-369/result.json",
+              "sha256": "43a54425a11bdfd9d170286b02bed9b7cff6dd4df6399bf756fa1b51e7641f2a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/historical-attempts.json",
+              "sha256": "7fad7db7566ed4dc2cdadf5867804200b09a4b2637af14e286f084b77dae2fdf"
+            }
+          ],
+          "platforms": [
+            "HOST_DOCKER",
+            "ACCURATE369_KVM"
+          ],
+          "family": "go-pg-tracer-component"
+        },
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/acceptance.json",
+          "scope": "同三根用PG627新home_node BPF重验；不是新增根",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/acceptance.json",
+              "sha256": "fdfcff52d4083f877a91ac28c4e6cb2f3912d33720b350b56b4b70f8ed6b61da"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/source-combination.json",
+              "sha256": "42185f00af4e3bfb90dd6f61e6e8c047495530604648c8f7ea5152df75fea76b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/actual-pg-elf-proof.json",
+              "sha256": "a4ea07fd90359302de48dafde91216e716592840dd8a50b6aa506ad65a9c6392"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-tracer-home-node-deny-20261031/guest-369-attempt-03/result.json",
+              "sha256": "4b9b5b896b5691a46d73713f0df86aa051d98e5fdd19ddf754c295817780e1e8"
+            }
+          ],
+          "platforms": [
+            "HOST_DOCKER",
+            "ACCURATE369_KVM"
+          ],
+          "coverage_delta": 0
+        }
+      ],
+      "platforms": [
+        "HOST_DOCKER",
+        "ACCURATE369_KVM"
+      ],
+      "family": "go-pg-tracer-component"
+    },
+    {
+      "id": "PG17-U-BIRTHSOURCE-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "PG17-U-BIRTHSOURCE-001 原始根组",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+      "root_count": 4,
+      "root_names": [
+        "TestNativeBirthSourceExactBytesAndUnsupportedABI",
+        "TestNativeBirthSourceLinuxReaderRejectsUnqualifiedFiles",
+        "TestNativeBirthSourceManifestIsBoundedAndStrict",
+        "TestNativeBirthSourceNonceAndGeometryStrict"
+      ],
+      "scope": "原字节/ABI/nonce与真实flock/fsync，kernel/ISO/PG身份为模型；ELF仅元数据，无执行/生产RO闭包S",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+          "scope": "原字节/ABI/nonce与真实flock/fsync，kernel/ISO/PG身份为模型；ELF仅元数据，无执行/生产RO闭包S",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+              "sha256": "ab67d8252b1de40cea2f3181b96801e544bf7ad45478ca8747816d86d0f01dec"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/source-lock.json",
+              "sha256": "84447a33be2c94dde28a60bdaddee016db4eb6110cba4541d4fd45b5e7e01407"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/acceptance.json",
+              "sha256": "0f9de1c53d99497f4aca4a5140c8046f4dffa97940d88c458c0dbfc6ac707ac3"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/actual-copy-and-tests/model-test.jsonl",
+              "sha256": "64a9f49e2a99621ca8433f27b40772033139814aab66cd8a827fe1c20e513db5"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-BIRTHSTAGE-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "PG17-U-BIRTHSTAGE-001 原始根组",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+      "root_count": 4,
+      "root_names": [
+        "TestNativeBirthStageWALFailuresPoisonWriterNoReplay",
+        "TestNativeBirthStageWALOrderedAndNonAuthorizing",
+        "TestNativeBirthStageWALOriginalConsumerAndSource",
+        "TestNativeBirthStageWALRejectsOrphanPartialAndGap"
+      ],
+      "scope": "原字节/ABI/nonce与真实flock/fsync，kernel/ISO/PG身份为模型；ELF仅元数据，无执行/生产RO闭包S",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+          "scope": "原字节/ABI/nonce与真实flock/fsync，kernel/ISO/PG身份为模型；ELF仅元数据，无执行/生产RO闭包S",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+              "sha256": "ab67d8252b1de40cea2f3181b96801e544bf7ad45478ca8747816d86d0f01dec"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/source-lock.json",
+              "sha256": "84447a33be2c94dde28a60bdaddee016db4eb6110cba4541d4fd45b5e7e01407"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/acceptance.json",
+              "sha256": "0f9de1c53d99497f4aca4a5140c8046f4dffa97940d88c458c0dbfc6ac707ac3"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/actual-copy-and-tests/model-test.jsonl",
+              "sha256": "64a9f49e2a99621ca8433f27b40772033139814aab66cd8a827fe1c20e513db5"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-BIRTHSOURCE-ELF-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestNativeBirthSourceELFDynamicMetadata",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+      "root_count": 1,
+      "root_names": [
+        "TestNativeBirthSourceELFDynamicMetadata"
+      ],
+      "scope": "原字节/ABI/nonce与真实flock/fsync，kernel/ISO/PG身份为模型；ELF仅元数据，无执行/生产RO闭包S",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+          "scope": "原字节/ABI/nonce与真实flock/fsync，kernel/ISO/PG身份为模型；ELF仅元数据，无执行/生产RO闭包S",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/result.json",
+              "sha256": "ab67d8252b1de40cea2f3181b96801e544bf7ad45478ca8747816d86d0f01dec"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/source-lock.json",
+              "sha256": "84447a33be2c94dde28a60bdaddee016db4eb6110cba4541d4fd45b5e7e01407"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/acceptance.json",
+              "sha256": "0f9de1c53d99497f4aca4a5140c8046f4dffa97940d88c458c0dbfc6ac707ac3"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/actual-copy-and-tests/model-test.jsonl",
+              "sha256": "64a9f49e2a99621ca8433f27b40772033139814aab66cd8a827fe1c20e513db5"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-PRESYS-BOOTSTRAP-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestBootstrapContinuesOnlyOriginalPreSystem",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestBootstrapContinuesOnlyOriginalPreSystem"
+      ],
+      "scope": "PreSys→正式Bootstrap同原WAL引用；真实flock/fsync、模型内核；非normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+          "scope": "PreSys→正式Bootstrap同原WAL引用；真实flock/fsync、模型内核；非normal许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+              "sha256": "c8428a77b36b9ebc2157d3177f4e9860d4867f85aba834611d89311ca8cc0f74"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/source-proof.json",
+              "sha256": "a3d785c80604acb60e16b37655b7b93dcd6a38a21b6704826e793f771f029efd"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/unit/unit.json",
+              "sha256": "c897fa163cebe12f0a0f22220185411ae16aef66df128bc2ac608852024ee96e"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-PRESYS-BOOTSTRAP-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestBootstrapPreSystemRejectsUnboundAndChangedStage",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestBootstrapPreSystemRejectsUnboundAndChangedStage"
+      ],
+      "scope": "PreSys→正式Bootstrap同原WAL引用；真实flock/fsync、模型内核；非normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+          "scope": "PreSys→正式Bootstrap同原WAL引用；真实flock/fsync、模型内核；非normal许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+              "sha256": "c8428a77b36b9ebc2157d3177f4e9860d4867f85aba834611d89311ca8cc0f74"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/source-proof.json",
+              "sha256": "a3d785c80604acb60e16b37655b7b93dcd6a38a21b6704826e793f771f029efd"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/unit/unit.json",
+              "sha256": "c897fa163cebe12f0a0f22220185411ae16aef66df128bc2ac608852024ee96e"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-PRESYS-BOOTSTRAP-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestBootstrapPreSystemPendingKeepsOriginalReference",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestBootstrapPreSystemPendingKeepsOriginalReference"
+      ],
+      "scope": "PreSys→正式Bootstrap同原WAL引用；真实flock/fsync、模型内核；非normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+          "scope": "PreSys→正式Bootstrap同原WAL引用；真实flock/fsync、模型内核；非normal许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+              "sha256": "c8428a77b36b9ebc2157d3177f4e9860d4867f85aba834611d89311ca8cc0f74"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/source-proof.json",
+              "sha256": "a3d785c80604acb60e16b37655b7b93dcd6a38a21b6704826e793f771f029efd"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/unit/unit.json",
+              "sha256": "c897fa163cebe12f0a0f22220185411ae16aef66df128bc2ac608852024ee96e"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-PRESYS-BOOTSTRAP-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestBootstrapPreSystemCompletionNeverRepairsLostSources",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestBootstrapPreSystemCompletionNeverRepairsLostSources"
+      ],
+      "scope": "PreSys→正式Bootstrap同原WAL引用；真实flock/fsync、模型内核；非normal许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+          "scope": "PreSys→正式Bootstrap同原WAL引用；真实flock/fsync、模型内核；非normal许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+              "sha256": "c8428a77b36b9ebc2157d3177f4e9860d4867f85aba834611d89311ca8cc0f74"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/source-proof.json",
+              "sha256": "a3d785c80604acb60e16b37655b7b93dcd6a38a21b6704826e793f771f029efd"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/unit/unit.json",
+              "sha256": "c897fa163cebe12f0a0f22220185411ae16aef66df128bc2ac608852024ee96e"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-PRESYS-V2-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemProfileVersionsAndOriginalMarkers",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+      "root_count": 1,
+      "root_names": [
+        "TestPrebootstrapSystemProfileVersionsAndOriginalMarkers"
+      ],
+      "scope": "PreSys v1/v2版本、split递归空、历史/原来源；模型kernel与真实WAL",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+          "scope": "PreSys v1/v2版本、split递归空、历史/原来源；模型kernel与真实WAL",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+              "sha256": "14052e809b33f238ec4f6723030c35f7377e74b1da9d063a76d662f1647f46e2"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/unit.json",
+              "sha256": "cc01d849ff2345402e30c1050cd1a478723003f253028c84508ed23dca6e5fdf"
+            }
+          ],
+          "race": true,
+          "case_id_source": "中央固定根名映射首次分配；后续保持"
+        }
+      ],
+      "race": true,
+      "case_id_source": "中央固定根名映射首次分配；后续保持"
+    },
+    {
+      "id": "PG17-U-PRESYS-V2-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemSplitProfileSameOriginalRecovery",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+      "root_count": 1,
+      "root_names": [
+        "TestPrebootstrapSystemSplitProfileSameOriginalRecovery"
+      ],
+      "scope": "PreSys v1/v2版本、split递归空、历史/原来源；模型kernel与真实WAL",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+          "scope": "PreSys v1/v2版本、split递归空、历史/原来源；模型kernel与真实WAL",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+              "sha256": "14052e809b33f238ec4f6723030c35f7377e74b1da9d063a76d662f1647f46e2"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/unit.json",
+              "sha256": "cc01d849ff2345402e30c1050cd1a478723003f253028c84508ed23dca6e5fdf"
+            }
+          ],
+          "race": true,
+          "case_id_source": "中央固定根名映射首次分配；后续保持"
+        }
+      ],
+      "race": true,
+      "case_id_source": "中央固定根名映射首次分配；后续保持"
+    },
+    {
+      "id": "PG17-U-PRESYS-V2-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemCompletedPGRequiresAppliedOriginalBootstrap",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+      "root_count": 1,
+      "root_names": [
+        "TestPrebootstrapSystemCompletedPGRequiresAppliedOriginalBootstrap"
+      ],
+      "scope": "PreSys v1/v2版本、split递归空、历史/原来源；模型kernel与真实WAL",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+          "scope": "PreSys v1/v2版本、split递归空、历史/原来源；模型kernel与真实WAL",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+              "sha256": "14052e809b33f238ec4f6723030c35f7377e74b1da9d063a76d662f1647f46e2"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/unit.json",
+              "sha256": "cc01d849ff2345402e30c1050cd1a478723003f253028c84508ed23dca6e5fdf"
+            }
+          ],
+          "race": true,
+          "case_id_source": "中央固定根名映射首次分配；后续保持"
+        }
+      ],
+      "race": true,
+      "case_id_source": "中央固定根名映射首次分配；后续保持"
+    },
+    {
+      "id": "PG17-U-PRESYS-V2-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestPrebootstrapSystemKernelAdaptersKeepEarlyCensusAndRecursiveEmpty",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+      "root_count": 1,
+      "root_names": [
+        "TestPrebootstrapSystemKernelAdaptersKeepEarlyCensusAndRecursiveEmpty"
+      ],
+      "scope": "PreSys v1/v2版本、split递归空、历史/原来源；模型kernel与真实WAL",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+          "scope": "PreSys v1/v2版本、split递归空、历史/原来源；模型kernel与真实WAL",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+              "sha256": "14052e809b33f238ec4f6723030c35f7377e74b1da9d063a76d662f1647f46e2"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/unit.json",
+              "sha256": "cc01d849ff2345402e30c1050cd1a478723003f253028c84508ed23dca6e5fdf"
+            }
+          ],
+          "race": true,
+          "case_id_source": "中央固定根名映射首次分配；后续保持"
+        }
+      ],
+      "race": true,
+      "case_id_source": "中央固定根名映射首次分配；后续保持"
+    },
+    {
+      "id": "PG17-S-PRESYS-V2-COMPLETED-ROLES",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "completed-roles",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+      "root_count": 1,
+      "root_names": [
+        "completed-roles"
+      ],
+      "scope": "真实369内核/ISO/ext4、原Prepare→Origin→PreSys→Bootstrap API；角色为sleep夹具，无PG/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+          "scope": "真实369内核/ISO/ext4、原Prepare→Origin→PreSys→Bootstrap API；角色为sleep夹具，无PG/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+              "sha256": "f9ed096afd1a386d6d9b6cdb64c737b43474e47d70823dedddaea0ebdc516a29"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/source-lock.json",
+              "sha256": "bd2c2bce5fa2aaaabea0fac872a4645ea08b02b0dc23f648aab8ad80f6460379"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+              "sha256": "14052e809b33f238ec4f6723030c35f7377e74b1da9d063a76d662f1647f46e2"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/failure-references.json",
+              "sha256": "59c6b67d10e3bf1d150fccf056c7fd5742077f58a689e77f8bbdb7d23a9efdca"
+            }
+          ],
+          "platforms": [
+            "ACCURATE369_KVM"
+          ],
+          "case_id_source": "中央按原固定mode首次分配；后续保持"
+        }
+      ],
+      "platforms": [
+        "ACCURATE369_KVM"
+      ],
+      "case_id_source": "中央按原固定mode首次分配；后续保持"
+    },
+    {
+      "id": "PG17-S-PRESYS-V2-INITIAL-PRIVATE-ROLE",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "initial-private-role",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+      "root_count": 1,
+      "root_names": [
+        "initial-private-role"
+      ],
+      "scope": "真实369内核/ISO/ext4、原Prepare→Origin→PreSys→Bootstrap API；角色为sleep夹具，无PG/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+          "scope": "真实369内核/ISO/ext4、原Prepare→Origin→PreSys→Bootstrap API；角色为sleep夹具，无PG/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+              "sha256": "f9ed096afd1a386d6d9b6cdb64c737b43474e47d70823dedddaea0ebdc516a29"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/source-lock.json",
+              "sha256": "bd2c2bce5fa2aaaabea0fac872a4645ea08b02b0dc23f648aab8ad80f6460379"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+              "sha256": "14052e809b33f238ec4f6723030c35f7377e74b1da9d063a76d662f1647f46e2"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/failure-references.json",
+              "sha256": "59c6b67d10e3bf1d150fccf056c7fd5742077f58a689e77f8bbdb7d23a9efdca"
+            }
+          ],
+          "platforms": [
+            "ACCURATE369_KVM"
+          ],
+          "case_id_source": "中央按原固定mode首次分配；后续保持"
+        }
+      ],
+      "platforms": [
+        "ACCURATE369_KVM"
+      ],
+      "case_id_source": "中央按原固定mode首次分配；后续保持"
+    },
+    {
+      "id": "PG17-S-PRESYS-V2-OVERCOMMIT-CORRECTIVE",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "overcommit-corrective",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+      "root_count": 1,
+      "root_names": [
+        "overcommit-corrective"
+      ],
+      "scope": "真实369内核/ISO/ext4、原Prepare→Origin→PreSys→Bootstrap API；角色为sleep夹具，无PG/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+          "scope": "真实369内核/ISO/ext4、原Prepare→Origin→PreSys→Bootstrap API；角色为sleep夹具，无PG/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/result.json",
+              "sha256": "f9ed096afd1a386d6d9b6cdb64c737b43474e47d70823dedddaea0ebdc516a29"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/native/source-lock.json",
+              "sha256": "bd2c2bce5fa2aaaabea0fac872a4645ea08b02b0dc23f648aab8ad80f6460379"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/go/source-proof.json",
+              "sha256": "14052e809b33f238ec4f6723030c35f7377e74b1da9d063a76d662f1647f46e2"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/failure-references.json",
+              "sha256": "59c6b67d10e3bf1d150fccf056c7fd5742077f58a689e77f8bbdb7d23a9efdca"
+            }
+          ],
+          "platforms": [
+            "ACCURATE369_KVM"
+          ],
+          "case_id_source": "中央按原固定mode首次分配；后续保持"
+        }
+      ],
+      "platforms": [
+        "ACCURATE369_KVM"
+      ],
+      "case_id_source": "中央按原固定mode首次分配；后续保持"
+    },
+    {
+      "id": "NEON-U-MMAX-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestGuestMaximumIOMemResource",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestGuestMaximumIOMemResource"
+      ],
+      "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+          "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+              "sha256": "f9cffdd0aa3f63b88bff37dcee7b6bbd1de28103490e6e6a6920f13136eddbc9"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/source-proof.json",
+              "sha256": "e3cdf2c1097b3baad7e74203d873f37453e6c7735ab8a4a44bbbe19c76679f77"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/go/unit.json",
+              "sha256": "99cc3986747e1880b6f95dbc1bd36758c79850ddc98ab6ece9a5387b6b2f2ac5"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "NEON-U-MMAX-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestGuestMaximumObservationValidation",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestGuestMaximumObservationValidation"
+      ],
+      "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+          "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+              "sha256": "f9cffdd0aa3f63b88bff37dcee7b6bbd1de28103490e6e6a6920f13136eddbc9"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/source-proof.json",
+              "sha256": "e3cdf2c1097b3baad7e74203d873f37453e6c7735ab8a4a44bbbe19c76679f77"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/go/unit.json",
+              "sha256": "99cc3986747e1880b6f95dbc1bd36758c79850ddc98ab6ece9a5387b6b2f2ac5"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "NEON-U-MMAX-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestGuestMaximumObservationMatch",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestGuestMaximumObservationMatch"
+      ],
+      "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+          "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+              "sha256": "f9cffdd0aa3f63b88bff37dcee7b6bbd1de28103490e6e6a6920f13136eddbc9"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/source-proof.json",
+              "sha256": "e3cdf2c1097b3baad7e74203d873f37453e6c7735ab8a4a44bbbe19c76679f77"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/go/unit.json",
+              "sha256": "99cc3986747e1880b6f95dbc1bd36758c79850ddc98ab6ece9a5387b6b2f2ac5"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "NEON-U-MMAX-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestGuestMaximumGeometryComparison",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestGuestMaximumGeometryComparison"
+      ],
+      "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+          "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+              "sha256": "f9cffdd0aa3f63b88bff37dcee7b6bbd1de28103490e6e6a6920f13136eddbc9"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/source-proof.json",
+              "sha256": "e3cdf2c1097b3baad7e74203d873f37453e6c7735ab8a4a44bbbe19c76679f77"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/go/unit.json",
+              "sha256": "99cc3986747e1880b6f95dbc1bd36758c79850ddc98ab6ece9a5387b6b2f2ac5"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "NEON-U-MMAX-005",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestGuestMaximumCanonicalDevice",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "TestGuestMaximumCanonicalDevice"
+      ],
+      "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+          "scope": "Guest不可变virtio region读者U，严格观察与几何比较，无资源写许可",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+              "sha256": "f9cffdd0aa3f63b88bff37dcee7b6bbd1de28103490e6e6a6920f13136eddbc9"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/source-proof.json",
+              "sha256": "e3cdf2c1097b3baad7e74203d873f37453e6c7735ab8a4a44bbbe19c76679f77"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/go/unit.json",
+              "sha256": "99cc3986747e1880b6f95dbc1bd36758c79850ddc98ab6ece9a5387b6b2f2ac5"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "NEON-S-MMAX-001",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "TestNativeGuestMemoryMaximumComponent",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/native/result.json",
+      "root_count": 1,
+      "root_names": [
+        "TestNativeGuestMemoryMaximumComponent"
+      ],
+      "scope": "real369 KVM readonly Guest and test-harness same-instance QMP consistency; not PG/E2E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/native/result.json",
+          "scope": "real369 KVM readonly Guest and test-harness same-instance QMP consistency; not PG/E2E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/native/result.json",
+              "sha256": "21fe20a594855b06b56b03a12cdcfbe9a564530f8583e7b6ab3c51855817f2c3"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/source-proof.json",
+              "sha256": "e3cdf2c1097b3baad7e74203d873f37453e6c7735ab8a4a44bbbe19c76679f77"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/native/source-lock.json",
+              "sha256": "8ffaf545260f117572f7ec6cfdd58d0d0f60a633ae79d49d34d020dc6957cf9b"
+            }
+          ],
+          "platforms": [
+            "ACCURATE369_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE369_KVM"
+      ]
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-001",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimePolicyTemplatesRenderFullPrefixWithoutUIDCycle",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimePolicyTemplatesRenderFullPrefixWithoutUIDCycle"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-002",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimePolicyTemplatesTypedPolicyRejectsUnsupportedOrOverBudget",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimePolicyTemplatesTypedPolicyRejectsUnsupportedOrOverBudget"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-003",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimePolicyTemplatesV1ExactBytesAndFieldPresence",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimePolicyTemplatesV1ExactBytesAndFieldPresence"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-004",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimePolicyTemplatesStrictEnvelopeAndDependencies",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimePolicyTemplatesStrictEnvelopeAndDependencies"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-005",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimePolicyTemplatesDocumentRejectsRawDriftAndUnknownFields",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimePolicyTemplatesDocumentRejectsRawDriftAndUnknownFields"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-006",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimeTemplatesProducerOriginalUIDNoCycleAndAssets",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimeTemplatesProducerOriginalUIDNoCycleAndAssets"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-007",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimeTemplatesProducerRejectsUntrustedOrPartialInputs",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimeTemplatesProducerRejectsUntrustedOrPartialInputs"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-008",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimeTemplatesDecodeBindsReadyIdentityAndBounds",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimeTemplatesDecodeBindsReadyIdentityAndBounds"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-U-RUNTIME-TEMPLATES-009",
+      "layer": "unit",
+      "status": "PASS",
+      "description": "TestRuntimeTemplatesV1ProducerRemainsByteCompatible",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+      "root_count": 1,
+      "root_names": [
+        "TestRuntimeTemplatesV1ProducerRemainsByteCompatible"
+      ],
+      "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+          "scope": "原UID/Ready与严格v2模板纯生产者/渲染U；Fake Kube API、模型预算，不是实际ISO/Root/WAL/normal",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+              "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/cohort-source-attempt04.json",
+              "sha256": "d90d3cbc26724924c94319992dc0e1ae42045ad1cddea7ca799246ed74a25486"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/actual-copy-proof-final.json",
+              "sha256": "bc34f39ed765be2254e6101de56a273e963a0b13850a659a9a31147c88f5ddf0"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/attempt04/test.json",
+              "sha256": "46e2aaac56f836c30fd4507d2d9b2c49bb160635b92f0ae193c71855fc81540a"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/before-entry-fix/test.json",
+              "sha256": "6ac8a5d125ee9cb2465714f0e633ec4ab87cf3e1df023ca41127ededcf031c92"
+            }
+          ],
+          "race": true
+        }
+      ],
+      "race": true
+    },
+    {
+      "id": "PG17-ENV-RUNTIME-TEMPLATES-001",
+      "layer": "environment",
+      "status": "PASS_COMPILE_ONLY",
+      "description": "Linux上Darwin/amd64交叉编译；不计U/S，未在Mac运行",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/platform-darwin-final/build.rc",
+      "root_count": null
+    },
+    {
+      "id": "PG17-S-FILTER-001",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_filter.Filter.test_PG17_S_FILTER_001_actual_syscall_boundaries_and_threads",
+      "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+      "root_count": 1,
+      "root_names": [
+        "test_filter.Filter.test_PG17_S_FILTER_001_actual_syscall_boundaries_and_threads"
+      ],
+      "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ],
+      "family": "native-pg-filter-component"
+    },
+    {
+      "id": "PG17-S-FILTER-002",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_filter.Filter.test_PG17_S_FILTER_002_real_logger_and_internal_recovery",
+      "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+      "root_count": 1,
+      "root_names": [
+        "test_filter.Filter.test_PG17_S_FILTER_002_real_logger_and_internal_recovery"
+      ],
+      "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ],
+      "family": "native-pg-filter-component"
+    },
+    {
+      "id": "PG17-S-FILTER-003",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_filter.Filter.test_PG17_S_FILTER_003_actual_extension_acl_and_definer",
+      "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+      "root_count": 1,
+      "root_names": [
+        "test_filter.Filter.test_PG17_S_FILTER_003_actual_extension_acl_and_definer"
+      ],
+      "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ],
+      "family": "native-pg-filter-component"
+    },
+    {
+      "id": "PG17-S-FILTER-004",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_filter.Filter.test_PG17_S_FILTER_004_ready_edge_failures_reaped",
+      "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+      "root_count": 1,
+      "root_names": [
+        "test_filter.Filter.test_PG17_S_FILTER_004_ready_edge_failures_reaped"
+      ],
+      "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ],
+      "family": "native-pg-filter-component"
+    },
+    {
+      "id": "PG17-U-FILTER-001",
+      "layer": "unit-native",
+      "status": "PASS",
+      "description": "test_filter.Filter.test_PG17_U_FILTER_001_explicit_mode_and_missing_r_fail",
+      "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+      "root_count": 1,
+      "root_names": [
+        "test_filter.Filter.test_PG17_U_FILTER_001_explicit_mode_and_missing_r_fail"
+      ],
+      "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+          "scope": "真实PG17 native TEST_ONLY，default-off/test-v1兼容与fork/logger/filter；无Root完整来源/normal/E",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/compatibility11-result.json",
+              "sha256": "f640c8813009fc02389ff159cc9bfd741ec794c17df8b121402934285110ac46"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/actual-image-source-and-elf.json",
+              "sha256": "399f6c8a06e2c7ff3978bd3b18ea2fe6b3d9282328ebefbf449737fcb0f08461"
+            }
+          ],
+          "family": "native-pg-filter-component"
+        }
+      ],
+      "family": "native-pg-filter-component"
+    },
+    {
+      "id": "PG17-S-MIGFILTER-001",
+      "layer": "single-service",
+      "status": "PASS",
+      "description": "test_PG17_S_MIGFILTER_001_actual_native_child_denies_migration_and_import",
+      "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-result.json",
+      "root_count": 1,
+      "root_names": [
+        "test_PG17_S_MIGFILTER_001_actual_native_child_denies_migration_and_import"
+      ],
+      "scope": "真实PG17 child的13个NUMA/迁移/namespace/uring/userfault导入调用拒绝；13机制场景共一根，Host不是KVM",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-result.json",
+          "scope": "真实PG17 child的13个NUMA/迁移/namespace/uring/userfault导入调用拒绝；13机制场景共一根，Host不是KVM",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-result.json",
+              "sha256": "3251353f14e1a96b943ac6009cb013e2c256afdbaa25cfee5d2947d4e3f0eff0"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+              "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-runner.py",
+              "sha256": "e0e535c049b94d3343af7989ccbfc534bca0dc14391584c0ab2588c0b9ba834a"
+            },
+            {
+              "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/mechanism13-observations.json",
+              "sha256": "e9faa14453c22aea99319c7e507bb16de2c0378ef837c88ed0e125ee58ccbad8"
+            }
+          ],
+          "family": "native-pg-filter-component",
+          "syscall_subcases": 13
+        }
+      ],
+      "family": "native-pg-filter-component",
+      "syscall_subcases": 13
+    },
+    {
+      "id": "PG17-S-CGROUP-ARRAYS-001",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "真实shmem首次触页/洞fault分别收费arrays/private",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json",
+      "root_count": 1,
+      "root_names": [
+        "真实shmem首次触页/洞fault分别收费arrays/private"
+      ],
+      "scope": "原3b KVM独立memfd收费机制，无真实PG/降normal/生产Root",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json",
+          "scope": "原3b KVM独立memfd收费机制，无真实PG/降normal/生产Root",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json",
+              "sha256": "464eed7ec4350638b4f7129d874075ac81adcae33801115d57165473280628bd"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/source-and-kernel-lock.json",
+              "sha256": "8450caa407faabbd13c6363cc72157fb09ae85b42d9371dfd4a3955509ad31d4"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/actual-facts.json",
+              "sha256": "f9d2047b01f3be0172ea25fe4ee8281993d59fb1a86822b174dc95f940e66b22"
+            }
+          ],
+          "platforms": [
+            "ACCURATE3B_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE3B_KVM"
+      ]
+    },
+    {
+      "id": "PG17-S-CGROUP-ARRAYS-002",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "真实pipe保活folio跨punch后收费保留直至释放",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json",
+      "root_count": 1,
+      "root_names": [
+        "真实pipe保活folio跨punch后收费保留直至释放"
+      ],
+      "scope": "原3b KVM独立memfd收费机制，无真实PG/降normal/生产Root",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json",
+          "scope": "原3b KVM独立memfd收费机制，无真实PG/降normal/生产Root",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/result.json",
+              "sha256": "464eed7ec4350638b4f7129d874075ac81adcae33801115d57165473280628bd"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/source-and-kernel-lock.json",
+              "sha256": "8450caa407faabbd13c6363cc72157fb09ae85b42d9371dfd4a3955509ad31d4"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-split-charge-kvm-component-20261031/attempt-01/actual-facts.json",
+              "sha256": "f9d2047b01f3be0172ea25fe4ee8281993d59fb1a86822b174dc95f940e66b22"
+            }
+          ],
+          "platforms": [
+            "ACCURATE3B_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE3B_KVM"
+      ]
+    },
+    {
+      "id": "PG17-S-MAPFILES-001",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "actual nonroot child NNP1/caps0/AS; four exact shared PROT_NONE VMAs; Root independent maps, real O_RDWR magic FD, fstat/fstatfs and populate",
+      "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "actual nonroot child NNP1/caps0/AS; four exact shared PROT_NONE VMAs; Root independent maps, real O_RDWR magic FD, fstat/fstatfs and populate"
+      ],
+      "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+          "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+              "sha256": "914d71cc5147925f96f27a35bb89045f7324262f66e6dfc3f7023b35f07999d6"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/source-lock.json",
+              "sha256": "fa8c6a5e23bfade9c5d02e34820d62a7b4f46697b164ad2283492d97f1b53075"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/result.json",
+              "sha256": "b19e36a98e9640941e46e4f53882abc7832bdf99f7c33843a2a6f67404147b5e"
+            }
+          ],
+          "platforms": [
+            "ACCURATE3B_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE3B_KVM"
+      ]
+    },
+    {
+      "id": "PG17-S-MAPFILES-002",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "private anonymous and wrong-span kernel lookup ENOENT; exact registry generation guard",
+      "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "private anonymous and wrong-span kernel lookup ENOENT; exact registry generation guard"
+      ],
+      "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+          "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+              "sha256": "914d71cc5147925f96f27a35bb89045f7324262f66e6dfc3f7023b35f07999d6"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/source-lock.json",
+              "sha256": "fa8c6a5e23bfade9c5d02e34820d62a7b4f46697b164ad2283492d97f1b53075"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/result.json",
+              "sha256": "b19e36a98e9640941e46e4f53882abc7832bdf99f7c33843a2a6f67404147b5e"
+            }
+          ],
+          "platforms": [
+            "ACCURATE3B_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE3B_KVM"
+      ]
+    },
+    {
+      "id": "PG17-S-MAPFILES-003",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "Root prepopulates before child first normal mprotect/write; Root verifies all bytes via the same inode",
+      "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "Root prepopulates before child first normal mprotect/write; Root verifies all bytes via the same inode"
+      ],
+      "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+          "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+              "sha256": "914d71cc5147925f96f27a35bb89045f7324262f66e6dfc3f7023b35f07999d6"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/source-lock.json",
+              "sha256": "fa8c6a5e23bfade9c5d02e34820d62a7b4f46697b164ad2283492d97f1b53075"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/result.json",
+              "sha256": "b19e36a98e9640941e46e4f53882abc7832bdf99f7c33843a2a6f67404147b5e"
+            }
+          ],
+          "platforms": [
+            "ACCURATE3B_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE3B_KVM"
+      ]
+    },
+    {
+      "id": "PG17-S-MAPFILES-004",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "real same-VA Rearm gives new inode; held old FD rejected for new mapping, old data remains live, explicit Root munmap/close",
+      "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "real same-VA Rearm gives new inode; held old FD rejected for new mapping, old data remains live, explicit Root munmap/close"
+      ],
+      "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+          "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+              "sha256": "914d71cc5147925f96f27a35bb89045f7324262f66e6dfc3f7023b35f07999d6"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/source-lock.json",
+              "sha256": "fa8c6a5e23bfade9c5d02e34820d62a7b4f46697b164ad2283492d97f1b53075"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/result.json",
+              "sha256": "b19e36a98e9640941e46e4f53882abc7832bdf99f7c33843a2a6f67404147b5e"
+            }
+          ],
+          "platforms": [
+            "ACCURATE3B_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE3B_KVM"
+      ]
+    },
+    {
+      "id": "PG17-S-MAPFILES-005",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "new generation independently opened/populated; exact all-byte visibility",
+      "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "new generation independently opened/populated; exact all-byte visibility"
+      ],
+      "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+          "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+              "sha256": "914d71cc5147925f96f27a35bb89045f7324262f66e6dfc3f7023b35f07999d6"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/source-lock.json",
+              "sha256": "fa8c6a5e23bfade9c5d02e34820d62a7b4f46697b164ad2283492d97f1b53075"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/result.json",
+              "sha256": "b19e36a98e9640941e46e4f53882abc7832bdf99f7c33843a2a6f67404147b5e"
+            }
+          ],
+          "platforms": [
+            "ACCURATE3B_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE3B_KVM"
+      ]
+    },
+    {
+      "id": "PG17-S-MAPFILES-006",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "exact child wait/reap then original exited pidfd rejected; numeric PID reuse was not forced",
+      "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+      "root_count": 1,
+      "root_names": [
+        "exact child wait/reap then original exited pidfd rejected; numeric PID reuse was not forced"
+      ],
+      "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+          "scope": "原3b KVM匿名SHARED map_files FD/代次/预触独立组件，无真实PG或memcg收费资格",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/catalog.json",
+              "sha256": "914d71cc5147925f96f27a35bb89045f7324262f66e6dfc3f7023b35f07999d6"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/source-lock.json",
+              "sha256": "fa8c6a5e23bfade9c5d02e34820d62a7b4f46697b164ad2283492d97f1b53075"
+            },
+            {
+              "path": "/data/neon-build/validation/pg17-anonymous-mapfiles-kvm-attempt01-20261030T223019Z-23d6ef/result.json",
+              "sha256": "b19e36a98e9640941e46e4f53882abc7832bdf99f7c33843a2a6f67404147b5e"
+            }
+          ],
+          "platforms": [
+            "ACCURATE3B_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE3B_KVM"
+      ]
+    },
+    {
+      "id": "NEON-S-INFLIGHT-001",
+      "layer": "single-service-component",
+      "status": "PASS",
+      "description": "准确369实际31-folio uncharge→retire窗口断点",
+      "evidence": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/native-retire/result.json",
+      "root_count": 1,
+      "root_names": [
+        "准确369实际31-folio uncharge→retire窗口断点"
+      ],
+      "scope": "actual same369 31-folio retire window; no memory/register writes, not complete I or production qualification",
+      "observations": [
+        {
+          "evidence": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/native-retire/result.json",
+          "scope": "actual same369 31-folio retire window; no memory/register writes, not complete I or production qualification",
+          "source_and_receipt_files": [
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/native-retire/result.json",
+              "sha256": "653674e28ef6999f91ff69db18e0893c56a427ffc08f070483544e87020d582b"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/source-lock.json",
+              "sha256": "90a71cace6a8fb8547cab23493a3afefa4fc1d6942b0724ddfb5d7077615ca65"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/conditional-equations.json",
+              "sha256": "4549862cfbada8e299b7ddf55a488a318571806daf58f156e0e2419663425cdd"
+            },
+            {
+              "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/first-fixture-failure/result.json",
+              "sha256": "565b03588fdc8709ff09e61633eb0e916e7783e5db2b9aa74cb7e217f17d9b6e"
+            }
+          ],
+          "platforms": [
+            "ACCURATE369_KVM"
+          ]
+        }
+      ],
+      "platforms": [
+        "ACCURATE369_KVM"
+      ]
     }
   ],
-  "counts": {
+  "dedup_rules": {
+    "identity": "stable case ID first, then exact root name/root_names; original grouped IDs retain group root_count",
+    "multi_platform": "same ID Host/369/newBPF appends observations, coverage delta0",
+    "regression": "explicit old roots in latest cohorts attach evidence only; no new count",
+    "layers": "unit Go roots, native-pg binary U, real PG S, isolated component case IDs, protocol fixtures and real E stay separate",
+    "failure_history": "original failure/superseded receipts remain referenced; final PASS does not overwrite old files",
+    "pg18": "module archives separate, no PG17 or E count"
+  },
+  "latest_extension_case_ids": [
+    "PG17-U-TRACER-001",
+    "PG17-S-TRACER-001",
+    "PG17-S-TRACER-002",
+    "PG17-S-TRACER-003",
+    "PG17-U-BIRTHSOURCE-001",
+    "PG17-U-BIRTHSTAGE-001",
+    "PG17-U-BIRTHSOURCE-ELF-001",
+    "PG17-U-PRESYS-BOOTSTRAP-001",
+    "PG17-U-PRESYS-BOOTSTRAP-002",
+    "PG17-U-PRESYS-BOOTSTRAP-003",
+    "PG17-U-PRESYS-BOOTSTRAP-004",
+    "PG17-U-PRESYS-V2-001",
+    "PG17-U-PRESYS-V2-002",
+    "PG17-U-PRESYS-V2-003",
+    "PG17-U-PRESYS-V2-004",
+    "PG17-S-PRESYS-V2-COMPLETED-ROLES",
+    "PG17-S-PRESYS-V2-INITIAL-PRIVATE-ROLE",
+    "PG17-S-PRESYS-V2-OVERCOMMIT-CORRECTIVE",
+    "NEON-U-MMAX-001",
+    "NEON-U-MMAX-002",
+    "NEON-U-MMAX-003",
+    "NEON-U-MMAX-004",
+    "NEON-U-MMAX-005",
+    "NEON-S-MMAX-001",
+    "PG17-U-RUNTIME-TEMPLATES-001",
+    "PG17-U-RUNTIME-TEMPLATES-002",
+    "PG17-U-RUNTIME-TEMPLATES-003",
+    "PG17-U-RUNTIME-TEMPLATES-004",
+    "PG17-U-RUNTIME-TEMPLATES-005",
+    "PG17-U-RUNTIME-TEMPLATES-006",
+    "PG17-U-RUNTIME-TEMPLATES-007",
+    "PG17-U-RUNTIME-TEMPLATES-008",
+    "PG17-U-RUNTIME-TEMPLATES-009",
+    "PG17-ENV-RUNTIME-TEMPLATES-001",
+    "PG17-S-FILTER-001",
+    "PG17-S-FILTER-002",
+    "PG17-S-FILTER-003",
+    "PG17-S-FILTER-004",
+    "PG17-U-FILTER-001",
+    "PG17-S-MIGFILTER-001",
+    "PG17-S-CGROUP-ARRAYS-001",
+    "PG17-S-CGROUP-ARRAYS-002",
+    "PG17-S-MAPFILES-001",
+    "PG17-S-MAPFILES-002",
+    "PG17-S-MAPFILES-003",
+    "PG17-S-MAPFILES-004",
+    "PG17-S-MAPFILES-005",
+    "PG17-S-MAPFILES-006",
+    "NEON-S-INFLIGHT-001"
+  ],
+  "latest_extension_delta": {
+    "environment": 0,
+    "single-service": 5,
+    "single-service-component": 16,
+    "unit": 37,
+    "unit-native": 1
+  },
+  "previous_index_counts": {
     "core_unit_roots_archived": 127,
     "native_pg_single_service_roots": 33,
     "native_pg_binary_unit_roots": 5,
+    "real_end_to_end_passed": 0
+  },
+  "development_tracks": [
+    {
+      "id": "PG17-DEV-ARRAY-HELPER",
+      "status": "IN_PROGRESS_NOT_COVERAGE",
+      "root_count": 0,
+      "scope": "C工具GNU12静态编译已过；共享tracer生命周期仍在接线，真实S未闭，不计新增U/S/E",
+      "receipt": "/data/neon-build/validation/array-populate-c-20261031T140854Z-875e0e",
+      "production_qualification": false
+    }
+  ],
+  "failure_history_catalogs": [
+    {
+      "catalog": {
+        "path": "/data/neon-build/src/autoscaling/docs/validation/native-birth-source-stage-20261031/acceptance.json",
+        "sha256": "0f9de1c53d99497f4aca4a5140c8046f4dffa97940d88c458c0dbfc6ac707ac3"
+      },
+      "records": [
+        {
+          "path": "historical/20261031T010740Z",
+          "status": "FAIL",
+          "reason": "used alias-only control.UnmarshalObject for RuntimeDocument which already has strict UnmarshalJSON; corrected to json.Unmarshal invoking original method"
+        },
+        {
+          "path": "historical/20261031T010832Z",
+          "status": "PASS_SUPERSEDED_SOURCE",
+          "reason": "new Root private instance nonce and readonly-symlink/default-loader reader strengthening subsequently added"
+        },
+        {
+          "path": "historical/20261031T011152Z",
+          "status": "PASS_SUPERSEDED_SOURCE",
+          "reason": "subsequent bounded raw ELF metadata preflight before parser allocations/real PT_DYNAMIC matching added"
+        },
+        {
+          "path": "historical/20261031T011639Z-before-independent-ELF-review",
+          "status": "PASS_OLD_TEST_SET_KNOWN_ELF_REVIEW_BLOCKERS",
+          "reason": "not final source; DT_STRTAB/STRSZ vs Link mismatch, unsupported DynString tags, compressed string expanded lengths not covered then"
+        },
+        {
+          "path": "historical/20261031T013304Z-before-page-overlap-review",
+          "status": "PASS_OLD_TEST_SET_KNOWN_PARTIAL_PAGE_LOAD_BLOCKER",
+          "reason": "full-target mapping count missed later partial same-page MAP_FIXED or BSS overwrite; final strict p_memsz page interval rule and 2 exact negative cases replace this source"
+        }
+      ]
+    },
+    {
+      "catalog": {
+        "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-policy-templates-20261031/acceptance-final.json",
+        "sha256": "f73ce7ff2fe921e96f856009fac06df308ee2d5d301d425f72a1713d028b448b"
+      },
+      "records": [
+        {
+          "attempt": "01",
+          "status": "FAIL_BUILD",
+          "description": "new bootstrap fixture string UID passed typed journal API; inherited bash -e stopped export; build log retained"
+        },
+        {
+          "attempt": "02",
+          "status": "FAIL_U_BUILD",
+          "testRC": 1,
+          "description": "same source exact receipt exported; resourceguard PASS, bootstrap fixture typed UID compile failed"
+        },
+        {
+          "attempt": "03",
+          "status": "PASS_U_KNOWN_INCOMPLETE",
+          "testRC": 0,
+          "description": "fix only own fixture typed UID and distinguish two Source unknown-key cases; exact updated source+copy receipts; nested entry encoding/json case aliases not yet covered, later read review found gap"
+        },
+        {
+          "attempt": "before-entry-fix",
+          "status": "EXPECTED_REAL_FAIL",
+          "testRC": 1,
+          "description": "old parser plus new exact entry counterexamples, three real failing alias cases",
+          "failingCases": [
+            "TestRuntimePolicyTemplatesStrictEnvelopeAndDependencies/entry_policy_case",
+            "TestRuntimePolicyTemplatesStrictEnvelopeAndDependencies/entry_alias_collision",
+            "TestRuntimePolicyTemplatesStrictEnvelopeAndDependencies/entry_asset_case"
+          ]
+        },
+        {
+          "attempt": "04",
+          "status": "PASS_FINAL_U",
+          "testRC": 0,
+          "description": "entry custom plain-alias strict decoder; new five counterexamples added; all exact source inputs and original behavior verified"
+        }
+      ]
+    },
+    {
+      "catalog": {
+        "path": "/data/neon-build/src/autoscaling/docs/validation/presys-v2-20261031/failure-references.json",
+        "sha256": "59c6b67d10e3bf1d150fccf056c7fd5742077f58a689e77f8bbdb7d23a9efdca"
+      },
+      "records": [
+        {
+          "path": "/data/neon-build/validation/presys-v2-native-20261031T002422Z",
+          "result_sha256": "b2fb4ac3c1bf1dd26bff826121d4bcc680affa0b1f42cf0c7fa9dd24dd802de2",
+          "scope": "test init BusyBox one-argument remount before /proc; Go did not start",
+          "retained": true
+        },
+        {
+          "path": "/data/neon-build/validation/presys-v2-native-20261031T002516Z",
+          "result_sha256": "ebae49fb6e3ac89e9267d4b3fbee150e588af64e9ede51eedcf1816f6616d45b",
+          "scope": "actual old formal Bootstrap rejected already original-placed System; Root bridge subsequently fixed",
+          "retained": true
+        },
+        {
+          "path": "/data/neon-build/validation/presys-v2-native-20261031T004650Z",
+          "result_sha256": "c8d1e3fb4e4a9d2f9c205176b8034b8170a4a7b50474651920602fcf91b0d476",
+          "scope": "actual original1G0 plan hit gigantic overcommit write0 EINVAL after bridge; Root same-value read-only writer subsequently fixed",
+          "retained": true
+        }
+      ]
+    },
+    {
+      "catalog": {
+        "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-tracer-20261031/historical-attempts.json",
+        "sha256": "7fad7db7566ed4dc2cdadf5867804200b09a4b2637af14e286f084b77dae2fdf"
+      },
+      "records": [
+        {
+          "attempt": "build initial",
+          "result": "ENV_FAIL",
+          "reason": "tool image has no python3; Dockerfile-v2 removed Python prerequisite",
+          "externalLog": "/data/neon-build/validation/pg17-go-native-tracer-20261030T235629Z/build.log"
+        },
+        {
+          "attempt": "build-v2",
+          "result": "SOURCE_COHORT_FAIL",
+          "reason": "active tree included unrelated uncommitted normal/bootstrap/split dependencies; replaced by parent-approved immutable410bcc plus exactly6 overlay files",
+          "externalLog": "/data/neon-build/validation/pg17-go-native-tracer-20261030T235629Z/build-v2.log"
+        },
+        {
+          "attempt": "native-attempt-01",
+          "result": "FAIL",
+          "reason": "nonroot child executable tmp ancestor permissions/noexec",
+          "externalDirectory": "/data/neon-build/validation/pg17-go-native-tracer-20261030T235629Z/native-attempt-01"
+        },
+        {
+          "attempt": "native-attempt-02",
+          "result": "FAIL",
+          "reason": "actual Docker tmpfs noexec; own isolated tmpfs explicitly exec in attempt03",
+          "externalDirectory": "/data/neon-build/validation/pg17-go-native-tracer-20261030T235629Z/native-attempt-02"
+        },
+        {
+          "attempt": "native-attempt-03-v5",
+          "result": "PASS_SUPERSEDED_SOURCE",
+          "reason": "numeric Wait4 independently found capable of wrong-child reap; not final certification",
+          "externalDirectory": "/data/neon-build/validation/pg17-go-native-tracer-20261030T235629Z/native-attempt-03"
+        },
+        {
+          "attempt": "guest-369-attempt-01-v5",
+          "result": "FAIL_INCOMPLETE_RECEIPT",
+          "reason": "Guest tests0/QEMU0 but only12/13 reports verified: ACPI printk interrupted final base64 line; preserve false result",
+          "externalDirectory": "/data/neon-build/validation/pg17-go-native-tracer-20261030T235629Z/guest-369-attempt-01"
+        },
+        {
+          "attempt": "v6-model/Host/Guest02",
+          "result": "PASS_COMPONENT_ONLY",
+          "reason": "all numeric waits replaced by original pidfd; Guest only printk quiet and serial drain before poweroff;14/14 report SHA verified",
+          "externalDirectory": "/data/neon-build/validation/pg17-go-native-tracer-20261030T235629Z"
+        }
+      ]
+    },
+    {
+      "catalog": {
+        "path": "/data/neon-build/src/neon/docs/validation/pg17-native-root-gate-20261031/catalog-final.json",
+        "sha256": "6e153c3ecb4b3bb6e9e2632b060e0c15d15e65c375025b1e8325b93ba298b0ad"
+      },
+      "records": [
+        {
+          "path": "attempt-01",
+          "status": "FAIL",
+          "cause": "recvmsg with SO_RCVTIMEO interrupted by actual Root ptrace PMbase audit; original draft treated EINTR as malformed ACK"
+        },
+        {
+          "path": "diagnostic-01b",
+          "status": "FAIL",
+          "cause": "same old image confirms native ACK rejection; cleanup additionally lacked fixture CAP_KILL"
+        },
+        {
+          "path": "attempt-02",
+          "status": "FAIL",
+          "cause": "8 roots PASS; M/N0 test stopped before PG at fixture temporary-directory chown EPERM, no CAP_CHOWN/DAC_OVERRIDE"
+        },
+        {
+          "path": "diagnostic-02-guc",
+          "status": "PASS",
+          "cause": "same frozen v2 binary, exact file-management capabilities added; actual M/N0 rejection observed"
+        }
+      ]
+    },
+    {
+      "catalog": {
+        "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-source-20261031/first-fixture-failure/result.json",
+        "sha256": "565b03588fdc8709ff09e61633eb0e916e7783e5db2b9aa74cb7e217f17d9b6e"
+      },
+      "records": {
+        "id": "NEON-S-INFLIGHT-001",
+        "scope": "actual same369 31-folio retire window; no memory/register writes, not complete I or production qualification",
+        "status": "FAIL_COMPONENT",
+        "host_qemu_exit": 0,
+        "gdb_exit": 3,
+        "actual_qmp_kvm": {
+          "enabled": true,
+          "present": true
+        },
+        "elapsed_seconds": 1.4630144600014319,
+        "kernel": {
+          "exit_code": 0,
+          "elapsed_seconds": 81.10696101399662,
+          "jobs": 8,
+          "guest_started": false,
+          "vm_shrink_permit": false,
+          "formal_image_published": false,
+          "artifact_sha256": "3693200bb10997988129955750382e586d13eef75e06f46aa3b9f56c6f8833f0",
+          "resolved_config_sha256": "11344757b0f979c7fee35e354bd706616c4283deaa67cc30c50747e4bca855be",
+          "notes_sha256": "7cf45ced24c800ec8390fc7f04f07b8dc9e73ac0efa4bf8abd11d8513c8eb828",
+          "symbols_sha256": "f62eda517fe3f8e73640ef0c74cb73e3192ba6bc4c1ed5d8a0a9506aba4b9fc9",
+          "release": "6.12.26-william-normal-split-v1-e210f5e3ee94"
+        },
+        "runtime_notes_sha256": null,
+        "console_sha256": "db7c3915f881369e03fb5ffa8ffd2c274ff41990e94d2bcd2f45e0e8098a0417",
+        "gdb_driver_sha256": "17374449b6817edc1b4395ccbeda93b2055c169e7fb808fdce61ef357e65b62b",
+        "gdb_image_id": "sha256:ebaeba1cc3372b303db000f2379d75e466dd0bcc86705caa716c7c9d42962d7b",
+        "boundary_counts": {
+          "retire_batch": 31
+        },
+        "probe": [],
+        "vm_shrink_permit": false,
+        "all_sources_closed": false,
+        "PG_started": false
+      }
+    },
+    {
+      "catalog": {
+        "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/failures/native-evaluator-reevaluation.json",
+        "sha256": "12a084f066d65f41fac0ec9dd874baf0355144f89e7026a8a56e850d5f694253"
+      },
+      "records": {
+        "original_result_status": "FAIL_PROBE",
+        "original_result_preserved": true,
+        "original_result_sha256": "a9ece91b2a2f19787566ca75ce61c5d282978576ad41f0ecb64188f9168b79fa",
+        "cause": "Host evaluator directly compared control.Uint64 JSON strings with QMP integers",
+        "corrected_component_evaluation": "PASS",
+        "Go_Guest_root_passed": true,
+        "normal_authorized": false,
+        "fresh_final_run": "/data/neon-build/validation/guest-maximum-native-20261031T012207Z"
+      }
+    },
+    {
+      "catalog": {
+        "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-native-birth-wire-kvm-20261031/attempt-01/result.json",
+        "sha256": "a17615d8888eb9d46fe8c6f7d73ee48564b67cc748a850199792f333652b0923"
+      },
+      "records": {
+        "id": "PG17-S-WIRE-001",
+        "status": "FAIL_COMPONENT_FIXTURE",
+        "platformEvidence": "actual KVM Guest target kernel; does not add coverage ID",
+        "sourceCommit": "1f57705491a5407bbea3496460b0d96e5c58cc64",
+        "actualKernelRelease": "6.12.26-william-bd33f7c78026",
+        "actualKernelNotesSha256": "b52a6321c44be2b8d138e9ca990ec86413c3744a189a118ed69aa295cb8ef03d",
+        "GuestTestExitCode": 1,
+        "hostQemuExitCode": 0,
+        "normalPoweroffDoesNotMeanTestPass": true,
+        "rootResults": [
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames",
+            "result": "FAIL"
+          },
+          {
+            "name": "TestNativeBirthWireExactOriginalContextAndRanges",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry",
+            "result": "PASS"
+          },
+          {
+            "name": "TestPG17NativePhysicalKernelComponent",
+            "result": "PASS"
+          }
+        ],
+        "subcaseCount": 41,
+        "subcaseResults": [
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/valid",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/wrong-pid",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/wrong-uid",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/wrong-gid",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/oversized",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/short",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/rights",
+            "result": "FAIL"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/truncated-rights",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/stream",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/deadline",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/short",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/tail",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/magic",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/version",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/ack-as-request",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/nonce",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/source",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/profile",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/AS",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/maximum",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/page",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/total",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/null-base",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/unaligned-base",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/high-base",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/overflow-base",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/length",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/element",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRejectsForgedOrAmbiguousFrames/overlap",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/nonce",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/source",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/profile",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/AS-zero",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/AS-alignment",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/AS-overflow",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/R-equals-AS",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/buffers-zero",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/buffers-overflow",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/page",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/ABI-zero",
+            "result": "PASS"
+          },
+          {
+            "name": "TestNativeBirthWireRequiresIndependentOriginalGeometry/ABI-overflow",
+            "result": "PASS"
+          }
+        ],
+        "failedSubcases": [
+          {
+            "name": "TestNativeBirthWireKernelPeerAndMalformedFrames/rights",
+            "result": "FAIL"
+          }
+        ],
+        "failure": {
+          "file": "pkg/dsga/resourceguard/native_birth_wire_native_test.go",
+          "line": 102,
+          "mode": "rights",
+          "beforeFdCount": 10,
+          "afterFdCount": 9,
+          "classification": "confirmed fixture lifecycle race; asynchronous stdout pipe closure; equality is not weakened",
+          "productionWireLeakProven": false,
+          "repeatOldToObtainPass": false,
+          "next": "parent changes only native fixture with explicit child/parent lifetime sync, then new immutable commit and recompile"
+        },
+        "actualValidPeer": {
+          "UID": 65534,
+          "GID": 65534,
+          "kernelSO_PEERCREDMatchedOriginalChildPID": true,
+          "childUIDGIDAssertionsPassedInValidCase": true
+        },
+        "physicalKernelCase": {
+          "id": "PG17-S-KERNEL-001",
+          "status": "PASS_COMPONENT_ONLY",
+          "repeatedExistingCase": true,
+          "observation": {
+            "protocol_version": 1,
+            "vm_shrink_permit": false,
+            "scope": "linux-6.12.26-physical-component-observation-only",
+            "identity": {
+              "vm_uid": "test-harness-pg17-native-kernel-component",
+              "compute_instance_id": "test-harness-isolated-kvm-observer",
+              "guest_boot_id": "38c06d3c-9b1b-43d5-a987-d9012838cd42",
+              "cgroup_device": "23",
+              "cgroup_inode": "28"
+            },
+            "kernel_release": "6.12.26-william-bd33f7c78026",
+            "kernel_notes_sha256": "b52a6321c44be2b8d138e9ca990ec86413c3744a189a118ed69aa295cb8ef03d",
+            "command_line_sha256": "781e0163df6c2f0157e05124f8c4229c89be62140f5800a3bfb6d025a935a416",
+            "page_size_bytes": "4096",
+            "possible_cpus": 2,
+            "pid_max": 512,
+            "zones": [
+              {
+                "node": 0,
+                "name": "DMA32",
+                "present_pages": "66462"
+              },
+              {
+                "node": 0,
+                "name": "Movable",
+                "present_pages": "195551"
+              },
+              {
+                "node": 0,
+                "name": "Normal",
+                "present_pages": "0"
+              }
+            ],
+            "non_movable_upper_bytes": "272228352",
+            "cpu_charge_stock_upper_bytes": "524288"
+          }
+        },
+        "sourceProof": {
+          "copiedGoModCount": 684,
+          "copiedManifestRawSha256": "985059d3e5a6c0874f411bcbba2eed7989aac35b406ec76a772bc655c204a8d5",
+          "allCopiedSourcesMatchSnapshot": true,
+          "P2UntrackedOriginExcluded": true,
+          "wireSources": {
+            "pkg/dsga/resourceguard/native_birth_wire.go": "8bbba0892d5bc46a9dc0c55c5ee23844b7ba2bc06a93259f0d7a2665bdc68c55",
+            "pkg/dsga/resourceguard/native_birth_wire_linux.go": "9c997d31e3b87f8d6fbb842596f98c7626573648773e6da186882fc25908e288",
+            "pkg/dsga/resourceguard/native_birth_wire_native_test.go": "7fe8724ba4d1417661c2c540f380aa5e446cc8c8fc0a8b2d50f2bc1136cb76e5",
+            "pkg/dsga/resourceguard/native_birth_wire_test.go": "8110cd4f60e2afef21b7621a887ace3b71ee5b65d6585e4e83ae8d3f63476e6f"
+          },
+          "toolchain": "go version go1.24.3 linux/amd64",
+          "CGO_ENABLED": "0",
+          "race": false
+        },
+        "artifacts": {
+          "startUTC": "2026-10-30T16:35:33.087351+00:00",
+          "endUTC": "2026-10-30T16:35:36.530150+00:00",
+          "elapsedSeconds": 3.442791235000186,
+          "hostDockerExitCode": 0,
+          "timeoutSeconds": 150,
+          "goTestTimeoutSeconds": 90,
+          "accel": "kvm",
+          "TCGFallback": false,
+          "NIC": "none",
+          "guestMemoryBytes": 1073741824,
+          "guestVCPUs": 2,
+          "image": "127.0.0.1:5001/neon/neonvm-runner@sha256:f170364ea02fc54d08523226e8616b1ef1c4097a6a2cc5b3a66db7756ef5df9e",
+          "kernelSha256": "0ab3f71456c783452a49d50752a9b1945c2da399588febed409637d7af6891a0",
+          "initramfsSha256": "809be6f3a70731f24fda4d1a1091c1d5c991a4953091dbd230decc0a8ceba78f",
+          "binarySha256": "5a9a47cd5c86b59b54af35213da21ac3637e8004ccd9438b4f9680f22043fa0f",
+          "rawConsoleSha256": "b6ea62fe7627c297d8873a92b88e74a007f6c311e8f80ef20e15ce6a541ec7cb",
+          "E2E": false
+        },
+        "boundaries": {
+          "PGStarted": false,
+          "RootPendingOrEnrollment": false,
+          "productionACKSender": false,
+          "normalMemoryLimitWritten": false,
+          "VMResize": false,
+          "KubernetesE2E": false,
+          "coverageDelta": 0,
+          "hostNetworkOrExistingVMChanged": false
+        },
+        "completedUTC": "2026-10-30T16:38:43.045280+00:00"
+      }
+    }
+  ],
+  "pg18_module_archives_separate": [
+    {
+      "path": "/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-first-leaf-v1.json",
+      "sha256": "e45aca05e4d331538b48f03b042f1936475d51296b708a196ee7189accee34df",
+      "scope": "PASS_LEAF_COMPONENT_ONLY",
+      "status": "ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE",
+      "included_in_pg17_counts": false,
+      "source_and_result_mapping": "see exact module archive; per-phase counts include direct regressions and must not be summed",
+      "git_state": "see versions_at_index_capture; stage4 v3 freeze is pending owner review/commit at capture if still untracked"
+    },
+    {
+      "path": "/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-arrays-core-v1.json",
+      "sha256": "3026a67e508f5ee82a566051b2a5329e5d4d39b2dd7960f9e0c96c30186ca1a7",
+      "scope": "TEST_ONLY default-off native core arrays and AIO completion lease; non-authorizing",
+      "status": "ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE",
+      "included_in_pg17_counts": false,
+      "source_and_result_mapping": "see exact module archive; per-phase counts include direct regressions and must not be summed",
+      "git_state": "see versions_at_index_capture; stage4 v3 freeze is pending owner review/commit at capture if still untracked"
+    },
+    {
+      "path": "/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-resize-core-v1.json",
+      "sha256": "8d9639dfe47bf5c16b88a61f6d278a75512766dcd772d7290f80e1b5068303e6",
+      "scope": "PG18 native buffer core third batch TEST_ONLY default off",
+      "status": "ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE",
+      "included_in_pg17_counts": false,
+      "source_and_result_mapping": "see exact module archive; per-phase counts include direct regressions and must not be summed",
+      "git_state": "see versions_at_index_capture; stage4 v3 freeze is pending owner review/commit at capture if still untracked"
+    },
+    {
+      "path": "/data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-resize-failures-v1.json",
+      "sha256": "b19e8b6b28983263456537c0d15bcab0dd9f0c0af64795c67e44092d23e57984",
+      "scope": "PG18 exact new failure/uring native tests, no C/H production changes",
+      "status": "ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE",
+      "included_in_pg17_counts": false,
+      "source_and_result_mapping": "see exact module archive; per-phase counts include direct regressions and must not be summed",
+      "git_state": "see versions_at_index_capture; stage4 v3 freeze is pending owner review/commit at capture if still untracked"
+    }
+  ],
+  "counts": {
+    "core_unit_roots_archived": 164,
+    "native_pg_single_service_roots": 38,
+    "native_pg_binary_unit_roots": 6,
+    "independent_service_component_case_ids": 39,
+    "go_pg_tracer_component_roots": 3,
     "cross_language_pg_single_service_roots": 1,
     "kernel_loader_wire_component_roots": 3,
     "peer_service_integration_roots": 1,
