@@ -1,0 +1,21 @@
+{
+  "timeUTC": "2026-10-31T20:25:46.262621+00:00",
+  "base": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+  "oldPG17": "053d1c3c4f6126a418e05229a1fa1149d3d6cb6d",
+  "newPG17": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+  "validation": "validate_postgres_sources(root,index,require_checkout=[v17])",
+  "result": "PASS",
+  "actual_checkout_clean": true,
+  "all_distribution_gitlinks_consistent": {
+    "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",
+    "v15": "2aaab3bb4a13557aae05bb2ae0ef0a132d0c4f85",
+    "v16": "a42351fcd41ea01edede1daed65f651e838988fc",
+    "v17": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f"
+  },
+  "AS_lock_not_moved": "508235d4520ff0db94f525f047a1ebe877c7bf9b",
+  "runtime_component_reference": "compute-no-rpath-pg-20261031T193328Z-45711b",
+  "component_build_is_old_Neon_base_plus_exact_overlays": true,
+  "normal_qualified": false,
+  "release_qualified": false,
+  "E_pass": 0
+}

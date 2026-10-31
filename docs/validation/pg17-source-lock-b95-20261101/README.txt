@@ -1,0 +1,7 @@
+PG17 内核已推送后同步上层源码锁
+
+将已独立复审、实际编译验证并推送的 PG17 b95b142190cdc51de0d5603bfb9c46a0e0e7051f 接入 Neon gitlink、vendor revisions 和 distribution PG17，三处同SHA。原source_lock函数在index上检查全部锁一致，并检查真实PG17子仓库HEAD与clean状态，通过。
+
+这是源码接入，不是发行通过。AS锁保持原已固定提交，待生产服务与系统窄修独立验证并提交后再顺序升级。新none运行时以Neon1fed加PGb95和精确两个loader覆盖文件实际构建，原收据保留该事实，不重标为本提交构建。后续完整联合镜像需要以最终Git锁重建/核验。
+
+当前Source13、安全normal降限、完整Linux与三节点K8s尚未通过，E0。
