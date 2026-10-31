@@ -1,0 +1,16 @@
+{
+  "kind": "compute-stage",
+  "pg": "v17",
+  "aliases": [
+    "build-deps"
+  ],
+  "image": "127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache",
+  "digest": "sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7",
+  "source_commit": "b82d1b9e95ceb9387e0be6e280cd2eed4eca299c",
+  "current_source_block_matches": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+  "rawBuildDepsSourceBlockSHA256": "404d2213e910513be0059ce2c11ba30585b7dc7ce228c178d68dbc2df0e1bd32",
+  "cacheImageID": "sha256:641ed0bef5386c99a90812d05c278e7cc2b469b9a0419f1a747440cab0deebeb",
+  "PGSourceCompiledInCachedLayer": false,
+  "TEST_ONLY": true,
+  "elapsedSeconds": 0.21477590000722557
+}

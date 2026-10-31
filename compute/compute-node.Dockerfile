@@ -106,6 +106,8 @@ ARG BASE_IMAGE_SHA=${BASE_IMAGE_SHA/debian:bullseye-slim/debian@$BULLSEYE_SLIM_S
 # By default, build all PostgreSQL extensions. For quick local testing when you don't
 # care about the extensions, pass EXTENSIONS=none or EXTENSIONS=minimal
 ARG EXTENSIONS=all
+# 新版来源仅选择可审计的默认loader构建；不是normal资格或运行时授权。
+ARG DSGA_RUNTIME_PROFILE=legacy
 
 #########################################################################################
 #
@@ -169,6 +171,8 @@ RUN case $DEBIAN_VERSION in \
 #########################################################################################
 FROM build-deps AS pg-build
 ARG PG_VERSION
+ARG DSGA_RUNTIME_PROFILE
+ARG TARGETARCH
 COPY vendor/postgres-${PG_VERSION:?} postgres
 COPY compute/patches/postgres_fdw.patch .
 COPY compute/patches/pg_stat_statements_pg14-16.patch .
@@ -199,6 +203,14 @@ RUN cd postgres && \
         # zstd is available only from PG15
         export CONFIGURE_CMD="${CONFIGURE_CMD} --with-zstd"; \
     fi && \
+    case "${DSGA_RUNTIME_PROFILE}" in \
+      legacy) ;; \
+      default-loader-v1) \
+        test "${PG_VERSION}" = v17 && test "${TARGETARCH}" = amd64 && \
+        export CONFIGURE_CMD="${CONFIGURE_CMD} --disable-rpath"; \
+        ;; \
+      *) echo "unsupported DSGA runtime profile" >&2; exit 1 ;; \
+    esac && \
     eval $CONFIGURE_CMD && \
     make MAKELEVEL=0 -j $(getconf _NPROCESSORS_ONLN) -s install && \
     make MAKELEVEL=0 -j $(getconf _NPROCESSORS_ONLN) -s -C contrib/ install && \
@@ -1925,6 +1937,8 @@ ENV PG_VERSION=${PG_VERSION:?}
 #########################################################################################
 FROM $BASE_IMAGE_SHA
 ARG DEBIAN_VERSION
+ARG DSGA_RUNTIME_PROFILE
+ARG TARGETARCH
 
 # Use strict mode for bash to catch errors early
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
@@ -2037,7 +2051,12 @@ COPY --from=sql_exporter_preprocessor --chmod=0644 /home/nonroot/compute/etc/neo
 
 # Make the libraries we built available
 COPY --chmod=0666 compute/etc/ld.so.conf.d/00-neon.conf /etc/ld.so.conf.d/00-neon.conf
-RUN /sbin/ldconfig
+COPY compute/dsga-default-loader.sh /tmp/neon-dsga-default-loader.sh
+RUN if [ "${DSGA_RUNTIME_PROFILE}" = legacy ]; then \
+      /sbin/ldconfig; \
+    else \
+      /bin/bash /tmp/neon-dsga-default-loader.sh "${DSGA_RUNTIME_PROFILE}" "${PG_VERSION}" "${TARGETARCH}"; \
+    fi && rm /tmp/neon-dsga-default-loader.sh
 
 # rsyslog config permissions
 # directory for rsyslogd pid file

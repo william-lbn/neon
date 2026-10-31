@@ -1,0 +1,128 @@
+{
+  "buildx.build.provenance": {
+    "builder": {
+      "id": ""
+    },
+    "buildType": "https://mobyproject.org/buildkit@v1",
+    "materials": [
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/compute-v17-stage@no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache?digest=sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7\u0026platform=linux%2Famd64",
+        "digest": {
+          "sha256": "03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7"
+        }
+      },
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/compute-v17-stage@no-rpath-pg-b95b142190cd-20261031t193328z-45711b-compute-tools?digest=sha256:a3f6f7f5d5702a459333bb75cb246ac603f297343f86cabc220559a469c55a36\u0026platform=linux%2Famd64",
+        "digest": {
+          "sha256": "a3f6f7f5d5702a459333bb75cb246ac603f297343f86cabc220559a469c55a36"
+        }
+      },
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/compute-v17-stage@no-rpath-pg-b95b142190cd-20261031t193328z-45711b-neon-ext-build?digest=sha256:3a5da5b5569d5d3c8a4eb89a96f7658265c78e0b8abec75601beb8bc679bebd5\u0026platform=linux%2Famd64",
+        "digest": {
+          "sha256": "3a5da5b5569d5d3c8a4eb89a96f7658265c78e0b8abec75601beb8bc679bebd5"
+        }
+      },
+      {
+        "uri": "pkg:docker/debian?digest=sha256:40b107342c492725bc7aacbe93a49945445191ae364184a6d24fedb28172f6f7\u0026platform=linux%2Famd64",
+        "digest": {
+          "sha256": "40b107342c492725bc7aacbe93a49945445191ae364184a6d24fedb28172f6f7"
+        }
+      },
+      {
+        "uri": "http://buildkit-session/nrihz69qsb1bw857axnpfxr9v",
+        "digest": {
+          "sha256": "2c5b940f77eed1857cce35df59db1b091e359de0e385cb83bc9027f707e235eb"
+        }
+      }
+    ],
+    "invocation": {
+      "configSource": {
+        "uri": "http://buildkit-session/nrihz69qsb1bw857axnpfxr9v",
+        "digest": {
+          "sha256": "2c5b940f77eed1857cce35df59db1b091e359de0e385cb83bc9027f707e235eb"
+        },
+        "entryPoint": "ci/pre-main-probe.Dockerfile"
+      },
+      "parameters": {
+        "frontend": "dockerfile.v0",
+        "args": {
+          "build-arg:BUILD_JOBS": "2",
+          "build-arg:BUILD_TAG": "no-rpath-pg-b95b142190cd-20261031t193328z-45711b",
+          "build-arg:DEBIAN_VERSION": "bookworm",
+          "build-arg:DSGA_RUNTIME_PROFILE": "default-loader-v1",
+          "build-arg:EXTENSIONS": "none",
+          "build-arg:GIT_VERSION": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+          "build-arg:HTTPS_PROXY": "http://127.0.0.1:7890",
+          "build-arg:HTTP_PROXY": "http://127.0.0.1:7890",
+          "build-arg:NO_PROXY": "localhost,127.0.0.1,::1",
+          "build-arg:PG_VERSION": "v17",
+          "build-arg:PROBE_MEMORY_MAX_BYTES": "2147483648",
+          "build-arg:http_proxy": "http://127.0.0.1:7890",
+          "build-arg:https_proxy": "http://127.0.0.1:7890",
+          "build-arg:no_proxy": "localhost,127.0.0.1,::1",
+          "cpuquota": "200000",
+          "force-network-mode": "host",
+          "label:io.neon.extensions": "none",
+          "label:io.neon.pg17.revision": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+          "label:io.neon.probe.source-manifest-sha256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+          "label:io.neon.test-only": "true",
+          "label:org.opencontainers.image.revision": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+          "memory": "2147483648",
+          "memswap": "2147483648",
+          "target": "runtime"
+        },
+        "root": {
+          "configSource": {
+            "uri": "http://buildkit-session/nrihz69qsb1bw857axnpfxr9v",
+            "digest": {
+              "sha256": "2c5b940f77eed1857cce35df59db1b091e359de0e385cb83bc9027f707e235eb"
+            },
+            "path": "ci/pre-main-probe.Dockerfile"
+          },
+          "request": {
+            "args": {
+              "build-arg:BUILD_JOBS": "2",
+              "build-arg:BUILD_TAG": "no-rpath-pg-b95b142190cd-20261031t193328z-45711b",
+              "build-arg:DEBIAN_VERSION": "bookworm",
+              "build-arg:DSGA_RUNTIME_PROFILE": "default-loader-v1",
+              "build-arg:EXTENSIONS": "none",
+              "build-arg:GIT_VERSION": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+              "build-arg:HTTPS_PROXY": "http://127.0.0.1:7890",
+              "build-arg:HTTP_PROXY": "http://127.0.0.1:7890",
+              "build-arg:NO_PROXY": "localhost,127.0.0.1,::1",
+              "build-arg:PG_VERSION": "v17",
+              "build-arg:PROBE_MEMORY_MAX_BYTES": "2147483648",
+              "build-arg:http_proxy": "http://127.0.0.1:7890",
+              "build-arg:https_proxy": "http://127.0.0.1:7890",
+              "build-arg:no_proxy": "localhost,127.0.0.1,::1",
+              "cpuquota": "200000",
+              "force-network-mode": "host",
+              "label:io.neon.extensions": "none",
+              "label:io.neon.pg17.revision": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+              "label:io.neon.probe.source-manifest-sha256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+              "label:io.neon.test-only": "true",
+              "label:org.opencontainers.image.revision": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+              "memory": "2147483648",
+              "memswap": "2147483648",
+              "target": "runtime"
+            }
+          }
+        },
+        "compatibilityVersion": 30
+      },
+      "environment": {
+        "dockerfileVersion": "1.28.0",
+        "platform": "linux/amd64"
+      }
+    }
+  },
+  "buildx.build.ref": "neon-data/neon-data0/1cf41tvdr9tzybf2m7yemv9au",
+  "containerimage.descriptor": {
+    "mediaType": "application/vnd.oci.image.index.v1+json",
+    "digest": "sha256:47ef74c7bee6018c1e8578486d1196bd0c9b6d84040f6ccdba97823dcd019e55",
+    "size": 856
+  },
+  "containerimage.digest": "sha256:47ef74c7bee6018c1e8578486d1196bd0c9b6d84040f6ccdba97823dcd019e55",
+  "image.name": "127.0.0.1:5001/neon/compute-v17:no-rpath-pg-b95b142190cd-20261031t193328z-45711b"
+}

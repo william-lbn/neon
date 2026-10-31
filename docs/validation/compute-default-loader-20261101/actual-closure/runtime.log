@@ -1,0 +1,4 @@
+=== RUN   TestDEVActualNoRpathRuntimeClosure
+    dev_actual_runtime_closure_test.go:25: DEV_ONLY actual ELF/default-loader closure 16 files passed; no Birth/Source/normal authority
+--- PASS: TestDEVActualNoRpathRuntimeClosure (0.64s)
+PASS

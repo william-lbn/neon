@@ -1,0 +1,448 @@
+#0 building with "neon-data" instance using remote driver
+
+#1 [internal] load remote build context
+#1 DONE 1.3s
+
+#1 [internal] load remote build context
+#1 DONE 1.3s
+
+#2 copy /context /
+#2 DONE 1.3s
+
+#3 [internal] load metadata for 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache@sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7
+#3 DONE 0.0s
+
+#4 [build-deps 1/1] FROM 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache@sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7
+#4 resolve 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache@sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7 0.0s done
+#4 DONE 0.0s
+
+#4 [build-deps 1/1] FROM 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache@sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7
+#4 CACHED
+
+#5 [pg-build 1/7] COPY vendor/postgres-v17 postgres
+#5 DONE 3.6s
+
+#6 [pg-build 2/7] COPY compute/patches/postgres_fdw.patch .
+#6 DONE 0.1s
+
+#7 [pg-build 3/7] COPY compute/patches/pg_stat_statements_pg14-16.patch .
+#7 DONE 0.1s
+
+#8 [pg-build 4/7] COPY compute/patches/pg_stat_statements_pg17.patch .
+#8 DONE 0.1s
+
+#9 [pg-build 5/7] COPY ci/pre-main-probe-pg-inputs.sha256 /tmp/pre-main-pg-inputs.sha256
+#9 DONE 0.3s
+
+#10 [pg-build 6/7] RUN printf "PROBE_MEMORY_MAX="; cat /sys/fs/cgroup/memory.max; printf "PROBE_CPU_MAX="; cat /sys/fs/cgroup/cpu.max; test "$(cat /sys/fs/cgroup/memory.max)" = "3221225472"; test "$(cat /sys/fs/cgroup/memory.swap.max)" = "0"; mkdir -p /pre-main-source-proof && cd /postgres && sha256sum -c /tmp/pre-main-pg-inputs.sha256 > /pre-main-source-proof/pg-before-official-patches.check && cp /tmp/pre-main-pg-inputs.sha256 /pre-main-source-proof/pg-inputs.sha256
+#10 0.104 PROBE_MEMORY_MAX=3221225472
+#10 0.105 PROBE_CPU_MAX=200000 100000
+#10 DONE 0.9s
+
+#11 [pg-build 7/7] RUN --mount=type=cache,id=compute-ccache-amd64,target=/home/nonroot/.cache/ccache,sharing=shared printf "PROBE_MEMORY_MAX="; cat /sys/fs/cgroup/memory.max; printf "PROBE_CPU_MAX="; cat /sys/fs/cgroup/cpu.max; test "$(cat /sys/fs/cgroup/memory.max)" = "3221225472"; test "$(cat /sys/fs/cgroup/memory.swap.max)" = "0"; cd postgres &&     case "v17" in     "v14" | "v15" | "v16")     patch -p1 < /pg_stat_statements_pg14-16.patch;     ;;     "v17")     patch -p1 < /pg_stat_statements_pg17.patch;     ;;     *)     echo "No contrib patches for this PostgreSQL version" && exit 1;;     esac &&     patch -p1 < /postgres_fdw.patch &&     export CONFIGURE_CMD="./configure CFLAGS='-O2 -g3 -fsigned-char' --enable-debug --with-openssl --with-uuid=ossp     --with-icu --with-libxml --with-libxslt --with-lz4" &&     if [ "v17" != "v14" ]; then         export CONFIGURE_CMD="${CONFIGURE_CMD} --with-zstd";     fi &&     case "default-loader-v1" in       legacy) ;;       default-loader-v1)         test "v17" = v17 && test "amd64" = amd64 &&         export CONFIGURE_CMD="${CONFIGURE_CMD} --disable-rpath";         ;;       *) echo "unsupported DSGA runtime profile" >&2; exit 1 ;;     esac &&     eval $CONFIGURE_CMD &&     make MAKELEVEL=0 -j "2" -s install &&     make MAKELEVEL=0 -j "2" -s -C contrib/ install &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/autoinc.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/dblink.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/postgres_fdw.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/bloom.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/earthdistance.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/insert_username.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/intagg.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/moddatetime.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/pg_stat_statements.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/pgrowlocks.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/pgstattuple.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/refint.control &&     echo 'trusted = true' >> /usr/local/pgsql/share/extension/xml2.control
+#11 0.110 PROBE_MEMORY_MAX=3221225472
+#11 0.111 PROBE_CPU_MAX=200000 100000
+#11 0.152 patching file contrib/pg_stat_statements/pg_stat_statements--1.10--1.11.sql
+#11 0.152 patching file contrib/pg_stat_statements/pg_stat_statements--1.4.sql
+#11 0.152 patching file contrib/pg_stat_statements/pg_stat_statements--1.6--1.7.sql
+#11 0.153 patching file contrib/postgres_fdw/postgres_fdw--1.0.sql
+#11 0.371 checking build system type... x86_64-pc-linux-gnu
+#11 1.522 checking host system type... x86_64-pc-linux-gnu
+#11 1.522 checking which template to use... linux
+#11 1.523 checking whether NLS is wanted... no
+#11 1.523 checking for default port number... 5432
+#11 1.531 checking for block size... 8kB
+#11 1.533 checking for segment size... 1GB
+#11 1.535 checking for WAL block size... 8kB
+#11 1.537 checking for gcc... gcc
+#11 1.708 checking whether the C compiler works... yes
+#11 2.075 checking for C compiler default output file name... a.out
+#11 2.076 checking for suffix of executables... 
+#11 2.128 checking whether we are cross compiling... no
+#11 2.271 checking for suffix of object files... o
+#11 2.339 checking whether we are using the GNU C compiler... yes
+#11 2.388 checking whether gcc accepts -g... yes
+#11 2.426 checking for gcc option to accept ISO C89... none needed
+#11 2.540 checking for gcc option to accept ISO C99... none needed
+#11 2.752 checking for g++... g++
+#11 2.846 checking whether we are using the GNU C++ compiler... yes
+#11 3.561 checking whether g++ accepts -g... yes
+#11 3.660 checking for gawk... no
+#11 3.660 checking for mawk... mawk
+#11 3.662 checking whether gcc supports -Wdeclaration-after-statement, for CFLAGS... yes
+#11 3.688 checking whether gcc supports -Werror=vla, for CFLAGS... yes
+#11 3.707 checking whether gcc supports -Werror=unguarded-availability-new, for CFLAGS... no
+#11 3.765 checking whether g++ supports -Werror=unguarded-availability-new, for CXXFLAGS... no
+#11 3.826 checking whether gcc supports -Wendif-labels, for CFLAGS... yes
+#11 3.847 checking whether g++ supports -Wendif-labels, for CXXFLAGS... yes
+#11 3.867 checking whether gcc supports -Wmissing-format-attribute, for CFLAGS... yes
+#11 3.887 checking whether g++ supports -Wmissing-format-attribute, for CXXFLAGS... yes
+#11 3.916 checking whether gcc supports -Wimplicit-fallthrough=3, for CFLAGS... yes
+#11 3.937 checking whether g++ supports -Wimplicit-fallthrough=3, for CXXFLAGS... yes
+#11 3.960 checking whether gcc supports -Wcast-function-type, for CFLAGS... yes
+#11 3.982 checking whether g++ supports -Wcast-function-type, for CXXFLAGS... yes
+#11 4.002 checking whether gcc supports -Wshadow=compatible-local, for CFLAGS... yes
+#11 4.023 checking whether g++ supports -Wshadow=compatible-local, for CXXFLAGS... yes
+#11 4.050 checking whether gcc supports -Wformat-security, for CFLAGS... yes
+#11 4.081 checking whether g++ supports -Wformat-security, for CXXFLAGS... yes
+#11 4.123 checking whether gcc supports -fno-strict-aliasing, for CFLAGS... yes
+#11 4.141 checking whether g++ supports -fno-strict-aliasing, for CXXFLAGS... yes
+#11 4.170 checking whether gcc supports -fwrapv, for CFLAGS... yes
+#11 4.188 checking whether g++ supports -fwrapv, for CXXFLAGS... yes
+#11 4.207 checking whether gcc supports -fexcess-precision=standard, for CFLAGS... yes
+#11 4.226 checking whether g++ supports -fexcess-precision=standard, for CXXFLAGS... no
+#11 4.251 checking whether gcc supports -funroll-loops, for CFLAGS_UNROLL_LOOPS... yes
+#11 4.268 checking whether gcc supports -ftree-vectorize, for CFLAGS_VECTORIZE... yes
+#11 4.293 checking whether gcc supports -Wunused-command-line-argument, for NOT_THE_CFLAGS... no
+#11 4.345 checking whether gcc supports -Wcompound-token-split-by-macro, for NOT_THE_CFLAGS... no
+#11 4.411 checking whether gcc supports -Wformat-truncation, for NOT_THE_CFLAGS... yes
+#11 4.433 checking whether gcc supports -Wstringop-truncation, for NOT_THE_CFLAGS... yes
+#11 4.453 checking whether gcc supports -Wcast-function-type-strict, for NOT_THE_CFLAGS... no
+#11 4.518 checking whether gcc supports -fvisibility=hidden, for CFLAGS_SL_MODULE... yes
+#11 4.535 checking whether g++ supports -fvisibility=hidden, for CXXFLAGS_SL_MODULE... yes
+#11 4.558 checking whether g++ supports -fvisibility-inlines-hidden, for CXXFLAGS_SL_MODULE... yes
+#11 4.579 checking whether the C compiler still works... yes
+#11 4.660 checking how to run the C preprocessor... gcc -E
+#11 4.770 checking for pkg-config... /usr/bin/pkg-config
+#11 4.771 checking pkg-config is at least version 0.9.0... yes
+#11 4.788 checking whether to build with ICU support... yes
+#11 4.788 checking for icu-uc icu-i18n... yes
+#11 4.845 checking whether to build with Tcl... no
+#11 4.845 checking whether to build Perl modules... no
+#11 4.845 checking whether to build Python modules... no
+#11 4.845 checking whether to build with GSSAPI support... no
+#11 4.847 checking whether to build with PAM support... no
+#11 4.847 checking whether to build with BSD Authentication support... no
+#11 4.847 checking whether to build with LDAP support... no
+#11 4.847 checking whether to build with Bonjour support... no
+#11 4.847 checking whether to build with SELinux support... no
+#11 4.847 checking whether to build with libseccomp support... no
+#11 4.847 checking whether to build with systemd support... no
+#11 4.847 checking whether to build with XML support... yes
+#11 4.847 checking for libxml-2.0 >= 2.6.23... yes
+#11 4.866 checking whether to build with LZ4 support... yes
+#11 4.867 checking for liblz4... yes
+#11 4.896 checking whether to build with ZSTD support... yes
+#11 4.896 checking for libzstd >= 1.4.0... yes
+#11 4.953 checking for strip... strip
+#11 4.953 checking whether it is possible to strip libraries... yes
+#11 4.971 checking for ar... ar
+#11 4.972 checking for a BSD-compatible install... /usr/bin/install -c
+#11 4.983 checking for tar... /usr/bin/tar
+#11 4.983 checking whether ln -s works... yes
+#11 4.983 checking for a thread-safe mkdir -p... /usr/bin/mkdir -p
+#11 4.986 checking for bison... /usr/bin/bison
+#11 5.032 configure: using bison (GNU Bison) 3.8.2
+#11 5.055 checking for flex... /usr/bin/flex
+#11 5.164 configure: using flex 2.6.4
+#11 5.164 checking for perl... /usr/bin/perl
+#11 5.479 configure: using perl 5.36.0
+#11 5.481 checking for a sed that does not truncate output... /usr/bin/sed
+#11 5.488 checking for grep that handles long lines and -e... /usr/bin/grep
+#11 5.490 checking for egrep... /usr/bin/grep -E
+#11 5.492 checking for ANSI C header files... yes
+#11 5.694 checking for sys/types.h... yes
+#11 5.757 checking for sys/stat.h... yes
+#11 5.860 checking for stdlib.h... yes
+#11 5.923 checking for string.h... yes
+#11 6.052 checking for memory.h... yes
+#11 6.134 checking for strings.h... yes
+#11 6.238 checking for inttypes.h... yes
+#11 6.655 checking for stdint.h... yes
+#11 6.733 checking for unistd.h... yes
+#11 6.932 checking whether gcc is Clang... no
+#11 7.008 checking whether pthreads work with -pthread... yes
+#11 7.112 checking for joinable pthread attribute... PTHREAD_CREATE_JOINABLE
+#11 7.169 checking whether more special flags are required for pthreads... no
+#11 7.169 checking for PTHREAD_PRIO_INHERIT... yes
+#11 7.229 checking pthread.h usability... yes
+#11 7.356 checking pthread.h presence... yes
+#11 7.377 checking for pthread.h... yes
+#11 7.377 checking for strerror_r... yes
+#11 7.427 checking whether strerror_r returns int... no
+#11 7.580 checking for main in -lm... yes
+#11 7.688 checking for library containing setproctitle... no
+#11 7.849 checking for library containing dlsym... none required
+#11 7.900 checking for library containing socket... none required
+#11 7.951 checking for library containing getopt_long... none required
+#11 8.000 checking for library containing shm_open... none required
+#11 8.067 checking for library containing shm_unlink... none required
+#11 8.143 checking for library containing clock_gettime... none required
+#11 8.193 checking for library containing shmget... none required
+#11 8.265 checking for library containing backtrace_symbols... none required
+#11 8.336 checking for library containing pthread_barrier_wait... none required
+#11 8.404 checking for library containing readline... -lreadline
+#11 8.493 checking for inflate in -lz... yes
+#11 8.545 checking for CRYPTO_new_ex_data in -lcrypto... yes
+#11 8.668 checking for SSL_new in -lssl... yes
+#11 8.790 checking for SSL_CTX_set_cert_cb... yes
+#11 8.872 checking for OPENSSL_init_ssl... yes
+#11 8.957 checking for BIO_meth_new... yes
+#11 9.051 checking for ASN1_STRING_get0_data... yes
+#11 9.140 checking for HMAC_CTX_new... yes
+#11 9.230 checking for HMAC_CTX_free... yes
+#11 9.320 checking for CRYPTO_lock... no
+#11 9.393 checking for X509_get_signature_info... yes
+#11 9.486 checking for SSL_CTX_set_num_tickets... yes
+#11 9.567 checking for xmlSaveToBuffer in -lxml2... yes
+#11 9.801 checking for xsltCleanupGlobals in -lxslt... yes
+#11 9.929 checking for LZ4_compress_default in -llz4... yes
+#11 10.00 checking for ZSTD_compress in -lzstd... yes
+#11 10.08 checking for uuid_export in -lossp-uuid... yes
+#11 10.22 checking atomic.h usability... no
+#11 10.42 checking atomic.h presence... no
+#11 10.52 checking for atomic.h... no
+#11 10.53 checking copyfile.h usability... no
+#11 10.64 checking copyfile.h presence... no
+#11 10.72 checking for copyfile.h... no
+#11 10.72 checking execinfo.h usability... yes
+#11 10.94 checking execinfo.h presence... yes
+#11 10.96 checking for execinfo.h... yes
+#11 10.96 checking getopt.h usability... yes
+#11 11.10 checking getopt.h presence... yes
+#11 11.11 checking for getopt.h... yes
+#11 11.12 checking ifaddrs.h usability... yes
+#11 11.42 checking ifaddrs.h presence... yes
+#11 11.44 checking for ifaddrs.h... yes
+#11 11.45 checking langinfo.h usability... yes
+#11 11.78 checking langinfo.h presence... yes
+#11 11.80 checking for langinfo.h... yes
+#11 11.81 checking mbarrier.h usability... no
+#11 11.93 checking mbarrier.h presence... no
+#11 11.98 checking for mbarrier.h... no
+#11 11.98 checking sys/epoll.h usability... yes
+#11 12.13 checking sys/epoll.h presence... yes
+#11 12.16 checking for sys/epoll.h... yes
+#11 12.17 checking sys/event.h usability... no
+#11 12.33 checking sys/event.h presence... no
+#11 12.35 checking for sys/event.h... no
+#11 12.36 checking sys/personality.h usability... yes
+#11 12.49 checking sys/personality.h presence... yes
+#11 12.51 checking for sys/personality.h... yes
+#11 12.52 checking sys/prctl.h usability... yes
+#11 12.67 checking sys/prctl.h presence... yes
+#11 12.68 checking for sys/prctl.h... yes
+#11 12.69 checking sys/procctl.h usability... no
+#11 12.88 checking sys/procctl.h presence... no
+#11 12.91 checking for sys/procctl.h... no
+#11 12.91 checking sys/signalfd.h usability... yes
+#11 13.01 checking sys/signalfd.h presence... yes
+#11 13.02 checking for sys/signalfd.h... yes
+#11 13.03 checking sys/ucred.h usability... no
+#11 13.21 checking sys/ucred.h presence... no
+#11 13.23 checking for sys/ucred.h... no
+#11 13.23 checking termios.h usability... yes
+#11 13.36 checking termios.h presence... yes
+#11 13.37 checking for termios.h... yes
+#11 13.38 checking ucred.h usability... no
+#11 13.53 checking ucred.h presence... no
+#11 13.55 checking for ucred.h... no
+#11 13.55 checking readline/readline.h usability... yes
+#11 13.78 checking readline/readline.h presence... yes
+#11 13.81 checking for readline/readline.h... yes
+#11 13.81 checking readline/history.h usability... yes
+#11 14.02 checking readline/history.h presence... yes
+#11 14.04 checking for readline/history.h... yes
+#11 14.04 checking zlib.h usability... yes
+#11 14.15 checking zlib.h presence... yes
+#11 14.17 checking for zlib.h... yes
+#11 14.17 checking for lz4... no
+#11 14.17 checking lz4.h usability... yes
+#11 14.33 checking lz4.h presence... yes
+#11 14.35 checking for lz4.h... yes
+#11 14.35 checking for zstd... /usr/bin/zstd
+#11 14.35 checking zstd.h usability... yes
+#11 14.53 checking zstd.h presence... yes
+#11 14.55 checking for zstd.h... yes
+#11 14.55 checking for openssl... /usr/bin/openssl
+#11 14.69 configure: using openssl: OpenSSL 3.0.22 25 Aug 2026 (Library: OpenSSL 3.0.22 25 Aug 2026)
+#11 14.69 checking openssl/ssl.h usability... yes
+#11 15.24 checking openssl/ssl.h presence... yes
+#11 15.29 checking for openssl/ssl.h... yes
+#11 15.29 checking openssl/err.h usability... yes
+#11 15.41 checking openssl/err.h presence... yes
+#11 15.43 checking for openssl/err.h... yes
+#11 15.43 checking libxml/parser.h usability... yes
+#11 15.75 checking libxml/parser.h presence... yes
+#11 15.79 checking for libxml/parser.h... yes
+#11 15.79 checking libxslt/xslt.h usability... yes
+#11 15.90 checking libxslt/xslt.h presence... yes
+#11 15.94 checking for libxslt/xslt.h... yes
+#11 15.94 checking ossp/uuid.h usability... yes
+#11 16.03 checking ossp/uuid.h presence... yes
+#11 16.04 checking for ossp/uuid.h... yes
+#11 16.06 checking whether byte ordering is bigendian... no
+#11 16.34 checking for inline... inline
+#11 16.37 checking for C printf format archetype... gnu_printf
+#11 16.41 checking for C++ printf format archetype... gnu_printf
+#11 16.44 checking for _Static_assert... yes
+#11 16.51 checking for typeof... typeof
+#11 16.57 checking for __builtin_types_compatible_p... yes
+#11 16.61 checking for __builtin_constant_p... yes
+#11 16.72 checking for __builtin_unreachable... yes
+#11 16.85 checking for computed goto support... yes
+#11 16.90 checking for struct tm.tm_zone... yes
+#11 17.03 checking for union semun... no
+#11 17.19 checking for socklen_t... yes
+#11 18.16 checking for struct sockaddr.sa_len... no
+#11 18.38 checking for locale_t... yes
+#11 18.45 checking for C/C++ restrict keyword... __restrict
+#11 18.53 checking for struct option... yes
+#11 18.72 checking whether assembler supports x86_64 popcntq... yes
+#11 18.78 checking for special C compiler options needed for large files... no
+#11 18.78 checking for _FILE_OFFSET_BITS value needed for large files... no
+#11 18.88 checking size of off_t... 8
+#11 19.02 checking size of bool... 1
+#11 19.10 checking for int timezone... yes
+#11 19.17 checking for wcstombs_l declaration... no
+#11 19.29 checking for backtrace_symbols... yes
+#11 19.36 checking for copyfile... no
+#11 19.55 checking for copy_file_range... yes
+#11 19.63 checking for getifaddrs... yes
+#11 19.70 checking for getpeerucred... no
+#11 19.78 checking for inet_pton... yes
+#11 19.91 checking for kqueue... no
+#11 19.98 checking for mbstowcs_l... no
+#11 20.06 checking for posix_fallocate... yes
+#11 20.16 checking for ppoll... yes
+#11 20.26 checking for pthread_is_threaded_np... no
+#11 20.34 checking for setproctitle... no
+#11 20.49 checking for setproctitle_fast... no
+#11 20.57 checking for strsignal... yes
+#11 20.64 checking for syncfs... yes
+#11 20.71 checking for sync_file_range... yes
+#11 20.79 checking for uselocale... yes
+#11 20.87 checking for wcstombs_l... no
+#11 20.93 checking for __builtin_bswap16... yes
+#11 21.00 checking for __builtin_bswap32... yes
+#11 21.07 checking for __builtin_bswap64... yes
+#11 21.14 checking for __builtin_clz... yes
+#11 21.20 checking for __builtin_ctz... yes
+#11 21.27 checking for __builtin_popcount... yes
+#11 21.78 checking for __builtin_frame_address... yes
+#11 21.84 checking for _LARGEFILE_SOURCE value needed for large files... no
+#11 21.91 checking how gcc reports undeclared, standard C functions... error
+#11 21.94 checking for posix_fadvise... yes
+#11 22.01 checking whether posix_fadvise is declared... yes
+#11 22.09 checking whether fdatasync is declared... yes
+#11 22.14 checking whether strlcat is declared... no
+#11 22.25 checking whether strlcpy is declared... no
+#11 22.90 checking whether strnlen is declared... yes
+#11 23.02 checking whether timingsafe_bcmp is declared... no
+#11 23.09 checking whether preadv is declared... yes
+#11 23.14 checking whether pwritev is declared... yes
+#11 23.23 checking whether strchrnul is declared... yes
+#11 23.33 checking whether memset_s is declared... no
+#11 23.41 checking whether F_FULLFSYNC is declared... no
+#11 23.51 checking for explicit_bzero... yes
+#11 23.57 checking for getopt... yes
+#11 23.64 checking for getpeereid... no
+#11 23.71 checking for inet_aton... yes
+#11 24.42 checking for mkdtemp... yes
+#11 24.49 checking for strlcat... no
+#11 24.56 checking for strlcpy... no
+#11 24.62 checking for strnlen... yes
+#11 24.69 checking for timingsafe_bcmp... no
+#11 24.80 checking for pthread_barrier_wait... yes
+#11 24.91 checking for getopt_long... yes
+#11 24.97 checking for syslog... yes
+#11 27.02 checking syslog.h usability... yes
+#11 27.98 checking syslog.h presence... yes
+#11 28.01 checking for syslog.h... yes
+#11 28.01 checking for opterr... yes
+#11 28.07 checking for optreset... no
+#11 28.14 checking unicode/ucol.h usability... yes
+#11 28.29 checking unicode/ucol.h presence... yes
+#11 28.32 checking for unicode/ucol.h... yes
+#11 28.32 checking for rl_completion_suppress_quote... yes
+#11 28.40 checking for rl_filename_quote_characters... yes
+#11 28.48 checking for rl_filename_quoting_function... yes
+#11 28.57 checking for append_history... yes
+#11 28.64 checking for history_truncate_file... yes
+#11 28.71 checking for rl_completion_matches... yes
+#11 28.79 checking for rl_filename_completion_function... yes
+#11 28.86 checking for rl_reset_screen_size... yes
+#11 28.93 checking for rl_variable_bind... yes
+#11 29.02 checking test program... ok
+#11 29.07 checking whether long int is 64 bits... yes
+#11 29.14 checking for __builtin_mul_overflow... yes
+#11 29.20 checking size of void *... 8
+#11 29.29 checking size of size_t... 8
+#11 29.49 checking size of long... 8
+#11 29.65 checking alignment of short... 2
+#11 29.75 checking alignment of int... 4
+#11 29.84 checking alignment of long... 8
+#11 29.93 checking alignment of double... 8
+#11 30.01 checking for int8... no
+#11 30.06 checking for uint8... no
+#11 30.10 checking for int64... no
+#11 30.14 checking for uint64... no
+#11 30.18 checking for __int128... yes
+#11 30.25 checking for __int128 alignment bug... ok
+#11 30.31 checking alignment of PG_INT128_TYPE... 16
+#11 30.44 checking for builtin __sync char locking functions... yes
+#11 30.50 checking for builtin __sync int32 locking functions... yes
+#11 30.56 checking for builtin __sync int32 atomic operations... yes
+#11 30.62 checking for builtin __sync int64 atomic operations... yes
+#11 30.68 checking for builtin __atomic int32 atomic operations... yes
+#11 30.74 checking for builtin __atomic int64 atomic operations... yes
+#11 30.80 checking for __get_cpuid... yes
+#11 30.87 checking for __get_cpuid_count... yes
+#11 30.95 checking for _xgetbv with CFLAGS=... no
+#11 31.37 checking for _xgetbv with CFLAGS=-mxsave... yes
+#11 31.81 checking for _mm512_popcnt_epi64 with CFLAGS=... no
+#11 32.24 checking for _mm512_popcnt_epi64 with CFLAGS=-mavx512vpopcntdq -mavx512bw... yes
+#11 32.68 checking for _mm_crc32_u8 and _mm_crc32_u32 with CFLAGS=... no
+#11 32.73 checking for _mm_crc32_u8 and _mm_crc32_u32 with CFLAGS=-msse4.2... yes
+#11 32.86 checking for __crc32cb, __crc32ch, __crc32cw, and __crc32cd with CFLAGS=... no
+#11 32.89 checking for __crc32cb, __crc32ch, __crc32cw, and __crc32cd with CFLAGS=-march=armv8-a+crc+simd... no
+#11 32.90 checking for __crc32cb, __crc32ch, __crc32cw, and __crc32cd with CFLAGS=-march=armv8-a+crc... no
+#11 32.92 checking for __builtin_loongarch_crcc_w_b_w, __builtin_loongarch_crcc_w_h_w, __builtin_loongarch_crcc_w_w_w and __builtin_loongarch_crcc_w_d_w... no
+#11 33.00 checking which CRC-32C implementation to use... SSE 4.2 with runtime check
+#11 33.00 checking for library containing sem_init... none required
+#11 33.06 checking which semaphore API to use... unnamed POSIX
+#11 33.06 checking which random number source to use... OpenSSL
+#11 33.06 checking for xmllint... no
+#11 33.06 checking for xsltproc... no
+#11 33.06 checking for fop... no
+#11 33.06 checking for dbtoepub... no
+#11 33.06 checking whether gcc supports -Wl,--as-needed, for LDFLAGS... yes
+#11 33.14 checking whether gcc supports -Wl,--export-dynamic, for LDFLAGS_EX_BE... yes
+#11 33.21 configure: using compiler=gcc (Debian 12.2.0-14+deb12u1) 12.2.0
+#11 33.21 configure: using CFLAGS=-Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Werror=vla -Wendif-labels -Wmissing-format-attribute -Wimplicit-fallthrough=3 -Wcast-function-type -Wshadow=compatible-local -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard -Wno-format-truncation -Wno-stringop-truncation -g -O2 -g3 -fsigned-char
+#11 33.21 configure: using CPPFLAGS= -D_GNU_SOURCE  -I/usr/include/libxml2
+#11 33.21 configure: using LDFLAGS=  -Wl,--as-needed
+#11 33.25 configure: creating ./config.status
+#11 33.36 config.status: creating GNUmakefile
+#11 33.37 config.status: creating src/Makefile.global
+#11 33.39 config.status: creating src/include/pg_config.h
+#11 33.40 config.status: creating src/include/pg_config_ext.h
+#11 33.42 config.status: creating src/interfaces/ecpg/include/ecpg_config.h
+#11 33.44 config.status: linking src/backend/port/tas/dummy.s to src/backend/port/tas.s
+#11 33.45 config.status: linking src/backend/port/posix_sema.c to src/backend/port/pg_sema.c
+#11 33.46 config.status: linking src/backend/port/sysv_shmem.c to src/backend/port/pg_shmem.c
+#11 33.46 config.status: linking src/include/port/linux.h to src/include/pg_config_os.h
+#11 33.47 config.status: linking src/makefiles/Makefile.linux to src/Makefile.port
+#11 DONE 331.5s
+
+#12 exporting to image
+#12 exporting layers
+#12 exporting layers 45.2s done
+#12 exporting manifest sha256:a04ada7d0475d76968605547ed6a41ccd369b7ee2c6cfdad3aa63254baa33180
+#12 exporting manifest sha256:a04ada7d0475d76968605547ed6a41ccd369b7ee2c6cfdad3aa63254baa33180 0.5s done
+#12 exporting config sha256:a9d23c301193ca76c32394d5b7a6c78079ed0d4aef3409684e16f9cce1e32d02
+#12 exporting config sha256:a9d23c301193ca76c32394d5b7a6c78079ed0d4aef3409684e16f9cce1e32d02 0.2s done
+#12 exporting attestation manifest sha256:4d10c2a11a2de95ce46d8a250318c21960796f95aace357fa71027dac1044e72
+#12 exporting attestation manifest sha256:4d10c2a11a2de95ce46d8a250318c21960796f95aace357fa71027dac1044e72 0.1s done
+#12 exporting manifest list sha256:4578312b21ccf702470ce42c41b46698d4eb5c02197cd83d324283b64ef0542e 0.1s done
+#12 DONE 49.1s
+
+#12 exporting to image
+#12 pushing layers
+#12 pushing layers 4.0s done
+#12 pushing manifest for 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-pg-build@sha256:4578312b21ccf702470ce42c41b46698d4eb5c02197cd83d324283b64ef0542e
+#12 pushing manifest for 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-pg-build@sha256:4578312b21ccf702470ce42c41b46698d4eb5c02197cd83d324283b64ef0542e 2.3s done
+#12 DONE 55.4s
+
+#13 resolving provenance for metadata file
+#13 DONE 0.0s

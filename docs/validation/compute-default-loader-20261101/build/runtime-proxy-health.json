@@ -1,0 +1,20 @@
+[
+  {
+    "label": "GitHub",
+    "curl_exit": 0,
+    "HTTP_status": "200",
+    "expected": "200"
+  },
+  {
+    "label": "Rust1.88",
+    "curl_exit": 0,
+    "HTTP_status": "200",
+    "expected": "200"
+  },
+  {
+    "label": "DockerRegistryAuthChallenge",
+    "curl_exit": 0,
+    "HTTP_status": "401",
+    "expected": "401"
+  }
+]

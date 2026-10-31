@@ -1,0 +1,8 @@
+独立只读审查：Root no-RUNPATH/default-loader 两源码
+结论：在此显式新构建组件范围无提交阻断。未编辑源码或Git。
+1. DSGA_RUNTIME_PROFILE默认legacy；旧pg configure不追加禁rpath，旧runtime仍运行ldconfig。新增脚本只在非legacy分支调用且严格拒未知profile/非v17/非amd64/非root。
+2. 新profile仅在PG17 amd64配置追加--disable-rpath；既有PG编译与原入口路径保持，真实PGstage/最终NONE runtime已有独立完成收据，测试层未修改其ELF。
+3. 原/usr/local/lib核心lib*.so*逐个解析源后复制同字节root-owned regular到独立/usr/lib/x86_64-linux-gnu/neon-pg17-core；默认搜索目录别名指向该独立core，避免指向可替换local/lib。当前可信构建源限定不等于任意未来插件可获得资格。
+4. cache删除后实际不存在；preload/hwcaps目录或别名出现均拒。目录完整RO祖先、实际加载器闭包、原image与source生命周期仍须真实Guest Source核验；此构建脚本不自证RO或正常降限。
+5. 精确2个当前源码逐hash匹配实际explicit-loader-profile-overlay.tar；PASS_EXACT_NONE_RUNTIME_DOCKER_VISIBLE仍非formalRelease/normalQualification，EXTENSIONS=none不代表全扩展矩阵。
+限制：本独审不执行源码、不更改文件、不替代Root真实glibc --list/完整RO闭包probe，不是normal/KVM/E2E验收。

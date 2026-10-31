@@ -1,0 +1,45 @@
+#0 building with "neon-data" instance using remote driver
+
+#1 [internal] load remote build context
+#1 DONE 1.8s
+
+#1 [internal] load remote build context
+#1 DONE 1.8s
+
+#2 copy /context /
+#2 DONE 0.8s
+
+#3 [internal] load metadata for 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache@sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7
+#3 DONE 0.0s
+
+#4 [build-deps 1/1] FROM 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache@sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7
+#4 resolve 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-cache@sha256:03f3388a20ef61486f13f6afeab0a2d550d1823205a85a1779a6247a71a883c7 0.1s done
+#4 DONE 0.1s
+
+#5 [build-deps-with-cargo 1/3] WORKDIR /home/nonroot
+#5 CACHED
+
+#6 [build-deps-with-cargo 2/3] RUN echo -e "--retry-connrefused\n--connect-timeout 15\n--retry 5\n--max-time 300\n" > /home/nonroot/.curlrc
+#6 CACHED
+
+#7 [build-deps-with-cargo 3/3] RUN curl -sSO https://static.rust-lang.org/rustup/dist/$(uname -m)-unknown-linux-gnu/rustup-init &&     chmod +x rustup-init &&     ./rustup-init -y --no-modify-path --profile minimal --default-toolchain 1.88.0 &&     rm rustup-init
+#7 CACHED
+
+#8 exporting to image
+#8 exporting layers done
+#8 exporting manifest sha256:8f44142f19367b54d0853f7efbcad6471a5332eaf2bd1c4d9323120f1a84ea3b 0.1s done
+#8 exporting config sha256:aa8dd49276e8e2958795e4f7fe1117cfd70c84ba757968f890aa4506d6d2935d 0.0s done
+#8 exporting attestation manifest sha256:31aa33bd605f7fbb60383c8d789646043506f37ef99a6fd419d9f1a0ba1a0db2
+#8 exporting attestation manifest sha256:31aa33bd605f7fbb60383c8d789646043506f37ef99a6fd419d9f1a0ba1a0db2 2.4s done
+#8 exporting manifest list sha256:c8e8b9138412a354aba5febebe7e6f5eeca07b3829ccf232516338a6c2f686f6 0.1s done
+#8 DONE 2.7s
+
+#8 exporting to image
+#8 pushing layers
+#8 pushing layers 0.9s done
+#8 pushing manifest for 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-with-cargo@sha256:c8e8b9138412a354aba5febebe7e6f5eeca07b3829ccf232516338a6c2f686f6
+#8 pushing manifest for 127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-with-cargo@sha256:c8e8b9138412a354aba5febebe7e6f5eeca07b3829ccf232516338a6c2f686f6 0.3s done
+#8 DONE 3.9s
+
+#9 resolving provenance for metadata file
+#9 DONE 0.0s

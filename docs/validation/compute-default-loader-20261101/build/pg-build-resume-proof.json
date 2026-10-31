@@ -1,0 +1,6 @@
+{
+  "status": "REUSED_EXACT_SUCCESSFUL_STAGE_NOT_RECOMPILED",
+  "image": "127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-pg-build",
+  "digest": "sha256:4578312b21ccf702470ce42c41b46698d4eb5c02197cd83d324283b64ef0542e",
+  "sameSourceManifest": true
+}

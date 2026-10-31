@@ -1,0 +1,11 @@
+{
+  "conclusion": "NO_BLOCKER_WITHIN_EXPLICIT_COMPONENT_SCOPE",
+  "source_sha256": {
+    "compute/compute-node.Dockerfile": "32ad972d5304b487d3f07d4d9f0b3459686477bab1ddf4e35c92ebcb4fab0bff",
+    "compute/dsga-default-loader.sh": "b553bed819c8839ba02b55961f3c76c241c02a821693adb0296d09d2a7fd5873"
+  },
+  "exact_overlay_matched": true,
+  "normal_permit": false,
+  "E": 0,
+  "review_report_sha256": "971c6252aa6a111df5104a336fe42cb680a38348bb290e7bf3b6612ab44c23a1"
+}

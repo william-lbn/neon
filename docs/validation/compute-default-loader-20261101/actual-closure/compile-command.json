@@ -1,0 +1,20 @@
+[
+  "docker",
+  "buildx",
+  "build",
+  "--builder",
+  "neon-data",
+  "--resource",
+  "memory=2g",
+  "--resource",
+  "memory-swap=2g",
+  "--resource",
+  "cpu-quota=200000",
+  "--progress",
+  "plain",
+  "--output",
+  "type=local,dest=/data/neon-build/validation/compute-no-rpath-closure-20261031T202356Z-0d36d0/compiled",
+  "-f",
+  "/data/neon-build/validation/compute-no-rpath-closure-20261031T202356Z-0d36d0/Dockerfile",
+  "/data/neon-build/validation/compute-no-rpath-closure-20261031T202356Z-0d36d0/source"
+]

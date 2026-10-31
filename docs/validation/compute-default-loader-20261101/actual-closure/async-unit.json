@@ -1,0 +1,10 @@
+{
+  "unit": "neon-compute-no-rpath-closure-20261031t202356z-0d36d0",
+  "nonce": "20261031T202356Z-0d36d0",
+  "source_lock_sha256": "e4a9147fb2d37569a08cbdc849b4019fcef28e1714901aad564d02d15101facd",
+  "runtime_image": "127.0.0.1:5001/neon/compute-v17@sha256:47ef74c7bee6018c1e8578486d1196bd0c9b6d84040f6ccdba97823dcd019e55",
+  "worker_sha256": "df3bdcb6b9059cbf039eea9101cd64c50bb5c7a7d510d77c7198c718003a8318",
+  "build_worker_limits": "2CPU/2GiB/no extra swap",
+  "runtime_limits": "1CPU/1GiB/read-only/noNIC/no extra swap/64pids",
+  "scope": "component only, not Source13/Birth/normal/E"
+}

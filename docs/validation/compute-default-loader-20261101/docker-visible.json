@@ -1,0 +1,9 @@
+{
+  "image": "127.0.0.1:5001/neon/compute-v17:no-rpath-pg-b95b142190cd-20261031t193328z-45711b",
+  "ID": "sha256:789ea19904a045bd9b5019cbc146e8a497c2195363f344f4e733b71cea59f65e",
+  "RepoDigests": [
+    "127.0.0.1:5001/neon/compute-v17@sha256:47ef74c7bee6018c1e8578486d1196bd0c9b6d84040f6ccdba97823dcd019e55"
+  ],
+  "Size": 807832438,
+  "scope": "NONE component, not final release"
+}

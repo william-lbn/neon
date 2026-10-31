@@ -1,0 +1,23 @@
+{
+  "status": "PASS_PG_STAGE_NO_RPATH_DOCKER_VISIBLE",
+  "sourceManifestSHA256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+  "neon": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+  "PG17": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+  "profile": "default-loader-v1",
+  "overlay": {
+    "compute/compute-node.Dockerfile": "32ad972d5304b487d3f07d4d9f0b3459686477bab1ddf4e35c92ebcb4fab0bff",
+    "compute/dsga-default-loader.sh": "b553bed819c8839ba02b55961f3c76c241c02a821693adb0296d09d2a7fd5873"
+  },
+  "image": "127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-pg-build",
+  "digest": "sha256:4578312b21ccf702470ce42c41b46698d4eb5c02197cd83d324283b64ef0542e",
+  "DockerImageID": "sha256:a9d23c301193ca76c32394d5b7a6c78079ed0d4aef3409684e16f9cce1e32d02",
+  "RepoDigests": [
+    "127.0.0.1:5001/neon/compute-v17-stage@sha256:4578312b21ccf702470ce42c41b46698d4eb5c02197cd83d324283b64ef0542e"
+  ],
+  "actualNoRpathELF": true,
+  "runtimeHelperAlreadySeparateComponentOnly": true,
+  "finalRuntimeImageBuilt": false,
+  "formalRelease": false,
+  "normalQualification": false,
+  "seconds": 418.79759965599806
+}

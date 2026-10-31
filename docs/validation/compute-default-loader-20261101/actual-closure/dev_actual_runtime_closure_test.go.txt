@@ -1,0 +1,26 @@
+//go:build linux
+package resourceguard
+import("encoding/json";"fmt";"os";"os/exec";"path/filepath";"sort";"strings";"syscall";"testing")
+// DEV_ONLY: actual immutable image integration probe. Inventory is a candidate,
+// not runtime ISO/Birth/Source authority; the production closure check is unchanged.
+func TestDEVActualNoRpathRuntimeClosure(t *testing.T){
+ m:=nativeBirthBuildManifest{ProtocolVersion:1,Scope:nativeBirthBuildScope,PGmajor:17,LaunchPath:FixedPostgresPath}
+ var e error;m.PostgresPath,e=nativeBirthCanonical(FixedPostgresPath);if e!=nil{t.Fatal(e)}
+ seen:=map[string]bool{};var visit func(string)error
+ visit=func(p string)error{p,e=nativeBirthCanonical(p);if e!=nil{return e};if seen[p]{return nil};seen[p]=true
+  f,e:=nativeBirthOpenRO(p);if e!=nil{return e};defer f.Close();h,e:=nativeBirthFileHash(f);if e!=nil{return e};meta,e:=nativeBirthParseELF(f);if e!=nil{return fmt.Errorf("strict parser %s: %w",p,e)};m.Files=append(m.Files,nativeBirthBuildFile{Path:p,SHA256:h})
+  if p==m.PostgresPath&&meta.Interpreter!="" {m.InterpreterPath,e=nativeBirthCanonical(meta.Interpreter);if e!=nil{return e};if e=visit(m.InterpreterPath);e!=nil{return e}}
+  for _,name:=range meta.Needed{found:="";for _,dir:=range nativeBirthLoaderDirs{v:=filepath.Join(dir,name);_,err:=os.Lstat(v);if os.IsNotExist(err){continue};if err!=nil{return err};found=v;break};if found==""{return fmt.Errorf("actual default path misses %s",name)};if err:=visit(found);err!=nil{return err}}
+  return nil
+ };if e=visit(m.PostgresPath);e!=nil{t.Fatal(e)};sort.Slice(m.Files,func(i,j int)bool{return m.Files[i].Path<m.Files[j].Path})
+ raw,e:=json.MarshalIndent(m,"","  ");if e!=nil{t.Fatal(e)};if e=os.WriteFile("/receipt/candidate-build-manifest.json",append(raw,'\n'),0644);e!=nil{t.Fatal(e)}
+ fd,e:=nativeBirthVerifyClosure(m);if e!=nil{t.Fatalf("UNCHANGED strict production closure: %v",e)};defer fd.Close()
+ // An independent glibc invocation as actual uid/gid1000 must choose the same
+ // resolved files. No LD_ variables or network and no simulated loader paths.
+ cmd:=exec.Command(m.InterpreterPath,"--list",FixedPostgresPath);cmd.Env=[]string{"PATH=/usr/bin:/bin","LC_ALL=C"};cmd.SysProcAttr=&syscall.SysProcAttr{Credential:&syscall.Credential{Uid:1000,Gid:1000,Groups:[]uint32{}}};out,e:=cmd.CombinedOutput();if err:=os.WriteFile("/receipt/actual-glibc-list.txt",out,0644);err!=nil{t.Fatal(err)};if e!=nil{t.Fatalf("actual glibc: %v %s",e,out)}
+ actual:=map[string]bool{m.PostgresPath:true}
+ for _,line:=range strings.Split(string(out),"\n"){for _,field:=range strings.Fields(line){if strings.HasPrefix(field,"/"){p,e:=filepath.EvalSymlinks(field);if e!=nil{t.Fatal(e)};actual[p]=true}}}
+ if len(actual)!=len(seen){t.Fatalf("actual loader files %v differ from candidate %v",actual,seen)};for p:=range actual{if !seen[p]{t.Fatalf("actual loader selected undeclared %s",p)}}
+ bad:=m;bad.Files=append([]nativeBirthBuildFile(nil),m.Files...);bad.Files[0].SHA256=strings.Repeat("ab",32);if f,e:=nativeBirthVerifyClosure(bad);e==nil{f.Close();t.Fatal("modified digest accepted")}
+ t.Logf("DEV_ONLY actual ELF/default-loader closure %d files passed; no Birth/Source/normal authority",len(m.Files))
+}

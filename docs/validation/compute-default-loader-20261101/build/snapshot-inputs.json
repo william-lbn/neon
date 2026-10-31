@@ -1,0 +1,16 @@
+{
+  "neonCommit": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+  "pg17Commit": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+  "sourceManifestSHA256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+  "sourceEntryCount": 9899,
+  "snapshot": "/data/neon-build/validation/compute-no-rpath-pg-20261031T193328Z-45711b/immutable-source",
+  "originalTarModesPreservedForBuild": true,
+  "compileFromArchiveNotActiveTree": true,
+  "loaderProfileOverlay": {
+    "compute/compute-node.Dockerfile": "32ad972d5304b487d3f07d4d9f0b3459686477bab1ddf4e35c92ebcb4fab0bff",
+    "compute/dsga-default-loader.sh": "b553bed819c8839ba02b55961f3c76c241c02a821693adb0296d09d2a7fd5873"
+  },
+  "DSGA_RUNTIME_PROFILE": "default-loader-v1",
+  "formalRelease": false,
+  "normalQualification": false
+}

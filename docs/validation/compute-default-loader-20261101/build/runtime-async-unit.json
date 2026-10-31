@@ -1,0 +1,8 @@
+{
+  "unit": "neon-compute-no-rpath-runtime-20261031t193328z-45711b-resume01",
+  "sourceManifestSHA256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+  "driverSHA256": "a163f64f542579ea394affcde052bac40cb7ee532690b1c70e9b104fe4af5fe6",
+  "client": "2CPU/2GiB",
+  "actualRUN": "sequential stage bounds2CPU/2GiB or8GiB/no extra swap; same exact PG stage reused3GiB",
+  "scope": "exact none runtime candidate only, source+overlay immutable; not release or normal"
+}

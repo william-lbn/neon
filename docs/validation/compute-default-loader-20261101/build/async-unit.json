@@ -1,0 +1,10 @@
+{
+  "unit": "neon-compute-no-rpath-pg-20261031t193328z-45711b",
+  "nonce": "20261031T193328Z-45711b",
+  "actual_RUN": "2CPU/3GiB/no extra swap; make jobs2; ccache retained",
+  "client": "2CPU/2GiB; separate from actual RUN",
+  "sourceManifestSHA256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+  "driverSHA256": "05ea8cebce2afa241de065e9fd2d3cbc6f863b31e690ae7dbb9e42df6e20d884",
+  "PG_input_files": 7364,
+  "scope": "PG formal stage only, no final Runtime/Source/normal certification"
+}

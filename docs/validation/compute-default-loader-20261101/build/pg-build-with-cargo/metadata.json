@@ -1,0 +1,113 @@
+{
+  "buildx.build.provenance": {
+    "builder": {
+      "id": ""
+    },
+    "buildType": "https://mobyproject.org/buildkit@v1",
+    "materials": [
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/compute-v17-stage@no-rpath-pg-b95b142190cd-20261031t193328z-45711b-build-deps-with-cargo?digest=sha256:c8e8b9138412a354aba5febebe7e6f5eeca07b3829ccf232516338a6c2f686f6\u0026platform=linux%2Famd64",
+        "digest": {
+          "sha256": "c8e8b9138412a354aba5febebe7e6f5eeca07b3829ccf232516338a6c2f686f6"
+        }
+      },
+      {
+        "uri": "pkg:docker/127.0.0.1:5001/neon/compute-v17-stage@no-rpath-pg-b95b142190cd-20261031t193328z-45711b-pg-build?digest=sha256:4578312b21ccf702470ce42c41b46698d4eb5c02197cd83d324283b64ef0542e\u0026platform=linux%2Famd64",
+        "digest": {
+          "sha256": "4578312b21ccf702470ce42c41b46698d4eb5c02197cd83d324283b64ef0542e"
+        }
+      },
+      {
+        "uri": "http://buildkit-session/fdjcx8mjcfriq915o71aiauqd",
+        "digest": {
+          "sha256": "4505e57830ad54cb716ecfdb635ad0d45cfa2cf2952a7bc1f8c1edde62a39615"
+        }
+      }
+    ],
+    "invocation": {
+      "configSource": {
+        "uri": "http://buildkit-session/fdjcx8mjcfriq915o71aiauqd",
+        "digest": {
+          "sha256": "4505e57830ad54cb716ecfdb635ad0d45cfa2cf2952a7bc1f8c1edde62a39615"
+        },
+        "entryPoint": "ci/pre-main-probe.Dockerfile"
+      },
+      "parameters": {
+        "frontend": "dockerfile.v0",
+        "args": {
+          "build-arg:BUILD_JOBS": "2",
+          "build-arg:BUILD_TAG": "no-rpath-pg-b95b142190cd-20261031t193328z-45711b",
+          "build-arg:DEBIAN_VERSION": "bookworm",
+          "build-arg:DSGA_RUNTIME_PROFILE": "default-loader-v1",
+          "build-arg:EXTENSIONS": "none",
+          "build-arg:GIT_VERSION": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+          "build-arg:HTTPS_PROXY": "http://127.0.0.1:7890",
+          "build-arg:HTTP_PROXY": "http://127.0.0.1:7890",
+          "build-arg:NO_PROXY": "localhost,127.0.0.1,::1",
+          "build-arg:PG_VERSION": "v17",
+          "build-arg:PROBE_MEMORY_MAX_BYTES": "2147483648",
+          "build-arg:http_proxy": "http://127.0.0.1:7890",
+          "build-arg:https_proxy": "http://127.0.0.1:7890",
+          "build-arg:no_proxy": "localhost,127.0.0.1,::1",
+          "cpuquota": "200000",
+          "force-network-mode": "host",
+          "label:io.neon.extensions": "none",
+          "label:io.neon.pg17.revision": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+          "label:io.neon.probe.source-manifest-sha256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+          "label:io.neon.test-only": "true",
+          "label:org.opencontainers.image.revision": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+          "memory": "2147483648",
+          "memswap": "2147483648",
+          "target": "pg-build-with-cargo"
+        },
+        "root": {
+          "configSource": {
+            "uri": "http://buildkit-session/fdjcx8mjcfriq915o71aiauqd",
+            "path": "ci/pre-main-probe.Dockerfile"
+          },
+          "request": {
+            "args": {
+              "build-arg:BUILD_JOBS": "2",
+              "build-arg:BUILD_TAG": "no-rpath-pg-b95b142190cd-20261031t193328z-45711b",
+              "build-arg:DEBIAN_VERSION": "bookworm",
+              "build-arg:DSGA_RUNTIME_PROFILE": "default-loader-v1",
+              "build-arg:EXTENSIONS": "none",
+              "build-arg:GIT_VERSION": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+              "build-arg:HTTPS_PROXY": "http://127.0.0.1:7890",
+              "build-arg:HTTP_PROXY": "http://127.0.0.1:7890",
+              "build-arg:NO_PROXY": "localhost,127.0.0.1,::1",
+              "build-arg:PG_VERSION": "v17",
+              "build-arg:PROBE_MEMORY_MAX_BYTES": "2147483648",
+              "build-arg:http_proxy": "http://127.0.0.1:7890",
+              "build-arg:https_proxy": "http://127.0.0.1:7890",
+              "build-arg:no_proxy": "localhost,127.0.0.1,::1",
+              "cpuquota": "200000",
+              "force-network-mode": "host",
+              "label:io.neon.extensions": "none",
+              "label:io.neon.pg17.revision": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+              "label:io.neon.probe.source-manifest-sha256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+              "label:io.neon.test-only": "true",
+              "label:org.opencontainers.image.revision": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+              "memory": "2147483648",
+              "memswap": "2147483648",
+              "target": "pg-build-with-cargo"
+            }
+          }
+        },
+        "compatibilityVersion": 30
+      },
+      "environment": {
+        "dockerfileVersion": "1.28.0",
+        "platform": "linux/amd64"
+      }
+    }
+  },
+  "buildx.build.ref": "neon-data/neon-data0/sgy8ikifz7hm9o26ydb46qsvw",
+  "containerimage.descriptor": {
+    "mediaType": "application/vnd.oci.image.index.v1+json",
+    "digest": "sha256:14dd4ed3ddb59512ccdf30df8b1a8c3812e5c4078132ea220d7728c24a9b1a07",
+    "size": 856
+  },
+  "containerimage.digest": "sha256:14dd4ed3ddb59512ccdf30df8b1a8c3812e5c4078132ea220d7728c24a9b1a07",
+  "image.name": "127.0.0.1:5001/neon/compute-v17-stage:no-rpath-pg-b95b142190cd-20261031t193328z-45711b-pg-build-with-cargo"
+}

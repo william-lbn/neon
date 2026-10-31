@@ -1,0 +1,11 @@
+{
+  "scope": "ACTUAL_IMMUTABLE_NONE_RUNTIME_LOADER_COMPONENT_ONLY",
+  "normal": false,
+  "E": 0,
+  "compile_exit": 0,
+  "probe_binary_sha256": "76b9fc3b0aa6f76bf71fbc36b5e75dac23cea2479e3f58d7764897b9859a4bff",
+  "runtime_exit": 0,
+  "pass": true,
+  "seconds": 14.01003993100312,
+  "endUTC": "2026-10-31T20:24:12.049124+00:00"
+}

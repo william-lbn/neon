@@ -1,0 +1,46 @@
+{
+  "status": "PASS_EXPLICIT_DEFAULT_LOADER_BUILD_AND_ACTUAL_CLOSURE_COMPONENT",
+  "owned": {
+    "compute/compute-node.Dockerfile": "32ad972d5304b487d3f07d4d9f0b3459686477bab1ddf4e35c92ebcb4fab0bff",
+    "compute/dsga-default-loader.sh": "b553bed819c8839ba02b55961f3c76c241c02a821693adb0296d09d2a7fd5873"
+  },
+  "build_source_manifest_sha256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+  "actual_PG17_ELF": "9f3b8eafeddcc37107e39158d1b6e30ad959bb385498db65526dc7436d2be9a7",
+  "runtime": {
+    "TEST_ONLY": true,
+    "formalRelease": false,
+    "normalQualification": false,
+    "runtimeTag": "127.0.0.1:5001/neon/compute-v17:no-rpath-pg-b95b142190cd-20261031t193328z-45711b",
+    "runtimeDigest": "sha256:47ef74c7bee6018c1e8578486d1196bd0c9b6d84040f6ccdba97823dcd019e55",
+    "DockerImageID": "sha256:789ea19904a045bd9b5019cbc146e8a497c2195363f344f4e733b71cea59f65e",
+    "RepoDigests": [
+      "127.0.0.1:5001/neon/compute-v17@sha256:47ef74c7bee6018c1e8578486d1196bd0c9b6d84040f6ccdba97823dcd019e55"
+    ],
+    "bytes": 807832438,
+    "neon": "1fed7ebc33eb4e00c1abba4ecb6db39925427bf8",
+    "PG17": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+    "EXTENSIONS": "none",
+    "omittedCommunityExtensions": 39,
+    "loaderProfile": "default-loader-v1",
+    "sourceManifestSHA256": "0d6c91a709e2f88d7dd91c708f283248c810c5841f9fc2909551ac568849be8e",
+    "two_file_profile_overlay": {
+      "compute/compute-node.Dockerfile": "32ad972d5304b487d3f07d4d9f0b3459686477bab1ddf4e35c92ebcb4fab0bff",
+      "compute/dsga-default-loader.sh": "b553bed819c8839ba02b55961f3c76c241c02a821693adb0296d09d2a7fd5873"
+    },
+    "seconds": 957.6591705320025
+  },
+  "loader_probe": {
+    "strict_AS_commit": "cf3691e4757a4627dee0d386a0059189c8c0b720",
+    "source_file_count": 3095,
+    "actual_ELF_files": 16,
+    "probe_binary_sha256": "76b9fc3b0aa6f76bf71fbc36b5e75dac23cea2479e3f58d7764897b9859a4bff",
+    "new_component_S_roots": 1,
+    "new_U": 0,
+    "E": 0,
+    "pass": true
+  },
+  "normal_qualification": false,
+  "Source13_qualification": false,
+  "all_extensions_release": false,
+  "source_relabelled_to_later_parent_commit": false
+}
