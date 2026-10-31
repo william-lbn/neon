@@ -317,3 +317,8 @@ PG18独立模块档案（不混PG17计数；各阶段包含回归，不可直接
 /data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-arrays-core-v1.json | ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE
 /data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-resize-core-v1.json | ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE
 /data/neon-build/src/postgres-v18/src/test/modules/test_dsg_region18/validation-resize-failures-v1.json | ARCHIVED_EXACT_NATIVE_COMPONENT_NOT_RELEASE
+
+最新已提交阶段目录导航（原基表计数不含后继增量）：
+/data/neon-build/src/neon/docs/validation/PG17-已提交阶段增量索引.json
+各阶段包含直接回归和原失败，不相加；PG18独立列出，不混PG17。
+当前完整安全normal、Linux全链及三节点Helm K8s尚未验收，E0。

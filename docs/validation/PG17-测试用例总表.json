@@ -5424,5 +5424,12 @@
     "note": "前期最小VM修复；不是最终最新控制面对接基线，不计当前真实E"
   },
   "visible_images": "docker images | grep pg17-7bbabd0f9869 (30 old baseline images, not final release)",
-  "not_release_certified": true
+  "not_release_certified": true,
+  "base_counts_updated_utc": "2026-10-31T14:31:27.611371+00:00",
+  "counts_scope": "counts保留原基表统计，未把此后阶段目录/直接回归/同ID重跑相加；最新导航见committed_phase_index",
+  "committed_phase_index": {
+    "path": "/data/neon-build/src/neon/docs/validation/PG17-已提交阶段增量索引.json",
+    "sha256": "f31e83843f8e880f0de01467c06951d9e339b75a1674ca078f0a2c3888f7dfb2"
+  },
+  "base_content_scope": "原计数与旧状态为基表时点快照；最新已提交阶段以committed_phase_index所指Git对象为准"
 }

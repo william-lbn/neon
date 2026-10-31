@@ -406,3 +406,7 @@ print(json.dumps(report['counts'],ensure_ascii=False))
 # 同次生成准确产物副本；版本锁/gitlink不属于本脚本。
 for name in ['PG17-测试用例总表.json','PG17-测试用例总表.txt']:
     (SRC/'neon/docs/validation'/name).write_bytes((BASE/'validation'/name).read_bytes())
+
+# 原基表生成后追加已提交阶段导航；不把目录/重跑直接累加成新覆盖。
+import runpy
+runpy.run_path(str(Path(__file__).with_name("pg17-committed-phase-index.py")), run_name="__main__")

@@ -1,0 +1,414 @@
+{
+  "schema_version": 1,
+  "updated_utc": "2026-10-31T21:01:27.364042+00:00",
+  "scope": "Git已提交阶段目录导航；包含原基表目录与后继增量，未统一累计新增根",
+  "versions_at_capture": {
+    "autoscaling": {
+      "head": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "branch": "codex/dsga-autoscaling-20261019"
+    },
+    "neon": {
+      "head": "7141574f0e019f04aaade15eff0c8380cf14cfe4",
+      "branch": "codex/dsga-neon-v3-20261019"
+    },
+    "control-plane": {
+      "head": "4550ccbc020596f93a220333ef771893ce5bf109",
+      "branch": "codex/dsga-control-plane-v3-20261020"
+    },
+    "PG17": {
+      "head": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+      "branch": "codex/dsga-pg17-v3-20261019"
+    },
+    "PG18": {
+      "head": "1197c33b49d17e5999a6cda0346f54352e43baa8",
+      "branch": "codex/dsga-pg18-v1-20261031"
+    }
+  },
+  "catalogs": [
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+      "git_path": "docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
+      "sha256": "c8428a77b36b9ebc2157d3177f4e9860d4867f85aba834611d89311ca8cc0f74",
+      "scope_from_original_catalog": "真实PreSys已完成到正式Bootstrap同源接续；非完整normal或E2E",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/fixed-runtime-iso-20261101/catalog.json",
+      "git_path": "docs/validation/fixed-runtime-iso-20261101/catalog.json",
+      "sha256": "9cffc6afb8aee53b09c65d2526680399a267b37417217a376a778fe799f97708",
+      "scope_from_original_catalog": "PASS_FIXED_SIX_ASSET_ISO_COMPONENT_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
+      "git_path": "docs/validation/guest-maximum-region-20261031/catalog.json",
+      "sha256": "f9cffdd0aa3f63b88bff37dcee7b6bbd1de28103490e6e6a6920f13136eddbc9",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/initial-boot-channel-20261101/catalog.json",
+      "git_path": "docs/validation/initial-boot-channel-20261101/catalog.json",
+      "sha256": "43aa644f374cc6445fc786305b59a326416ee55d95c89caa27670c4f2037db66",
+      "scope_from_original_catalog": "PASS_FIXED_WIRE_AND_LINUX_ORIGINAL_PROCESS_COMPONENT_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/initial-boot-protocol-20261031/catalog.json",
+      "git_path": "docs/validation/initial-boot-protocol-20261031/catalog.json",
+      "sha256": "4daa275937fd24cfd1a722985b43196209b0131d116caa88ae2a11bfc137098d",
+      "scope_from_original_catalog": "PASS_SHARED_WIRE_SYNTAX_BINDING_U_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/initial-bootstrap-component-20261101/catalog.json",
+      "git_path": "docs/validation/initial-bootstrap-component-20261101/catalog.json",
+      "sha256": "25a0fc4ac14435f261c38a9fe98bf5a7facdde4370963c023b48c1f3d2e9f0a0",
+      "scope_from_original_catalog": "non-authorizing initial Host component U only; no actual initialization/Guest/QEMU grow/normal/E",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/initial-bootstrap-lifecycle-20261101/catalog.json",
+      "git_path": "docs/validation/initial-bootstrap-lifecycle-20261101/catalog.json",
+      "sha256": "884b208823b1154fcdc838990158e8394f0b157703d9a7c8787927d978466a3e",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/initial-guest-fixed-port-20261101/catalog.json",
+      "git_path": "docs/validation/initial-guest-fixed-port-20261101/catalog.json",
+      "sha256": "19b5b6060cf869ab003a96eab44050117fbdfe37233c8e4d753a261f2e2efe3a",
+      "scope_from_original_catalog": "fixed actual Guest initial channel component only",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/initial-preboot-guest-20261101/catalog.json",
+      "git_path": "docs/validation/initial-preboot-guest-20261101/catalog.json",
+      "sha256": "649ccbea04cfb00ea9626dc95cf7ce9ed7afaa368a5b9c6a2fbf0bb377ccced5",
+      "scope_from_original_catalog": "GUEST_EARLY_PREPARATION_COMPONENT_NOT_HOST_SOURCE_OR_NORMAL",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/initial-runner-production-20261101/catalog.json",
+      "git_path": "docs/validation/initial-runner-production-20261101/catalog.json",
+      "sha256": "5bef694a7ea1b28a7da3398ad52dbbac919d77137a649f33309855b4c131e2d3",
+      "scope_from_original_catalog": "production Runner static entry wiring and exact binary compilation only",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/native-array-populate-20261031/catalog.json",
+      "git_path": "docs/validation/native-array-populate-20261031/catalog.json",
+      "sha256": "a80bbb1779d468cf496919f11d2cf889117534a2d84d1b0e46c06526fc576cae",
+      "scope_from_original_catalog": "COMPONENT_ONLY_NOT_PG_NORMAL_VM_OR_K8S",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/native-array-populate-durability-v2-20261031/catalog.json",
+      "git_path": "docs/validation/native-array-populate-durability-v2-20261031/catalog.json",
+      "sha256": "806484ca93b53c2e49c26c71b45781c20efe0f4249b0625ba66382c233da941b",
+      "scope_from_original_catalog": "COMPONENT_DURABILITY_ONLY_NOT_PG_NORMAL_VM_K8S",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/native-filter-audit-go-20261031/catalog.json",
+      "git_path": "docs/validation/native-filter-audit-go-20261031/catalog.json",
+      "sha256": "3bd38d058c20393e249ddffd527c4485080b7500060174de90a8cbf9bca8500e",
+      "scope_from_original_catalog": "完整过滤器字节解码/比较与Linux原生读取组件；未启生产消费者、S/E未跑",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-builder-mount-narrow-v2-20261101/catalog.json",
+      "git_path": "docs/validation/normal-builder-mount-narrow-v2-20261101/catalog.json",
+      "sha256": "86b791ddc22371c6ad3154a84c0e24b0eb530158f58eeee7d7b5022558c091bc",
+      "scope_from_original_catalog": "显式normal构建/启动/System-v2与单ext4挂载组件；非正式Root/PG/normal/K8s验收",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-builder-system-v2-20261101/catalog.json",
+      "git_path": "docs/validation/normal-builder-system-v2-20261101/catalog.json",
+      "sha256": "171549edcedd5284c8c2740765c684eadf9fa78dab3b2685c2fea23d0ac891b2",
+      "scope_from_original_catalog": "fixed build/start mode and System v2 components only; not image/normal/E qualification",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-production-source-20261031/catalog.json",
+      "git_path": "docs/validation/normal-inflight-production-source-20261031/catalog.json",
+      "sha256": "61383e1978d38cfbd90eff089871174d1e0688a7b70d643026435e58c3670718",
+      "scope_from_original_catalog": "conditional finite F/I source component, no normal write/qualification",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-source-20261031/catalog.json",
+      "git_path": "docs/validation/normal-system-source-20261031/catalog.json",
+      "sha256": "4c931a0cb7d6b8d6085ecaff032251a6cc282cb1fb77d763e058db307138920b",
+      "scope_from_original_catalog": "strict fixed System startup/file gate only; synthetic service fixture, no normal authority",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-source-canonical-v2-20261031/catalog.json",
+      "git_path": "docs/validation/normal-system-source-canonical-v2-20261031/catalog.json",
+      "sha256": "f53976b62abccdea37536ae96afede51542aa84f9eaec570c0c95a6c538fb06f",
+      "scope_from_original_catalog": "strict fixed System startup/file gate only; synthetic service fixture, no normal authority",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-vminit-mount-20261101/catalog.json",
+      "git_path": "docs/validation/normal-vminit-mount-20261101/catalog.json",
+      "sha256": "0c2f8295d8a263e35eec1740deba765a5532a6e7bead255516b9845792fc26c6",
+      "scope_from_original_catalog": "actual exact frozen vminit on disposable single ext4; DEV initial-boot diagnostic only",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-formal-elf-array4-20261101/catalog.json",
+      "git_path": "docs/validation/pg17-formal-elf-array4-20261101/catalog.json",
+      "sha256": "efa78f247412d63016d7f8ef6e28e9e7d206a708983d8cd94c0d5a66d07b61be",
+      "scope_from_original_catalog": "新正式NONE runtime中的准确9f3 PG ELF + b95 module + 真map_files测试Root responder组件；非生产Root/normal/KVM/E2E",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "git_path": "docs/validation/pg17-normal-split-topology-20261031/catalog.json",
+      "sha256": "03d10e1c4b7d6f5c18f1abba4e8f7b187461692d900bc8a9802aef9f8eacc9d4",
+      "scope_from_original_catalog": "normal-split-topology-preparation-only",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-p1-node-chain-linux-20261030/catalog.json",
+      "git_path": "docs/validation/pg17-p1-node-chain-linux-20261030/catalog.json",
+      "sha256": "970cb9c9b7a7009f8910a56d4409b551bfad531b462b5aff93c2cbae74f3879e",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "git_path": "docs/validation/qmp-memory-geometry-20261031/catalog.json",
+      "sha256": "d9f508693a9ad8f41a265911d20a46ea3cb1a78ea0dc934e4d1434bb24df7ae8",
+      "scope_from_original_catalog": "PG17安全降限的只读QMP最大内存来源组件；非E2E认证",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runner-runtime-boot-20261031/catalog.json",
+      "git_path": "docs/validation/runner-runtime-boot-20261031/catalog.json",
+      "sha256": "c199950f25d28cb1d4dbc01315161f813c9321c146cc9b0bd50c34b4892c206d",
+      "scope_from_original_catalog": "PASS_RUNNER_STATIC_COMMANDLINE_COMPONENT_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runner-runtime-iso-20261031/catalog.json",
+      "git_path": "docs/validation/runner-runtime-iso-20261031/catalog.json",
+      "sha256": "ec240ee8c6ce978a0c41157a04e48bdcdfcd8c5b6cddca2ecc5ef701c519ea01",
+      "scope_from_original_catalog": "PASS_ISO_COMPONENT_ONLY_NON_AUTHORIZING",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-boot-requirements-20261031/catalog.json",
+      "git_path": "docs/validation/runtime-boot-requirements-20261031/catalog.json",
+      "sha256": "e33380a4f4024c8ca434d23cf5e615869fa54472bdf499b6f15e8f45f2d342cb",
+      "scope_from_original_catalog": "PASS_PURE_STATIC_PLANNING_U_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "2fe36f12a970b5a7d7606425a5f09a0982f91b3f",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-iso-asset-names-20261031/catalog.json",
+      "git_path": "docs/validation/runtime-iso-asset-names-20261031/catalog.json",
+      "sha256": "9ab2e40d167f3a6696236f3ebfc366bacf482ea2260f4c66104ce4faa2db1fb8",
+      "scope_from_original_catalog": "PURE_LOGICAL_TO_ISO_FILENAME_MAPPING_AND_PRESYS_PATH_COMPONENT_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "neon",
+      "commit_at_capture": "7141574f0e019f04aaade15eff0c8380cf14cfe4",
+      "path": "/data/neon-build/src/neon/docs/validation/array-request-jwt-forward-20261101/catalog.json",
+      "git_path": "docs/validation/array-request-jwt-forward-20261101/catalog.json",
+      "sha256": "29182ed82cd35c623cedd58926e23ffb59c3597d35fb48f288fb459516ced59d",
+      "scope_from_original_catalog": "PG-neutral dedicated request-bound JWT and opaque fixed Root forwarding only",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "neon",
+      "commit_at_capture": "7141574f0e019f04aaade15eff0c8380cf14cfe4",
+      "path": "/data/neon-build/src/neon/docs/validation/compute-default-loader-20261101/catalog.json",
+      "git_path": "docs/validation/compute-default-loader-20261101/catalog.json",
+      "sha256": "e7fbff2d2aa538931b326cb2a16466cae16908bffbd32373497750b48ee55643",
+      "scope_from_original_catalog": "PASS_EXPLICIT_DEFAULT_LOADER_BUILD_AND_ACTUAL_CLOSURE_COMPONENT",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "neon",
+      "commit_at_capture": "7141574f0e019f04aaade15eff0c8380cf14cfe4",
+      "path": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/catalog.json",
+      "git_path": "docs/validation/pg17-linux-budget-20261030/catalog.json",
+      "sha256": "75e03ef203f3e03341957f25ca45d9eb5eef88901e03312a98b028a141a3128c",
+      "scope_from_original_catalog": "只覆盖PG17内存自动扩缩容新增或直接受影响逻辑",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "neon",
+      "commit_at_capture": "7141574f0e019f04aaade15eff0c8380cf14cfe4",
+      "path": "/data/neon-build/src/neon/docs/validation/pg17-native-birth-ci-linux-20261031/catalog.json",
+      "git_path": "docs/validation/pg17-native-birth-ci-linux-20261031/catalog.json",
+      "sha256": "885d9df2369d8627b0b03b9227e4d71acc0f03c640117f105317cc168057476c",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "control-plane",
+      "commit_at_capture": "4550ccbc020596f93a220333ef771893ce5bf109",
+      "path": "/data/neon-build/src/control-plane/docs/validation/dsga-array-credentials-20261031/catalog.json",
+      "git_path": "docs/validation/dsga-array-credentials-20261031/catalog.json",
+      "sha256": "3876a0ef8db3cd6c109576113b6fc776260199061b2a448dfba148f64260e150",
+      "scope_from_original_catalog": "PG-neutral array request-bound issuer narrow extension; real TLS/local Kube model only",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "control-plane",
+      "commit_at_capture": "4550ccbc020596f93a220333ef771893ce5bf109",
+      "path": "/data/neon-build/src/control-plane/docs/validation/dsga-array-credentials-exact-v2-20261031/catalog.json",
+      "git_path": "docs/validation/dsga-array-credentials-exact-v2-20261031/catalog.json",
+      "sha256": "18612519349624edcf10f22c74e6af1813144f7f64d11bcea4514d7dc2f0264c",
+      "scope_from_original_catalog": "PG-neutral array request-bound issuer narrow extension; real TLS/local Kube model only",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "PG17",
+      "commit_at_capture": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/array-root-20261101/catalog.json",
+      "git_path": "doc/dsga-validation/array-root-20261101/catalog.json",
+      "sha256": "154567facdb925f57f94ef6bd6fb60df36b8a38eee56b02aa024aad5f3b3efa9",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "PG17",
+      "commit_at_capture": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/array-root-v2-20261101/catalog.json",
+      "git_path": "doc/dsga-validation/array-root-v2-20261101/catalog.json",
+      "sha256": "59fb0d7c932be8232ca529ae937c87863a8dcb0e859fc381c26e481ecf75b863",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "PG17",
+      "commit_at_capture": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+      "path": "/data/neon-build/src/neon/vendor/postgres-v17/doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+      "git_path": "doc/dsga-validation/filter-numa-deny-20261031/catalog.json",
+      "sha256": "ac3ebd2013038d0edc10c7a84ed1b874df28afb5f2777f5fc98b4f591ae1c0f2",
+      "scope_from_original_catalog": "new PG native BPF TEST_ONLY component; not complete normal proof",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "PG18",
+      "commit_at_capture": "1197c33b49d17e5999a6cda0346f54352e43baa8",
+      "path": "/data/neon-build/src/postgres-v18/doc/dsga-validation/array-root-v1-20261101/catalog.json",
+      "git_path": "doc/dsga-validation/array-root-v1-20261101/catalog.json",
+      "sha256": "85e2cfb77488663799fef578a49b24d67dbb2254b3a748b28aa50a5775cc10d7",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "PG18",
+      "commit_at_capture": "1197c33b49d17e5999a6cda0346f54352e43baa8",
+      "path": "/data/neon-build/src/postgres-v18/doc/dsga-validation/birth-ar-v1-20261101/catalog.json",
+      "git_path": "doc/dsga-validation/birth-ar-v1-20261101/catalog.json",
+      "sha256": "723bd8fb767c8cb53b163152629841c6d10c9ce580c02b795914f37673750f65",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    }
+  ],
+  "PG18_included_in_PG17_counts": false,
+  "normal_decrease_accepted": false,
+  "real_Linux_or_K8s_E_pass": 0,
+  "uncommitted_production_chain_and_quota_excluded": true,
+  "source_of_truth": "每项原Git对象及其源码/命令/资源/终态/失败收据；目录存在不是通过证据"
+}
