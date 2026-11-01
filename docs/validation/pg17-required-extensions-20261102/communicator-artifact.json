@@ -1,0 +1,32 @@
+{
+  "reason": "compiler-artifact",
+  "package_id": "path+file:///home/nonroot/neon-extension-source/pgxn/neon/communicator#0.1.0",
+  "manifest_path": "/home/nonroot/neon-extension-source/pgxn/neon/communicator/Cargo.toml",
+  "target": {
+    "kind": [
+      "staticlib"
+    ],
+    "crate_types": [
+      "staticlib"
+    ],
+    "name": "communicator",
+    "src_path": "/home/nonroot/neon-extension-source/pgxn/neon/communicator/src/lib.rs",
+    "edition": "2024",
+    "doc": true,
+    "doctest": false,
+    "test": true
+  },
+  "profile": {
+    "opt_level": "0",
+    "debuginfo": 2,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": false
+  },
+  "features": [],
+  "filenames": [
+    "/home/nonroot/target/debug/libcommunicator.a"
+  ],
+  "executable": null,
+  "fresh": false
+}

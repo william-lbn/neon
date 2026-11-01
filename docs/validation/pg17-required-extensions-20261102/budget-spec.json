@@ -1,0 +1,11 @@
+{
+  "protocol_version": 1,
+  "nonce": "20261101T212438Z-c75c26",
+  "unit": "neon-root-pg17-required-extensions-20261101t212438z-c75c26.service",
+  "kind": "heavy",
+  "evidence_dir": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T212438Z-c75c26",
+  "argv": [
+    "/usr/bin/python3",
+    "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T212438Z-c75c26/worker.py"
+  ]
+}

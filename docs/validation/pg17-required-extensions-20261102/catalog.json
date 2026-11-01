@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "scope": "PG17真实Neon必需扩展B构建及配方收口，不是运行服务或端到端",
+  "stable_id": "NEON-B-PG17-REQUIRED-EXTENSIONS-001",
+  "status": "PASS_BUILD_ONLY",
+  "source_neon_git": "3e5aa22c264b809645819f88b37783a5aad53a53",
+  "source_PG17_git": "adecb5ecaf131fffde035a56f88c634403309b46",
+  "original_evidence": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T212438Z-c75c26",
+  "actual_COPY_files": 1439,
+  "artifacts": {
+    "neon.so": {
+      "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T212438Z-c75c26/export/artifacts/neon.so",
+      "sha256": "1a06bf714ef7f20163566c57d6f04652995f00211add1c9483db09b3b6cd6fbe",
+      "bytes": 202107888
+    },
+    "neon_rmgr.so": {
+      "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T212438Z-c75c26/export/artifacts/neon_rmgr.so",
+      "sha256": "fb42f80a173ce02f8a96e781d717bba89cf9d460dee103a96a87e956268898f4",
+      "bytes": 403760
+    }
+  },
+  "PG_postgres_unchanged": "649f4535d07e682fe5015fd8df8be23f626e73bd772da21b16e1c032721c53c6",
+  "communicator_actual_path_checked": true,
+  "actual_limits": {
+    "cpu": 6,
+    "memory_bytes": 8589934592
+  },
+  "original_attempts": [
+    {
+      "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T210919Z-38c0fa",
+      "result": {
+        "build_exit": 125,
+        "extension_make_exit": null,
+        "seconds": 0.015162,
+        "PG_rebuilt": false,
+        "full_Rust_services_rebuilt": false,
+        "normal": false,
+        "E": 0
+      },
+      "raw_result_sha256": "f92223c23ed438d56b9bc18d29fd4ecf36f96998e9e64fde940a97bb81ada552",
+      "original_command_log_sha256": "7411d53bd243c19c51d5006d918f762bc851e20cc376ccb2edfccb9d4739d737",
+      "artifact_accepted": false
+    },
+    {
+      "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T211050Z-035250",
+      "result": {
+        "build_exit": 1,
+        "extension_make_exit": null,
+        "seconds": 16.596659,
+        "PG_rebuilt": false,
+        "full_Rust_services_rebuilt": false,
+        "normal": false,
+        "E": 0
+      },
+      "raw_result_sha256": "3b56819615fe2901a0a4298615c8d60c7997123cadeaf949b310d421fb18f723",
+      "original_command_log_sha256": "5f1ac5b69df553d1598b03b66a2f842135ba55eaa0892ad8d1055ccb2c6ae5ea",
+      "artifact_accepted": false
+    },
+    {
+      "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T211341Z-5bbc4f",
+      "result": {
+        "build_exit": 1,
+        "extension_make_exit": null,
+        "seconds": 9.486247,
+        "PG_rebuilt": false,
+        "full_Rust_services_rebuilt": false,
+        "normal": false,
+        "E": 0
+      },
+      "raw_result_sha256": "b5ddb0b74f35481800bbd40efb11f2d20ff57908cbf13183daaed54c3cda54d0",
+      "original_command_log_sha256": "8a87cd806e14edab25cfc18c0f180d2b0a2478a302b5f588c3894810f04118a4",
+      "artifact_accepted": false
+    },
+    {
+      "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T211558Z-237f56",
+      "result": {
+        "build_exit": 0,
+        "extension_make_exit": 2,
+        "seconds": 123.429397,
+        "PG_rebuilt": false,
+        "full_Rust_services_rebuilt": false,
+        "normal": false,
+        "E": 0
+      },
+      "raw_result_sha256": "c4c1efa1eeb445824a3fb8fd8d2e909fab797b4e513a174d07625c6c61661591",
+      "original_command_log_sha256": "01f053214a4a79f3bb5d2fa03432a2d6f3741dc897f77cce11f8a5d82c0d4701",
+      "artifact_accepted": false
+    },
+    {
+      "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T211944Z-fc5c90",
+      "result": {
+        "build_exit": 0,
+        "extension_make_exit": 2,
+        "seconds": 9.268373,
+        "PG_rebuilt": false,
+        "full_Rust_services_rebuilt": false,
+        "normal": false,
+        "E": 0
+      },
+      "raw_result_sha256": "bcda8a89f39399140e9e2bf72e9126489810f9033f1539a7886fc7fef702ecf2",
+      "original_command_log_sha256": "49f7fc6815f0573905ab68d18ac806b15f92d118efc0f8a930b87484c3e9fd5a",
+      "artifact_accepted": false
+    },
+    {
+      "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T212438Z-c75c26",
+      "result": {
+        "build_exit": 0,
+        "extension_make_exit": 0,
+        "seconds": 82.199403,
+        "PG_rebuilt": false,
+        "full_Rust_services_rebuilt": false,
+        "normal": false,
+        "E": 0
+      },
+      "raw_result_sha256": "2f685ad36616c558763318b61ec6be7f4b035f08fbfc3e5a40aa4bd0489e2972",
+      "original_command_log_sha256": "07e249640e346ced4563628f9b9f6cb19eae9c7eca16746153d81d2a9233379c",
+      "artifact_accepted": true
+    }
+  ],
+  "U": 0,
+  "S": 0,
+  "E": 0,
+  "normal_decrease_accepted": false,
+  "runtime_loader_closure_and_actual_preload": "后继真实PG服务验证必需；本目录不冒通过",
+  "checked_out_heads_are_not_release_locks": true,
+  "raw_build_log": {
+    "path": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T212438Z-c75c26/export/build.log",
+    "sha256": "670b6d68cfbdccc4d9e986084bb53388c1a2a25b1d9f358497d84f4646a801ae"
+  },
+  "replay_note": "replay仅把原launcher的当前HEAD相等前置改为冻结Git对象存在；仍导出准确旧对象/OCI依赖，不切分支，不承诺重新执行的二进制字节相同。新nonce实跑另取实际结果。"
+}

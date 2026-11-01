@@ -1,0 +1,5 @@
+本批只补齐PG17真实compute必须的neon.so与neon_rmgr.so。
+源码从Linux Git3e5与已验证PG17 adecb5安装/headers导入；Cargo1.88准确工具链、缓存输出路径及原生成header均实核，PG本体649f前后不变。
+前五次环境/配方失败全部保留，分别为项目Docker CLI配置、ignore漏校验清单、Rustup自动补组件联网、外部PGXS未设置VPATH、Cargo缓存未重跑写源码目录的header生成器。最终隔离Git快照内编译，touch build.rs仅mtime/字节不变，强制原生成器重跑；不clean或prune。
+构建产物原件和静态lib/header SHA收据留/data，大ELF不进Git。本目录包括原launcher与冻结输入重放入口；重放在Linux118运行、复用原/data预算/缓存及准确OCI镜像，不切业务分支，不能从该B结果推断服务/Source/normal/E通过。
+原构建完整日志留/data，Git只保存小收据与单个Cargo artifact记录。后继必须验证真实GNU依赖/默认loader和实际PG加载，继而PG内存及Linux/K8s端到端。

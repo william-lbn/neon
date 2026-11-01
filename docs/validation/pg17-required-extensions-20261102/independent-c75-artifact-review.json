@@ -1,0 +1,65 @@
+{
+  "reviewer": "pg_stderr_chain",
+  "utc": "2026-11-01T21:28:30.161992+00:00",
+  "actual_run": "/data/neon-build/validation/root-pg17-required-extensions-build-20261101T212438Z-c75c26",
+  "source_lock_sha256": "55cdda804b323cdc4cbd00554b6647fd7064a5f7bcc2e19b72f18b11fc417d36",
+  "Dockerfile_sha256": "126af1721e6c92df3983ea78c9cf0fa7a57db1d6bd68da8e8653fb7478e7c05b",
+  "driver_sha256": "7b75eff6df4aa68655f64367a6393f260e6e74004176e060a5441d768319188d",
+  "result": {
+    "build_exit": 0,
+    "extension_make_exit": 0,
+    "seconds": 82.199403,
+    "PG_rebuilt": false,
+    "full_Rust_services_rebuilt": false,
+    "normal": false,
+    "E": 0
+  },
+  "actual_COPY_verified": 1439,
+  "host_snapshot_byte_hashes_verified": 1439,
+  "actual_communicator_Cargo_artifact": {
+    "package_id": "path+file:///home/nonroot/neon-extension-source/pgxn/neon/communicator#0.1.0",
+    "manifest_path": "/home/nonroot/neon-extension-source/pgxn/neon/communicator/Cargo.toml",
+    "filenames": [
+      "/home/nonroot/target/debug/libcommunicator.a"
+    ],
+    "fresh": false
+  },
+  "header_and_static_archive_sha256_receipt": [
+    "a1eb5fbf933a0939c2601ff995d32c0b5041344a9f24327eb715673f32a75c18  /home/nonroot/target/debug/libcommunicator.a",
+    "3499ca7a8e122374e5776d96d555dadbf9cc16525ae1db35ee7d64813740e715  /home/nonroot/neon-extension-source/pgxn/neon/communicator/communicator_bindings.h"
+  ],
+  "header_and_archive_raw_bytes_exported": false,
+  "extension_actual_bytes_independently_verified": {
+    "neon_rmgr.so": {
+      "sha256": "fb42f80a173ce02f8a96e781d717bba89cf9d460dee103a96a87e956268898f4",
+      "bytes": 403760
+    },
+    "neon.so": {
+      "sha256": "1a06bf714ef7f20163566c57d6f04652995f00211add1c9483db09b3b6cd6fbe",
+      "bytes": 202107888
+    }
+  },
+  "PG_identity_before_OK_and_after_equal_649f": true,
+  "PG_source_git": "adecb5ecaf131fffde035a56f88c634403309b46",
+  "PG_rebuilt": false,
+  "no_C_ABI_compile_error_observed": true,
+  "needed": {
+    "neon.dynamic.txt": [
+      "0x0000000000000001 (NEEDED)             Shared library: [libpq.so.5]",
+      "0x0000000000000001 (NEEDED)             Shared library: [libcurl.so.4]",
+      "0x0000000000000001 (NEEDED)             Shared library: [libgcc_s.so.1]",
+      "0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]",
+      "0x0000000000000001 (NEEDED)             Shared library: [ld-linux-x86-64.so.2]"
+    ],
+    "neon-rmgr.dynamic.txt": [
+      "0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]"
+    ]
+  },
+  "build_PASS": true,
+  "runtime_S_executed": false,
+  "Source": false,
+  "normal": false,
+  "E": 0,
+  "K8s": 0,
+  "reviewer_launched_new_build": false
+}
