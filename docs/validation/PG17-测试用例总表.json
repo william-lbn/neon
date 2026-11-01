@@ -5429,7 +5429,7 @@
   "counts_scope": "counts保留原基表统计，未把此后阶段目录/直接回归/同ID重跑相加；最新导航见committed_phase_index",
   "committed_phase_index": {
     "path": "/data/neon-build/src/neon/docs/validation/PG17-已提交阶段增量索引.json",
-    "sha256": "8b3248bc0011f458669fe737275e79667adfb023e89c9c0a5aa8d30d5d3dfbc6"
+    "sha256": "1d021f1910d160a1a690a4b8d1562845e8f359775c93745fd0a4e4ecf3205c34"
   },
   "base_content_scope": "原计数与旧状态为基表时点快照；最新已提交阶段以committed_phase_index所指Git对象为准"
 }
