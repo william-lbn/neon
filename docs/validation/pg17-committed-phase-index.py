@@ -24,8 +24,8 @@ def update():
     for label, repo in REPOSITORIES.items():
         commit = git(repo, 'rev-parse', 'HEAD').decode().strip()
         versions[label] = {'head': commit, 'branch': git(repo, 'branch', '--show-current').decode().strip()}
-        names = git(repo, 'ls-tree', '-r', '-z', '--name-only', commit, '--', 'docs/validation', 'doc/dsga-validation').decode().split('\0')
-        for name in sorted(n for n in names if n.rsplit('/', 1)[-1] in {'catalog.json', 'test-catalog.json'} and n.count('/') == 3):
+        names = git(repo, 'ls-tree', '-r', '-z', '--name-only', commit, '--', 'docs/validation', 'doc/dsga-validation', 'src/test/modules/test_dsg_region18').decode().split('\0')
+        for name in sorted(n for n in names if n.rsplit('/', 1)[-1] in {'catalog.json', 'test-catalog.json'} and (n.count('/') == 3 or label == 'PG18' and n.startswith('src/test/modules/test_dsg_region18/validation-') and n.count('/') == 5)):
             raw = git(repo, 'show', commit + ':' + name)
             data = json.loads(raw)
             rows.append({'repository': label, 'commit_at_capture': commit, 'path': str(repo / name),
@@ -38,6 +38,8 @@ def update():
               'scope': 'Git已提交阶段目录导航；包含原基表目录与后继增量，未统一累计新增根',
               'versions_at_capture': versions, 'catalogs': rows,
               'PG18_included_in_PG17_counts': False, 'normal_decrease_accepted': False,
+              'checked_out_heads_are_not_release_locks': True,
+              'PG17_parent_gitlink_at_capture': git(ROOT, 'rev-parse', 'HEAD:vendor/postgres-v17').decode().strip(),
               'real_Linux_or_K8s_E_pass': 0, 'uncommitted_production_chain_and_quota_excluded': True,
               'source_of_truth': '每项原Git对象及其源码/命令/资源/终态/失败收据；目录存在不是通过证据'}
     OUTPUT.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
