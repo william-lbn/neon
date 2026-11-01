@@ -25,7 +25,7 @@ def update():
         commit = git(repo, 'rev-parse', 'HEAD').decode().strip()
         versions[label] = {'head': commit, 'branch': git(repo, 'branch', '--show-current').decode().strip()}
         names = git(repo, 'ls-tree', '-r', '-z', '--name-only', commit, '--', 'docs/validation', 'doc/dsga-validation').decode().split('\0')
-        for name in sorted(n for n in names if n.endswith('/catalog.json') and n.count('/') == 3):
+        for name in sorted(n for n in names if n.rsplit('/', 1)[-1] in {'catalog.json', 'test-catalog.json'} and n.count('/') == 3):
             raw = git(repo, 'show', commit + ':' + name)
             data = json.loads(raw)
             rows.append({'repository': label, 'commit_at_capture': commit, 'path': str(repo / name),
