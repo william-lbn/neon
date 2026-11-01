@@ -1,0 +1,13 @@
+{
+  "nonce": "20261101T140711Z-8b494d",
+  "unit": "neon-pg17-stderr-rust-native-20261101t140711z-8b494d.service",
+  "limits": {
+    "CPU": 2,
+    "MemoryGiB": 3,
+    "CargoJobs": 2,
+    "single_RUN": true
+  },
+  "build_then_native_automatic": true,
+  "source_lock_sha256": "ae6359788c1ad0d15bfa37a607b35d8268175caee47c66f8389bdc2dc4ce4190",
+  "scope": "ACTUAL_RUST_PIPE_PG_LOG_EOF_WAIT_NOT_ROOT_SOURCE"
+}

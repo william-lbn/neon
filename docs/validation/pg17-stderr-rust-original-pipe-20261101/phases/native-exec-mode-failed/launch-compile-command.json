@@ -1,0 +1,23 @@
+[
+  "docker",
+  "run",
+  "--rm",
+  "--network=none",
+  "--read-only",
+  "--cpus=1",
+  "--memory=512m",
+  "--memory-swap=512m",
+  "--tmpfs",
+  "/tmp:rw,nosuid,nodev,size=32m",
+  "-v",
+  "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d:/proof:rw",
+  "--entrypoint",
+  "/usr/bin/gcc",
+  "127.0.0.1:5001/neon/pg17-stderr-cap@sha256:46c3e2a3b0eddc18e6bf57911556254d74af65246c827706f4a6d8c3d62f815b",
+  "-O2",
+  "-Wall",
+  "-Werror",
+  "/proof/launch.c",
+  "-o",
+  "/proof/pg-launch"
+]

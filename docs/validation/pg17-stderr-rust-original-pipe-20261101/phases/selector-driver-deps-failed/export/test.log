@@ -1,0 +1,12 @@
+error: failed to select a version for `serde_derive`.
+    ... required by package `serde v1.0.219`
+    ... which satisfies dependency `serde = "=1.0.219"` of package `pg-stderr-component v0.0.0 (/component)`
+versions that meet the requirements `^1` are: 1.0.215
+
+all possible versions conflict with previously selected packages.
+
+  previously selected package `serde_derive v1.0.219`
+    ... which satisfies dependency `serde_derive = "=1.0.219"` of package `serde v1.0.219`
+    ... which satisfies dependency `serde = "=1.0.219"` of package `pg-stderr-component v0.0.0 (/component)`
+
+failed to select a version for `serde_derive` which could resolve this conflict

@@ -1,0 +1,1274 @@
+[
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/Dockerfile",
+    "bytes": 1442,
+    "sha256": "aa7967ff6089b7a285e2f755bb5f175b4a8184e8f9a55b09907c830cb032fa02"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/budget-launch.json",
+    "bytes": 566,
+    "sha256": "36d19da37636f3e21b284361ec255b40fb29f287dd0a21d8a5d3dcda08750918"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/budget-reserve.json",
+    "bytes": 567,
+    "sha256": "3c83485f50d84b2ca5312120ea0a5b35a2e89616b32dc71d6f184e606d255880"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/budget-spec.json",
+    "bytes": 379,
+    "sha256": "5e260053be0b270e24c4d9153bf7910f03258f38ee51f3baf8771fe303e0812e"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/build-command.json",
+    "bytes": 587,
+    "sha256": "a42b061d578a8922aa785d312ec71f749ddf43e0d3c456b864020fd5547993c2"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/build.log",
+    "bytes": 2448,
+    "sha256": "eb598135f5c98323895d2219ee4b1d06c707a85d07acdb5d5594557735bb8876"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/Cargo.lock",
+    "bytes": 8010,
+    "sha256": "377364248740069f9bfc3bc0278df28fd023527c54d52474351b0ab7688016af"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/actual-source.sha256",
+    "bytes": 310,
+    "sha256": "9ff80c43539a50b42104ed1894fc2a52e54a800d80c385a9d74bf348b9357c3d"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/cargo-version.txt",
+    "bytes": 36,
+    "sha256": "6c2df3721232c841c6af639c7b1c37c3032fcbf711e4f2914435f97ab5f4dff1"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/module-after.sha256",
+    "bytes": 83,
+    "sha256": "a752cde31d01b42be294524a536eaa5e3bbdcd96318839b75b58ee48cef61962"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/rustc-version.txt",
+    "bytes": 36,
+    "sha256": "1ac65f1cd11fa83e9530348b787fa3e5bdd85b0f3727099df8bcdf3e24274138"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/source-check.txt",
+    "bytes": 62,
+    "sha256": "0b31a2e15fef22948686e6d6f1393111ef4bf8a84b8441ed28d55255021aecab"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/test.exitcode",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/export/test.log",
+    "bytes": 2710,
+    "sha256": "265cac89faedcbf2cabfc5d9869331ed2e6e9a4e4b9096526c8dee0a8dcc2d65"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/metadata.json",
+    "bytes": 351,
+    "sha256": "b6fdc2ce3a57049ca733447c86a3e3ba175ffe53c38e4aea46aaa1e01fdb32c1"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/result.json",
+    "bytes": 141,
+    "sha256": "c6daf791efc07a15a0db69e2f6f99e449ef2373c2a723c795c0eae91e02325d5"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/source-lock.json",
+    "bytes": 791,
+    "sha256": "5a104d2307f23b83f85e83fd7987ea8976369abcbed4e06043735d53c174e318"
+  },
+  {
+    "phase": "initial-bounded-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/worker.py",
+    "bytes": 970,
+    "sha256": "224915e4e3d316ad42b752ca66825010d127941df5e3c66625bca34d3b417f03"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/Dockerfile",
+    "bytes": 1584,
+    "sha256": "9894f2a0e9a76aeb9f981ac430b69afbd398fba41b60824ae1388c055b5726f2"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/budget-launch.json",
+    "bytes": 565,
+    "sha256": "6c83562b07da8c1dc69087d7d06b7b3d48ed1382024eb4cd65169928861c72d4"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/budget-reserve.json",
+    "bytes": 566,
+    "sha256": "a47ba4939ec94d53f4565b9ea4e43e7063266ed640d1851c5a1e3400f07095a1"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/budget-spec.json",
+    "bytes": 364,
+    "sha256": "949f1945de193bb55efd79bacd1e7b041f7b17fabe002bdfe80fa86a9a814a7a"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/build-command.json",
+    "bytes": 559,
+    "sha256": "535e648a2cce06640bd7afcef3b4589945642dc7811a55f36fc475b4f0884a2a"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/build.log",
+    "bytes": 2214,
+    "sha256": "f796ec18f1dbd0d81f97394ff8d490a82d5787ce21dadd133d98482ba631a359"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/actual-source.sha256",
+    "bytes": 384,
+    "sha256": "774f0a11c28baa1a132686f929f218c8b4f8a62b31ff2f4a642bf2b90526dcdc"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/cpu.stat",
+    "bytes": 157,
+    "sha256": "0d856e8da0f683bccf18a14e96182710d7648568e18ca1dfac99b93151a4933d"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/io.stat",
+    "bytes": 72,
+    "sha256": "1e5ce1d5ec34875bd199ae6eb5417cd9d25f6b716d05c3a6532e5ed50891d948"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/memory.peak",
+    "bytes": 10,
+    "sha256": "3120920044779f7b6fd8f121c1dadfa97a9835eae8628460411cb998f689be30"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/rustc-version.txt",
+    "bytes": 36,
+    "sha256": "1ac65f1cd11fa83e9530348b787fa3e5bdd85b0f3727099df8bcdf3e24274138"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/source-check.txt",
+    "bytes": 74,
+    "sha256": "574177dbef68a77827cf0cf0c48dee5e8087ea51bebd9f8e4652ac85d237201f"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/suite-build.exitcode",
+    "bytes": 4,
+    "sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/export/suite-build.log",
+    "bytes": 3501,
+    "sha256": "8795a4dd5f9e5a96353fa9e055ad46118e990392d14a3ee2ecb01b05c117cdfe"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/launch.c",
+    "bytes": 217,
+    "sha256": "1a04608063bf3f418623f152503463d367100ea5e78776268b242f4c1b643ec6"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/metadata.json",
+    "bytes": 405,
+    "sha256": "9b635a770f7a70df85a90e6c154383734cb763a9ed2bd5c8015888da19c02c1a"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/result.json",
+    "bytes": 113,
+    "sha256": "eeb83650a7a058225edba58306c1c42a442be5e30272647fa793d879165250a6"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/source-lock.json",
+    "bytes": 1054,
+    "sha256": "8b16b3f5ed74dd01e68c53f6a8a44d6ace664e6c14236a767d918680d9bd9dfd"
+  },
+  {
+    "phase": "original-native-build-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140257Z-d4b31b/worker.py",
+    "bytes": 3485,
+    "sha256": "dbb71007238b82518cce4864515dad133688880264785d3da5788ac0a63b0388"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/Dockerfile",
+    "bytes": 1584,
+    "sha256": "9894f2a0e9a76aeb9f981ac430b69afbd398fba41b60824ae1388c055b5726f2"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/actual-reports.json",
+    "bytes": 3,
+    "sha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/budget-launch.json",
+    "bytes": 565,
+    "sha256": "06f33ce5b02de121761390f2ae13c1ac240c8ec6356a5a5160472ce4c90cf08e"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/budget-reserve.json",
+    "bytes": 566,
+    "sha256": "001f000dfb695991b91f437cccd76eb3ad8c77ae0f5fbe61f173659a6a8276fc"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/budget-spec.json",
+    "bytes": 364,
+    "sha256": "f16c129332b1bec130ad185ed1841cfe966e1afe041fa0cf54bae2e65bfd7569"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/build-command.json",
+    "bytes": 559,
+    "sha256": "fec1d9a3fbcc7fe51865531b2ea7beb5165030dc400c46c212de231cb70ddb40"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/build.log",
+    "bytes": 2251,
+    "sha256": "eb7cae68a255848cc50cc54658c1f215c464e564e4eeafd7eafd7da0997ad63f"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/actual-source.sha256",
+    "bytes": 384,
+    "sha256": "1f778d0d0f349d331623bab78177ad65faaa7bf2ce02021a3b080984c322c225"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/cpu.stat",
+    "bytes": 157,
+    "sha256": "ca00ee6f9d638c514930d5087a83064b0f4d83093fd34e4b07c4cd71708f412e"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/io.stat",
+    "bytes": 72,
+    "sha256": "cc866bd149ffa789aa5eb2525853ed848f559918e8a941ef00acaa3325c974de"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/memory.peak",
+    "bytes": 10,
+    "sha256": "71268dcc079bbdad6a56a4b05655dacdd0d4674dfe7877bcf7c3ce3132502575"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/pg-stderr-suite",
+    "bytes": 27198216,
+    "sha256": "7c4a17c27d2b55808d2e523d1757a1e44e1d5fe223e4f4a5f0f9ee92d8f733b3"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/rustc-version.txt",
+    "bytes": 36,
+    "sha256": "1ac65f1cd11fa83e9530348b787fa3e5bdd85b0f3727099df8bcdf3e24274138"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/source-check.txt",
+    "bytes": 74,
+    "sha256": "574177dbef68a77827cf0cf0c48dee5e8087ea51bebd9f8e4652ac85d237201f"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/suite-build.exitcode",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/export/suite-build.log",
+    "bytes": 2905,
+    "sha256": "3777cd1debb30b1f4d8f881361de310edfcc9bb8b715abe4f5f96846798933a2"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/launch-compile-command.json",
+    "bytes": 508,
+    "sha256": "f65db6316fed19a9e051c9a3320793ae7272818f26975c8fd697c8035918b6d8"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/launch-compile.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/launch.c",
+    "bytes": 217,
+    "sha256": "1a04608063bf3f418623f152503463d367100ea5e78776268b242f4c1b643ec6"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/metadata.json",
+    "bytes": 405,
+    "sha256": "f801ccafa883b1b51a4f577760e073370af65a2fab2e595997379990cdbee149"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native-command.json",
+    "bytes": 1101,
+    "sha256": "cbbd5e94ec908240ca28079b465ec2e9c1b5872724eda3e7df271605c9f3761e"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native-report/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native-report/cpu.stat",
+    "bytes": 149,
+    "sha256": "7783177c00d1d41ff0cb3846c9fcc905f18469ad9446867a680de7ae23509185"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native-report/io.stat",
+    "bytes": 59,
+    "sha256": "fa1479cd063375976bac7dac39c565e9fac80e2938392cc9e06140a3a90cb0d5"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native-report/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native-report/memory.peak",
+    "bytes": 8,
+    "sha256": "7b4a862a1ef25b8ca7853fde0e3753889d2246137d28f7f26367c8dd5e5b952d"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native-report/suite.exitcode",
+    "bytes": 4,
+    "sha256": "703d2c10fa601276a4dd96193faed68902a642a44eb5b01b40d6fc8499e12822"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native.stderr",
+    "bytes": 68,
+    "sha256": "7d3b1b5cc48f9f4a9a486d2ef9d2335b6bd95e3c45fa5c1ca3730c990d386c12"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/native.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/pg-launch",
+    "bytes": 16064,
+    "sha256": "2e450fc459f634bb3d91cedfc078badbb7cea6a291205609c061d37f1fea6d23"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/result.json",
+    "bytes": 314,
+    "sha256": "255d462365d1d34825391fba088ed2e651244a00e8d74738b9d5b784cf0cab79"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/source-lock.json",
+    "bytes": 1054,
+    "sha256": "ae6359788c1ad0d15bfa37a607b35d8268175caee47c66f8389bdc2dc4ce4190"
+  },
+  {
+    "phase": "native-exec-mode-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d/worker.py",
+    "bytes": 3485,
+    "sha256": "dbb71007238b82518cce4864515dad133688880264785d3da5788ac0a63b0388"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/budget-launch.json",
+    "bytes": 565,
+    "sha256": "e70e843f375f714e26835a17d6a6b4093a4f56c6514df5020fbbbdbd256c06a0"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/budget-reserve.json",
+    "bytes": 566,
+    "sha256": "da9aefe001499a27e613d5f3dd0b4761e75879d7facede331fe66412abfd412e"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/budget-spec.json",
+    "bytes": 364,
+    "sha256": "2561df496b4d25a4e1d6d60abe89435d1ecb8c847998fadca50faecec0ad267e"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/export/pg-stderr-suite",
+    "bytes": 27198216,
+    "sha256": "7c4a17c27d2b55808d2e523d1757a1e44e1d5fe223e4f4a5f0f9ee92d8f733b3"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/metadata.json",
+    "bytes": 281,
+    "sha256": "8866573166ced22b5018e5db9e1fe9a7011a0c52c4953e45bb84275eba439ddc"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native-command.json",
+    "bytes": 1101,
+    "sha256": "2bcbd09ce4ac77e5bea6c06e80dc3ce443b22e454f2f659767d0376b54bad77f"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native-report/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native-report/cpu.stat",
+    "bytes": 149,
+    "sha256": "c99ab61735a70fbc973c3314da1d7c78832e664583b699a8bc2964b60baea525"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native-report/io.stat",
+    "bytes": 59,
+    "sha256": "5728f1b49dd3696cc3cb219f022bec974805368a63e41cccc98d5e59f2d7e53d"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native-report/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native-report/memory.peak",
+    "bytes": 8,
+    "sha256": "83ee658e96398e044ed382f08af8702fdc27934fb70e540824250e4c473a7f1a"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native-report/suite.exitcode",
+    "bytes": 2,
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native.stderr",
+    "bytes": 160,
+    "sha256": "c6787dbd5e89039732c5d83de066633b3cbc95f0c55e977300fef475814be291"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/native.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/pg-launch",
+    "bytes": 16064,
+    "sha256": "2e450fc459f634bb3d91cedfc078badbb7cea6a291205609c061d37f1fea6d23"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/result.json",
+    "bytes": 150,
+    "sha256": "1193f1605864898628559a5f14579c3038ef12ef2bb6e5379320ff0101c67432"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/source-lock.json",
+    "bytes": 604,
+    "sha256": "9326e4d763fe62ded1faccb6216333e9ceee1b425d72a75f6f5997663146070f"
+  },
+  {
+    "phase": "native-loader-env-failed",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9/worker.py",
+    "bytes": 903,
+    "sha256": "04c8840aa387d5e4e70e03bc3cddb211eb96ebf67066b01971df7171798af11b"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/budget-launch.json",
+    "bytes": 565,
+    "sha256": "cd8c55fa9a817de469cb6d21bdd854923742e2e61e004fd1c4e098ab717d7bb9"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/budget-reserve.json",
+    "bytes": 566,
+    "sha256": "39aa6dee456229b8c3fb1665d6e3d79627eeb567caffd63504b7a74d49cb488f"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/budget-spec.json",
+    "bytes": 364,
+    "sha256": "31c5dbc18296c1b426d4dbce5fc0b47d3fe596a5505c1cb8dd6e15b82e39cc36"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/export/pg-stderr-suite",
+    "bytes": 27198216,
+    "sha256": "7c4a17c27d2b55808d2e523d1757a1e44e1d5fe223e4f4a5f0f9ee92d8f733b3"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/metadata.json",
+    "bytes": 281,
+    "sha256": "e2e720bc7c497c4f0e8b43fbcc7fab97f1e4a5a1dce5d772cf4a7ffe238d0992"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native-command.json",
+    "bytes": 1154,
+    "sha256": "e6f58bdfd7347e8251ce490d0cae252a341396a1c865a3cb365c6dc5d68b9b46"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native-report/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native-report/cpu.stat",
+    "bytes": 156,
+    "sha256": "9b15186b62a55564a1fb9257b2ce1e3a4812c04ec6a207c78c0c917ad9d7998b"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native-report/io.stat",
+    "bytes": 59,
+    "sha256": "ce11a5fbb30b6171b768cbc4326ecbf481108b4d95b4ff0ae98de6f521a9aa28"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native-report/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native-report/memory.peak",
+    "bytes": 10,
+    "sha256": "8319ccf7bff1da9162fd8e3ef17f03c108cc00c6b193b0e0b29365c990133c87"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native-report/suite.exitcode",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native.stderr",
+    "bytes": 17485975,
+    "sha256": "6106ed351f6f927e0bcbb2f702bf4ef58fcef5a7598f84630bcbb0e3a1f931b8"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/native.stdout",
+    "bytes": 667,
+    "sha256": "b6c275b0e73a231c00adcd6d55bf38befc0d08d639837e028959e5fc860f1b2b"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/pg-launch",
+    "bytes": 16064,
+    "sha256": "2e450fc459f634bb3d91cedfc078badbb7cea6a291205609c061d37f1fea6d23"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/result.json",
+    "bytes": 1025,
+    "sha256": "500b4e648cf049a869672209b90fac041fdcfe96e7692080e9ad50b385e36b9f"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/source-lock.json",
+    "bytes": 608,
+    "sha256": "21e392ce0835e0740ea57bf0c5b8169b9176221299ed8b64b1f4485a9cc13b8a"
+  },
+  {
+    "phase": "actual-PG-pipe-component",
+    "path": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144248Z-40b42b/worker.py",
+    "bytes": 903,
+    "sha256": "04c8840aa387d5e4e70e03bc3cddb211eb96ebf67066b01971df7171798af11b"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/Dockerfile",
+    "bytes": 1572,
+    "sha256": "6b781d1e23719ac7326577c7d25c359a7f54f3c188269a8bedc53660b8dd83b8"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/budget-launch.json",
+    "bytes": 566,
+    "sha256": "6ed6fe0554e0fb4d77b1da3b4944b63c90be54936b0df74c33b574dfc1f4de91"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/budget-reserve.json",
+    "bytes": 567,
+    "sha256": "0175bd29a74fd0f71b6cc00e5f94775e652679b1cd0768e01f02c3450b7580ba"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/budget-spec.json",
+    "bytes": 379,
+    "sha256": "4ae988816c5365a160f5234fc429eadce598a47a144a3d95e1fda7103e44d921"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/build-command.json",
+    "bytes": 587,
+    "sha256": "cf7cbf4a6e1e245a8cfa553c4eb9466bc29dd3cc8a0d6941d6dbde2afc18c854"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/build.log",
+    "bytes": 2311,
+    "sha256": "258ea23c54b5c23ad1b85ed9cbea4a7f0b8131e3cd8fd9bd97f1fa4ba1711400"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/Cargo.lock",
+    "bytes": 213744,
+    "sha256": "1358db1043de34ebdf091c27a76d7b6cbda3ae54319f3d4fb928e4edb9abf389"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/actual-source.sha256",
+    "bytes": 310,
+    "sha256": "316ae9ef1f5eb9e8f11526fcec836d7b5bf6e0894459d5153b4701f592e79673"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/cargo-version.txt",
+    "bytes": 36,
+    "sha256": "6c2df3721232c841c6af639c7b1c37c3032fcbf711e4f2914435f97ab5f4dff1"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/cpu.stat",
+    "bytes": 151,
+    "sha256": "10a821d57924c35eeabad0b0e51dbbba0df3ee066bd592c7185869b4fb453b4d"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/io.stat",
+    "bytes": 62,
+    "sha256": "b5f8d434544a19bbc9f161e6d66c901d58ab729e5a65fb33aec047b7b75900bd"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/memory.peak",
+    "bytes": 9,
+    "sha256": "fea31870549866ef5ce1338cb49988c4e3aeb6266564200afd47c6d2626eaba2"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/module-after.sha256",
+    "bytes": 83,
+    "sha256": "53623896bbf4be256b4bf240b7f49d2526447eecb8c4b6c7681eae0a711e0e4f"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/rustc-version.txt",
+    "bytes": 36,
+    "sha256": "1ac65f1cd11fa83e9530348b787fa3e5bdd85b0f3727099df8bcdf3e24274138"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/source-check.txt",
+    "bytes": 62,
+    "sha256": "0b31a2e15fef22948686e6d6f1393111ef4bf8a84b8441ed28d55255021aecab"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/test.exitcode",
+    "bytes": 4,
+    "sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/export/test.log",
+    "bytes": 665,
+    "sha256": "df1697bb73bd463f766331a2f2106c0eef669ea60a82b77c25a93a28ec19651c"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/metadata.json",
+    "bytes": 351,
+    "sha256": "f4da76d04eafac85d9a5312515c8d8c67998625e770a3301be7b77086127e7a3"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/result.json",
+    "bytes": 143,
+    "sha256": "59dc051f0244f361a9447a589d7d6d6fe090fa4a867407e9d6b4a4b20d1ed206"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/source-lock.json",
+    "bytes": 791,
+    "sha256": "07e205b81cec7907a1e1712bfb71e3cb0914833ef65f39c124fce24ad56b303f"
+  },
+  {
+    "phase": "selector-driver-deps-failed",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T144820Z-7551f4/worker.py",
+    "bytes": 970,
+    "sha256": "224915e4e3d316ad42b752ca66825010d127941df5e3c66625bca34d3b417f03"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/Dockerfile",
+    "bytes": 1572,
+    "sha256": "6b781d1e23719ac7326577c7d25c359a7f54f3c188269a8bedc53660b8dd83b8"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/budget-launch.json",
+    "bytes": 566,
+    "sha256": "15040c87779ad1ccafb141af55280e359fe794be8fabd2e00f4c32996f327284"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/budget-reserve.json",
+    "bytes": 567,
+    "sha256": "498f686ad205cc3500d234aa1a9d18b0535e3c912e8f6ac088dee10dc41769a3"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/budget-spec.json",
+    "bytes": 379,
+    "sha256": "92f6e45759aadfa1507507abed76b142edfb8cc90b1d2ae4b2bd0ccb9b6ebc87"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/build-command.json",
+    "bytes": 587,
+    "sha256": "0649b68e4fd9233063d83ec594f17d1731735b6ea3334e6eb0965ad28a317473"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/build.log",
+    "bytes": 2306,
+    "sha256": "3b64290a64db9012bdb3f9ac1e87509a51e669da9d2d163caf48cb68bc54a365"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/Cargo.lock",
+    "bytes": 9572,
+    "sha256": "be241ff0f4d8e31e9fc17217407e153d5c6842e83f2b5547d273ef6e160488a9"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/actual-source.sha256",
+    "bytes": 310,
+    "sha256": "c307e0c6a7d00580166f85e5fafceb81999c7097d30d9ceedf3c2d74c3e4c83a"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/cargo-version.txt",
+    "bytes": 36,
+    "sha256": "6c2df3721232c841c6af639c7b1c37c3032fcbf711e4f2914435f97ab5f4dff1"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/cpu.stat",
+    "bytes": 162,
+    "sha256": "2e13c3c79ad311de20c2866897a575c5860762c21e36ca2089bf71f532d4f7b6"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/io.stat",
+    "bytes": 71,
+    "sha256": "fbabde16a9dd2df3ebd1b8117db9507e481590eac7f2cd0385b790e189b37858"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/memory.peak",
+    "bytes": 10,
+    "sha256": "cc5067f102e8a087abd29020b7bd650ca68516500cdc62efcdecff2f32b3f859"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/module-after.sha256",
+    "bytes": 83,
+    "sha256": "53623896bbf4be256b4bf240b7f49d2526447eecb8c4b6c7681eae0a711e0e4f"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/rustc-version.txt",
+    "bytes": 36,
+    "sha256": "1ac65f1cd11fa83e9530348b787fa3e5bdd85b0f3727099df8bcdf3e24274138"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/source-check.txt",
+    "bytes": 62,
+    "sha256": "0b31a2e15fef22948686e6d6f1393111ef4bf8a84b8441ed28d55255021aecab"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/test.exitcode",
+    "bytes": 4,
+    "sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/export/test.log",
+    "bytes": 3227,
+    "sha256": "618c4e315b1c619c488c5f53a228f85958a0bd656e74708d0204e370aa9c28b9"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/metadata.json",
+    "bytes": 351,
+    "sha256": "b96c657f2aef91bf9c6706da00d03bab216c89b538d51e039df9e2fc002eb8c4"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/result.json",
+    "bytes": 143,
+    "sha256": "e90899fa88ef1e3d84bbc086a570a7e292ee03fa5685fec1f0c12ace53139650"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/source-lock.json",
+    "bytes": 791,
+    "sha256": "dc8336ae19f8fc814392147ca20c0312ae591f0998607e8b6b04f13f17e572c0"
+  },
+  {
+    "phase": "selector-array-negative-found-bug",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/worker.py",
+    "bytes": 970,
+    "sha256": "224915e4e3d316ad42b752ca66825010d127941df5e3c66625bca34d3b417f03"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/Dockerfile",
+    "bytes": 1572,
+    "sha256": "6b781d1e23719ac7326577c7d25c359a7f54f3c188269a8bedc53660b8dd83b8"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/budget-launch.json",
+    "bytes": 566,
+    "sha256": "752b1d20b0c6a3036dc3ed779fc47526d433bbbea206a7fb27410d06c3199e8d"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/budget-reserve.json",
+    "bytes": 567,
+    "sha256": "1f24b7ffae43e0942aebd0995f3293f31398edb81f984283d6290d77af77d548"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/budget-spec.json",
+    "bytes": 379,
+    "sha256": "d55f95b566346fb83d03552d851181c1ee1533bf1d7d474eed4fe55754fbec8f"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/build-command.json",
+    "bytes": 587,
+    "sha256": "f72e194ad1c9b44d31550267fef8e7d1afdf9540dced65bb790e1afba65cde60"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/build.log",
+    "bytes": 2311,
+    "sha256": "6082737ec77cdefa6ad3bb2ffd0acbc5b502cf6d0db2b4829a885de795d3aecb"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/Cargo.lock",
+    "bytes": 9572,
+    "sha256": "be241ff0f4d8e31e9fc17217407e153d5c6842e83f2b5547d273ef6e160488a9"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/actual-source.sha256",
+    "bytes": 310,
+    "sha256": "a912de4f721ebea8ab252bcf8479d1d34d51905f625175f1b36d2f9f4b1d7cf2"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/cargo-version.txt",
+    "bytes": 36,
+    "sha256": "6c2df3721232c841c6af639c7b1c37c3032fcbf711e4f2914435f97ab5f4dff1"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/cpu.max",
+    "bytes": 14,
+    "sha256": "07eb5019b2babb019fbbfe1cb328ec5b7affac5e07da4b94ebedb5e110dfab69"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/cpu.stat",
+    "bytes": 157,
+    "sha256": "4830e02863a996c2c63c258240342073c1347be7dcd89a7d87d523d23d821a4d"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/io.stat",
+    "bytes": 72,
+    "sha256": "569fef0d4c888b970e231ded3b5cf8f44ad9cdecfd9e190eafdb72f1bc432ba9"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/memory.max",
+    "bytes": 11,
+    "sha256": "e299e7e064963e64b8955bf05efe3e8151603ac8410068ae44c09285dd88707b"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/memory.peak",
+    "bytes": 10,
+    "sha256": "a172705409b3392750a1e3e97aecf798373ddd43bb690919829674b983529a10"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/module-after.sha256",
+    "bytes": 83,
+    "sha256": "858deedb66225ed6abf44257a6d021f99b12e5f23c32438c5d0424e2eedcfa00"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/rustc-version.txt",
+    "bytes": 36,
+    "sha256": "1ac65f1cd11fa83e9530348b787fa3e5bdd85b0f3727099df8bcdf3e24274138"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/source-check.txt",
+    "bytes": 62,
+    "sha256": "0b31a2e15fef22948686e6d6f1393111ef4bf8a84b8441ed28d55255021aecab"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/test.exitcode",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/export/test.log",
+    "bytes": 2585,
+    "sha256": "6ed80c002c305376710b47e45e8aac384ea708aecbc07a6e65dedb3b5d0477a0"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/metadata.json",
+    "bytes": 351,
+    "sha256": "0a91ffedd4335752f563cb6f2103e7406007068bf9fff4d8eacfe3bd4f86899c"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/result.json",
+    "bytes": 142,
+    "sha256": "a3ab11b02847882577b9eba6089fe8744918d688f505ee8bf13aff0bc6e7b170"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/source-lock.json",
+    "bytes": 791,
+    "sha256": "4f9852c7a83ce28808815813a5a750c01a77b2529f5ea0fba2dbd763324fc8a5"
+  },
+  {
+    "phase": "final-component-U",
+    "path": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145626Z-c4b3c1/worker.py",
+    "bytes": 970,
+    "sha256": "224915e4e3d316ad42b752ca66825010d127941df5e3c66625bca34d3b417f03"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/Dockerfile",
+    "bytes": 1520,
+    "sha256": "397ed36943823b36176f91672e529ba2864f53f386eab400a510cd58b727730d"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/budget-launch.json",
+    "bytes": 570,
+    "sha256": "4ee6a001b290b59f1099e745d290725c6e7c1534cd65bd1645ccbd81007b3bc4"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/budget-reserve.json",
+    "bytes": 571,
+    "sha256": "245385868215f413e4426f5285bdecc9cb4f8c2515715639cd0cdf791843452b"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/budget-spec.json",
+    "bytes": 393,
+    "sha256": "7df97695ddcbf6010aa7d5ce17bc4a3f294980b806e650059039b4f1f677485b"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/build-command.json",
+    "bytes": 607,
+    "sha256": "3be55e792b138d9f638a446d0296e44e8484af27e998d7f23e0363a3756dea6f"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/build.log",
+    "bytes": 6134,
+    "sha256": "75d299505bdaa871096f3d128ef735ef08e37bba81efb20a796b0911c675c858"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/metadata.json",
+    "bytes": 309,
+    "sha256": "c3073e8ddd7be5058660af64e6788ac681ac55efd937110fe8a2210ee154e3a5"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/result.json",
+    "bytes": 144,
+    "sha256": "e0ab2411766f9f138f980ded5bc6a9c6a87fe65a42161f9b34a1a12225694575"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/source-lock.json",
+    "bytes": 90534,
+    "sha256": "4d7c3dce376bd7e89af673cb041628b94a1f723ddfc8ab96f6aa1fde0ae6c3ad"
+  },
+  {
+    "phase": "full-compute-ignore-fixture-failed",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/worker.py",
+    "bytes": 982,
+    "sha256": "3d6a91ed2bcd8d38e352cac593c5166648ee6b0cf5fdd21116d814ceba020e33"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/Dockerfile",
+    "bytes": 1480,
+    "sha256": "b00e3e3ac81689e13001afef1cc3af0fde6d3038c5c27e33f4287ecea467d778"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/Dockerfile.dockerignore",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/budget-launch.json",
+    "bytes": 570,
+    "sha256": "0d39f48c627a9bc92918723eb913d57e4ea7363430fb94601a30c0201f7f3590"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/budget-reserve.json",
+    "bytes": 571,
+    "sha256": "39bf9f5b5b3b97ba1c63898191c1d4b25f504165b91c241eec01614c7025fd12"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/budget-spec.json",
+    "bytes": 393,
+    "sha256": "36881e44d028fac11c9592da0a4d099fc08fb9a822849f45029e2a9305186b24"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/build-command.json",
+    "bytes": 607,
+    "sha256": "237326d48f104728feff13272f6941f69a304e51d5816426e942afec296e0198"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/build.log",
+    "bytes": 2199,
+    "sha256": "4e260e5a4a2b01fc0b3ce7d8afebc3e6a40727bb9d31cf536b1655056b719f2d"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/compiled-source.sha256",
+    "bytes": 82501,
+    "sha256": "760ffe5b094492ac4dbbd1ca157f2c8537266057642cf458f15663ad69062e92"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/cpu.max",
+    "bytes": 14,
+    "sha256": "2f8bd783be33cf80b6a2a0cf810f81ccf85f988c72c9bb76fa6172b6e4ec2b02"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/cpu.stat",
+    "bytes": 162,
+    "sha256": "40066184a5acaa79411cf3a08a0bcd7bfd5c691ecfa66c435b3ad9025a09a399"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/io.stat",
+    "bytes": 79,
+    "sha256": "c652534c74cab17af2ad7f5cb2d14c5214350c1b473421d08f2410f939ae3106"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/memory.max",
+    "bytes": 11,
+    "sha256": "8528d39f97fdd9c9689c4373fe4c7b18f2c3bef6b044a2c4be74b07bf9cd07d8"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/memory.peak",
+    "bytes": 11,
+    "sha256": "9ccc894797f7061ae3723258d7fc8326c2bd8ea31951b3ea2efd6c70194f6b4f"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/rustc-version.txt",
+    "bytes": 36,
+    "sha256": "1ac65f1cd11fa83e9530348b787fa3e5bdd85b0f3727099df8bcdf3e24274138"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/source-check.txt",
+    "bytes": 32405,
+    "sha256": "cc4bd49ce0527c9d53be166e00b48df7e8ae016d4d54d1bd11c326e386600355"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/test.exitcode",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/export/test.log",
+    "bytes": 10344,
+    "sha256": "6d241aa5bd224297aa9517629509aab28b8a9a4350ee66d5d977e92904677bc8"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/metadata.json",
+    "bytes": 342,
+    "sha256": "0b407ee70f71948621324e0714762b30ba130cef7c80f8ba300e5869cda6a2b6"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/result.json",
+    "bytes": 192,
+    "sha256": "c4d8e1456f774a659e6fa5d4e20a90adb5886dc7e434e3538aa26f764f9b07fb"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/source-lock.json",
+    "bytes": 1032,
+    "sha256": "ea88e426389f88bac6021cf75753dd0683aca03b3ddc492f64957af421967be1"
+  },
+  {
+    "phase": "full-compute-compile-five-U",
+    "path": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b/worker.py",
+    "bytes": 1150,
+    "sha256": "b3b280e41473d4b6929a7c63a052b212eff412a99c15520c422768f6312b2f7f"
+  }
+]

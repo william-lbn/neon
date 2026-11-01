@@ -1,0 +1,10 @@
+{
+  "nonce": "20261101T144054Z-109cf9",
+  "unit": "neon-pg17-stderr-rust-native-20261101t144054z-109cf9.service",
+  "limits": {
+    "CPU": 2,
+    "MemoryGiB": 3
+  },
+  "no_rebuild": true,
+  "source_lock_sha256": "9326e4d763fe62ded1faccb6216333e9ceee1b425d72a75f6f5997663146070f"
+}

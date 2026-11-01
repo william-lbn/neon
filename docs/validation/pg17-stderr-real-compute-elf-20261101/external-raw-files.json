@@ -1,0 +1,217 @@
+[
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/source-lock.json",
+    "bytes": 1050,
+    "sha256": "71c718f7dd8b5741aa332ba65f28d2c7c80bff4bf6d98e77757dfbc2033c19a8"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/metadata.json",
+    "bytes": 334,
+    "sha256": "e8ef0d9beeb7b56ef21ab6eb898c48d6cfe1ca8bab4e58b55f98a912e1cf17e9"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/budget-spec.json",
+    "bytes": 369,
+    "sha256": "fd62132be179458bace2413b975eba355b344730b6c1b2bfa2c25aaa10dbbddb"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/worker.py",
+    "bytes": 1107,
+    "sha256": "f766fa7b63685d3fcb45e76d8a13f2125938196831c82311c9d2d3bbd2673f68"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/Dockerfile",
+    "bytes": 1873,
+    "sha256": "4a4303e318a9b8fc32bbf33361761585bd1ae2c5505c90896a5ea564ae35a1d6"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/Dockerfile.dockerignore",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/build-command.json",
+    "bytes": 583,
+    "sha256": "cf043a2732cfa239397978a37698e856ef1e7c04ea667933937a211c65781c4e"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/build.log",
+    "bytes": 2520,
+    "sha256": "71dcdcfd67c8d4ff231afa6c9dd30b6b61fdcfd25b7dfd05c5665bb01f100168"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/result.json",
+    "bytes": 161,
+    "sha256": "8008f68d20ed5906dc836f3ffc061f85fad0e126a0cfc8aa7cca2a7217c764f9"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/runtime-inputs.json",
+    "bytes": 2545,
+    "sha256": "8f0613050dc737dc998a649c62acdb874d3c9d5bbfcc73abe83385f2a03c1125"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/bin-build.log",
+    "bytes": 8489,
+    "sha256": "238a6feaa034d5a5e5c5a67e6bf7f0d286dda3d716279aa38f0b4eab6cdba8e3"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/bin-build.exitcode",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/strip.exitcode",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/ELF.sha256",
+    "bytes": 88,
+    "sha256": "c0c7a71b1f0b01d98001094e3ded217ff3f24ceefb8914f597e8e1d11db171da"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/ELF.readelf",
+    "bytes": 5568,
+    "sha256": "869686d06eccd4e52014e67718fbf7413dc9b5269a54baaba052e7ca8fffda20"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/unstripped-ELF.sha256",
+    "bytes": 105,
+    "sha256": "2547ce0519b8b20898aa3502bf41154637dc08e01428d8fc20f2cd045f1c624f"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/unstripped-ELF.bytes",
+    "bytes": 10,
+    "sha256": "b35de3bf9e586ddc7f8a435df8cfc0e5d6c176a4e3117c3bdff5a1c34296e7da"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/source-check.txt",
+    "bytes": 32405,
+    "sha256": "cc4bd49ce0527c9d53be166e00b48df7e8ae016d4d54d1bd11c326e386600355"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/compiled-source.sha256",
+    "bytes": 82501,
+    "sha256": "760ffe5b094492ac4dbbd1ca157f2c8537266057642cf458f15663ad69062e92"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/memory.peak",
+    "bytes": 11,
+    "sha256": "ca9f80a6cf843fd4a504bc41dbeffdca25ce77093a670b9c50499380f00e1751"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/cpu.stat",
+    "bytes": 162,
+    "sha256": "5f696be99dd0ad8ce399e4a194d7ed8128d88afef8b34d4d773f75fe839ef0af"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/io.stat",
+    "bytes": 79,
+    "sha256": "172f1382a09e60bbeb0cf042e29aaf206c761f69abb1379989db1156867f260b"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/memory.max",
+    "bytes": 11,
+    "sha256": "8528d39f97fdd9c9689c4373fe4c7b18f2c3bef6b044a2c4be74b07bf9cd07d8"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/cpu.max",
+    "bytes": 14,
+    "sha256": "2f8bd783be33cf80b6a2a0cf810f81ccf85f988c72c9bb76fa6172b6e4ec2b02"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/source-lock.json",
+    "bytes": 521,
+    "sha256": "9f7864cf80a85cb05955c1ca9c0a5ac8726b5d3f96ced1e6e584fa09ef19fa1c"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/metadata.json",
+    "bytes": 320,
+    "sha256": "371ba51869a7685c1c92b2d13195641bff70e74e34e60dba2e1e9a36a2f9275c"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/budget-spec.json",
+    "bytes": 376,
+    "sha256": "30ea09fbaf4576dd6f5f2369c047675e428cbe44925de102e8b5ee1f10248b62"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/worker.py",
+    "bytes": 581,
+    "sha256": "41fddf153d3553fd519d90977e0f59cdf86ef669d532d14d794a5ffbd2da106f"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/command.json",
+    "bytes": 1112,
+    "sha256": "07d60cfee434a8acacda86f9cd7f297e9b147c1c58682a1c4426e84a774b0b25"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/result.json",
+    "bytes": 125,
+    "sha256": "1770b1b863e498e7c4c1873c779eec34d70abf197fd6efa72f84fe6cb747ccdc"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/stdout",
+    "bytes": 2159,
+    "sha256": "5213d03d18734703656b4c557d14952b5e2a77038ee2d92164052ad6431ac85a"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/help.exitcode",
+    "bytes": 2,
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/cpu.stat",
+    "bytes": 150,
+    "sha256": "c7a55a0087985c8ae3cdd817d6e2a4c678fc3cf5ca37fb52d1cc64e928e6f89e"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/memory.peak",
+    "bytes": 8,
+    "sha256": "c02506a44459a506ad78c9425098a973d40ad73280f1c781356e53d65a1fc963"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/io.stat",
+    "bytes": 61,
+    "sha256": "4bad23287420bba0fc2637b2159ba137e7e7f0cc48ecb949c46a3ab261324818"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/memory.max",
+    "bytes": 10,
+    "sha256": "a4e2a1c28ab6c77b49f903f37526602e32e9495ee3719519baa8dcc66900bce5"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/cpu.max",
+    "bytes": 14,
+    "sha256": "261369fa24cb11ef3776980c85360401b9cdc7cf51aaa7a27e7acad94d662607"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/compute_ctl.real",
+    "bytes": 71147152,
+    "sha256": "7569a12e36a19cb2f184d123e19ea8f52bd7294c914a1d918e4b5c8020af2af5"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/runtime-inputs/ld-linux-x86-64.so.2",
+    "bytes": 215000,
+    "sha256": "02bcda52c1a5dfc236f94d9e5255b4a0e26347d8a372a5223b650e31f291ce3c"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/runtime-inputs/libc.so.6",
+    "bytes": 1926232,
+    "sha256": "6b4a45352fd0c540a9c7c718f35ce8c8e46a4e482f9d3885a910c32d1a0e1421"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/runtime-inputs/libgcc_s.so.1",
+    "bytes": 125312,
+    "sha256": "2bd1552c47799ef67e701e81d4383061fd76059868e446e63560f0dd0d5ec14e"
+  },
+  {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/runtime-inputs/libm.so.6",
+    "bytes": 911904,
+    "sha256": "7f2ca87f652f56b094462474b076749e90e689d0ecb9cb63c7679820b271b4e7"
+  }
+]

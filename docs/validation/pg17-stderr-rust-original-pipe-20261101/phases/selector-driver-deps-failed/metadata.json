@@ -1,0 +1,12 @@
+{
+  "nonce": "20261101T144820Z-7551f4",
+  "unit": "neon-pg-stderr-rust-component-20261101t144820z-7551f4.service",
+  "kind": "SMALL_RUST_NATIVE_COMPONENT_BUILD",
+  "limits": {
+    "CPU": 2,
+    "MemoryGiB": 3,
+    "CargoJobs": 2,
+    "single_RUN": true
+  },
+  "source_lock_sha256": "07e205b81cec7907a1e1712bfb71e3cb0914833ef65f39c124fce24ad56b303f"
+}

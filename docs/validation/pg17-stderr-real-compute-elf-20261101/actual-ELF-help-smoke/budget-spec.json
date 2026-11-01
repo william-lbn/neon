@@ -1,0 +1,1 @@
+{"argv": ["/usr/bin/python3", "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/worker.py"], "evidence_dir": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59", "kind": "native", "nonce": "20261101T152412Z-e31b59", "protocol_version": 1, "unit": "neon-pg-stderr-compute-bin-smoke-20261101t152412z-e31b59.service"}

@@ -1,0 +1,84 @@
+   Compiling autocfg v1.1.0
+   Compiling serde v1.0.215
+   Compiling memoffset v0.9.0
+   Compiling nix v0.30.1
+   Compiling serde_derive v1.0.215
+   Compiling serde_json v1.0.125
+   Compiling itoa v1.0.11
+   Compiling ryu v1.0.13
+   Compiling pg-stderr-component v0.0.0 (/component)
+warning: constant `PIPE_CAPACITY_BYTES` is never used
+  --> dsg_pg_stderr.rs:14:18
+   |
+14 | pub(crate) const PIPE_CAPACITY_BYTES: i32 = 64 * 1024;
+   |                  ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: constant `READ_BYTES` is never used
+  --> dsg_pg_stderr.rs:17:7
+   |
+17 | const READ_BYTES: usize = 8 * 1024;
+   |       ^^^^^^^^^^
+
+warning: struct `OriginalPgStderr` is never constructed
+  --> dsg_pg_stderr.rs:21:19
+   |
+21 | pub(crate) struct OriginalPgStderr {
+   |                   ^^^^^^^^^^^^^^^^
+
+warning: associated items `new`, `endpoints`, `capacity`, `register_with_root`, and `configure` are never used
+  --> dsg_pg_stderr.rs:29:19
+   |
+28 | impl OriginalPgStderr {
+   | --------------------- associated items in this implementation
+29 |     pub(crate) fn new() -> Result<Self> {
+   |                   ^^^
+...
+39 |     pub(crate) fn endpoints(&self) -> (&File, &OwnedFd) { (&self.reader, &self.writer) }
+   |                   ^^^^^^^^^
+40 |
+41 |     pub(crate) fn capacity(&self) -> i32 { self.capacity }
+   |                   ^^^^^^^^
+...
+45 |     pub(crate) fn register_with_root(&self) -> Result<()> {
+   |                   ^^^^^^^^^^^^^^^^^^
+...
+74 |     pub(crate) fn configure(self, command: &mut Command) -> File {
+   |                   ^^^^^^^^^
+
+warning: function `root_registration_required` is never used
+  --> dsg_pg_stderr.rs:83:15
+   |
+83 | pub(crate) fn root_registration_required(managed: bool) -> Result<bool> {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `drain_original_pg_stderr` is never used
+   --> dsg_pg_stderr.rs:199:21
+    |
+199 | pub(crate) async fn drain_original_pg_stderr(file: File) -> Result<DrainReceipt> {
+    |                     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `pg-stderr-component` (lib test) generated 6 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.47s
+     Running unittests lib.rs (/home/nonroot/target/pg-stderr-component/debug/deps/pg_stderr_component-f070f979210e3acb)
+
+running 5 tests
+test dsg_pg_stderr::tests::unit_empty_lines_are_preserved ... ok
+test dsg_pg_stderr::tests::unit_ordinary_multiline_format_and_crlf ... ok
+
+thread 'dsg_pg_stderr::tests::unit_protocol_selection_rejects_malformed_or_duplicate' panicked at dsg_pg_stderr.rs:225:13:
+assertion failed: parse_protocol_selection(raw).is_err()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test dsg_pg_stderr::tests::unit_protocol_selection_rejects_malformed_or_duplicate ... FAILED
+test dsg_pg_stderr::tests::unit_utf8_fragment_boundary_and_output_failure ... ok
+test dsg_pg_stderr::tests::unit_bounded_single_line_and_group ... ok
+
+failures:
+
+failures:
+    dsg_pg_stderr::tests::unit_protocol_selection_rejects_malformed_or_duplicate
+
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+error: test failed, to rerun pass `--lib`

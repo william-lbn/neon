@@ -1,0 +1,28 @@
+{
+  "scope": "REAL_NEW_COMPUTE_CTL_ELF_AND_HELP_SMOKE_NOT_SOURCE",
+  "build": {
+    "build_exit": 0,
+    "bin_build_exit": 0,
+    "seconds": 178.4668513990182,
+    "Source": false,
+    "normal": false,
+    "actual_compute_bin_build_requested": true
+  },
+  "smoke": {
+    "exit": 0,
+    "seconds": 0.4040748419938609,
+    "actual_compute_help_passed": true,
+    "Source": false,
+    "normal": false
+  },
+  "ELF": {
+    "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/compute_ctl.real",
+    "bytes": 71147152,
+    "sha256": "7569a12e36a19cb2f184d123e19ea8f52bd7294c914a1d918e4b5c8020af2af5"
+  },
+  "DSO_and_loader_inputs": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/runtime-inputs.json",
+  "Source": false,
+  "normal": false,
+  "release_image": false,
+  "K8s_E": false
+}

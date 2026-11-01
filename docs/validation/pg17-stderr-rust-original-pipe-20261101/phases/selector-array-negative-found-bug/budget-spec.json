@@ -1,0 +1,1 @@
+{"argv": ["/usr/bin/python3", "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0/worker.py"], "evidence_dir": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T145305Z-4893a0", "kind": "native", "nonce": "20261101T145305Z-4893a0", "protocol_version": 1, "unit": "neon-pg-stderr-rust-component-20261101t145305z-4893a0.service"}

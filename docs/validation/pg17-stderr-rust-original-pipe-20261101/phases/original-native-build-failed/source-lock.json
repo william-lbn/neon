@@ -1,0 +1,17 @@
+{
+  "scope": "ACTUAL_NEW_RUST_PIPE_AND_PG_BOUNDED_DRAIN_EOF_WAIT_NOT_ROOT_SOURCE",
+  "module_immutable": "/data/neon-build/validation/pg-stderr-rust-component-build-20261101T135031Z-894768/source/dsg_pg_stderr.rs",
+  "module_sha256": "5b07ab9994a52ee7df95b8373a25eacb6f8e697e2ade97a17f89c5b67b3b9a42",
+  "inputs": {
+    "main.rs": "fc6861018f73a311e9f0a37973f1327973050a4eb792b5742ac4a18181cfbef3",
+    "dsg_pg_stderr.rs": "5b07ab9994a52ee7df95b8373a25eacb6f8e697e2ade97a17f89c5b67b3b9a42",
+    "Cargo.lock": "377364248740069f9bfc3bc0278df28fd023527c54d52474351b0ab7688016af",
+    "lib.rs": "d08ad345930dd193004b77ed0117cd1f8b2b4bc409fa2656523b57cbe4bf5142",
+    "Cargo.toml": "ba2f05994837702d7eeceb3518016849dcde8f498d7c1d2221e20b64b25a87a1"
+  },
+  "launch_c_sha256": "1a04608063bf3f418623f152503463d367100ea5e78776268b242f4c1b643ec6",
+  "PGimage": "127.0.0.1:5001/neon/pg17-stderr-cap@sha256:46c3e2a3b0eddc18e6bf57911556254d74af65246c827706f4a6d8c3d62f815b",
+  "Root_Birth_RPC_or_PIDFD_not_yet_exercised": true,
+  "Source": false,
+  "normal": false
+}

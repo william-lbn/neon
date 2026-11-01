@@ -1,0 +1,12 @@
+{
+  "build_exit": 0,
+  "suite_build_exit": 0,
+  "Source": false,
+  "normal": false,
+  "launch_compile_exit": 0,
+  "native_exit": 126,
+  "reports": [],
+  "seconds": 23.641676895989804,
+  "status": "FAIL_RUNTIME_OR_FIXTURE",
+  "suite_ELF_sha256": "7c4a17c27d2b55808d2e523d1757a1e44e1d5fe223e4f4a5f0f9ee92d8f733b3"
+}

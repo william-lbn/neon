@@ -1,0 +1,137 @@
+{
+  "scope": "PG17_ORIGINAL_RUST_STDERR_PIPE_BOUNDED_DRAIN_COMPILE_AND_REAL_PG_COMPONENT_ONLY",
+  "owned5": {
+    "compute_tools/Cargo.toml": "30316b034612e8a13afb73da8f9e18ef4580a865d320cac737b6f51fd585ff87",
+    "compute_tools/src/lib.rs": "2c136cb7bd72755da923e8da3c54e66ec75cfd85436a12b513958e02c3dcd578",
+    "compute_tools/src/compute.rs": "83f466a2236c0de16c761fd7e96449abde75edd54dfe22b630652e983d662414",
+    "compute_tools/src/pg_helpers.rs": "bf5c2d9069fed1a619f8324af86559f33fdf7dab129800a4760028bda2f2f2a3",
+    "compute_tools/src/dsg_pg_stderr.rs": "ccf35239e9725927a6f2445cccf3a5aeae0b14224065ff82550c6f3140d9aea1"
+  },
+  "phases": {
+    "initial-bounded-U": {
+      "build_exit": 0,
+      "test_exit": 0,
+      "seconds": 42.77963230700698,
+      "Source": false,
+      "normal": false,
+      "full_compute_build": false
+    },
+    "original-native-build-failed": {
+      "build_exit": 0,
+      "suite_build_exit": 101,
+      "Source": false,
+      "normal": false,
+      "status": "BUILD_FAIL"
+    },
+    "native-exec-mode-failed": {
+      "build_exit": 0,
+      "suite_build_exit": 0,
+      "Source": false,
+      "normal": false,
+      "launch_compile_exit": 0,
+      "native_exit": 126,
+      "reports": [],
+      "seconds": 23.641676895989804,
+      "status": "FAIL_RUNTIME_OR_FIXTURE",
+      "suite_ELF_sha256": "7c4a17c27d2b55808d2e523d1757a1e44e1d5fe223e4f4a5f0f9ee92d8f733b3"
+    },
+    "native-loader-env-failed": {
+      "native_exit": 1,
+      "reports": [],
+      "seconds": 0.5884809870040044,
+      "Source": false,
+      "normal": false,
+      "status": "FAIL_RUNTIME_OR_FIXTURE"
+    },
+    "actual-PG-pipe-component": {
+      "native_exit": 0,
+      "reports": [
+        {
+          "mode": "off",
+          "pid": 24,
+          "pipe_device": 14,
+          "pipe_inode": 5372323,
+          "initial_capacity": 65536,
+          "received_bytes": 8729572,
+          "emitted_groups": 327,
+          "max_line_bytes": 16384,
+          "max_group_bytes": 64520,
+          "original_wait_success": true,
+          "wait_did_not_imply_EOF": true,
+          "actual_EOF_after_last_write_close": true,
+          "Source": false,
+          "normal": false
+        },
+        {
+          "mode": "filtered",
+          "pid": 57,
+          "pipe_device": 14,
+          "pipe_inode": 5378160,
+          "initial_capacity": 65536,
+          "received_bytes": 8729577,
+          "emitted_groups": 327,
+          "max_line_bytes": 16384,
+          "max_group_bytes": 64520,
+          "original_wait_success": true,
+          "wait_did_not_imply_EOF": true,
+          "actual_EOF_after_last_write_close": true,
+          "Source": false,
+          "normal": false
+        }
+      ],
+      "seconds": 3.3118464320141356,
+      "Source": false,
+      "normal": false,
+      "status": "PASS_REAL_PG_PIPE_COMPONENT"
+    },
+    "selector-driver-deps-failed": {
+      "build_exit": 0,
+      "test_exit": 101,
+      "seconds": 4.572112521971576,
+      "Source": false,
+      "normal": false,
+      "full_compute_build": false
+    },
+    "selector-array-negative-found-bug": {
+      "build_exit": 0,
+      "test_exit": 101,
+      "seconds": 16.61670825400506,
+      "Source": false,
+      "normal": false,
+      "full_compute_build": false
+    },
+    "final-component-U": {
+      "build_exit": 0,
+      "test_exit": 0,
+      "seconds": 14.816956519993255,
+      "Source": false,
+      "normal": false,
+      "full_compute_build": false
+    },
+    "full-compute-ignore-fixture-failed": {
+      "build_exit": 1,
+      "test_exit": null,
+      "seconds": 4.98164288001135,
+      "Source": false,
+      "normal": false,
+      "full_compute_compile": true
+    },
+    "full-compute-compile-five-U": {
+      "build_exit": 0,
+      "test_exit": 0,
+      "seconds": 221.04637598100817,
+      "Source": false,
+      "normal": false,
+      "full_compute_compile_requested": true,
+      "full_compute_compile_passed": true
+    }
+  },
+  "actual_full_compute_compile": "8d718b five stderr tests passed;29 unrelated tests filtered out",
+  "actual_PG_component": "40b42b off/filter two actual PMs, same unchanged bounded drain; older module5b07 before new registration method",
+  "Root_RPC_exercised": false,
+  "actual_same_g_Compute_lease_Source": false,
+  "normal_safe_lowering": false,
+  "Linux_E": false,
+  "K8s_E": false,
+  "real_compute_bin_build_pending": "pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c"
+}

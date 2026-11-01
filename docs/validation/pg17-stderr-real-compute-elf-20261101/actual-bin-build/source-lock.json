@@ -1,0 +1,16 @@
+{
+  "scope": "ACTUAL_COMPUTE_CTL_ELF_BUILD_FROM_VERIFIED_NEW_STDERR_SOURCE_NOT_SOURCE_OR_RELEASE",
+  "immutable_context": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150045Z-f6ddd6/source",
+  "immutable_full_compile": "/data/neon-build/validation/pg-stderr-compute-integration-build-20261101T150222Z-8d718b",
+  "immutable_full_compile_lock_sha256": "ea88e426389f88bac6021cf75753dd0683aca03b3ddc492f64957af421967be1",
+  "same_owned5": {
+    "compute_tools/Cargo.toml": "30316b034612e8a13afb73da8f9e18ef4580a865d320cac737b6f51fd585ff87",
+    "compute_tools/src/lib.rs": "2c136cb7bd72755da923e8da3c54e66ec75cfd85436a12b513958e02c3dcd578",
+    "compute_tools/src/compute.rs": "83f466a2236c0de16c761fd7e96449abde75edd54dfe22b630652e983d662414",
+    "compute_tools/src/pg_helpers.rs": "bf5c2d9069fed1a619f8324af86559f33fdf7dab129800a4760028bda2f2f2a3",
+    "compute_tools/src/dsg_pg_stderr.rs": "ccf35239e9725927a6f2445cccf3a5aeae0b14224065ff82550c6f3140d9aea1"
+  },
+  "Source": false,
+  "normal": false,
+  "release": false
+}

@@ -1,0 +1,9 @@
+{
+  "scope": "ACTUAL_COMPUTE_CTL_HELP_SMOKE_NOT_GUEST_SOURCE",
+  "actual_ELF": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/compute_ctl.real",
+  "actual_ELF_sha256": "7569a12e36a19cb2f184d123e19ea8f52bd7294c914a1d918e4b5c8020af2af5",
+  "immutable_build": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c",
+  "immutable_build_lock_sha256": "71c718f7dd8b5741aa332ba65f28d2c7c80bff4bf6d98e77757dfbc2033c19a8",
+  "Source": false,
+  "normal": false
+}

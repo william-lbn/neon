@@ -1,0 +1,10 @@
+{
+  "nonce": "20261101T152412Z-e31b59",
+  "unit": "neon-pg-stderr-compute-bin-smoke-20261101t152412z-e31b59.service",
+  "declared_profile": "native2CPU3GiB",
+  "actual_runtime_limits": {
+    "CPU": 1,
+    "MemoryMiB": 256
+  },
+  "source_lock_sha256": "9f7864cf80a85cb05955c1ca9c0a5ac8726b5d3f96ced1e6e584fa09ef19fa1c"
+}

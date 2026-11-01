@@ -568,6 +568,15 @@ pub fn handle_postgres_logs(stderr: std::process::ChildStderr) -> JoinHandle<Res
     })
 }
 
+/// 新ABI只接受原Rust pipe读端。read0前不返回成功，不把PM Wait当EOF。
+pub(crate) fn handle_original_postgres_logs(stderr: std::fs::File) -> JoinHandle<Result<()>> {
+    tokio::spawn(async move {
+        let receipt=crate::dsg_pg_stderr::drain_original_pg_stderr(stderr).await?;
+        anyhow::ensure!(receipt.eof_observed,"original PG stderr EOF absent");
+        Ok(())
+    })
+}
+
 /// Read Postgres logs from `stderr` until EOF. Buffer is flushed on one of the following conditions:
 /// - next line starts with timestamp
 /// - EOF

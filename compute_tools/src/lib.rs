@@ -18,6 +18,7 @@ pub mod disk_quota;
 mod dsg;
 mod dsg_hba;
 mod dsg_launch;
+mod dsg_pg_stderr;
 mod dsg_roles;
 pub mod extension_server;
 pub mod hadron_metrics;

@@ -1,0 +1,10 @@
+{
+  "scope": "ACTUAL_RUST_PIPE_PG_BOUNDED_DRAIN_EOF_WAIT_NOT_ROOT_SOURCE",
+  "immutable_build": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T140711Z-8b494d",
+  "previous_failed_fixture": "/data/neon-build/validation/pg17-stderr-rust-native-20261101T144054Z-109cf9",
+  "suite_ELF_sha256": "7c4a17c27d2b55808d2e523d1757a1e44e1d5fe223e4f4a5f0f9ee92d8f733b3",
+  "launch_ELF_sha256": "2e450fc459f634bb3d91cedfc078badbb7cea6a291205609c061d37f1fea6d23",
+  "runtime_fixture_fix": "LD_LIBRARY_PATH original installed PG lib path; no RPATH in production image",
+  "Source": false,
+  "normal": false
+}

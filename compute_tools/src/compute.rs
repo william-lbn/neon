@@ -613,6 +613,19 @@ impl ComputeNode {
         Ok(maybe_cgexec(&self.params.pgbin))
     }
 
+    fn configure_original_pg_stderr(&self, command: &mut Command) -> Result<Option<std::fs::File>> {
+        #[cfg(target_os="linux")]
+        {
+            if crate::dsg_pg_stderr::root_registration_required(self.frozen_dsg_startup().is_some())? {
+                let pipe=crate::dsg_pg_stderr::OriginalPgStderr::new()?;
+                pipe.register_with_root()?;
+                return Ok(Some(pipe.configure(command)));
+            }
+        }
+        command.stderr(Stdio::piped());
+        Ok(None)
+    }
+
     pub fn new(params: ComputeNodeParams, config: ComputeConfig) -> Result<Self> {
         let dsg_private = config
             .spec
@@ -1619,7 +1632,8 @@ impl ComputeNode {
 
         // 先完成可失败的命令选择，再创建子进程，显式区分尚无Child的错误边界。
         let mut command = self.postgres_command()?;
-        let mut sync_handle = command
+        let original_stderr = self.configure_original_pg_stderr(&mut command)?;
+        let spawned = command
             .args(["--sync-safekeepers"])
             .env("PGDATA", &self.params.pgdata) // we cannot use -D in this mode
             .envs(if let Some(storage_auth_token) = &storage_auth_token {
@@ -1628,19 +1642,19 @@ impl ComputeNode {
                 vec![]
             })
             .stdout(Stdio::piped())
-            .stderr(Stdio::piped())
-            .spawn()
-            .expect("postgres --sync-safekeepers failed to start");
+            .spawn();
+        drop(command); // 不能让父Command持write直到EOF。
+        let mut sync_handle = spawned.expect("postgres --sync-safekeepers failed to start");
         SYNC_SAFEKEEPERS_PID.store(sync_handle.id(), Ordering::SeqCst);
 
         // `postgres --sync-safekeepers` will print all log output to stderr and
         // final LSN to stdout. So we leave stdout to collect LSN, while stderr logs
         // will be collected in a child thread.
-        let stderr = sync_handle
-            .stderr
-            .take()
-            .expect("stderr should be captured");
-        let logs_handle = handle_postgres_logs(stderr);
+        let logs_handle = if let Some(stderr) = original_stderr {
+            crate::pg_helpers::handle_original_postgres_logs(stderr)
+        } else {
+            handle_postgres_logs(sync_handle.stderr.take().expect("stderr should be captured"))
+        };
 
         let sync_output = sync_handle
             .wait_with_output()
@@ -1970,18 +1984,22 @@ impl ComputeNode {
             }
         }
         let mut command = self.postgres_command()?;
-        let mut pg = command
+        let original_stderr = self.configure_original_pg_stderr(&mut command)?;
+        let spawned = command
             .args(["-D", &self.params.pgdata])
             .args(dsg_arguments)
             .envs(env_vars)
-            .stderr(Stdio::piped())
-            .spawn()
-            .expect("cannot start postgres process");
+            .spawn();
+        drop(command); // Root仍持自己的write，原NativeFinal后才释放。
+        let mut pg = spawned.expect("cannot start postgres process");
         PG_PID.store(pg.id(), Ordering::SeqCst);
 
         // Start a task to collect logs from stderr.
-        let stderr = pg.stderr.take().expect("stderr should be captured");
-        let logs_handle = handle_postgres_logs(stderr);
+        let logs_handle = if let Some(stderr) = original_stderr {
+            crate::pg_helpers::handle_original_postgres_logs(stderr)
+        } else {
+            handle_postgres_logs(pg.stderr.take().expect("stderr should be captured"))
+        };
 
         wait_for_postgres(&mut pg, pgdata_path)?;
 

@@ -1,0 +1,12 @@
+{
+  "nonce": "20261101T150222Z-8d718b",
+  "unit": "neon-pg-stderr-compute-integration-20261101t150222z-8d718b.service",
+  "limits": {
+    "CPU": 6,
+    "MemoryGiB": 8,
+    "CargoJobs": 4,
+    "single_RUN": true
+  },
+  "source_lock_sha256": "ea88e426389f88bac6021cf75753dd0683aca03b3ddc492f64957af421967be1",
+  "no_second_source_copy": true
+}
