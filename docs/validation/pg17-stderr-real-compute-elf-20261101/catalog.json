@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "postgres_versions_actually_tested": [],
+  "scope": "PG17真实compute_ctl构建产物及--help启动smoke；既非完整单服务运行，也非Root来源或E",
+  "Source": false,
+  "realRootComputeSource": false,
+  "safeNormal": false,
+  "normal": false,
+  "E": 0,
+  "Linux_E": 0,
+  "K8s_E": 0,
+  "PG18_included": false,
+  "release_lock_changed": false,
+  "counting": {
+    "base_aggregate_counts_changed": false,
+    "historical_repeats_are_not_added": true,
+    "compile_or_help_smoke_is_not_service_E": true
+  },
+  "U": [],
+  "S": [],
+  "BUILD": [
+    {
+      "id": "PG17-BUILD-REAL-COMPUTE-STDERR-001",
+      "classification": "BUILD_ARTIFACT",
+      "run_nonce": "20261101T151519Z-8c9f1c",
+      "result": "BUILD_PASS_NOT_SERVICE",
+      "evidence": {
+        "directory": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c",
+        "result": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/result.json",
+          "sha256": "8008f68d20ed5906dc836f3ffc061f85fad0e126a0cfc8aa7cca2a7217c764f9",
+          "bytes": 161
+        },
+        "source_lock": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/source-lock.json",
+          "sha256": "71c718f7dd8b5741aa332ba65f28d2c7c80bff4bf6d98e77757dfbc2033c19a8",
+          "bytes": 1050
+        },
+        "metadata_json": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/metadata.json",
+          "sha256": "e8ef0d9beeb7b56ef21ab6eb898c48d6cfe1ca8bab4e58b55f98a912e1cf17e9",
+          "bytes": 334
+        },
+        "budget-spec_json": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/budget-spec.json",
+          "sha256": "fd62132be179458bace2413b975eba355b344730b6c1b2bfa2c25aaa10dbbddb",
+          "bytes": 369
+        },
+        "worker_py": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/worker.py",
+          "sha256": "f766fa7b63685d3fcb45e76d8a13f2125938196831c82311c9d2d3bbd2673f68",
+          "bytes": 1107
+        },
+        "Dockerfile": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/Dockerfile",
+          "sha256": "4a4303e318a9b8fc32bbf33361761585bd1ae2c5505c90896a5ea564ae35a1d6",
+          "bytes": 1873
+        },
+        "build-command_json": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/build-command.json",
+          "sha256": "cf043a2732cfa239397978a37698e856ef1e7c04ea667933937a211c65781c4e",
+          "bytes": 583
+        },
+        "export_resource_receipts": {
+          "cpu.stat": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/cpu.stat",
+            "sha256": "5f696be99dd0ad8ce399e4a194d7ed8128d88afef8b34d4d773f75fe839ef0af",
+            "bytes": 162
+          },
+          "memory.peak": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/memory.peak",
+            "sha256": "ca9f80a6cf843fd4a504bc41dbeffdca25ce77093a670b9c50499380f00e1751",
+            "bytes": 11
+          },
+          "io.stat": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/io.stat",
+            "sha256": "172f1382a09e60bbeb0cf042e29aaf206c761f69abb1379989db1156867f260b",
+            "bytes": 79
+          },
+          "memory.max": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/memory.max",
+            "sha256": "8528d39f97fdd9c9689c4373fe4c7b18f2c3bef6b044a2c4be74b07bf9cd07d8",
+            "bytes": 11
+          },
+          "cpu.max": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/cpu.max",
+            "sha256": "2f8bd783be33cf80b6a2a0cf810f81ccf85f988c72c9bb76fa6172b6e4ec2b02",
+            "bytes": 14
+          }
+        },
+        "native-report_resource_receipts": {},
+        "report_resource_receipts": {},
+        "actual_cgroup_limit_values": {
+          "export/cpu.max": "600000 100000",
+          "export/memory.max": "8589934592"
+        },
+        "actual_host_worker_argv_from_budget_spec": [
+          "/usr/bin/python3",
+          "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/worker.py"
+        ]
+      },
+      "ELF": {
+        "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/compute_ctl.real",
+        "bytes": 71147152,
+        "sha256": "7569a12e36a19cb2f184d123e19ea8f52bd7294c914a1d918e4b5c8020af2af5"
+      },
+      "ELF_header_and_dynamic_dependencies": {
+        "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/ELF.readelf",
+        "sha256": "869686d06eccd4e52014e67718fbf7413dc9b5269a54baaba052e7ca8fffda20",
+        "bytes": 5568
+      },
+      "strip_exit": {
+        "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/export/strip.exitcode",
+        "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+        "bytes": 2
+      },
+      "runtime_input_inventory": {
+        "path": "/data/neon-build/validation/pg-stderr-compute-bin-build-20261101T151519Z-8c9f1c/runtime-inputs.json",
+        "sha256": "8f0613050dc737dc998a649c62acdb874d3c9d5bbfcc73abe83385f2a03c1125",
+        "bytes": 2545
+      },
+      "canonical_Guest_aliases_and_System3_installation_tested": false
+    }
+  ],
+  "SMOKE": [
+    {
+      "id": "PG17-SMOKE-REAL-COMPUTE-HELP-001",
+      "classification": "ARTIFACT_CLI_SMOKE_NOT_SERVICE",
+      "run_nonce": "20261101T152412Z-e31b59",
+      "result": "PASS_HELP_ONLY",
+      "evidence": {
+        "directory": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59",
+        "result": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/result.json",
+          "sha256": "1770b1b863e498e7c4c1873c779eec34d70abf197fd6efa72f84fe6cb747ccdc",
+          "bytes": 125
+        },
+        "source_lock": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/source-lock.json",
+          "sha256": "9f7864cf80a85cb05955c1ca9c0a5ac8726b5d3f96ced1e6e584fa09ef19fa1c",
+          "bytes": 521
+        },
+        "metadata_json": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/metadata.json",
+          "sha256": "371ba51869a7685c1c92b2d13195641bff70e74e34e60dba2e1e9a36a2f9275c",
+          "bytes": 320
+        },
+        "budget-spec_json": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/budget-spec.json",
+          "sha256": "30ea09fbaf4576dd6f5f2369c047675e428cbe44925de102e8b5ee1f10248b62",
+          "bytes": 376
+        },
+        "worker_py": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/worker.py",
+          "sha256": "41fddf153d3553fd519d90977e0f59cdf86ef669d532d14d794a5ffbd2da106f",
+          "bytes": 581
+        },
+        "command_json": {
+          "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/command.json",
+          "sha256": "07d60cfee434a8acacda86f9cd7f297e9b147c1c58682a1c4426e84a774b0b25",
+          "bytes": 1112
+        },
+        "export_resource_receipts": {},
+        "native-report_resource_receipts": {},
+        "report_resource_receipts": {
+          "cpu.stat": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/cpu.stat",
+            "sha256": "c7a55a0087985c8ae3cdd817d6e2a4c678fc3cf5ca37fb52d1cc64e928e6f89e",
+            "bytes": 150
+          },
+          "memory.peak": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/memory.peak",
+            "sha256": "c02506a44459a506ad78c9425098a973d40ad73280f1c781356e53d65a1fc963",
+            "bytes": 8
+          },
+          "io.stat": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/io.stat",
+            "sha256": "4bad23287420bba0fc2637b2159ba137e7e7f0cc48ecb949c46a3ab261324818",
+            "bytes": 61
+          },
+          "memory.max": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/memory.max",
+            "sha256": "a4e2a1c28ab6c77b49f903f37526602e32e9495ee3719519baa8dcc66900bce5",
+            "bytes": 10
+          },
+          "cpu.max": {
+            "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/report/cpu.max",
+            "sha256": "261369fa24cb11ef3776980c85360401b9cdc7cf51aaa7a27e7acad94d662607",
+            "bytes": 14
+          }
+        },
+        "actual_cgroup_limit_values": {
+          "report/cpu.max": "100000 100000",
+          "report/memory.max": "268435456"
+        },
+        "actual_host_worker_argv_from_budget_spec": [
+          "/usr/bin/python3",
+          "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/worker.py"
+        ]
+      },
+      "original_stdout": {
+        "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/stdout",
+        "sha256": "5213d03d18734703656b4c557d14952b5e2a77038ee2d92164052ad6431ac85a",
+        "bytes": 2159
+      },
+      "original_stderr": {
+        "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/stderr",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "bytes": 0
+      },
+      "ELF_sha256": "7569a12e36a19cb2f184d123e19ea8f52bd7294c914a1d918e4b5c8020af2af5",
+      "actual_command_json": {
+        "path": "/data/neon-build/validation/pg-stderr-compute-bin-smoke-20261101T152412Z-e31b59/command.json",
+        "sha256": "07d60cfee434a8acacda86f9cd7f297e9b147c1c58682a1c4426e84a774b0b25",
+        "bytes": 1112
+      },
+      "actual_Docker_limits": {
+        "CPU": 1,
+        "MemoryMiB": 256,
+        "UID": 1000,
+        "NNP": 1,
+        "capabilities": "none",
+        "network": "none"
+      },
+      "budget_declaration_is_not_actual_runtime_limit": "native profile2CPU3GiB; Docker command actually1CPU256MiB",
+      "complete_Compute_service_started": false,
+      "PG_started": false,
+      "Root_RPC_exercised": false
+    }
+  ],
+  "git_context": {
+    "repository": "/data/neon-build/src/neon",
+    "committed_head_at_catalog_preparation": "a10a2328fafb3a20fae1ece17833c77fd46ce6ad"
+  },
+  "executed_source_snapshot": {
+    "exact_owned5_sha256": {
+      "compute_tools/Cargo.toml": "30316b034612e8a13afb73da8f9e18ef4580a865d320cac737b6f51fd585ff87",
+      "compute_tools/src/lib.rs": "2c136cb7bd72755da923e8da3c54e66ec75cfd85436a12b513958e02c3dcd578",
+      "compute_tools/src/compute.rs": "83f466a2236c0de16c761fd7e96449abde75edd54dfe22b630652e983d662414",
+      "compute_tools/src/pg_helpers.rs": "bf5c2d9069fed1a619f8324af86559f33fdf7dab129800a4760028bda2f2f2a3",
+      "compute_tools/src/dsg_pg_stderr.rs": "ccf35239e9725927a6f2445cccf3a5aeae0b14224065ff82550c6f3140d9aea1"
+    },
+    "Rust_module_sha256": "ccf35239e9725927a6f2445cccf3a5aeae0b14224065ff82550c6f3140d9aea1",
+    "source_Unit_catalog": "/data/neon-build/src/neon/docs/validation/pg17-stderr-rust-original-pipe-20261101/catalog.json",
+    "unit_results_not_duplicated_here": true
+  },
+  "scope_limits": [
+    "不把BUILD/SMOKE塞入U或S/E计数",
+    "与前一catalog同五源，仅互相引用，不重复单元根数",
+    "大ELF/loader/DSO只引用/data原件，机器catalog未复制产物"
+  ],
+  "target_backend_versions": [
+    17
+  ]
+}
