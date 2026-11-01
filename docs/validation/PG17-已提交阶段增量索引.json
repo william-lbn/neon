@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T11:58:48.234050+00:00",
+  "updated_utc": "2026-11-01T13:26:58.047807+00:00",
   "scope": "Git已提交阶段目录导航；包含原基表目录与后继增量，未统一累计新增根",
   "versions_at_capture": {
     "autoscaling": {
-      "head": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "head": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "branch": "codex/dsga-autoscaling-20261019"
     },
     "neon": {
-      "head": "7c5be803d3c40c99edd2ea945b85ef595ae52d29",
+      "head": "c6457c061068e0547999f475271b375599b98839",
       "branch": "codex/dsga-neon-v3-20261019"
     },
     "control-plane": {
@@ -27,7 +27,7 @@
   "catalogs": [
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/array-production-service-20261101/catalog.json",
       "git_path": "docs/validation/array-production-service-20261101/catalog.json",
       "sha256": "890aad33c73814da31a9d4a6badd72ae008b39640ce646ad01715f42169c49fe",
@@ -37,7 +37,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/array-quota-joint-source-v1-20261101/catalog.json",
       "git_path": "docs/validation/array-quota-joint-source-v1-20261101/catalog.json",
       "sha256": "9e37649f8b7cdc79a0a589b38a292bb58f61d0f9cdf09ba754209f28825222c9",
@@ -47,7 +47,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
       "git_path": "docs/validation/bootstrap-presystem-bridge-20261031/catalog.json",
       "sha256": "c8428a77b36b9ebc2157d3177f4e9860d4867f85aba834611d89311ca8cc0f74",
@@ -57,7 +57,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/fixed-runtime-iso-20261101/catalog.json",
       "git_path": "docs/validation/fixed-runtime-iso-20261101/catalog.json",
       "sha256": "9cffc6afb8aee53b09c65d2526680399a267b37417217a376a778fe799f97708",
@@ -67,7 +67,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/guest-maximum-region-20261031/catalog.json",
       "git_path": "docs/validation/guest-maximum-region-20261031/catalog.json",
       "sha256": "f9cffdd0aa3f63b88bff37dcee7b6bbd1de28103490e6e6a6920f13136eddbc9",
@@ -77,7 +77,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/initial-boot-channel-20261101/catalog.json",
       "git_path": "docs/validation/initial-boot-channel-20261101/catalog.json",
       "sha256": "43aa644f374cc6445fc786305b59a326416ee55d95c89caa27670c4f2037db66",
@@ -87,7 +87,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/initial-boot-protocol-20261031/catalog.json",
       "git_path": "docs/validation/initial-boot-protocol-20261031/catalog.json",
       "sha256": "4daa275937fd24cfd1a722985b43196209b0131d116caa88ae2a11bfc137098d",
@@ -97,7 +97,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/initial-bootstrap-component-20261101/catalog.json",
       "git_path": "docs/validation/initial-bootstrap-component-20261101/catalog.json",
       "sha256": "25a0fc4ac14435f261c38a9fe98bf5a7facdde4370963c023b48c1f3d2e9f0a0",
@@ -107,7 +107,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/initial-bootstrap-lifecycle-20261101/catalog.json",
       "git_path": "docs/validation/initial-bootstrap-lifecycle-20261101/catalog.json",
       "sha256": "884b208823b1154fcdc838990158e8394f0b157703d9a7c8787927d978466a3e",
@@ -117,7 +117,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/initial-guest-fixed-port-20261101/catalog.json",
       "git_path": "docs/validation/initial-guest-fixed-port-20261101/catalog.json",
       "sha256": "19b5b6060cf869ab003a96eab44050117fbdfe37233c8e4d753a261f2e2efe3a",
@@ -127,7 +127,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/initial-preboot-guest-20261101/catalog.json",
       "git_path": "docs/validation/initial-preboot-guest-20261101/catalog.json",
       "sha256": "649ccbea04cfb00ea9626dc95cf7ce9ed7afaa368a5b9c6a2fbf0bb377ccced5",
@@ -137,7 +137,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/initial-runner-production-20261101/catalog.json",
       "git_path": "docs/validation/initial-runner-production-20261101/catalog.json",
       "sha256": "5bef694a7ea1b28a7da3398ad52dbbac919d77137a649f33309855b4c131e2d3",
@@ -147,7 +147,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/metadata-transfer2-atomic-20261101/catalog.json",
       "git_path": "docs/validation/metadata-transfer2-atomic-20261101/catalog.json",
       "sha256": "4401d7224c23b62f541132b88c03932b521bbbc814177c06b4093fb9b2231aa9",
@@ -157,7 +157,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/native-array-populate-20261031/catalog.json",
       "git_path": "docs/validation/native-array-populate-20261031/catalog.json",
       "sha256": "a80bbb1779d468cf496919f11d2cf889117534a2d84d1b0e46c06526fc576cae",
@@ -167,7 +167,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/native-array-populate-durability-v2-20261031/catalog.json",
       "git_path": "docs/validation/native-array-populate-durability-v2-20261031/catalog.json",
       "sha256": "806484ca93b53c2e49c26c71b45781c20efe0f4249b0625ba66382c233da941b",
@@ -177,7 +177,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/native-filter-audit-go-20261031/catalog.json",
       "git_path": "docs/validation/native-filter-audit-go-20261031/catalog.json",
       "sha256": "3bd38d058c20393e249ddffd527c4485080b7500060174de90a8cbf9bca8500e",
@@ -187,7 +187,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-builder-mount-narrow-v2-20261101/catalog.json",
       "git_path": "docs/validation/normal-builder-mount-narrow-v2-20261101/catalog.json",
       "sha256": "86b791ddc22371c6ad3154a84c0e24b0eb530158f58eeee7d7b5022558c091bc",
@@ -197,7 +197,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-builder-system-v2-20261101/catalog.json",
       "git_path": "docs/validation/normal-builder-system-v2-20261101/catalog.json",
       "sha256": "171549edcedd5284c8c2740765c684eadf9fa78dab3b2685c2fea23d0ac891b2",
@@ -207,7 +207,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-filesystem-memory2-20261101/catalog.json",
       "git_path": "docs/validation/normal-filesystem-memory2-20261101/catalog.json",
       "sha256": "c696ffcbce30d06aa94759ca7e4acf5cf7306e1094d4b9731968d41a6537d640",
@@ -217,7 +217,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-filesystem-origin-layout-reference-v2-20261101/catalog.json",
       "git_path": "docs/validation/normal-filesystem-origin-layout-reference-v2-20261101/catalog.json",
       "sha256": "2ee515d086f50c13a3ec786f4b897576f9679948be8bf728d386673082a0a95f",
@@ -227,7 +227,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-filesystem-origin-source-20261101/catalog.json",
       "git_path": "docs/validation/normal-filesystem-origin-source-20261101/catalog.json",
       "sha256": "5bce9961ce415e2316ac90f8a1b8c337341bc6e85f01b254f0cc9b2fdbd1d95e",
@@ -237,7 +237,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-immutable-bounds-20261101/catalog.json",
       "git_path": "docs/validation/normal-immutable-bounds-20261101/catalog.json",
       "sha256": "2e7cb78e77e101dab657a88092038983389087767fd372ac7e5bb554c1de6855",
@@ -247,7 +247,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-inflight-production-source-20261031/catalog.json",
       "git_path": "docs/validation/normal-inflight-production-source-20261031/catalog.json",
       "sha256": "61383e1978d38cfbd90eff089871174d1e0688a7b70d643026435e58c3670718",
@@ -257,7 +257,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-kernel-control-signal-20261101/catalog.json",
       "git_path": "docs/validation/normal-kernel-control-signal-20261101/catalog.json",
       "sha256": "d1da132cacb4b6757c98c8f0c232321fc75a8b276ee94641f5445001a7f4a72a",
@@ -267,7 +267,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-kernel-control-source-20261101/catalog.json",
       "git_path": "docs/validation/normal-kernel-control-source-20261101/catalog.json",
       "sha256": "74e9b253b9cb2651fdf62a3606973f99e8d1d9d61be2565fe8970c16fabd24f4",
@@ -277,7 +277,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-kernel-memory-consumer-20261101/catalog.json",
       "git_path": "docs/validation/normal-kernel-memory-consumer-20261101/catalog.json",
       "sha256": "9931aa2258884e727b3266b943c6cc6b98ef6210848ed034b035c4c381272c74",
@@ -287,7 +287,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-kernel-metadata-profile-20261101/catalog.json",
       "git_path": "docs/validation/normal-kernel-metadata-profile-20261101/catalog.json",
       "sha256": "916ab61e6317b94400186756a1ec92f2688d26a62b1a74f184c472bcbc0ee345",
@@ -297,7 +297,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-kernel-metadata-reference-20261101/catalog.json",
       "git_path": "docs/validation/normal-kernel-metadata-reference-20261101/catalog.json",
       "sha256": "76244fb7837b7d857de31bf697a7e9c5eaca7821dd567d691025f79057d2af43",
@@ -307,7 +307,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-kernel-prep-userns-v2-20261101/catalog.json",
       "git_path": "docs/validation/normal-kernel-prep-userns-v2-20261101/catalog.json",
       "sha256": "87be4ecc88600f05b89ccd2d3ce1c5dd735aab50354d3b371483d6e430344ffe",
@@ -317,7 +317,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-memory-commit2-20261101-v2/catalog.json",
       "git_path": "docs/validation/normal-memory-commit2-20261101-v2/catalog.json",
       "sha256": "1b8841d486d0d68f0f99b5b38f6688c1092ef2686dc6209ce8ea6afac5e073d4",
@@ -327,7 +327,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-memory-origin-component-20261101/catalog.json",
       "git_path": "docs/validation/normal-memory-origin-component-20261101/catalog.json",
       "sha256": "3b2db288be4ec3d6c9a44525b1bbd43e4584e674897a922327ce2aa6b6f3a112",
@@ -337,7 +337,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-memory-origin-policy-v2-20261101/catalog.json",
       "git_path": "docs/validation/normal-memory-origin-policy-v2-20261101/catalog.json",
       "sha256": "d7129a6ae2bc15bc93e9dcbc71ab698c73758b08fbfd3816161f07cedb7bac45",
@@ -347,7 +347,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-memory-origin-wire-20261101/test-catalog.json",
       "git_path": "docs/validation/normal-memory-origin-wire-20261101/test-catalog.json",
       "sha256": "c2ab8aac6ddb451a3acd58895a6647c93a3cb6a03d9206a114dff9eafb2956a4",
@@ -357,7 +357,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-metadata-production-wiring-go-20261101/catalog.json",
       "git_path": "docs/validation/normal-metadata-production-wiring-go-20261101/catalog.json",
       "sha256": "f7feabc73882a24a66e6044b140760866cbda6b29f68236806050f14434b03e1",
@@ -367,7 +367,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-metadata-production-wiring-presys3-reader-fix-20261101/catalog.json",
       "git_path": "docs/validation/normal-metadata-production-wiring-presys3-reader-fix-20261101/catalog.json",
       "sha256": "c5f759b7f6de7ab927770374a588655878a274255bcbe09e6a02c2da3a40cffe",
@@ -377,7 +377,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-metadata-production-wiring-r2-caller-fix-20261101/catalog.json",
       "git_path": "docs/validation/normal-metadata-production-wiring-r2-caller-fix-20261101/catalog.json",
       "sha256": "8d2c6e67ed44f2bf7d1ff8870499f3ed703cf181c0f05bbf32d7da99f394d423",
@@ -387,7 +387,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-metadata-production-wiring-stable-minfree-20261101/catalog.json",
       "git_path": "docs/validation/normal-metadata-production-wiring-stable-minfree-20261101/catalog.json",
       "sha256": "5efcd4339263b6137133d4f82f57343ee19abb3b2c17ed5a910d6b3d07db1460",
@@ -397,7 +397,27 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-ordinary-device-check-20261101/catalog.json",
+      "git_path": "docs/validation/normal-ordinary-device-check-20261101/catalog.json",
+      "sha256": "81b4eb3325589354bc2485c595f02cc37d6d5106f9678024d73b3cf636dc1f21",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-ordinary-management-root-prepare-20261101/catalog.json",
+      "git_path": "docs/validation/normal-ordinary-management-root-prepare-20261101/catalog.json",
+      "sha256": "634d32c65d86c91a7cba368bb6c73ff82bdde11f60a2fad91b72fd13acf7ac5e",
+      "scope_from_original_catalog": "FIXED_MANAGEMENT_TLS_DIRECTORY_PRIMITIVE_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-ordinary-stock-udev-config-20261101/catalog.json",
       "git_path": "docs/validation/normal-ordinary-stock-udev-config-20261101/catalog.json",
       "sha256": "ebc2221e8a75649a38b5d0c9a2ae00fa357725d8f4cc6b3329993a795593d5e5",
@@ -407,7 +427,27 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-ordinary2-gate-stdio-lease-20261101/catalog.json",
+      "git_path": "docs/validation/normal-ordinary2-gate-stdio-lease-20261101/catalog.json",
+      "sha256": "3c7b15fa6dfe73dc19e34e0b8621623b7d044bc5e4ffff07c6dc2527b042a938",
+      "scope_from_original_catalog": "按原目录精确证据解释",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-ordinary2-layout-20261101/catalog.json",
+      "git_path": "docs/validation/normal-ordinary2-layout-20261101/catalog.json",
+      "sha256": "9bcc0c6bdac733f2d88b663723553f60ea22410beb192505cde1feb4ae203aa6",
+      "scope_from_original_catalog": "component only; explicit ordinary2 initial fixed path preparation/build assets",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-pg-memory-control-ip-review-20261101/catalog.json",
       "git_path": "docs/validation/normal-pg-memory-control-ip-review-20261101/catalog.json",
       "sha256": "7f3bc2da3ab2c8e35ca5c2e1cc039458ef86b65cddc08408e78b6acb7846b623",
@@ -417,7 +457,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-pg-memory-control-source-20261101/catalog.json",
       "git_path": "docs/validation/normal-pg-memory-control-source-20261101/catalog.json",
       "sha256": "60bd0dd0b80be15a15afd2850ffb5d5e20d3bf249a8ac7c49b4ee5ca40fa3013",
@@ -427,7 +467,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-pg17-array-resize-native-20261101/catalog.json",
       "git_path": "docs/validation/normal-pg17-array-resize-native-20261101/catalog.json",
       "sha256": "b0dcb0a3714249c6d588cef117d6a81cf95b086cf372c1cf465fc4a86117d40c",
@@ -437,7 +477,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-quota-handoff-v1-20261101/catalog.json",
       "git_path": "docs/validation/normal-quota-handoff-v1-20261101/catalog.json",
       "sha256": "77d08bc563f018a935617c8619b4721ac1d25281b725d3b37b16a21cf92c6720",
@@ -447,7 +487,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-role-authority-v2-20261101/catalog.json",
       "git_path": "docs/validation/normal-role-authority-v2-20261101/catalog.json",
       "sha256": "a119959055883d69c2b44c2ade4d287a904986e0d7bca1f0f7997871c7fd0b92",
@@ -457,7 +497,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-role-authority-v2-final-20261101/catalog.json",
       "git_path": "docs/validation/normal-role-authority-v2-final-20261101/catalog.json",
       "sha256": "14551cdcd7a3f98f4918373266a60d32fc37c733d3d5f8754e800842885388b6",
@@ -467,7 +507,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-role-transfer2-20261101/catalog.json",
       "git_path": "docs/validation/normal-role-transfer2-20261101/catalog.json",
       "sha256": "f16cacb521868c0f01f3c88f7a8d7fd37743a45812f95bef7fd7c4136a491d9c",
@@ -477,7 +517,57 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-stock-udev-database-20261101/catalog.json",
+      "git_path": "docs/validation/normal-stock-udev-database-20261101/catalog.json",
+      "sha256": "94e2634c7edcfa4b1743917b63fdf9eb4a6894b234cacbdde7b09cf1c304b69d",
+      "scope_from_original_catalog": "POST_STOCK_DATABASE_PERSISTENT_SUBSET_CAPTURE_NOT_SOURCE",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-stock-udev-kmod-inputs-20261101/catalog.json",
+      "git_path": "docs/validation/normal-stock-udev-kmod-inputs-20261101/catalog.json",
+      "sha256": "5138d85da8fc469b9c61516a303774a027a2b5ded85eeeaebf501669e00c1a98",
+      "scope_from_original_catalog": "KMOD31_R2_STATIC_EMPTY_AND_ORIGINAL_PSEUDO_INPUT_PRIMITIVES_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-stock-udev-ro-inputs-20261101/catalog.json",
+      "git_path": "docs/validation/normal-stock-udev-ro-inputs-20261101/catalog.json",
+      "sha256": "93158218bb5ef8dde5472530f1bf7d25f67da88479b41128c72d8b540efae9a2",
+      "scope_from_original_catalog": "ORIGINAL_STOCK_UDEV_RO_INPUT_PRIMITIVES_UNIT_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-stock-udev-ro-inputs-iusr001-20261101/catalog.json",
+      "git_path": "docs/validation/normal-stock-udev-ro-inputs-iusr001-20261101/catalog.json",
+      "sha256": "1cf7a70876541118c4c72efe8baceef531ee4b44e7ab5e4cb9ce55e4448a340f",
+      "scope_from_original_catalog": "IUSR001_STATIC_RULE_LOOKUP_PINNING_NOT_SOURCE",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-stock-udev-runtime-dirs-20261101/catalog.json",
+      "git_path": "docs/validation/normal-stock-udev-runtime-dirs-20261101/catalog.json",
+      "sha256": "cabae16a4451ec12f57e4f15d622a292dcfbc6a6b7703f70e442cb7804fdc556",
+      "scope_from_original_catalog": "FIXED_FD_PERMISSION_PRIMITIVES_PRIVATE_TEMP_TREE_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-lifecycle-independent-root-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-lifecycle-independent-root-20261101/catalog.json",
       "sha256": "7e3fcd355b2203d7407b156cb1b34b2df93e168d9380cd8c49bee811a4acdf3c",
@@ -487,7 +577,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-lifecycle-source-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-lifecycle-source-20261101/catalog.json",
       "sha256": "ecc240b98f3997ef98d88029623bc7d1d5ad1ac8b8355a26744070b67e66f3f8",
@@ -497,7 +587,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-metadata-inventory-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-metadata-inventory-20261101/catalog.json",
       "sha256": "50e2b4d2d4116a1e2e5d43b3c40e27a1299c77759492232259871467240af0cb",
@@ -507,7 +597,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-role-exec-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-role-exec-20261101/catalog.json",
       "sha256": "2458cc612b9f014d94c4ca10fa1e4010fa85eb5b81d713098c4c7f8e07ddfc6b",
@@ -517,7 +607,27 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-role-lease-backend-20261101/catalog.json",
+      "git_path": "docs/validation/normal-system-role-lease-backend-20261101/catalog.json",
+      "sha256": "4b0639b36142735d4f1252f4036ecf0205642cc44cb6cc71a5201b8ea525c35b",
+      "scope_from_original_catalog": "PRIVATE_ORIGINAL_ROLE_LEASE_BACKEND_COMPONENT_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-role-lease-pending-exit-20261101/catalog.json",
+      "git_path": "docs/validation/normal-system-role-lease-pending-exit-20261101/catalog.json",
+      "sha256": "e8d55cd549947cb9211adcf5071b6251ccf872c6c8133cf8ec9d37f2645d260f",
+      "scope_from_original_catalog": "PRIVATE_LEASE_PENDING_EXIT_COMPONENT_ONLY",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-role-service-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-role-service-20261101/catalog.json",
       "sha256": "7a560b3f93e754d68da10c9ebaac2b1cd9e56bb1bd0075f6d41afdacb2c3d470",
@@ -527,7 +637,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-role-service-exitcode-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-role-service-exitcode-20261101/catalog.json",
       "sha256": "97698526ec8111245dd5139e010a113642330a2d87f2f835a0c2e77c4e9552bb",
@@ -537,7 +647,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-role-trusted-gate-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-role-trusted-gate-20261101/catalog.json",
       "sha256": "a4b88f13eb6c1546c1d87c86b14632b2253a893788356ffb7b7c7ef5b3fdccf5",
@@ -547,7 +657,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-role-trusted-gate-v2-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-role-trusted-gate-v2-20261101/catalog.json",
       "sha256": "ed5c16ee49cc9c8582d44af2b0a2d7cfdfbe4c146425b1aa91913d20714de80f",
@@ -557,7 +667,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-source-20261031/catalog.json",
       "git_path": "docs/validation/normal-system-source-20261031/catalog.json",
       "sha256": "4c931a0cb7d6b8d6085ecaff032251a6cc282cb1fb77d763e058db307138920b",
@@ -567,7 +677,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-source-canonical-v2-20261031/catalog.json",
       "git_path": "docs/validation/normal-system-source-canonical-v2-20261031/catalog.json",
       "sha256": "f53976b62abccdea37536ae96afede51542aa84f9eaec570c0c95a6c538fb06f",
@@ -577,7 +687,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-v3-builder-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-v3-builder-20261101/catalog.json",
       "sha256": "437510cf9b210c5a10d50242146b20d722cf069a4901308dd6efd3ef49120eff",
@@ -587,7 +697,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-system-v3-readers-20261101/catalog.json",
       "git_path": "docs/validation/normal-system-v3-readers-20261101/catalog.json",
       "sha256": "494f8601d7dee708f31824ad10a59dd5a22eccdb4169f9eabce55b3442c8ad45",
@@ -597,7 +707,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/normal-vminit-mount-20261101/catalog.json",
       "git_path": "docs/validation/normal-vminit-mount-20261101/catalog.json",
       "sha256": "0c2f8295d8a263e35eec1740deba765a5532a6e7bead255516b9845792fc26c6",
@@ -607,7 +717,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/ordinary-services-v2-20261101/catalog.json",
       "git_path": "docs/validation/ordinary-services-v2-20261101/catalog.json",
       "sha256": "666970970f9d94a2a59d243268ed8b0707c992c01d553ce67759f9ee46771cc2",
@@ -617,7 +727,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/ordinary-tls-root-client-20261101/catalog.json",
       "git_path": "docs/validation/ordinary-tls-root-client-20261101/catalog.json",
       "sha256": "7cc973be9a6180a6f11cc87bda7de0c68f6cd6d7821b49ea23c3fd23c7d13d98",
@@ -627,7 +737,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-formal-elf-array4-20261101/catalog.json",
       "git_path": "docs/validation/pg17-formal-elf-array4-20261101/catalog.json",
       "sha256": "efa78f247412d63016d7f8ef6e28e9e7d206a708983d8cd94c0d5a66d07b61be",
@@ -637,7 +747,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-normal-split-topology-20261031/catalog.json",
       "git_path": "docs/validation/pg17-normal-split-topology-20261031/catalog.json",
       "sha256": "03d10e1c4b7d6f5c18f1abba4e8f7b187461692d900bc8a9802aef9f8eacc9d4",
@@ -647,7 +757,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/pg17-p1-node-chain-linux-20261030/catalog.json",
       "git_path": "docs/validation/pg17-p1-node-chain-linux-20261030/catalog.json",
       "sha256": "970cb9c9b7a7009f8910a56d4409b551bfad531b462b5aff93c2cbae74f3879e",
@@ -657,7 +767,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/qmp-memory-geometry-20261031/catalog.json",
       "git_path": "docs/validation/qmp-memory-geometry-20261031/catalog.json",
       "sha256": "d9f508693a9ad8f41a265911d20a46ea3cb1a78ea0dc934e4d1434bb24df7ae8",
@@ -667,7 +777,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/root-fixed-actions-fs-family-20261101/catalog.json",
       "git_path": "docs/validation/root-fixed-actions-fs-family-20261101/catalog.json",
       "sha256": "f96eecb75717ba38f31773b25139c063b6512a60a9a56201b90c617be61f0db7",
@@ -677,7 +787,37 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/root-ordinary2-atomic-integration-20261101/catalog.json",
+      "git_path": "docs/validation/root-ordinary2-atomic-integration-20261101/catalog.json",
+      "sha256": "8d1550bda96736a267dfeeb62c8dde9f3707701751d778c947a573468853310e",
+      "scope_from_original_catalog": "EXACT_ORDINARY2_GATE_STDIO_LEASE_COMPONENT_INTEGRATION",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/root-stock-assets-actions-integration-20261101/catalog.json",
+      "git_path": "docs/validation/root-stock-assets-actions-integration-20261101/catalog.json",
+      "sha256": "b1ace448d177da0ac82fa8bebd9c05c854b938fac3e8d05f28e7c2f312dbeb16",
+      "scope_from_original_catalog": "EXPLICIT_STOCK_BUILDER_RO_PACKAGE_LOCK_AND_FIXED_DEVICE_ACTION_COMPONENTS",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
+      "path": "/data/neon-build/src/autoscaling/docs/validation/root-stock-joint-20261101/catalog.json",
+      "git_path": "docs/validation/root-stock-joint-20261101/catalog.json",
+      "sha256": "0889df7596f7178148e56122c8aa3fa0b8d57064ce5a698f6619c415060345ca",
+      "scope_from_original_catalog": "STOCK_INPUTS_LAYOUT_RULE_READER_DATABASE_SEAL_COMPONENT_INTEGRATION",
+      "included_in_base_aggregate_counts": false,
+      "counting_note": "含历史/直接回归/同ID重跑；逐目录查看，不作目录计数之和，不替代最终E"
+    },
+    {
+      "repository": "autoscaling",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/root-stock-udev-supervisor-20261101/catalog.json",
       "git_path": "docs/validation/root-stock-udev-supervisor-20261101/catalog.json",
       "sha256": "31bc900087c16ff85eb63a8e794f7ac6cb735ecac08c0873d0ea3b604160e22f",
@@ -687,7 +827,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/runner-runtime-boot-20261031/catalog.json",
       "git_path": "docs/validation/runner-runtime-boot-20261031/catalog.json",
       "sha256": "c199950f25d28cb1d4dbc01315161f813c9321c146cc9b0bd50c34b4892c206d",
@@ -697,7 +837,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/runner-runtime-iso-20261031/catalog.json",
       "git_path": "docs/validation/runner-runtime-iso-20261031/catalog.json",
       "sha256": "ec240ee8c6ce978a0c41157a04e48bdcdfcd8c5b6cddca2ecc5ef701c519ea01",
@@ -707,7 +847,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-boot-requirements-20261031/catalog.json",
       "git_path": "docs/validation/runtime-boot-requirements-20261031/catalog.json",
       "sha256": "e33380a4f4024c8ca434d23cf5e615869fa54472bdf499b6f15e8f45f2d342cb",
@@ -717,7 +857,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/runtime-iso-asset-names-20261031/catalog.json",
       "git_path": "docs/validation/runtime-iso-asset-names-20261031/catalog.json",
       "sha256": "9ab2e40d167f3a6696236f3ebfc366bacf482ea2260f4c66104ce4faa2db1fb8",
@@ -727,7 +867,7 @@
     },
     {
       "repository": "autoscaling",
-      "commit_at_capture": "b39c2e1596ed19c8a80a750c9bd979a1c859777d",
+      "commit_at_capture": "8aac4b3810214fdf685001403adb180f5ef885f5",
       "path": "/data/neon-build/src/autoscaling/docs/validation/system3-stock-inventory-builder-20261101/catalog.json",
       "git_path": "docs/validation/system3-stock-inventory-builder-20261101/catalog.json",
       "sha256": "5b30fffde17c63bffbb9042bdc6eb8154abca39210e1544e5111b15f4f5adc9b",
@@ -737,7 +877,7 @@
     },
     {
       "repository": "neon",
-      "commit_at_capture": "7c5be803d3c40c99edd2ea945b85ef595ae52d29",
+      "commit_at_capture": "c6457c061068e0547999f475271b375599b98839",
       "path": "/data/neon-build/src/neon/docs/validation/array-request-jwt-forward-20261101/catalog.json",
       "git_path": "docs/validation/array-request-jwt-forward-20261101/catalog.json",
       "sha256": "29182ed82cd35c623cedd58926e23ffb59c3597d35fb48f288fb459516ced59d",
@@ -747,7 +887,7 @@
     },
     {
       "repository": "neon",
-      "commit_at_capture": "7c5be803d3c40c99edd2ea945b85ef595ae52d29",
+      "commit_at_capture": "c6457c061068e0547999f475271b375599b98839",
       "path": "/data/neon-build/src/neon/docs/validation/compute-default-loader-20261101/catalog.json",
       "git_path": "docs/validation/compute-default-loader-20261101/catalog.json",
       "sha256": "e7fbff2d2aa538931b326cb2a16466cae16908bffbd32373497750b48ee55643",
@@ -757,7 +897,7 @@
     },
     {
       "repository": "neon",
-      "commit_at_capture": "7c5be803d3c40c99edd2ea945b85ef595ae52d29",
+      "commit_at_capture": "c6457c061068e0547999f475271b375599b98839",
       "path": "/data/neon-build/src/neon/docs/validation/pg17-linux-budget-20261030/catalog.json",
       "git_path": "docs/validation/pg17-linux-budget-20261030/catalog.json",
       "sha256": "75e03ef203f3e03341957f25ca45d9eb5eef88901e03312a98b028a141a3128c",
@@ -767,7 +907,7 @@
     },
     {
       "repository": "neon",
-      "commit_at_capture": "7c5be803d3c40c99edd2ea945b85ef595ae52d29",
+      "commit_at_capture": "c6457c061068e0547999f475271b375599b98839",
       "path": "/data/neon-build/src/neon/docs/validation/pg17-native-birth-ci-linux-20261031/catalog.json",
       "git_path": "docs/validation/pg17-native-birth-ci-linux-20261031/catalog.json",
       "sha256": "885d9df2369d8627b0b03b9227e4d71acc0f03c640117f105317cc168057476c",
