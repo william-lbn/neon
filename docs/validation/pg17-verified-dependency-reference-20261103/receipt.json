@@ -1,0 +1,16 @@
+{
+  "scope": "功能分支已推送依赖引用一致性，不是最终发行冻结",
+  "postgres17": "6c6ac086bc5aa69ff2da0b40da7ae087e08e5265",
+  "autoscaling": "5fe2a34cc32da69b06799cab8fb4363f63c344e0",
+  "parent_gitlink_previous": "b95b142190cdc51de0d5603bfb9c46a0e0e7051f",
+  "actual_source_lock_check_exit": 0,
+  "PG17_component_cycle": "622368",
+  "independent_cycle_receipt_sha256": "031f8519197f3c6df755c9f1167f64d4b19bce1b68c0b2880e45c01887b555c5",
+  "actual_kernel_decrease_receipt_sha256": "fdf9eecbdbbb97065e1c368e5a533196431a19d3465cb62c9b6fccb1e8790e52",
+  "G5_faults": "IN_PROGRESS",
+  "platform_qualification": "NOT_ISSUED",
+  "E": 0,
+  "K8s": false,
+  "release_frozen": false,
+  "PG14_PG15_PG16_PG18_refs_unchanged": true
+}
