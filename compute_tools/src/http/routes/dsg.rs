@@ -54,6 +54,23 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
             "/dsg/v1/resource/array-replay-original",
             post(super::dsg_resource::proxy),
         )
+        // 原签名和JSON逐字转交Root，normal预算/恢复资格由Root原状态门判断。
+        .route(
+            "/dsg/v1/resource/normal-apply",
+            post(super::dsg_resource::proxy),
+        )
+        .route(
+            "/dsg/v1/resource/normal-observe",
+            post(super::dsg_resource::proxy),
+        )
+        .route(
+            "/dsg/v1/resource/normal-replay-original",
+            post(super::dsg_resource::proxy),
+        )
+        .route(
+            "/dsg/v1/resource/normal-recover",
+            post(super::dsg_resource::proxy),
+        )
         .route("/dsg/v1/resource/fence", post(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/apply", post(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/observe", post(super::dsg_resource::proxy))

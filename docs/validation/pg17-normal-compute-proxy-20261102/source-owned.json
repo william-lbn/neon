@@ -1,0 +1,8 @@
+{
+  "source_head": "13802483a9844df6e0a2735d2cdc9439ede54b66",
+  "owned2": {
+    "compute_tools/src/http/routes/dsg.rs": "d9e417638a78c40e907cc16f0a073649d4c5d66db2ce5a404a3b9c1f94c1fe1c",
+    "compute_tools/src/http/routes/dsg_resource.rs": "dd9f017139d75845c72af6ca2cc51c3be217522f10c013b04d617246cb8b64c7"
+  },
+  "actual_test_nonce": "pg17-normal-proxy-compute-build-20261101T234359Z-ab6209"
+}

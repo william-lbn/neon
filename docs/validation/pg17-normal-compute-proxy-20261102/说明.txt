@@ -1,0 +1,4 @@
+PG17 normal生产透明转发阶段归档
+四条normal-apply/observe/replay-original/recover固定路由保持原JSON/签名转交原Root，不在Compute生成降限或VM许可。
+实际定向代理测试及compute_ctl二进制构建均退出0；构建266.369秒。此阶段仅证明转发与编译，不代表真实normal硬降限、Linux全链或K8s验收。
+真实硬限、原操作与持久恢复由autoscaling Root/生产执行器继续核验。PG17 gitlink和发行锁不变。

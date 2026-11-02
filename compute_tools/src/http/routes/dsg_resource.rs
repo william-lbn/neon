@@ -144,6 +144,10 @@ mod tests {
         check_fixed_forward("/dsg/v1/resource/array-authorize").await;
         check_fixed_forward("/dsg/v1/resource/array-observe").await;
         check_fixed_forward("/dsg/v1/resource/array-replay-original").await;
+        check_fixed_forward("/dsg/v1/resource/normal-apply").await;
+        check_fixed_forward("/dsg/v1/resource/normal-observe").await;
+        check_fixed_forward("/dsg/v1/resource/normal-replay-original").await;
+        check_fixed_forward("/dsg/v1/resource/normal-recover").await;
     }
 
     // 转发保持原字节/原签名，不在Rust根据JSON重新生成恢复选择。
