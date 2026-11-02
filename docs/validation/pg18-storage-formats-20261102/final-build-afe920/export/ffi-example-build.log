@@ -1,0 +1,10 @@
+   Compiling workspace_hack v0.1.0 (/stderr-work/workspace_hack)
+   Compiling tracing-utils v0.1.0 (/stderr-work/libs/tracing-utils)
+   Compiling metrics v0.1.0 (/stderr-work/libs/metrics)
+   Compiling postgres_ffi v0.1.0 (/stderr-work/libs/postgres_ffi)
+   Compiling postgres_connection v0.1.0 (/stderr-work/libs/postgres_connection)
+   Compiling pq_proto v0.1.0 (/stderr-work/libs/pq_proto)
+   Compiling postgres_versioninfo v0.1.0 (/stderr-work/libs/postgres_versioninfo)
+   Compiling postgres_ffi_types v0.1.0 (/stderr-work/libs/postgres_ffi_types)
+   Compiling utils v0.1.0 (/stderr-work/libs/utils)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 49.07s

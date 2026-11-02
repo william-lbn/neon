@@ -1,0 +1,28 @@
+{
+  "kind": "editor-only pure formatting of exact Linux-authored source; no Mac business repo/binary inputs; no build or validation claim",
+  "formatter": "rustfmt 1.8.0-stable (6b00bc3880 2025-06-23)",
+  "before": {
+    "libs/postgres_versioninfo/src/lib.rs": "806a65e349ea5f84e1197143bf295ac1e821003a6c103885a2fc3a569d44b0ab",
+    "libs/postgres_ffi/build.rs": "5b910da71220e5b31ca7764829cbb460dcc7ca4f21a1399f4ff622d784df725c",
+    "libs/postgres_ffi/src/lib.rs": "242d6c7d556325df21a405c168e3d804c1d9d5291a967fd7606da2cbed370e91",
+    "libs/postgres_ffi/src/pg_constants_v18.rs": "38ac8b9ceae434331cc6414762e9ff2fa17f705c09af356d84dae497e3abe249",
+    "libs/postgres_ffi/src/walrecord.rs": "8fd916468933bdb7aed1f0eb6d0ff71182fecbd017210270d1c33f69bfec3788",
+    "libs/postgres_ffi/src/controlfile_utils.rs": "af05bf22c930c442396ebf6bf9f4a84c68bef8a64c68f4b10b8bc70208e4ba7a",
+    "libs/wal_decoder/src/decoder.rs": "47fef289bc94f9879f31d10e7a14b296c5271f2d8e3ff2a3b0b54e592e6baee9",
+    "compute_tools/src/extension_server.rs": "d4f0641c753f84a91cce4f16511c180a19898e424427a7d598e0320b2d78d218",
+    "pageserver/src/walingest.rs": "5688a5ab81236bd18f4c002164075776f97d07e18069a27098724e3c034d18d5",
+    "libs/postgres_ffi/examples/pg18_native_formats.rs": "ce83fe329918e6d12f169cbbbfe7df9b87b7ddc2dbc7b8429d353533380b4c20"
+  },
+  "after": {
+    "libs/postgres_versioninfo/src/lib.rs": "806a65e349ea5f84e1197143bf295ac1e821003a6c103885a2fc3a569d44b0ab",
+    "libs/postgres_ffi/build.rs": "5b910da71220e5b31ca7764829cbb460dcc7ca4f21a1399f4ff622d784df725c",
+    "libs/postgres_ffi/src/lib.rs": "242d6c7d556325df21a405c168e3d804c1d9d5291a967fd7606da2cbed370e91",
+    "libs/postgres_ffi/src/pg_constants_v18.rs": "38ac8b9ceae434331cc6414762e9ff2fa17f705c09af356d84dae497e3abe249",
+    "libs/postgres_ffi/src/walrecord.rs": "8fd916468933bdb7aed1f0eb6d0ff71182fecbd017210270d1c33f69bfec3788",
+    "libs/postgres_ffi/src/controlfile_utils.rs": "af05bf22c930c442396ebf6bf9f4a84c68bef8a64c68f4b10b8bc70208e4ba7a",
+    "libs/wal_decoder/src/decoder.rs": "47fef289bc94f9879f31d10e7a14b296c5271f2d8e3ff2a3b0b54e592e6baee9",
+    "compute_tools/src/extension_server.rs": "d4f0641c753f84a91cce4f16511c180a19898e424427a7d598e0320b2d78d218",
+    "pageserver/src/walingest.rs": "5688a5ab81236bd18f4c002164075776f97d07e18069a27098724e3c034d18d5",
+    "libs/postgres_ffi/examples/pg18_native_formats.rs": "65f5ac1d459b161cddb66f5f3846d0fabdb21d193fa6614b9c08cf60886b9c96"
+  }
+}

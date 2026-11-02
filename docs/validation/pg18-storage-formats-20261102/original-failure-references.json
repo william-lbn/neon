@@ -1,0 +1,56 @@
+[
+  {
+    "path": "/data/neon-build/validation/pg18-storage-formats-build-20261102T021852Z-16ca3d",
+    "result": {
+      "build_exit": 1,
+      "phases": {
+        "versioninfo-tests": null,
+        "ffi-example-build": null,
+        "affected-consumers": null,
+        "compute-version-test": null
+      },
+      "seconds": 1.0978016360022593,
+      "normal": false,
+      "Source": false,
+      "E": 0
+    },
+    "result_sha256": "2717a7a96a937ba952b2e452b60a90c18d031f32db40c81dabc00cdbf3b3588c",
+    "source_lock_sha256": "ca06e9470202ff432e665325810cf250493e416f7113687739da40b4d1a55298"
+  },
+  {
+    "path": "/data/neon-build/validation/pg18-storage-formats-build-20261102T022118Z-c9843d",
+    "result": {
+      "build_exit": 1,
+      "phases": {
+        "versioninfo-tests": null,
+        "ffi-example-build": null,
+        "affected-consumers": null,
+        "compute-version-test": null
+      },
+      "seconds": 5.986934893007856,
+      "normal": false,
+      "Source": false,
+      "E": 0
+    },
+    "result_sha256": "ff21cf3e58ebeb6aaac5e67006e19d031268683381ea271efaf6b6328b8d05dd",
+    "source_lock_sha256": "ca06e9470202ff432e665325810cf250493e416f7113687739da40b4d1a55298"
+  },
+  {
+    "path": "/data/neon-build/validation/pg18-storage-formats-build-20261102T022335Z-82dab1",
+    "result": {
+      "build_exit": 0,
+      "phases": {
+        "versioninfo-tests": null,
+        "ffi-example-build": null,
+        "affected-consumers": null,
+        "compute-version-test": null
+      },
+      "seconds": 4.1104136199865025,
+      "normal": false,
+      "Source": false,
+      "E": 0
+    },
+    "result_sha256": "8bb8d40b9aa70056f0a94bf29035b2a6181b4f203e6ff28273fe7555e8db849b",
+    "source_lock_sha256": "ca06e9470202ff432e665325810cf250493e416f7113687739da40b4d1a55298"
+  }
+]

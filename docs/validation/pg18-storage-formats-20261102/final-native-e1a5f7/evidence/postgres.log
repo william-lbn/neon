@@ -1,0 +1,14 @@
+2026-11-02 05:09:20.664 UTC [34] LOG:  starting PostgreSQL 18.2 (dsga-pg18-native-TEST_ONLY) on x86_64-pc-linux-gnu, compiled by gcc-12 (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-02 05:09:20.664 UTC [34] LOG:  listening on Unix socket "/tmp/pg18-formats-85rp1y62/s/.s.PGSQL.55439"
+2026-11-02 05:09:20.667 UTC [40] LOG:  database system was shut down at 2026-11-02 05:09:20 UTC
+2026-11-02 05:09:20.668 UTC [40] LOG:  Continue writing WAL at 0/1516A48
+2026-11-02 05:09:20.669 UTC [34] LOG:  database system is ready to accept connections
+2026-11-02 05:09:20.818 UTC [38] LOG:  checkpoint starting: immediate force wait
+2026-11-02 05:09:20.820 UTC [38] LOG:  checkpoint complete: wrote 47 buffers (9.2%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=37, longest=0.001 s, average=0.001 s; distance=244 kB, estimate=244 kB; lsn=0/1553B00, redo lsn=0/1553A58
+2026-11-02 05:09:20.835 UTC [34] LOG:  received fast shutdown request
+2026-11-02 05:09:20.835 UTC [34] LOG:  aborting any active transactions
+2026-11-02 05:09:20.837 UTC [34] LOG:  background worker "logical replication launcher" (PID 43) exited with exit code 1
+2026-11-02 05:09:20.837 UTC [38] LOG:  shutting down
+2026-11-02 05:09:20.837 UTC [38] LOG:  checkpoint starting: shutdown immediate
+2026-11-02 05:09:20.838 UTC [38] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=1, longest=0.001 s, average=0.001 s; distance=1 kB, estimate=219 kB; lsn=0/15540F8, redo lsn=0/15540F8
+2026-11-02 05:09:20.841 UTC [34] LOG:  database system is shut down

@@ -1,0 +1,49 @@
+{
+  "scope": "DEFAULT_NEON_PG18_GITHUB_SOURCE_TO_REAL_HEADERS_AND_RECIPE_CLOSURE",
+  "Root_owned_gitlink": {
+    "path": "vendor/postgres-v18",
+    "commit": "27b354b4352bc629c90a2790d811941d22ae651c",
+    "checkout_receipt_sha256": "e28b26f440a45c98cd3850d8fbf9f9eeff9a08e15a78904769030a50198e5ca0"
+  },
+  "owned_recipe2": {
+    "Makefile": "7f8f5751020929cb4984b6fc82042262c7c1f4f03aa996f6b4da23909f8a7697",
+    "Dockerfile": "11069ceb1f312fda8f567ed76df1fe121cc9df676ade21c2035d9fe9286da898"
+  },
+  "module_freeze": "/data/neon-build/validation/pg18-storage-formats-final-freeze-20261102",
+  "header_build_run": "/data/neon-build/validation/pg18-default-headers-20261102T053338Z-676ccf",
+  "source_lock_sha256": "03b214b3e604bed4a7c51efc74c660e34997d52ee77122fbf0912b436e0b90c2",
+  "result": {
+    "build_exit": 0,
+    "headers_exit": 0,
+    "seconds": 30.639263074001065,
+    "Source": false,
+    "normal": false,
+    "E": 0
+  },
+  "header_comparison": {
+    "generated_headers": 900,
+    "only_new_relative_paths": [],
+    "different_common_headers": [
+      "pg_config.h",
+      "postgresql/server/pg_config.h"
+    ],
+    "layout": {
+      "PG_VERSION_NUM": 180002,
+      "PG_CONTROL_VERSION": 1800,
+      "XLOG_PAGE_MAGIC": 53528,
+      "sizeof_ControlFileData": 296,
+      "offsetof_ControlFileData_checkPointCopy": 40,
+      "sizeof_CheckPoint": 88,
+      "offsetof_CheckPoint_wal_level": 20,
+      "sizeof_XLogRecord": 24,
+      "sizeof_XLogLongPageHeaderData": 40
+    },
+    "reference_layout_identical": true
+  },
+  "default_build_input_gap_closed": true,
+  "default_full_image_build_performed": false,
+  "PG17_gitlink_changed": false,
+  "Source": false,
+  "normal": false,
+  "E": 0
+}

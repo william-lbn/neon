@@ -1,0 +1,7 @@
+test_PG18_S_NATIVE_CONTROL_001_real_CRC_roundtrip_and_foreign_version_reject (__main__.NativeFormats.test_PG18_S_NATIVE_CONTROL_001_real_CRC_roundtrip_and_foreign_version_reject) ... ok
+test_PG18_S_NATIVE_WAL_001_real_SQL_marker_decode_and_CRC_magic_reject (__main__.NativeFormats.test_PG18_S_NATIVE_WAL_001_real_SQL_marker_decode_and_CRC_magic_reject) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.998s
+
+OK

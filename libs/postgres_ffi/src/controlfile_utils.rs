@@ -25,7 +25,7 @@
 //!
 use super::bindings::{ControlFileData, PG_CONTROL_FILE_SIZE};
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use bytes::{Bytes, BytesMut};
 
 /// Equivalent to sizeof(ControlFileData) in C
@@ -65,6 +65,17 @@ impl ControlFileData {
                 "invalid CRC in control file: expected {:08X}, was {:08X}",
                 expectedcrc,
                 controlfile.crc
+            );
+        }
+
+        // 新18入口必须核真实格式版本；CRC正确只证明字节完整，不能把17布局
+        // 授为18。旧14–17调用合同保持，本批不扩大它们的历史导入行为。
+        if super::bindings::MY_PGVERSION == crate::PgMajorVersion::PG18
+            && controlfile.pg_control_version != super::bindings::PG_CONTROL_VERSION
+        {
+            bail!(
+                "unexpected PostgreSQL control version: {}",
+                controlfile.pg_control_version
             );
         }
 

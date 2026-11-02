@@ -1,0 +1,20 @@
+{
+  "generated_headers": 900,
+  "only_new_relative_paths": [],
+  "different_common_headers": [
+    "pg_config.h",
+    "postgresql/server/pg_config.h"
+  ],
+  "layout": {
+    "PG_VERSION_NUM": 180002,
+    "PG_CONTROL_VERSION": 1800,
+    "XLOG_PAGE_MAGIC": 53528,
+    "sizeof_ControlFileData": 296,
+    "offsetof_ControlFileData_checkPointCopy": 40,
+    "sizeof_CheckPoint": 88,
+    "offsetof_CheckPoint_wal_level": 20,
+    "sizeof_XLogRecord": 24,
+    "sizeof_XLogLongPageHeaderData": 40
+  },
+  "reference_layout_identical": true
+}

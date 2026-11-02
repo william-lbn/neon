@@ -1,0 +1,9 @@
+此补充关闭上一pg18-storage-formats归档时明确记录的默认头依赖缺口；此前109路径的“gap open”是当时事实，保留原件不覆盖。
+
+Root已从GitHub下载独立vendor/postgres-v18准确27b354b4352bc629c90a2790d811941d22ae651c，Root负责.gitmodules/gitlink/revisions新18项；原17 gitlink/revision/发行锁不变。本批只在Makefile版本表追加v18（原默认17保留），Docker PG源码COPY、最终安装COPY及兼容tar加入v18，原默认neon→postgres-headers-install依赖自动包含18。
+
+676ccf实际使用正式缓存build-tools@234cfd与原Makefile/postgres.mk/ninstall、BUILD_TYPE=release目标postgres-headers-install-v18，原libseccomp/OpenSSL等配置均保，30.639s通过；产生900个真实头文件。全部相对路径存在，898个头与已测FFI原PG18头逐字一致；仅两份pg_config.h因默认release/commit/config选项变化不同，原始diff保留。实际C编译/执行比较版本180002、control1800、WAL magic53528、ControlFileData296/CheckPoint88等尺寸与字段offset全部一致。5个关键control/WAL原头逐SHA/cmp通过。因此默认构建具备真实PG18头生产者，而非把临时借用头签作默认来源。
+
+此处未重新构建全部旧PG/整个Neon发行镜像，也未签正式PG18 Pageserver timeline/normal/E；Rust9源和真实control/WAL2组件结果沿上一次准确冻结。引用的reference18只用于比较，真正新include来自GitHub源的原make，不作为产物替代。生成include/两个C probe ELF及原二进制布局留/data，Git只归档源码/文本/SHA。
+
+原da53 worker换行语法错误、b2误选运行SDK缺jq/seccomp-dev、672测试context复制ninstall.sh丢执行位三次真实失败留原nonce；最终676恢复原Git脚本执行位和完整工具库，不改变生产配置凑绿。未prune，全部有界nonce/锁/资源/终态/日志保留。

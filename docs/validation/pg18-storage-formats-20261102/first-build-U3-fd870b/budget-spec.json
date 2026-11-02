@@ -1,0 +1,11 @@
+{
+  "protocol_version": 1,
+  "nonce": "20261102T022800Z-fd870b",
+  "unit": "neon-pg18-storage-formats-20261102t022800z-fd870b.service",
+  "kind": "heavy",
+  "evidence_dir": "/data/neon-build/validation/pg18-storage-formats-build-20261102T022800Z-fd870b",
+  "argv": [
+    "/usr/bin/python3",
+    "/data/neon-build/validation/pg18-storage-formats-build-20261102T022800Z-fd870b/worker.py"
+  ]
+}

@@ -211,6 +211,7 @@ impl DecodedWALRecord {
                 PgMajorVersion::PG15 => info == crate::v15::bindings::XLOG_DBASE_CREATE_FILE_COPY,
                 PgMajorVersion::PG16 => info == crate::v16::bindings::XLOG_DBASE_CREATE_FILE_COPY,
                 PgMajorVersion::PG17 => info == crate::v17::bindings::XLOG_DBASE_CREATE_FILE_COPY,
+                PgMajorVersion::PG18 => info == crate::v18::bindings::XLOG_DBASE_CREATE_FILE_COPY,
             }
         } else {
             false
@@ -886,6 +887,16 @@ pub mod v17 {
             }
         }
     }
+}
+
+// 本轮18 heap insert/delete/update/lock/multi-insert/end-of-recovery和Neon
+// WAL结构已与实际18头逐字段核对；仅这些不变payload共用解码器。
+// 这不包含ControlFileData或WAL页magic，两者各走v18真实绑定。
+pub mod v18 {
+    pub use super::v17::{
+        XlEndOfRecovery, XlHeapDelete, XlHeapInsert, XlHeapLock, XlHeapLockUpdated,
+        XlHeapMultiInsert, XlHeapUpdate, XlParameterChange, rm_neon,
+    };
 }
 
 #[repr(C)]

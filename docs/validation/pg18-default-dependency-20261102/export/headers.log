@@ -1,0 +1,119 @@
+mkdir -p /home/nonroot//build
+test -e /home/nonroot//build/CACHEDIR.TAG || echo ""Signature: 8a477f597d28d172789f06886806bc55"" > /home/nonroot//build/CACHEDIR.TAG
+Configuring Postgres v18 build
+mkdir -p /home/nonroot//build/v18
+VERSION=v18; \
+EXTRA_VERSION=$(cd /home/nonroot//vendor/postgres-$VERSION && git rev-parse HEAD 2>/dev/null) || \
+EXTRA_VERSION=$(jq -r --arg version "$VERSION" '.[$version][1]' /home/nonroot//vendor/revisions.json); \
+(cd /home/nonroot//build/$VERSION && \
+env PATH=":$PATH" /home/nonroot//vendor/postgres-$VERSION/configure \
+	CFLAGS='-fsigned-char -O2 -g3 ' LDFLAGS='' \
+	--enable-debug --with-openssl --with-icu ICU_CFLAGS='-I//usr/local/icu/include -DU_STATIC_IMPLEMENTATION' ICU_LIBS='-L/usr/local/icu/lib -L/usr/local/icu/lib64 -licui18n -licuuc -licudata -lstdc++ -Wl,-Bdynamic -lm' --with-libseccomp INSTALL='/home/nonroot//scripts/ninstall.sh -C' --with-extra-version=" ($EXTRA_VERSION)" \
+	--prefix=/home/nonroot/pg_install/$VERSION > configure.log)
+Installing PostgreSQL v18 headers
+make -C /home/nonroot//build/v18/src/include MAKELEVEL=0 install
+make: Entering directory '/home/nonroot/build/v18/src/include'
+make -C ../../src/backend generated-headers
+/usr/bin/mkdir -p '/home/nonroot/pg_install/v18/include/libpq' '/home/nonroot/pg_install/v18/include/postgresql/internal/libpq'
+/usr/bin/mkdir -p '/home/nonroot/pg_install/v18/include/postgresql/server'/access '/home/nonroot/pg_install/v18/include/postgresql/server'/archive '/home/nonroot/pg_install/v18/include/postgresql/server'/bootstrap '/home/nonroot/pg_install/v18/include/postgresql/server'/catalog '/home/nonroot/pg_install/v18/include/postgresql/server'/commands '/home/nonroot/pg_install/v18/include/postgresql/server'/common '/home/nonroot/pg_install/v18/include/postgresql/server'/datatype '/home/nonroot/pg_install/v18/include/postgresql/server'/executor '/home/nonroot/pg_install/v18/include/postgresql/server'/fe_utils '/home/nonroot/pg_install/v18/include/postgresql/server'/foreign '/home/nonroot/pg_install/v18/include/postgresql/server'/jit '/home/nonroot/pg_install/v18/include/postgresql/server'/lib '/home/nonroot/pg_install/v18/include/postgresql/server'/libpq '/home/nonroot/pg_install/v18/include/postgresql/server'/mb '/home/nonroot/pg_install/v18/include/postgresql/server'/nodes '/home/nonroot/pg_install/v18/include/postgresql/server'/optimizer '/home/nonroot/pg_install/v18/include/postgresql/server'/parser '/home/nonroot/pg_install/v18/include/postgresql/server'/partitioning '/home/nonroot/pg_install/v18/include/postgresql/server'/postmaster '/home/nonroot/pg_install/v18/include/postgresql/server'/regex '/home/nonroot/pg_install/v18/include/postgresql/server'/replication '/home/nonroot/pg_install/v18/include/postgresql/server'/rewrite '/home/nonroot/pg_install/v18/include/postgresql/server'/statistics '/home/nonroot/pg_install/v18/include/postgresql/server'/storage '/home/nonroot/pg_install/v18/include/postgresql/server'/tcop '/home/nonroot/pg_install/v18/include/postgresql/server'/snowball '/home/nonroot/pg_install/v18/include/postgresql/server'/snowball/libstemmer '/home/nonroot/pg_install/v18/include/postgresql/server'/tsearch '/home/nonroot/pg_install/v18/include/postgresql/server'/tsearch/dicts '/home/nonroot/pg_install/v18/include/postgresql/server'/utils '/home/nonroot/pg_install/v18/include/postgresql/server'/port '/home/nonroot/pg_install/v18/include/postgresql/server'/port/atomics '/home/nonroot/pg_install/v18/include/postgresql/server'/port/win32 '/home/nonroot/pg_install/v18/include/postgresql/server'/port/win32_msvc '/home/nonroot/pg_install/v18/include/postgresql/server'/port/win32_msvc/sys '/home/nonroot/pg_install/v18/include/postgresql/server'/port/win32/arpa '/home/nonroot/pg_install/v18/include/postgresql/server'/port/win32/netinet '/home/nonroot/pg_install/v18/include/postgresql/server'/port/win32/sys '/home/nonroot/pg_install/v18/include/postgresql/server'/portability
+make: Entering directory '/home/nonroot/build/v18/src/backend'
+make -C ../include/catalog generated-headers
+make -C nodes generated-header-symlinks
+make: Entering directory '/home/nonroot/build/v18/src/backend/nodes'
+'/usr/bin/perl' /home/nonroot//vendor/postgres-v18/src/backend/nodes/gen_node_support.pl /home/nonroot//vendor/postgres-v18/src/include/nodes/nodes.h /home/nonroot//vendor/postgres-v18/src/include/nodes/primnodes.h /home/nonroot//vendor/postgres-v18/src/include/nodes/parsenodes.h /home/nonroot//vendor/postgres-v18/src/include/nodes/pathnodes.h /home/nonroot//vendor/postgres-v18/src/include/nodes/plannodes.h /home/nonroot//vendor/postgres-v18/src/include/nodes/execnodes.h /home/nonroot//vendor/postgres-v18/src/include/access/amapi.h /home/nonroot//vendor/postgres-v18/src/include/access/cmptype.h /home/nonroot//vendor/postgres-v18/src/include/access/sdir.h /home/nonroot//vendor/postgres-v18/src/include/access/tableam.h /home/nonroot//vendor/postgres-v18/src/include/access/tsmapi.h /home/nonroot//vendor/postgres-v18/src/include/commands/event_trigger.h /home/nonroot//vendor/postgres-v18/src/include/commands/trigger.h /home/nonroot//vendor/postgres-v18/src/include/executor/tuptable.h /home/nonroot//vendor/postgres-v18/src/include/foreign/fdwapi.h /home/nonroot//vendor/postgres-v18/src/include/nodes/bitmapset.h /home/nonroot//vendor/postgres-v18/src/include/nodes/extensible.h /home/nonroot//vendor/postgres-v18/src/include/nodes/lockoptions.h /home/nonroot//vendor/postgres-v18/src/include/nodes/miscnodes.h /home/nonroot//vendor/postgres-v18/src/include/nodes/replnodes.h /home/nonroot//vendor/postgres-v18/src/include/nodes/supportnodes.h /home/nonroot//vendor/postgres-v18/src/include/nodes/value.h /home/nonroot//vendor/postgres-v18/src/include/utils/rel.h
+make: Entering directory '/home/nonroot/build/v18/src/include/catalog'
+'/usr/bin/perl' /home/nonroot//vendor/postgres-v18/src/backend/catalog/genbki.pl --include-path=/home/nonroot//vendor/postgres-v18/src/include/ \
+	--set-version=18 /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_proc.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_type.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_attribute.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_class.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_attrdef.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_constraint.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_inherits.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_index.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_operator.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_opfamily.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_opclass.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_am.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_amop.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_amproc.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_language.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_largeobject_metadata.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_largeobject.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_aggregate.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_statistic.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_statistic_ext.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_statistic_ext_data.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_rewrite.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_trigger.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_event_trigger.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_description.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_cast.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_enum.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_namespace.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_conversion.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_depend.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_database.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_db_role_setting.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_tablespace.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_authid.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_auth_members.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_shdepend.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_shdescription.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_ts_config.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_ts_config_map.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_ts_dict.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_ts_parser.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_ts_template.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_extension.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_foreign_data_wrapper.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_foreign_server.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_user_mapping.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_foreign_table.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_policy.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_replication_origin.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_default_acl.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_init_privs.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_seclabel.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_shseclabel.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_collation.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_parameter_acl.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_partitioned_table.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_range.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_transform.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_sequence.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_publication.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_publication_namespace.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_publication_rel.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_subscription.h /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_subscription_rel.h
+touch node-support-stamp
+cd '../../../src/include/nodes/' && for file in nodetags.h; do \
+  rm -f $file && ln -s "../../../src/backend/nodes/$file" . ; \
+done
+touch ../../../src/include/nodes/header-stamp
+make: Leaving directory '/home/nonroot/build/v18/src/backend/nodes'
+make -C utils generated-header-symlinks
+make: Entering directory '/home/nonroot/build/v18/src/backend/utils'
+make -C adt jsonpath_gram.h
+make: Entering directory '/home/nonroot/build/v18/src/backend/utils/adt'
+/usr/bin/bison -Wno-deprecated  -d -o jsonpath_gram.c /home/nonroot//vendor/postgres-v18/src/backend/utils/adt/jsonpath_gram.y
+touch jsonpath_gram.h
+make: Leaving directory '/home/nonroot/build/v18/src/backend/utils/adt'
+'/usr/bin/perl' -I /home/nonroot//vendor/postgres-v18/src/backend/catalog /home/nonroot//vendor/postgres-v18/src/backend/utils/Gen_fmgrtab.pl --include-path=/home/nonroot//vendor/postgres-v18/src/include/ /home/nonroot//vendor/postgres-v18/src/include/catalog/pg_proc.dat
+touch fmgr-stamp
+'/usr/bin/perl' /home/nonroot//vendor/postgres-v18/src/backend/utils/generate-errcodes.pl --outfile errcodes.h /home/nonroot//vendor/postgres-v18/src/backend/utils/errcodes.txt
+'/usr/bin/perl' -n /home/nonroot//vendor/postgres-v18/src/backend/utils/Gen_dummy_probes.pl /home/nonroot//vendor/postgres-v18/src/backend/utils/probes.d >probes.h
+'/usr/bin/perl' /home/nonroot//vendor/postgres-v18/src/backend/utils/activity/generate-wait_event_types.pl --code /home/nonroot//vendor/postgres-v18/src/backend/utils/activity/wait_event_names.txt
+cd '../../../src/include/utils/' && for file in fmgroids.h fmgrprotos.h errcodes.h probes.h pgstat_wait_event.c wait_event_funcs_data.c wait_event_types.h; do \
+  rm -f $file && ln -s "../../../src/backend/utils/$file" . ; \
+done
+touch ../../../src/include/utils/header-stamp
+make: Leaving directory '/home/nonroot/build/v18/src/backend/utils'
+make -C storage/lmgr lwlocknames.h
+make: Entering directory '/home/nonroot/build/v18/src/backend/storage/lmgr'
+'/usr/bin/perl' /home/nonroot//vendor/postgres-v18/src/backend/storage/lmgr/generate-lwlocknames.pl /home/nonroot//vendor/postgres-v18/src/backend/storage/lmgr/../../../include/storage/lwlocklist.h /home/nonroot//vendor/postgres-v18/src/backend/storage/lmgr/../../utils/activity/wait_event_names.txt /home/nonroot//vendor/postgres-v18/src/backend/storage/lmgr/generate-lwlocknames.pl
+make: Leaving directory '/home/nonroot/build/v18/src/backend/storage/lmgr'
+make -C parser gram.h
+make: Entering directory '/home/nonroot/build/v18/src/backend/parser'
+'/usr/bin/perl' /home/nonroot//vendor/postgres-v18/src/backend/parser/check_keywords.pl /home/nonroot//vendor/postgres-v18/src/backend/parser/gram.y /home/nonroot//vendor/postgres-v18/src/include/parser/kwlist.h
+touch bki-stamp
+make: Leaving directory '/home/nonroot/build/v18/src/include/catalog'
+prereqdir=`cd 'storage/lmgr/' >/dev/null && pwd` && \
+  cd '../../src/include/storage/' && rm -f lwlocknames.h && \
+  ln -s "$prereqdir/lwlocknames.h" .
+/usr/bin/bison -Wno-deprecated  -d -o gram.c /home/nonroot//vendor/postgres-v18/src/backend/parser/gram.y
+touch gram.h
+make: Leaving directory '/home/nonroot/build/v18/src/backend/parser'
+make: Leaving directory '/home/nonroot/build/v18/src/backend'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/postgres_ext.h   '/home/nonroot/pg_install/v18/include'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/libpq/libpq-fs.h '/home/nonroot/pg_install/v18/include/libpq'
+/home/nonroot//scripts/ninstall.sh -C -m 644 pg_config.h     '/home/nonroot/pg_install/v18/include'
+/home/nonroot//scripts/ninstall.sh -C -m 644 pg_config_os.h  '/home/nonroot/pg_install/v18/include'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/pg_config_manual.h '/home/nonroot/pg_install/v18/include'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/c.h            '/home/nonroot/pg_install/v18/include/postgresql/internal'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/port.h         '/home/nonroot/pg_install/v18/include/postgresql/internal'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/postgres_fe.h  '/home/nonroot/pg_install/v18/include/postgresql/internal'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/libpq/pqcomm.h '/home/nonroot/pg_install/v18/include/postgresql/internal/libpq'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/libpq/protocol.h '/home/nonroot/pg_install/v18/include/postgresql/internal/libpq'
+/home/nonroot//scripts/ninstall.sh -C -m 644 pg_config.h     '/home/nonroot/pg_install/v18/include/postgresql/server'
+/home/nonroot//scripts/ninstall.sh -C -m 644 pg_config_os.h  '/home/nonroot/pg_install/v18/include/postgresql/server'
+/home/nonroot//scripts/ninstall.sh -C -m 644 nodes/nodetags.h '/home/nonroot/pg_install/v18/include/postgresql/server/nodes'
+/home/nonroot//scripts/ninstall.sh -C -m 644 utils/errcodes.h '/home/nonroot/pg_install/v18/include/postgresql/server/utils'
+/home/nonroot//scripts/ninstall.sh -C -m 644 utils/fmgroids.h '/home/nonroot/pg_install/v18/include/postgresql/server/utils'
+/home/nonroot//scripts/ninstall.sh -C -m 644 utils/fmgrprotos.h '/home/nonroot/pg_install/v18/include/postgresql/server/utils'
+/home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/*.h '/home/nonroot/pg_install/v18/include/postgresql/server'
+for dir in access archive bootstrap catalog commands common datatype executor fe_utils foreign jit lib libpq mb nodes optimizer parser partitioning postmaster regex replication rewrite statistics storage tcop snowball snowball/libstemmer tsearch tsearch/dicts utils port port/atomics port/win32 port/win32_msvc port/win32_msvc/sys port/win32/arpa port/win32/netinet port/win32/sys portability; do \
+  /home/nonroot//scripts/ninstall.sh -C -m 644 /home/nonroot//vendor/postgres-v18/src/include/$dir/*.h '/home/nonroot/pg_install/v18/include/postgresql/server'/$dir || exit; \
+done
+for file in storage/lwlocknames.h utils/probes.h utils/wait_event_types.h; do \
+  /home/nonroot//scripts/ninstall.sh -C -m 644 $file '/home/nonroot/pg_install/v18/include/postgresql/server'/$file || exit; \
+done
+make -C catalog install
+make: Entering directory '/home/nonroot/build/v18/src/include/catalog'
+make -C ../../../src/backend generated-headers
+make: Entering directory '/home/nonroot/build/v18/src/backend'
+make -C ../include/catalog generated-headers
+make -C nodes generated-header-symlinks
+make: Entering directory '/home/nonroot/build/v18/src/backend/nodes'
+make: Nothing to be done for 'generated-header-symlinks'.
+make: Leaving directory '/home/nonroot/build/v18/src/backend/nodes'
+make -C utils generated-header-symlinks
+make: Entering directory '/home/nonroot/build/v18/src/backend/utils'
+make -C adt jsonpath_gram.h
+make: Entering directory '/home/nonroot/build/v18/src/include/catalog'
+make: Nothing to be done for 'generated-headers'.
+make: Leaving directory '/home/nonroot/build/v18/src/include/catalog'
+make: Entering directory '/home/nonroot/build/v18/src/backend/utils/adt'
+make: 'jsonpath_gram.h' is up to date.
+make: Leaving directory '/home/nonroot/build/v18/src/backend/utils/adt'
+/usr/bin/mkdir -p '/home/nonroot/pg_install/v18/share/postgresql' '/home/nonroot/pg_install/v18/include/postgresql/server'
+make: Leaving directory '/home/nonroot/build/v18/src/backend/utils'
+make: Leaving directory '/home/nonroot/build/v18/src/backend'
+/home/nonroot//scripts/ninstall.sh -C -m 644 postgres.bki '/home/nonroot/pg_install/v18/share/postgresql/postgres.bki'
+/home/nonroot//scripts/ninstall.sh -C -m 644 system_constraints.sql '/home/nonroot/pg_install/v18/share/postgresql/system_constraints.sql'
+/home/nonroot//scripts/ninstall.sh -C -m 644 schemapg.h '/home/nonroot/pg_install/v18/include/postgresql/server'/catalog/schemapg.h
+/home/nonroot//scripts/ninstall.sh -C -m 644 syscache_ids.h '/home/nonroot/pg_install/v18/include/postgresql/server'/catalog/syscache_ids.h
+/home/nonroot//scripts/ninstall.sh -C -m 644 system_fk_info.h '/home/nonroot/pg_install/v18/include/postgresql/server'/catalog/system_fk_info.h
+for file in pg_proc_d.h pg_type_d.h pg_attribute_d.h pg_class_d.h pg_attrdef_d.h pg_constraint_d.h pg_inherits_d.h pg_index_d.h pg_operator_d.h pg_opfamily_d.h pg_opclass_d.h pg_am_d.h pg_amop_d.h pg_amproc_d.h pg_language_d.h pg_largeobject_metadata_d.h pg_largeobject_d.h pg_aggregate_d.h pg_statistic_d.h pg_statistic_ext_d.h pg_statistic_ext_data_d.h pg_rewrite_d.h pg_trigger_d.h pg_event_trigger_d.h pg_description_d.h pg_cast_d.h pg_enum_d.h pg_namespace_d.h pg_conversion_d.h pg_depend_d.h pg_database_d.h pg_db_role_setting_d.h pg_tablespace_d.h pg_authid_d.h pg_auth_members_d.h pg_shdepend_d.h pg_shdescription_d.h pg_ts_config_d.h pg_ts_config_map_d.h pg_ts_dict_d.h pg_ts_parser_d.h pg_ts_template_d.h pg_extension_d.h pg_foreign_data_wrapper_d.h pg_foreign_server_d.h pg_user_mapping_d.h pg_foreign_table_d.h pg_policy_d.h pg_replication_origin_d.h pg_default_acl_d.h pg_init_privs_d.h pg_seclabel_d.h pg_shseclabel_d.h pg_collation_d.h pg_parameter_acl_d.h pg_partitioned_table_d.h pg_range_d.h pg_transform_d.h pg_sequence_d.h pg_publication_d.h pg_publication_namespace_d.h pg_publication_rel_d.h pg_subscription_d.h pg_subscription_rel_d.h; do \
+  /home/nonroot//scripts/ninstall.sh -C -m 644 $file '/home/nonroot/pg_install/v18/include/postgresql/server'/catalog/$file || exit; \
+done
+make: Leaving directory '/home/nonroot/build/v18/src/include/catalog'
+make: Leaving directory '/home/nonroot/build/v18/src/include'

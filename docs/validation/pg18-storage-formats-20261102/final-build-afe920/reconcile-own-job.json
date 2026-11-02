@@ -1,0 +1,19 @@
+{
+  "raw_receipt": "/data/neon-build/validation/pg18-storage-formats-build-20261102T025717Z-afe920/reconcile-receipt.json",
+  "raw_receipt_sha256": "9b1b1f320f8b429da68f13526fe8d100bbcdd720f1937a5c82d6210899f09feb",
+  "own_job": {
+    "cpu": 6,
+    "kind": "heavy",
+    "last_observation": "original-unit-terminal",
+    "memory": 8589934592,
+    "nonce": "20261102T025717Z-afe920",
+    "process_exit_code": 0,
+    "queue_reason": "",
+    "spec_sha256": "0bd7f6818bab21a85f31e7857a9e81405ac1e3e7f3fd3935b7a0df3d35936731",
+    "state": "terminal",
+    "test_verdict": "NOT_INTERPRETED",
+    "unit": "neon-pg18-storage-formats-20261102t025717z-afe920.service",
+    "unit_result": "success",
+    "worker_sha256": "574bee00b3a85993f0497a264dd872038083aa5d4257295d16a8227eea737b6c"
+  }
+}

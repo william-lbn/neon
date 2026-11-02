@@ -1,0 +1,9 @@
+{
+  "source": "GitHub original user fork",
+  "origin": "https://github.com/william-lbn/postgres.git",
+  "branch": "codex/dsga-pg18-v1-20261031",
+  "head": "27b354b4352bc629c90a2790d811941d22ae651c",
+  "target": "/data/neon-build/src/neon/vendor/postgres-v18",
+  "time": "2026-11-02T05:16:40.157055+00:00",
+  "Mac_source_copied": false
+}

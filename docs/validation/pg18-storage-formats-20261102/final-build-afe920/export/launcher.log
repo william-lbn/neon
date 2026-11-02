@@ -1,0 +1,61 @@
++ set -eu
+++ cat /sys/fs/cgroup/memory.max
++ test 8589934592 = 8589934592
+++ cat /sys/fs/cgroup/cpu.max
++ test '600000 100000' = '600000 100000'
++ sha256sum -c formats-source.sha256
++ for major in 14 15 16 17 18
++ test -f /home/nonroot/pg_install/v14/include/postgresql/server/pg_config.h
++ grep '^#define PG_VERSION_NUM' /home/nonroot/pg_install/v14/include/postgresql/server/pg_config.h
++ find /home/nonroot/pg_install/v14/include -type f -print0
++ sort -z
++ xargs -0 sha256sum
++ for major in 14 15 16 17 18
++ test -f /home/nonroot/pg_install/v15/include/postgresql/server/pg_config.h
++ grep '^#define PG_VERSION_NUM' /home/nonroot/pg_install/v15/include/postgresql/server/pg_config.h
++ find /home/nonroot/pg_install/v15/include -type f -print0
++ sort -z
++ xargs -0 sha256sum
++ for major in 14 15 16 17 18
++ test -f /home/nonroot/pg_install/v16/include/postgresql/server/pg_config.h
++ grep '^#define PG_VERSION_NUM' /home/nonroot/pg_install/v16/include/postgresql/server/pg_config.h
++ find /home/nonroot/pg_install/v16/include -type f -print0
++ sort -z
++ xargs -0 sha256sum
++ for major in 14 15 16 17 18
++ test -f /home/nonroot/pg_install/v17/include/postgresql/server/pg_config.h
++ grep '^#define PG_VERSION_NUM' /home/nonroot/pg_install/v17/include/postgresql/server/pg_config.h
++ find /home/nonroot/pg_install/v17/include -type f -print0
++ sort -z
++ xargs -0 sha256sum
++ for major in 14 15 16 17 18
++ test -f /home/nonroot/pg_install/v18/include/postgresql/server/pg_config.h
++ grep '^#define PG_VERSION_NUM' /home/nonroot/pg_install/v18/include/postgresql/server/pg_config.h
++ find /home/nonroot/pg_install/v18/include -type f -print0
++ sort -z
++ xargs -0 sha256sum
++ rustc --version
++ set +e
++ cargo build --locked --offline -p postgres_ffi --example pg18_native_formats
++ ffi=0
++ echo 0
++ cargo check --locked --offline -p wal_decoder -p pageserver -p safekeeper -p compute_tools
++ echo 0
++ cargo test --locked --offline -p pageserver --lib walingest::tests::pg18_checkpoint_wal_level_records -- --exact --nocapture
++ echo 0
++ test 0 = 0
++ strip --strip-debug -o /out/pg18_native_formats /home/nonroot/target/debug/examples/pg18_native_formats
++ sha256sum /out/pg18_native_formats
++ for metric in cpu.stat memory.peak io.stat memory.events cpu.max memory.max
++ cat /sys/fs/cgroup/cpu.stat
++ for metric in cpu.stat memory.peak io.stat memory.events cpu.max memory.max
++ cat /sys/fs/cgroup/memory.peak
++ for metric in cpu.stat memory.peak io.stat memory.events cpu.max memory.max
++ cat /sys/fs/cgroup/io.stat
++ for metric in cpu.stat memory.peak io.stat memory.events cpu.max memory.max
++ cat /sys/fs/cgroup/memory.events
++ for metric in cpu.stat memory.peak io.stat memory.events cpu.max memory.max
++ cat /sys/fs/cgroup/cpu.max
++ for metric in cpu.stat memory.peak io.stat memory.events cpu.max memory.max
++ cat /sys/fs/cgroup/memory.max
++ exit 0

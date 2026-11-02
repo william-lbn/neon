@@ -1,0 +1,63 @@
+--- previous-tested-native/pg_config.h
++++ default-release/pg_config.h
+@@ -32,7 +32,7 @@
+ #define BLCKSZ 8192
+ 
+ /* Saved arguments from configure */
+-#define CONFIGURE_ARGS " '--prefix=/opt/pg18' '--enable-debug' '--enable-cassert' '--enable-injection-points' '--with-openssl' '--with-icu' '--with-liburing' '--with-extra-version= (dsga-pg18-native-TEST_ONLY)' 'CFLAGS=-fsigned-char -O2 -g3' 'ICU_CFLAGS=-I/usr/local/icu/include -DU_STATIC_IMPLEMENTATION' 'ICU_LIBS=-L/usr/local/icu/lib -L/usr/local/icu/lib64 -licui18n -licuuc -licudata -lstdc++ -Wl,-Bdynamic -lm' 'CC=ccache /usr/bin/gcc-12'"
++#define CONFIGURE_ARGS " 'CFLAGS=-fsigned-char -O2 -g3 ' 'LDFLAGS=' '--enable-debug' '--with-openssl' '--with-icu' 'ICU_CFLAGS=-I//usr/local/icu/include -DU_STATIC_IMPLEMENTATION' 'ICU_LIBS=-L/usr/local/icu/lib -L/usr/local/icu/lib64 -licui18n -licuuc -licudata -lstdc++ -Wl,-Bdynamic -lm' '--with-libseccomp' 'INSTALL=/home/nonroot//scripts/ninstall.sh -C' '--with-extra-version= (27b354b4352bc629c90a2790d811941d22ae651c)' '--prefix=/home/nonroot/pg_install/v18'"
+ 
+ /* Define to the default TCP port number on which the server listens and to
+    which clients will try to connect. This can be overridden at run-time, but
+@@ -267,7 +267,7 @@
+ #define HAVE_LIBREADLINE 1
+ 
+ /* Define to 1 if you have the `seccomp' library (-lseccomp). */
+-/* #undef HAVE_LIBSECCOMP */
++#define HAVE_LIBSECCOMP 1
+ 
+ /* Define to 1 if you have the `selinux' library (-lselinux). */
+ /* #undef HAVE_LIBSELINUX */
+@@ -617,13 +617,13 @@
+ #define PG_PRINTF_ATTRIBUTE gnu_printf
+ 
+ /* PostgreSQL version as a string */
+-#define PG_VERSION "18.2 (dsga-pg18-native-TEST_ONLY)"
++#define PG_VERSION "18.2 (27b354b4352bc629c90a2790d811941d22ae651c)"
+ 
+ /* PostgreSQL version as a number */
+ #define PG_VERSION_NUM 180002
+ 
+ /* A string containing the version number, platform, and C compiler */
+-#define PG_VERSION_STR "PostgreSQL 18.2 (dsga-pg18-native-TEST_ONLY) on x86_64-pc-linux-gnu, compiled by gcc-12 (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit"
++#define PG_VERSION_STR "PostgreSQL 18.2 (27b354b4352bc629c90a2790d811941d22ae651c) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit"
+ 
+ /* Define to 1 to allow profiling output to be saved separately for each
+    process. */
+@@ -674,7 +674,7 @@
+ /* #undef USE_ARMV8_CRC32C_WITH_RUNTIME_CHECK */
+ 
+ /* Define to 1 to build with assertion checks. (--enable-cassert) */
+-#define USE_ASSERT_CHECKING 1
++/* #undef USE_ASSERT_CHECKING */
+ 
+ /* Define to 1 to use AVX-512 CRC algorithms with a runtime check. */
+ #define USE_AVX512_CRC32C_WITH_RUNTIME_CHECK 1
+@@ -692,7 +692,7 @@
+ #define USE_ICU 1
+ 
+ /* Define to 1 to build with injection points. (--enable-injection-points) */
+-#define USE_INJECTION_POINTS 1
++/* #undef USE_INJECTION_POINTS */
+ 
+ /* Define to 1 to build with LDAP support. (--with-ldap) */
+ /* #undef USE_LDAP */
+@@ -704,7 +704,7 @@
+ /* #undef USE_LIBNUMA */
+ 
+ /* Define to build with io_uring support. (--with-liburing) */
+-#define USE_LIBURING 1
++/* #undef USE_LIBURING */
+ 
+ /* Define to 1 to build with XML support. (--with-libxml) */
+ /* #undef USE_LIBXML */

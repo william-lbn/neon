@@ -1,0 +1,27 @@
+   Compiling glob v0.3.1
+   Compiling prost v0.12.6
+   Compiling libloading v0.7.4
+   Compiling bindgen v0.71.1
+   Compiling cexpr v0.6.0
+   Compiling rustc-hash v2.1.1
+   Compiling clang-sys v1.6.1
+   Compiling prost-types v0.12.6
+   Compiling symbolic-common v12.12.0
+   Compiling workspace_hack v0.1.0 (/stderr-work/workspace_hack)
+   Compiling ciborium v0.2.2
+   Compiling tinytemplate v1.2.1
+   Compiling tracing-utils v0.1.0 (/stderr-work/libs/tracing-utils)
+   Compiling prost-build v0.12.6
+   Compiling criterion v0.5.1
+   Compiling pprof v0.14.0
+   Compiling inferno v0.11.21
+   Compiling metrics v0.1.0 (/stderr-work/libs/metrics)
+   Compiling symbolic-demangle v12.12.0
+   Compiling postgres_connection v0.1.0 (/stderr-work/libs/postgres_connection)
+   Compiling pq_proto v0.1.0 (/stderr-work/libs/pq_proto)
+   Compiling postgres_versioninfo v0.1.0 (/stderr-work/libs/postgres_versioninfo)
+   Compiling postgres_ffi_types v0.1.0 (/stderr-work/libs/postgres_ffi_types)
+   Compiling postgres v0.19.7 (https://github.com/neondatabase/rust-postgres.git?branch=neon#f3cf448f)
+   Compiling utils v0.1.0 (/stderr-work/libs/utils)
+   Compiling postgres_ffi v0.1.0 (/stderr-work/libs/postgres_ffi)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 29.88s

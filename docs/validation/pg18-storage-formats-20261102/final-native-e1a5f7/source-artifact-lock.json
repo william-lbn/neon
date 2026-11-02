@@ -1,0 +1,15 @@
+{
+  "scope": "TWO_RELATED_NATIVE_PG18_CONTROL_WAL_COMPONENT_TARGETS",
+  "real_compile": "/data/neon-build/validation/pg18-storage-formats-build-20261102T025717Z-afe920",
+  "compile_source_lock_sha256": "d0b6b6ae40b81fb8345d4ddef283a90bfe824492ce8197562fb1bf9b8a91b0e6",
+  "reader_ELF_sha256": "c868b91e126d8486001754be1841e3ce6ec02bb00e6cd2c201d83098c68b1d01",
+  "driver_sha256": "15147d288ea4eb375360c5683d92376463575e4f59ab28a6172656390a342545",
+  "PG_sha256": "95b4c4a86b0e365aaef080572959ade5f0ab7875aa55c40f38aef95abcb431d9",
+  "PG_install": "/data/neon-build/validation/pg18-neon-aio-error-holdoff-fix-build-20261102T012118Z-ff51b4/install",
+  "runtime_image": "127.0.0.1:5001/neon/pg18-native-tools@sha256:68c6b14f76f04bdcebbf15dba0c97de2bdcb2bed5850654797cc6d631f694ee6",
+  "peer_is_model": false,
+  "formal_Pageserver": false,
+  "normal": false,
+  "Source": false,
+  "E": 0
+}

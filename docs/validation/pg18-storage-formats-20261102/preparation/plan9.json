@@ -1,0 +1,41 @@
+{
+  "scope": "PG18 bottom version + real binding/control/WAL dispatch; no service E claim",
+  "head": "b3918578aee38b01f29ddb6346104a0e6b51909f",
+  "new_direct_tests": [
+    "libs/postgres_ffi/examples/pg18_native_formats.rs",
+    "ci/test_dsg_pg18_formats.py"
+  ],
+  "baseline": {
+    "libs/postgres_versioninfo/src/lib.rs": "2438f31bae53ccd097657b50c9198f8e87a77f08dcbc09bef6aa5f111ea7082a",
+    "libs/postgres_ffi/build.rs": "3d209de1501c72b8befa26e682f4f76a2848f38f014f0e1022d7adb9fd86217e",
+    "libs/postgres_ffi/src/lib.rs": "b3e06c06e1ff2c9a95b832d1eaf41aaa1041a2828ed611aead7ef0dc8c40c6cc",
+    "libs/postgres_ffi/src/walrecord.rs": "c6027fc614b456dafa818c532e3dc332f3ef368831c5fb3068c2093b25061868",
+    "libs/postgres_ffi/src/controlfile_utils.rs": "7c57e2a675a6e74576e43203ca70b72ccdc79536f8600da41ced0cc7059839eb",
+    "libs/wal_decoder/src/decoder.rs": "aa68e6eba37c644b589c6685d28dd8cba4699358bbfdaf57d56a832c732b6b5c",
+    "compute_tools/src/extension_server.rs": "c9f44d9f30a91bf3910021a6afc29a0a9f65da38b13c174a6329b91a276a3b03",
+    "pageserver/src/walingest.rs": "9f9e300fe6283764db591fe3b9e74952831a98541bcf18f6c53157cf923c2f2c"
+  },
+  "header_origin": "/data/neon-build/validation/pg18-neon-aio-error-holdoff-fix-build-20261102T012118Z-ff51b4/install",
+  "header_origin_runtime_PG": "95b4c4a86b0e365aaef080572959ade5f0ab7875aa55c40f38aef95abcb431d9",
+  "heavy_budget": "6CPU8GiB one heavy max; queued behind real PG17 native-large",
+  "unchanged": [
+    "PG18 prior frozen3",
+    "Neon prior frozen11",
+    "PG17 gitlink/release lock",
+    "default17",
+    "AS public API",
+    "broker",
+    "P2 two routes"
+  ],
+  "owned_production9": [
+    "libs/postgres_versioninfo/src/lib.rs",
+    "libs/postgres_ffi/build.rs",
+    "libs/postgres_ffi/src/lib.rs",
+    "libs/postgres_ffi/src/pg_constants_v18.rs",
+    "libs/postgres_ffi/src/walrecord.rs",
+    "libs/postgres_ffi/src/controlfile_utils.rs",
+    "libs/wal_decoder/src/decoder.rs",
+    "compute_tools/src/extension_server.rs",
+    "pageserver/src/walingest.rs"
+  ]
+}

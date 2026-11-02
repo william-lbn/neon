@@ -1,0 +1,265 @@
+   Compiling workspace_hack v0.1.0 (/stderr-work/workspace_hack)
+   Compiling tracing-utils v0.1.0 (/stderr-work/libs/tracing-utils)
+   Compiling pq_proto v0.1.0 (/stderr-work/libs/pq_proto)
+   Compiling metrics v0.1.0 (/stderr-work/libs/metrics)
+   Compiling postgres_connection v0.1.0 (/stderr-work/libs/postgres_connection)
+   Compiling postgres_versioninfo v0.1.0 (/stderr-work/libs/postgres_versioninfo)
+   Compiling storage_broker v0.1.0 (/stderr-work/storage_broker)
+   Compiling postgres_ffi_types v0.1.0 (/stderr-work/libs/postgres_ffi_types)
+   Compiling utils v0.1.0 (/stderr-work/libs/utils)
+   Compiling posthog_client_lite v0.1.0 (/stderr-work/libs/posthog_client_lite)
+   Compiling postgres_backend v0.1.0 (/stderr-work/libs/postgres_backend)
+   Compiling rstest_macros v0.18.2
+   Compiling io-uring v0.6.2
+   Compiling pageserver_page_api v0.1.0 (/stderr-work/pageserver/page_api)
+   Compiling wal_decoder v0.1.0 (/stderr-work/libs/wal_decoder)
+   Compiling http-utils v0.1.0 (/stderr-work/libs/http-utils)
+   Compiling remote_storage v0.1.0 (/stderr-work/libs/remote_storage)
+   Compiling relative-path v1.9.0
+   Compiling linux-raw-sys v0.6.4
+   Compiling uring-common v0.1.0 (https://github.com/neondatabase/tokio-epoll-uring.git?branch=main#781989bb)
+warning: unused import: `GCSVersionListing`
+ --> libs/remote_storage/src/gcs_bucket.rs:9:5
+  |
+9 |     GCSVersionListing, 
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `azure_core::Etag`
+  --> libs/remote_storage/src/gcs_bucket.rs:12:5
+   |
+12 | use azure_core::Etag;
+   |     ^^^^^^^^^^^^^^^^
+
+warning: unused import: `bytes::BytesMut`
+  --> libs/remote_storage/src/gcs_bucket.rs:14:5
+   |
+14 | use bytes::BytesMut;
+   |     ^^^^^^^^^^^^^^^
+
+warning: unused import: `Token`
+  --> libs/remote_storage/src/gcs_bucket.rs:19:16
+   |
+19 | use gcp_auth::{Token, TokenProvider};
+   |                ^^^^^
+
+warning: unused import: `http::Method`
+  --> libs/remote_storage/src/gcs_bucket.rs:20:5
+   |
+20 | use http::Method;
+   |     ^^^^^^^^^^^^
+
+warning: unused import: `ParseIntError`
+  --> libs/remote_storage/src/gcs_bucket.rs:27:28
+   |
+27 | use std::num::{NonZeroU32, ParseIntError};
+   |                            ^^^^^^^^^^^^^
+
+warning: unused imports: `Pin` and `pin`
+  --> libs/remote_storage/src/gcs_bucket.rs:28:16
+   |
+28 | use std::pin::{Pin, pin};
+   |                ^^^  ^^^
+
+warning: unused imports: `BytesCodec` and `FramedRead`
+  --> libs/remote_storage/src/gcs_bucket.rs:33:25
+   |
+33 | use tokio_util::codec::{BytesCodec, FramedRead};
+   |                         ^^^^^^^^^^  ^^^^^^^^^^
+
+warning: unused imports: `ParseError` and `Url`
+  --> libs/remote_storage/src/gcs_bucket.rs:36:11
+   |
+36 | use url::{ParseError, Url};
+   |           ^^^^^^^^^^  ^^^
+
+warning: unused doc comment
+   --> libs/remote_storage/src/gcs_bucket.rs:700:9
+    |
+700 | /         /// We do this in two parts:
+701 | |         /// 1. Serialize the metadata of the first request to get Etag, last modified, etc
+702 | |         /// 2. We do not .await the second request pass on the pinned stream to the 'get_object'
+703 | |         ///    caller
+    | |_____________________^
+704 |           let metadata_uri_mod = "alt=json";
+    |           ---------------------------------- rustdoc does not generate documentation for statements
+    |
+    = help: use `//` for a plain comment
+    = note: `#[warn(unused_doc_comments)]` on by default
+
+warning: unused doc comment
+    --> libs/remote_storage/src/gcs_bucket.rs:1248:16
+     |
+1248 |                /// Case 1: we have a recent object outside of our restore window.
+     |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ rustdoc does not generate documentation for macro invocations
+     |
+     = help: to document an item produced by a macro, the macro must produce the documentation as part of its expansion
+
+warning: unused doc comment
+    --> libs/remote_storage/src/gcs_bucket.rs:1252:12
+     |
+1252 |              /// we get index in the array that we want whether its `v` or `e`
+     |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1253 | /            let version_to_restore_to =
+1254 | |                match versions.binary_search_by_key(&timestamp, |tpl| tpl.last_modified) {
+1255 | |                    Ok(v) => v,
+1256 | |                    Err(e) => e,
+1257 | |                };
+     | |_________________- rustdoc does not generate documentation for statements
+     |
+     = help: use `//` for a plain comment
+
+   Compiling postgres_ffi v0.1.0 (/stderr-work/libs/postgres_ffi)
+warning: variable `continuation_token` is assigned to, but never used
+   --> libs/remote_storage/src/gcs_bucket.rs:961:21
+    |
+961 |             let mut continuation_token = None;
+    |                     ^^^^^^^^^^^^^^^^^^
+    |
+    = note: consider using `_continuation_token` instead
+    = note: `#[warn(unused_variables)]` on by default
+
+warning: value assigned to `continuation_token` is never read
+    --> libs/remote_storage/src/gcs_bucket.rs:1049:17
+     |
+1049 |                 continuation_token = match resp.next_page_token {
+     |                 ^^^^^^^^^^^^^^^^^^
+     |
+     = help: maybe it is overwritten before being read?
+     = note: `#[warn(unused_assignments)]` on by default
+
+warning: unused variable: `req_uri`
+   --> libs/remote_storage/src/gcs_bucket.rs:235:21
+    |
+235 |             let mut req_uri = versions_base_uri.clone();
+    |                     ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_req_uri`
+
+warning: variable does not need to be mutable
+   --> libs/remote_storage/src/gcs_bucket.rs:235:17
+    |
+235 |             let mut req_uri = versions_base_uri.clone();
+    |                 ----^^^^^^^
+    |                 |
+    |                 help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` on by default
+
+warning: variable does not need to be mutable
+   --> libs/remote_storage/src/gcs_bucket.rs:361:13
+    |
+361 |         let mut form = reqwest::multipart::Form::new()
+    |             ----^^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: unused variable: `permit`
+   --> libs/remote_storage/src/gcs_bucket.rs:693:13
+    |
+693 |         let permit = self.owned_permit(kind, cancel).await?;
+    |             ^^^^^^ help: if this is intentional, prefix it with an underscore: `_permit`
+
+warning: unused variable: `remaining`
+   --> libs/remote_storage/src/gcs_bucket.rs:837:13
+    |
+837 |         let remaining = self.timeout.saturating_sub(started_at.elapsed());
+    |             ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_remaining`
+
+warning: variable does not need to be mutable
+   --> libs/remote_storage/src/gcs_bucket.rs:789:13
+    |
+789 |         let mut req = Client::new()
+    |             ----^^^
+    |             |
+    |             help: remove this `mut`
+
+warning: unused variable: `from`
+   --> libs/remote_storage/src/gcs_bucket.rs:861:9
+    |
+861 |         from: &RemotePath,
+    |         ^^^^ help: if this is intentional, prefix it with an underscore: `_from`
+
+warning: unused variable: `cancel`
+   --> libs/remote_storage/src/gcs_bucket.rs:863:9
+    |
+863 |         cancel: &CancellationToken,
+    |         ^^^^^^ help: if this is intentional, prefix it with an underscore: `_cancel`
+
+warning: unused variable: `delete_objects`
+    --> libs/remote_storage/src/gcs_bucket.rs:1170:17
+     |
+1170 |         let mut delete_objects: Vec<String> = Vec::with_capacity(paths.len());
+     |                 ^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_delete_objects`
+
+warning: variable does not need to be mutable
+    --> libs/remote_storage/src/gcs_bucket.rs:1170:13
+     |
+1170 |         let mut delete_objects: Vec<String> = Vec::with_capacity(paths.len());
+     |             ----^^^^^^^^^^^^^^
+     |             |
+     |             help: remove this `mut`
+
+   Compiling enumset_derive v0.8.1
+warning: unused import: `futures::stream::TryStreamExt`
+  --> libs/remote_storage/src/gcs_bucket.rs:17:5
+   |
+17 | use futures::stream::TryStreamExt;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+   Compiling archery v0.5.0
+   Compiling gen_ops v0.4.0
+   Compiling futures-timer v3.0.3
+warning: fields `bucket` and `etag` are never read
+  --> libs/remote_storage/src/gcs_bucket.rs:58:5
+   |
+57 | struct GetObjectRequest {
+   |        ---------------- fields in this struct
+58 |     bucket: String,
+   |     ^^^^^^
+59 |     key: String,
+60 |     etag: Option<String>,
+   |     ^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: method `max_keys_per_delete` is never used
+   --> libs/remote_storage/src/gcs_bucket.rs:138:8
+    |
+66  | impl GCSBucket {
+    | -------------- method in this implementation
+...
+138 |     fn max_keys_per_delete(&self) -> usize {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+   Compiling svg_fmt v0.4.3
+   Compiling rstest v0.18.2
+   Compiling range-set-blaze v0.1.16
+   Compiling enumset v1.1.2
+   Compiling rpds v0.13.0
+   Compiling pageserver_api v0.1.0 (/stderr-work/libs/pageserver_api)
+   Compiling tokio-epoll-uring v0.1.0 (https://github.com/neondatabase/tokio-epoll-uring.git?branch=main#781989bb)
+   Compiling tonic-reflection v0.13.1
+warning: `remote_storage` (lib) generated 27 warnings (run `cargo fix --lib -p remote_storage` to apply 13 suggestions)
+   Compiling postgres_initdb v0.1.0 (/stderr-work/libs/postgres_initdb)
+   Compiling camino-tempfile v1.0.2
+   Compiling tikv-jemallocator v0.6.0
+   Compiling consumption_metrics v0.1.0 (/stderr-work/libs/consumption_metrics)
+   Compiling hashlink v0.9.1
+   Compiling tenant_size_model v0.1.0 (/stderr-work/libs/tenant_size_model)
+   Compiling tokio-io-timeout v1.2.0
+   Compiling md5 v0.7.0
+   Compiling send-future v0.1.0
+   Compiling hex-literal v0.4.1
+   Compiling indoc v2.0.5
+   Compiling bit_field v0.10.2
+   Compiling pageserver_client v0.1.0 (/stderr-work/pageserver/client)
+   Compiling pageserver_compaction v0.1.0 (/stderr-work/pageserver/compaction)
+   Compiling pageserver v0.1.0 (/stderr-work/pageserver)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4m 02s
+     Running unittests src/lib.rs (/home/nonroot/target/debug/deps/pageserver-befa20b37d468b80)
+
+running 1 test
+test walingest::tests::pg18_checkpoint_wal_level_records ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 265 filtered out; finished in 0.00s
+

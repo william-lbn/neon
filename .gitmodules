@@ -14,3 +14,8 @@
 	path = vendor/postgres-v17
 	url = ../postgres.git
 	branch = REL_17_STABLE_neon
+
+[submodule "vendor/postgres-v18"]
+	path = vendor/postgres-v18
+	url = ../postgres.git
+	branch = codex/dsga-pg18-v1-20261031

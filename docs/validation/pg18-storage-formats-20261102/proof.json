@@ -1,0 +1,105 @@
+{
+  "scope": "PG18_BOTTOM_VERSION_FFI_CONSTANTS_CONTROL_WAL_DISPATCH_ONLY",
+  "owned11": {
+    "libs/postgres_versioninfo/src/lib.rs": "806a65e349ea5f84e1197143bf295ac1e821003a6c103885a2fc3a569d44b0ab",
+    "libs/postgres_ffi/build.rs": "5b910da71220e5b31ca7764829cbb460dcc7ca4f21a1399f4ff622d784df725c",
+    "libs/postgres_ffi/src/lib.rs": "242d6c7d556325df21a405c168e3d804c1d9d5291a967fd7606da2cbed370e91",
+    "libs/postgres_ffi/src/pg_constants_v18.rs": "38ac8b9ceae434331cc6414762e9ff2fa17f705c09af356d84dae497e3abe249",
+    "libs/postgres_ffi/src/walrecord.rs": "8fd916468933bdb7aed1f0eb6d0ff71182fecbd017210270d1c33f69bfec3788",
+    "libs/postgres_ffi/src/controlfile_utils.rs": "af05bf22c930c442396ebf6bf9f4a84c68bef8a64c68f4b10b8bc70208e4ba7a",
+    "libs/wal_decoder/src/decoder.rs": "47fef289bc94f9879f31d10e7a14b296c5271f2d8e3ff2a3b0b54e592e6baee9",
+    "compute_tools/src/extension_server.rs": "d4f0641c753f84a91cce4f16511c180a19898e424427a7d598e0320b2d78d218",
+    "pageserver/src/walingest.rs": "5688a5ab81236bd18f4c002164075776f97d07e18069a27098724e3c034d18d5",
+    "libs/postgres_ffi/examples/pg18_native_formats.rs": "65f5ac1d459b161cddb66f5f3846d0fabdb21d193fa6614b9c08cf60886b9c96",
+    "ci/test_dsg_pg18_formats.py": "15147d288ea4eb375360c5683d92376463575e4f59ab28a6172656390a342545"
+  },
+  "build_source_lock_sha256": "d0b6b6ae40b81fb8345d4ddef283a90bfe824492ce8197562fb1bf9b8a91b0e6",
+  "real_build": {
+    "build_exit": 0,
+    "phases": {
+      "ffi-example-build": 0,
+      "affected-consumers": 0,
+      "checkpoint-wallevel-test": 0
+    },
+    "seconds": 360.6632447029988,
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "native_result": {
+    "status": "PASS_REAL_PG18_NATIVE_CONTROL_WAL",
+    "exit": 0,
+    "OOMKilled": false,
+    "seconds": 3.84566468000412,
+    "targets": 2,
+    "formal_Pageserver": false,
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "reader_ELF_sha256": "c868b91e126d8486001754be1841e3ce6ec02bb00e6cd2c201d83098c68b1d01",
+  "real_PG_sha256": "95b4c4a86b0e365aaef080572959ade5f0ab7875aa55c40f38aef95abcb431d9",
+  "classification": {
+    "inherited_direct_unit_tests": 3,
+    "new_checkpoint_wallevel_unit_tests": 1,
+    "final_native_control_WAL_targets": 2,
+    "native_targets_replacement_not_added_to_old_ecd115": true,
+    "affected_consumer_check_packages": [
+      "wal_decoder",
+      "pageserver",
+      "safekeeper",
+      "compute_tools"
+    ],
+    "formal_Pageserver_timeline": false,
+    "E": 0,
+    "normal": false,
+    "Source": false
+  },
+  "default_build_dependency_gap": {
+    "status": "BLOCKED_PENDING_EXACT_PRODUCTION_PG18_DEPENDENCY_INTEGRATION",
+    "reason": "build.rs requires actual v18 headers while default Makefile/.gitmodules/Dockerfile currently only build/copy14\u201317",
+    "final_build_explicit_real_header_source": "/data/neon-build/validation/pg18-neon-aio-error-holdoff-fix-build-20261102T012118Z-ff51b4/install",
+    "not_claiming_default_image_build": true,
+    "PG17_gitlink_moved": false
+  },
+  "retained_binary_inputs": {
+    "path": "/data/neon-build/validation/pg18-storage-formats-native-20261102T050914Z-e1a5f7/evidence",
+    "index": {
+      "server_version_num": "180002",
+      "start_lsn": "0/1000000",
+      "flush_lsn": "0/15540F8",
+      "original_isolated_root": "/tmp/pg18-formats-85rp1y62",
+      "files": {
+        "global/pg_control": {
+          "sha256": "c0ce98f88bb8d008ee17f16a27d93383d62c155505762b9a067244f47bb9240a",
+          "bytes": 8192
+        },
+        "pg_wal/000000010000000000000001": {
+          "sha256": "a41d02f8512320ad6eb9dfb6e0e2a29eef8a973fa1ae79b8b0b21ad91dfc3dd8",
+          "bytes": 16777216
+        }
+      },
+      "retained_exact_inputs": {
+        "original-pg_control.bin": {
+          "sha256": "c0ce98f88bb8d008ee17f16a27d93383d62c155505762b9a067244f47bb9240a",
+          "bytes": 8192
+        },
+        "original-wal-interval.bin": {
+          "sha256": "e3fc30bbd888cf1a40036c9430d466c33ee1384c8eaa863bce93b2b09157b019",
+          "bytes": 5587192
+        }
+      },
+      "formal_Pageserver": false,
+      "Source": false,
+      "E": 0
+    }
+  },
+  "metrics": {
+    "heavy_seconds": 360.6632447029988,
+    "heavy_CPU_seconds": 258.266056,
+    "heavy_memory_peak_bytes": 8589934592,
+    "heavy_memory_max_events": 667,
+    "heavy_OOM": 0,
+    "native_seconds": 3.84566468000412
+  }
+}

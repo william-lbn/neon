@@ -64,6 +64,26 @@ impl CheckPoint {
         enum_pgversion_dispatch!(self, CheckPoint, cp, { cp.update_next_xid(xid) })
     }
 
+    // 17/18都在真实版本checkpoint中保留wal_level；14–16不读这些字段。
+    // 两种记录payload已对照实际18头保持同布局，不能因仅匹配V17静默丢18更新。
+    fn update_wal_level_record(&mut self, info: u8, buf: &mut Bytes) -> bool {
+        if info != pg_constants::XLOG_PARAMETER_CHANGE && info != pg_constants::XLOG_END_OF_RECOVERY
+        {
+            return false;
+        }
+        let wal_level = match self {
+            CheckPoint::V17(cp) => &mut cp.wal_level,
+            CheckPoint::V18(cp) => &mut cp.wal_level,
+            _ => return false,
+        };
+        *wal_level = if info == pg_constants::XLOG_PARAMETER_CHANGE {
+            v18::XlParameterChange::decode(buf).wal_level
+        } else {
+            v18::XlEndOfRecovery::decode(buf).wal_level
+        };
+        true
+    }
+
     pub fn update_next_multixid(&mut self, multi_xid: u32, multi_offset: u32) -> bool {
         enum_pgversion_dispatch!(self, CheckPoint, cp, {
             cp.update_next_multixid(multi_xid, multi_offset)
@@ -1206,18 +1226,8 @@ impl WalIngest {
         let RawXlogRecord { info, lsn, mut buf } = raw_record;
         let pg_version = modification.tline.pg_version;
 
-        if info == pg_constants::XLOG_PARAMETER_CHANGE {
-            if let CheckPoint::V17(cp) = &mut self.checkpoint {
-                let rec = v17::XlParameterChange::decode(&mut buf);
-                cp.wal_level = rec.wal_level;
-                self.checkpoint_modified = true;
-            }
-        } else if info == pg_constants::XLOG_END_OF_RECOVERY {
-            if let CheckPoint::V17(cp) = &mut self.checkpoint {
-                let rec = v17::XlEndOfRecovery::decode(&mut buf);
-                cp.wal_level = rec.wal_level;
-                self.checkpoint_modified = true;
-            }
+        if self.checkpoint.update_wal_level_record(info, &mut buf) {
+            self.checkpoint_modified = true;
         }
 
         enum_pgversion_dispatch!(&mut self.checkpoint, CheckPoint, cp, {
@@ -1623,6 +1633,49 @@ async fn get_relsize(
 #[allow(clippy::bool_assert_comparison)]
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn pg18_checkpoint_wal_level_records() {
+        let mut checkpoint = super::CheckPoint::V18(postgres_ffi::v18::CheckPoint::default());
+        let mut parameter = Vec::new();
+        for value in [20i32, 4, 2, 3, 64, 1] {
+            parameter.extend_from_slice(&value.to_le_bytes());
+        }
+        parameter.extend_from_slice(&[0, 0, 0, 0]);
+        let mut bytes = bytes::Bytes::from(parameter);
+        assert!(checkpoint.update_wal_level_record(
+            postgres_ffi::pg_constants::XLOG_PARAMETER_CHANGE,
+            &mut bytes
+        ));
+        assert!(bytes.is_empty());
+        let super::CheckPoint::V18(cp) = &checkpoint else {
+            panic!("lost18 checkpoint");
+        };
+        assert_eq!(cp.wal_level, 1);
+        let mut end = Vec::new();
+        end.extend_from_slice(&100i64.to_le_bytes());
+        end.extend_from_slice(&1u32.to_le_bytes());
+        end.extend_from_slice(&1u32.to_le_bytes());
+        end.extend_from_slice(&2i32.to_le_bytes());
+        let mut bytes = bytes::Bytes::from(end);
+        assert!(
+            checkpoint.update_wal_level_record(
+                postgres_ffi::pg_constants::XLOG_END_OF_RECOVERY,
+                &mut bytes
+            )
+        );
+        assert!(bytes.is_empty());
+        let super::CheckPoint::V18(cp) = &checkpoint else {
+            panic!("lost18 checkpoint");
+        };
+        assert_eq!(cp.wal_level, 2);
+        let mut bytes = bytes::Bytes::from_static(&[9, 8, 7, 6]);
+        assert!(
+            !checkpoint
+                .update_wal_level_record(postgres_ffi::pg_constants::XLOG_SWITCH, &mut bytes)
+        );
+        assert_eq!(&bytes[..], &[9, 8, 7, 6]);
+    }
+
     use anyhow::Result;
     use postgres_ffi::PgMajorVersion;
     use postgres_ffi::RELSEG_SIZE;

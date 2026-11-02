@@ -1,0 +1,34 @@
+{
+  "kind": "owned source editor formatting, no build/test",
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--pull=never",
+    "--network=none",
+    "--read-only",
+    "--cap-drop=ALL",
+    "--security-opt=no-new-privileges",
+    "--cpus=1",
+    "--memory=256m",
+    "--memory-swap=256m",
+    "--pids-limit=32",
+    "--user=1000:1000",
+    "--tmpfs",
+    "/tmp:rw,nosuid,nodev,size=32m",
+    "-i",
+    "--entrypoint",
+    "/home/nonroot/.rustup/toolchains/1.88.0-x86_64-unknown-linux-gnu/bin/rustfmt",
+    "127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020",
+    "--edition",
+    "2024"
+  ],
+  "receipts": {
+    "libs/postgres_versioninfo/src/lib.rs": {
+      "exit": 127,
+      "stderr": "docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: exec: \"/home/nonroot/.rustup/toolchains/1.88.0-x86_64-unknown-linux-gnu/bin/rustfmt\": stat /home/nonroot/.rustup/toolchains/1.88.0-x86_64-unknown-linux-gnu/bin/rustfmt: no such file or directory: unknown\n\nRun 'docker run --help' for more information\n",
+      "before": "b2c0500eb21bc611c7875386a1d5ee3c18482788f87de46a5301a6269d0ea5c7"
+    }
+  },
+  "published": false
+}

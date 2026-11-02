@@ -1,0 +1,29 @@
+{
+  "server_version_num": "180002",
+  "start_lsn": "0/1000000",
+  "flush_lsn": "0/15540F8",
+  "original_isolated_root": "/tmp/pg18-formats-85rp1y62",
+  "files": {
+    "global/pg_control": {
+      "sha256": "c0ce98f88bb8d008ee17f16a27d93383d62c155505762b9a067244f47bb9240a",
+      "bytes": 8192
+    },
+    "pg_wal/000000010000000000000001": {
+      "sha256": "a41d02f8512320ad6eb9dfb6e0e2a29eef8a973fa1ae79b8b0b21ad91dfc3dd8",
+      "bytes": 16777216
+    }
+  },
+  "retained_exact_inputs": {
+    "original-pg_control.bin": {
+      "sha256": "c0ce98f88bb8d008ee17f16a27d93383d62c155505762b9a067244f47bb9240a",
+      "bytes": 8192
+    },
+    "original-wal-interval.bin": {
+      "sha256": "e3fc30bbd888cf1a40036c9430d466c33ee1384c8eaa863bce93b2b09157b019",
+      "bytes": 5587192
+    }
+  },
+  "formal_Pageserver": false,
+  "Source": false,
+  "E": 0
+}

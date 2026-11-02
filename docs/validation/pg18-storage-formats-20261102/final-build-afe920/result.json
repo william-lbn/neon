@@ -1,0 +1,12 @@
+{
+  "build_exit": 0,
+  "phases": {
+    "ffi-example-build": 0,
+    "affected-consumers": 0,
+    "checkpoint-wallevel-test": 0
+  },
+  "seconds": 360.6632447029988,
+  "normal": false,
+  "Source": false,
+  "E": 0
+}

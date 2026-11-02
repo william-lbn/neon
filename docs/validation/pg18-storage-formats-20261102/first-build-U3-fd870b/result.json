@@ -1,0 +1,13 @@
+{
+  "build_exit": 0,
+  "phases": {
+    "versioninfo-tests": 0,
+    "ffi-example-build": 0,
+    "affected-consumers": 0,
+    "compute-version-test": 0
+  },
+  "seconds": 384.2159748970007,
+  "normal": false,
+  "Source": false,
+  "E": 0
+}

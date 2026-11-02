@@ -1,0 +1,11 @@
+{
+  "status": "PASS_REAL_PG18_NATIVE_CONTROL_WAL",
+  "exit": 0,
+  "OOMKilled": false,
+  "seconds": 3.84566468000412,
+  "targets": 2,
+  "formal_Pageserver": false,
+  "normal": false,
+  "Source": false,
+  "E": 0
+}

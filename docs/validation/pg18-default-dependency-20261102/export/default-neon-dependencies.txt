@@ -1,0 +1,4 @@
+8:POSTGRES_VERSIONS = v17 v16 v15 v14 v18
+114:neon: postgres-headers-install walproposer-lib cargo-target-dir
+169:neon-pg-ext: $(foreach pg_version,$(POSTGRES_VERSIONS),neon-pg-ext-$(pg_version))
+242:$(foreach pg_version,$(POSTGRES_VERSIONS),postgres-install-$(pg_version)): skip-install
