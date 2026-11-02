@@ -120,6 +120,10 @@
 #include "storage/spin.h"
 #include "tcop/tcopprot.h"
 #include "utils/memutils.h"
+#if PG_MAJORVERSION_NUM >= 18
+#include "storage/lock.h"
+#include "utils/injection_point.h"
+#endif
 #include "utils/ps_status.h"
 #include "utils/snapmgr.h"
 
@@ -329,6 +333,8 @@ WalRedoMain(int argc, char *argv[])
 	InitAuxiliaryProcess();
 #if PG_MAJORVERSION_NUM >= 18
 	pgaio_init_backend();
+	/* PG18将进程本地锁表从共享锁初始化中拆出；VM重放仍会获取扩展锁。 */
+	InitLockManagerAccess();
 #endif
 
 	SetProcessingMode(NormalProcessing);
@@ -622,6 +628,10 @@ CreateFakeSharedMemoryAndSemaphores(void)
 	BTreeShmemInit();
 	SyncScanShmemInit();
 #if PG_MAJORVERSION_NUM >= 18
+#ifdef USE_INJECTION_POINTS
+	/* 沿原标准启动顺序先初始化AIO完成路径会读取的测试点共享状态。 */
+	InjectionPointShmemInit();
+#endif
 	/* PG18将AIO状态独立纳入共享内存；沿原核算大小完成初始化。 */
 	AioShmemInit();
 #endif

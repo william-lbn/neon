@@ -1,0 +1,11 @@
+# PG18 WAL重放后端：补齐标准初始化
+
+PG18将共享锁管理与进程本地锁访问初始化拆开。Neon独立WAL redo进程只初始化共享部分，遗漏`InitLockManagerAccess()`。实际首条Neon INSERT带有`XLH_INSERT_ALL_VISIBLE_CLEARED`，即使主fork有全页映像，也先走可见性辅助页路径；不存在的辅助fork触发关系扩展锁，最终对未初始化的`LockMethodLocalHash`执行hash_search并崩溃。PG17的原`InitLocks()`同时完成这两部分，所以本缺口属于PG18接入适配。
+
+本次仅在PG18分支沿标准后端顺序调用进程本地锁初始化；启用标准injection points的PG18构建还在AIO前初始化对应共享状态。没有新增信号处理器、加载器或内存dump，没有修改WAL格式、CRC、页验证或PG17分支。
+
+验证使用真实冷读产生的有效WAL：相同base页与0至4条原始记录，覆盖首条INSERT/FPI以及后续三条HOT UPDATE。五个独立标准进程均退出0并输出非零8192B页面；base-only内容精确相同，其他前缀LSN逐条符合原记录结束位置。独立审查已核源码、实际ELF、输入CRC/字节、页面hash及容器退出/OOM状态。原先缺INSERT的不完整向量和零页输出不算通过。
+
+纯C增量编译通过，约6秒；原worker继承旧nonce标签的结果文件保持原样，另有result-binding将本次唯一unit/spec/source-lock与实际产物绑定，未篡改原失败或结果。
+
+后续真实六服务回归已完成warm5000行写入及原Compute正常停止，freshPGDATA冷启动仍失败（28b6b8，约145秒），正在独立分类。故本提交只修复已证实的初始化缺口，不宣称完整cold、PG18内存扩缩容、Source或K8s验收通过。完整/data证据路径及摘要见receipt.json。

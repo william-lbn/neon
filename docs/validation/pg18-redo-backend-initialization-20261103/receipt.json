@@ -1,0 +1,77 @@
+{
+  "scope": "PG18 WAL redo标准初始化缺口的真实有效前缀组件回归；不是完整cold或内存端到端验收",
+  "source_sha256": "c04df7703f4867e708f8a8a30853ce9a783cb90640dfbdd23e383157b2e56d99",
+  "postgres_sha256": "9a7d0e168f3416f13d4ae2d0402a4a37f28d27ecd2a35ef3d865b80d8c4091a4",
+  "redo_library_sha256": "c00c0f4419e6c5f3dc7769079d3d2497085b691132c8bf623b370ddcd4140965",
+  "build_dir": "/data/neon-build/validation/pg18-redo-local-lock-init-build-20261102T183152Z-92c466",
+  "build_result_binding_sha256": "8278148960b7cd01a67b878f9e98317b9223f23bcf2b525f1368b46d7fa76cc6",
+  "prefix_dir": "/data/neon-build/validation/pg18-local-lock-prefix-functional-20261102T183413Z-0e3164",
+  "result_sha256": "5d824087b00cf3e488973504c9734a9c12a750960362636ed295e1a06fc705dd",
+  "independent_review_sha256": "bb90f8faedeb1afbea41e33f541f51b3f1286b49b7678d72bc465e3494591e81",
+  "unique_prefix_cases": 5,
+  "cases": [
+    {
+      "A_records": 0,
+      "exit": 0,
+      "output_bytes": 8192,
+      "page_sha256": "01cf5b55ffca346b452f091ea0fd92a893caa9ca9d5e4df22a9c8b4b6bd3dd84",
+      "page_lsn": "0/14A9430",
+      "base_exact": true,
+      "container_terminal_sha256": "dffaad0bac4fe659cfc8c640850b83495483f4403d8598b7f5ab4182578832e4",
+      "container_wait_sha256": "082b85f115df0ad441fe0e23e26ce44dadff97a8012c21975e64045fff562b82"
+    },
+    {
+      "A_records": 1,
+      "exit": 0,
+      "output_bytes": 8192,
+      "page_sha256": "60c6badc55c79b4e4b5de88dfcbb75c42670b40156f6c5578bd0a9777b3ed9b5",
+      "page_lsn": "0/1517328",
+      "base_exact": null,
+      "container_terminal_sha256": "dffaad0bac4fe659cfc8c640850b83495483f4403d8598b7f5ab4182578832e4",
+      "container_wait_sha256": "082b85f115df0ad441fe0e23e26ce44dadff97a8012c21975e64045fff562b82"
+    },
+    {
+      "A_records": 2,
+      "exit": 0,
+      "output_bytes": 8192,
+      "page_sha256": "f393a6dc71a93764e29d7525d0495249c1481941770527b7b7ae62c7d3768cb9",
+      "page_lsn": "0/1596400",
+      "base_exact": null,
+      "container_terminal_sha256": "dffaad0bac4fe659cfc8c640850b83495483f4403d8598b7f5ab4182578832e4",
+      "container_wait_sha256": "082b85f115df0ad441fe0e23e26ce44dadff97a8012c21975e64045fff562b82"
+    },
+    {
+      "A_records": 3,
+      "exit": 0,
+      "output_bytes": 8192,
+      "page_sha256": "416fb66b81bef5b6974f7517fca7a9307faae43387133bb62eabea07e404f594",
+      "page_lsn": "0/1596500",
+      "base_exact": null,
+      "container_terminal_sha256": "dffaad0bac4fe659cfc8c640850b83495483f4403d8598b7f5ab4182578832e4",
+      "container_wait_sha256": "082b85f115df0ad441fe0e23e26ce44dadff97a8012c21975e64045fff562b82"
+    },
+    {
+      "A_records": 4,
+      "exit": 0,
+      "output_bytes": 8192,
+      "page_sha256": "1e948abbda988daca23bde3e896e5c40d6bb1921026527d84e8842066ba29c78",
+      "page_lsn": "0/1596558",
+      "base_exact": null,
+      "container_terminal_sha256": "dffaad0bac4fe659cfc8c640850b83495483f4403d8598b7f5ab4182578832e4",
+      "container_wait_sha256": "082b85f115df0ad441fe0e23e26ce44dadff97a8012c21975e64045fff562b82"
+    }
+  ],
+  "CRC_and_WAL_payload_unchanged": true,
+  "no_custom_handler_loader_or_memory_dump": true,
+  "original_bad_vector_not_counted": true,
+  "cold_followup": {
+    "dir": "/data/neon-build/validation/pg18-cold-data-local-lock-fix-20261102T184428Z-28b6b8",
+    "state": "FAIL_AFTER_WARM_WRITE_AND_NORMAL_STOP",
+    "seconds": 144.99174117000075,
+    "failure_classification_pending": true
+  },
+  "Source": false,
+  "normal": false,
+  "E": 0,
+  "K8s": false
+}
