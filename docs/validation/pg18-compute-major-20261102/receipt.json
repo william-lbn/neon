@@ -1,0 +1,29 @@
+{
+  "source": "compute_tools/src/dsg.rs",
+  "source_sha256": "7a13cda19510c4fc5cf6f856b8af0553596d5bd94531b0fdf5baa1a81e60057e",
+  "compiled_base": "15a26c717511148caadd659f0015fd909a5a075a",
+  "actual_run": "/data/neon-build/validation/pg18-compute-initialization-major-build-20261102T090027Z-30b4bd",
+  "result_sha256": "dcb7861d934241378f70eeec0e5184ecb0aeb1e97de9b87f281ef11060054cd9",
+  "new_major_test_roots": 1,
+  "ignored": 0,
+  "unrelated_filtered": 36,
+  "phase_exits": {
+    "major_test": 0,
+    "bin_build": 0,
+    "strip": 0
+  },
+  "seconds": 272.2099761669524,
+  "compute_elf_sha256": "a5c50dc38695e89053dbd17fb4bd776f52bac734fc60591dc7c882d0b8b9f8d4",
+  "actual_build_resources": {
+    "peak_bytes_approx_gib": 5.1,
+    "cpu_seconds": 84.15,
+    "cpu_throttled": false
+  },
+  "prior_environment_failure": "44af99 Dockerfile-specific ignore missing; original retained under /data; no Rust execution claimed",
+  "format_check": "cached toolchain has no rustfmt; not run; git diff --check passed",
+  "normal_accepted": false,
+  "PG18_real_initialization_accepted": false,
+  "Linux_full_E": 0,
+  "K8s_E": 0,
+  "PG17_gitlink_and_release_lock_moved": false
+}

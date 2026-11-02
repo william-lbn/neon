@@ -32,6 +32,25 @@ impl CreationIdentity {
     }
 }
 
+// 仅选择本fork已实现的大版本；返回值不授予初始化、准入或normal资格。
+// 实际SQL身份仍须精确等于冻结配置，不能以"属于支持范围"接受另一个major。
+struct DsgInitializationMajor(i32);
+
+impl DsgInitializationMajor {
+    fn select(configured: &str) -> Result<Self> {
+        let major = match configured {
+            "17" => 17,
+            "18" => 18,
+            _ => anyhow::bail!("DSGA initialization requires an implemented PG major"),
+        };
+        Ok(Self(major))
+    }
+
+    fn matches(&self, actual: i32) -> bool {
+        self.0 == actual
+    }
+}
+
 impl ComputeNode {
     /// 只读比较已冻结存储身份，不持锁/不访问网络。原创建缺UUID的旧配置仍可
     /// 沿原启动路径处理，但初始化证明必须拒绝补造来源；后续通知不能填补它。
@@ -55,10 +74,7 @@ impl ComputeNode {
     /// 并发重配、文件漂移、连接断开或内部恢复都不能拼出成功。此GET不打开准入。
     pub(crate) async fn dsg_initialization(&self) -> Result<DsgInitializationResponse> {
         self.verify_dsg_running()?;
-        ensure!(
-            self.params.pgversion == "17",
-            "DSGA initialization currently requires PG17"
-        );
+        let pg_major = DsgInitializationMajor::select(&self.params.pgversion)?;
         let (spec, tenant, timeline) = {
             let state = self
                 .state
@@ -88,7 +104,7 @@ impl ComputeNode {
         let storage = timeout(Duration::from_secs(5), observer.query_one(
             "SELECT current_setting('server_version_num')::int/10000,current_setting('neon.tenant_id'),current_setting('neon.timeline_id')", &[])).await??;
         ensure!(
-            storage.get::<_, i32>(0) == 17
+            pg_major.matches(storage.get::<_, i32>(0))
                 && storage.get::<_, String>(1) == tenant
                 && storage.get::<_, String>(2) == timeline,
             "DSGA PG storage identity or major version differs"
@@ -251,6 +267,25 @@ async fn management_connection(config: &Config) -> Result<Client> {
 mod creation_tests {
     use super::*;
     use compute_api::responses::{ComputeConfig, ComputeCtlConfig};
+
+    #[test]
+    fn initialization_requires_exact_supported_pg_major() -> Result<()> {
+        for (configured, expected) in [("17", 17), ("18", 18)] {
+            let selected = DsgInitializationMajor::select(configured)?;
+            assert!(selected.matches(expected));
+            for actual in [-1, 0, 14, 16, 17, 18, 19, 170000, 180002] {
+                assert_eq!(
+                    selected.matches(actual),
+                    actual == expected,
+                    "supported choice must match actual SQL major exactly"
+                );
+            }
+        }
+        for unsupported in ["", "14", "16", "19", "018", "17\n", "18.2", "+18"] {
+            assert!(DsgInitializationMajor::select(unsupported).is_err());
+        }
+        Ok(())
+    }
 
     #[test]
     fn frozen_creation_is_distinct_from_current_configuration() -> Result<()> {
