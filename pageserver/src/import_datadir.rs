@@ -29,16 +29,59 @@ use crate::pgdatadir_mapping::*;
 use crate::tenant::Timeline;
 use crate::walingest::{WalIngest, WalIngestErrorKind};
 
+// 入库只保留实际消费的字段与对应版本checkpoint字节，不把18布局强转旧公共alias。
+#[derive(Debug)]
+struct ImportedControlFile {
+    state: u32,
+    checkpoint_lsn: Lsn,
+    redo_lsn: Lsn,
+    checkpoint_bytes: bytes::Bytes,
+}
+
+fn decode_imported_control_file(
+    raw: &[u8],
+    pg_version: postgres_ffi::PgMajorVersion,
+) -> Result<ImportedControlFile> {
+    use postgres_ffi::PgMajorVersion;
+
+    match pg_version {
+        PgMajorVersion::PG18 => {
+            // 真实18读取器保留CRC和PG_CONTROL_VERSION校验。
+            let control = postgres_ffi::v18::ControlFileData::decode(raw)?;
+            Ok(ImportedControlFile {
+                state: control.state,
+                checkpoint_lsn: Lsn(control.checkPoint),
+                redo_lsn: Lsn(control.checkPointCopy.redo),
+                checkpoint_bytes: control.checkPointCopy.encode()?,
+            })
+        }
+        PgMajorVersion::PG14
+        | PgMajorVersion::PG15
+        | PgMajorVersion::PG16
+        | PgMajorVersion::PG17 => {
+            // 14–17继续原v14公共alias路径，保持既有布局和导入行为。
+            let control = ControlFileData::decode(raw)?;
+            Ok(ImportedControlFile {
+                state: control.state,
+                checkpoint_lsn: Lsn(control.checkPoint),
+                redo_lsn: Lsn(control.checkPointCopy.redo),
+                checkpoint_bytes: control.checkPointCopy.encode()?,
+            })
+        }
+    }
+}
+
 // Returns checkpoint LSN from controlfile
-pub fn get_lsn_from_controlfile(path: &Utf8Path) -> Result<Lsn> {
+pub fn get_lsn_from_controlfile(
+    path: &Utf8Path,
+    pg_version: postgres_ffi::PgMajorVersion,
+) -> Result<Lsn> {
     // Read control file to extract the LSN
     let controlfile_path = path.join("global").join("pg_control");
     let controlfile_buf = std::fs::read(&controlfile_path)
         .with_context(|| format!("reading controlfile: {controlfile_path}"))?;
-    let controlfile = ControlFileData::decode(&controlfile_buf)?;
-    let lsn = controlfile.checkPoint;
-
-    Ok(Lsn(lsn))
+    let controlfile = decode_imported_control_file(&controlfile_buf, pg_version)?;
+    Ok(controlfile.checkpoint_lsn)
 }
 
 ///
@@ -53,7 +96,7 @@ pub async fn import_timeline_from_postgres_datadir(
     pgdata_lsn: Lsn,
     ctx: &RequestContext,
 ) -> Result<()> {
-    let mut pg_control: Option<ControlFileData> = None;
+    let mut pg_control: Option<ImportedControlFile> = None;
 
     // TODO this shoud be start_lsn, which is not necessarily equal to end_lsn (aka lsn)
     // Then fishing out pg_control would be unnecessary
@@ -74,7 +117,7 @@ pub async fn import_timeline_from_postgres_datadir(
             let mut file = tokio::fs::File::open(absolute_path).await?;
             let len = metadata.len() as usize;
             if let Some(control_file) =
-                import_file(&mut modification, relative_path, &mut file, len, ctx).await?
+                import_file(&mut modification, relative_path, &mut file, len, tline.pg_version, ctx).await?
             {
                 pg_control = Some(control_file);
             }
@@ -92,7 +135,7 @@ pub async fn import_timeline_from_postgres_datadir(
         "Postgres cluster was not shut down cleanly"
     );
     ensure!(
-        pg_control.checkPointCopy.redo == pgdata_lsn.0,
+        pg_control.redo_lsn == pgdata_lsn,
         "unexpected checkpoint REDO pointer"
     );
 
@@ -102,7 +145,7 @@ pub async fn import_timeline_from_postgres_datadir(
     import_wal(
         &pgdata_path.join("pg_wal"),
         tline,
-        Lsn(pg_control.checkPointCopy.redo),
+        pg_control.redo_lsn,
         pgdata_lsn,
         ctx,
     )
@@ -360,7 +403,7 @@ pub async fn import_basebackup_from_tar(
     let mut modification = tline.begin_modification_for_import(base_lsn);
     modification.init_empty()?;
 
-    let mut pg_control: Option<ControlFileData> = None;
+    let mut pg_control: Option<ImportedControlFile> = None;
 
     // Import base
     let mut entries = Archive::new(reader).entries()?;
@@ -373,7 +416,7 @@ pub async fn import_basebackup_from_tar(
         match header.entry_type() {
             tokio_tar::EntryType::Regular => {
                 if let Some(res) =
-                    import_file(&mut modification, file_path.as_ref(), &mut entry, len, ctx).await?
+                    import_file(&mut modification, file_path.as_ref(), &mut entry, len, tline.pg_version, ctx).await?
                 {
                     // We found the pg_control file.
                     pg_control = Some(res);
@@ -506,8 +549,9 @@ async fn import_file(
     file_path: &Path,
     reader: &mut (impl AsyncRead + Send + Sync + Unpin),
     len: usize,
+    pg_version: postgres_ffi::PgMajorVersion,
     ctx: &RequestContext,
-) -> Result<Option<ControlFileData>> {
+) -> Result<Option<ImportedControlFile>> {
     let file_name = match file_path.file_name() {
         Some(name) => name.to_string_lossy(),
         None => return Ok(None),
@@ -528,9 +572,8 @@ async fn import_file(
                 let bytes = read_all_bytes(reader).await?;
 
                 // Extract the checkpoint record and import it separately.
-                let pg_control = ControlFileData::decode(&bytes[..])?;
-                let checkpoint_bytes = pg_control.checkPointCopy.encode()?;
-                modification.put_checkpoint(checkpoint_bytes)?;
+                let pg_control = decode_imported_control_file(&bytes, pg_version)?;
+                modification.put_checkpoint(pg_control.checkpoint_bytes.clone())?;
                 debug!("imported control file");
 
                 // Import it as ControlFile
@@ -653,4 +696,63 @@ async fn read_all_bytes(reader: &mut (impl AsyncRead + Unpin)) -> Result<Bytes> 
     let mut buf: Vec<u8> = vec![];
     reader.read_to_end(&mut buf).await?;
     Ok(Bytes::from(buf))
+}
+
+#[cfg(test)]
+mod control_import_tests {
+    use super::*;
+    use postgres_ffi::PgMajorVersion;
+
+    #[test]
+    fn pg18_control_import_requires_versioned_layout_and_checkpoint() {
+        let mut control = postgres_ffi::v18::ControlFileData::default();
+        control.pg_control_version = postgres_ffi::v18::bindings::PG_CONTROL_VERSION;
+        control.state = postgres_ffi::v18::DBState_DB_SHUTDOWNED;
+        control.checkPoint = 0x102030;
+        control.checkPointCopy.redo = 0x101000;
+        control.checkPointCopy.wal_level = 2;
+        let raw = control.encode();
+        let decoded = decode_imported_control_file(&raw, PgMajorVersion::PG18).unwrap();
+        assert_eq!(decoded.state, DBState_DB_SHUTDOWNED);
+        assert_eq!(decoded.checkpoint_lsn, Lsn(0x102030));
+        assert_eq!(decoded.redo_lsn, Lsn(0x101000));
+        let checkpoint = postgres_ffi::v18::CheckPoint::decode(&decoded.checkpoint_bytes).unwrap();
+        assert_eq!(checkpoint.wal_level, 2);
+        assert_eq!(checkpoint.redo, 0x101000);
+        assert!(decode_imported_control_file(&raw, PgMajorVersion::PG17).is_err());
+
+        let mut corrupt = raw.to_vec();
+        corrupt[0] ^= 1;
+        assert!(decode_imported_control_file(&corrupt, PgMajorVersion::PG18).is_err());
+        control.pg_control_version = postgres_ffi::v17::bindings::PG_CONTROL_VERSION;
+        assert!(
+            decode_imported_control_file(&control.encode(), PgMajorVersion::PG18)
+                .unwrap_err()
+                .to_string()
+                .contains("unexpected PostgreSQL control version")
+        );
+    }
+
+    #[test]
+    fn legacy_control_import_preserves_shared_alias_bytes() {
+        let mut control = ControlFileData::default();
+        control.state = DBState_DB_SHUTDOWNED;
+        control.checkPoint = 0x204000;
+        control.checkPointCopy.redo = 0x203000;
+        let raw = control.encode();
+        let original_checkpoint = control.checkPointCopy.encode().unwrap();
+        for pg_version in [
+            PgMajorVersion::PG14,
+            PgMajorVersion::PG15,
+            PgMajorVersion::PG16,
+            PgMajorVersion::PG17,
+        ] {
+            let decoded = decode_imported_control_file(&raw, pg_version).unwrap();
+            assert_eq!(decoded.state, control.state);
+            assert_eq!(decoded.checkpoint_lsn, Lsn(control.checkPoint));
+            assert_eq!(decoded.redo_lsn, Lsn(control.checkPointCopy.redo));
+            assert_eq!(decoded.checkpoint_bytes, original_checkpoint);
+        }
+        assert!(decode_imported_control_file(&raw, PgMajorVersion::PG18).is_err());
+    }
 }

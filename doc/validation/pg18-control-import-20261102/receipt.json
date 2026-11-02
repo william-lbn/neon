@@ -1,0 +1,27 @@
+{
+  "scope": "PG18 Pageserver control import and real timeline initialization only",
+  "source_sha256": {
+    "pageserver/src/import_datadir.rs": "d2e53d51c9cf4c84e988684c8e6d48a8a77a766338ac7967aa46ab5b5e5819fe",
+    "pageserver/src/tenant.rs": "162a77a5eb3f6ca1111bc69fd587842254ab1b76ef534e42d046ace0c669a7dd"
+  },
+  "build_run": "pg18-pageserver-control-import-build-20261102T134619Z-f39276",
+  "build_exit": 0,
+  "targeted_unit_tests_passed": 2,
+  "targeted_unit_tests_ignored": 0,
+  "build_seconds": 537.79,
+  "runtime_run": "pg18-real-storage-control-retry-20261102T135859Z-87f9ff",
+  "runtime_outer_exit": 0,
+  "runtime_outer_seconds": 32.15388992597582,
+  "create_and_independent_get": {
+    "pg_version": 18,
+    "state": "Active",
+    "initdb_lsn": "0/15169E0",
+    "last_record_lsn": "0/1516A58"
+  },
+  "all_five_services_stopped_exit_zero": true,
+  "original_failed_run_preserved": "pg18-real-storage-preparation-20261102T132433Z-9bc766",
+  "reused_original_initdb_archive": true,
+  "safe_normal_accepted": false,
+  "Linux_full_E": 0,
+  "K8s_E": 0
+}
