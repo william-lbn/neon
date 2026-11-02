@@ -279,6 +279,8 @@ WalRedoMain(int argc, char *argv[])
 	 */
 #if PG_MAJORVERSION_NUM >= 18
 	smgr_init_inmem();
+	/* PG18的全局存储生命周期只初始化一次；逐条重放只重置私有页表。 */
+	smgrinit();
 #else
 	smgr_hook = smgr_inmem;
 	smgr_init_hook = smgr_init_inmem;
@@ -884,7 +886,12 @@ ApplyRecord(StringInfo input_message)
 	 */
 	lsn = pq_getmsgint64(input_message);
 
+#if PG_MAJORVERSION_NUM >= 18
+	/* PG18 smgrinit会注册进程退出回调，不能在每条WAL记录重复调用。 */
+	smgr_reset_inmem();
+#else
 	smgrinit();					/* reset inmem smgr state */
+#endif
 
 	/* note: the input must be aligned here */
 	record = (XLogRecord *) pq_getmsgbytes(input_message, sizeof(XLogRecord));

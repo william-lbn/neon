@@ -494,3 +494,12 @@ smgr_init_inmem()
 #endif
 	inmem_init();
 }
+
+#if PG_MAJORVERSION_NUM >= 18
+/* 独立重放每条记录只清私有缓存，不重注册smgr或进程退出回调。 */
+void
+smgr_reset_inmem(void)
+{
+	inmem_init();
+}
+#endif

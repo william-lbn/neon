@@ -1,0 +1,13 @@
+# PG18重放：存储管理初始化只执行一次
+
+PG17的smgrinit在该重放进程中只调用私有inmem reset；PG18原生smgrinit改为遍历已注册存储provider并注册进程退出回调。旧适配仍在每个ApplyRecord调用它，真实长链因而耗尽on_proc_exit槽位，4条记录的前缀不能检出这一问题。
+
+本次PG18启动时按标准生命周期执行一次smgrinit；每条WAL只调用新私有smgr_reset_inmem包装原inmem_init，仍只清used_pages。PG17调用路径和退出槽容量不变，不修改WAL/CRC/数据页，不增加调试handler或加载器。
+
+定向验证：原4条有效WAL原帧重复16批，共64条A，记录内容及CRC逐字不变。标准正式程序退出0，最终8192B页面SHA与原4A页面精确相同、LSN为0/1596558。首个64A尝试因worker预期SHA未同步而在正式程序前拒绝，原失败保留不计通过；新运行通过，配置映射核验明确为POST_RUN，未倒签预检。
+
+真实六角色SQL链（Compute先后a/b，共7个容器实例）通过：PG18写入5000行、flush后PS/SK追齐、原Compute正常停止、全新PGDATA启动并读取，warm/cold checksum完全一致。101秒，7实例全部Exit0/Running=false/OOM=false；独审核PS无CRITICAL/redo失败/退出槽耗尽，SK无corruption。该轮PRE_RESERVE输入/实际库/Worker/资源预检在运行前保留。
+
+原result的released字段为false，文件保持原样；本票按7个实际容器终态记录清理事实，不将该字段改写为true。数据与所有原日志仍保留。
+
+这是真实Neon PG18存储与冷读组件验证，PS/SK不是模型；但DSGA未启用，Source、normal、完整内存E与K8s都尚未验收。后续独立核PG17近期必要修复在PG18的同步，以及PG18真实normal降限/VM和最终多版本K8s回归。准确路径、源码、产物和原证据摘要见receipt.json。

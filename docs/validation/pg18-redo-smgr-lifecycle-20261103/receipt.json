@@ -1,0 +1,43 @@
+{
+  "scope": "PG18存储管理生命周期适配及真实warm→freshPGDATA冷读；不是内存扩缩容验收",
+  "build_source_head": "06eea6ee36dc04440edc0ecd946a8931242db271",
+  "sources": {
+    "pgxn/neon_walredo/walredoproc.c": "6a9d23cae8a04828aebafca48dd81ab9fd350869db6830ffa348cc780e0e7735",
+    "pgxn/neon_walredo/inmem_smgr.c": "4baa3a832151ed361f1ea7ccdc639ffe7f0fc73c6e0d0da5395930232e49170e",
+    "pgxn/neon_walredo/inmem_smgr.h": "4098b1b06e2a53df08c1800956b54ec12d101660602b7ade619320111c2d1ba2"
+  },
+  "build_dir": "/data/neon-build/validation/pg18-redo-per-record-reset-build-20261102T185445Z-7dd50a",
+  "build_exit": 0,
+  "redo_library_sha256": "623103e00846525e15c84e51c5d482db41f476c5741f0dd1d7898320a2a067e9",
+  "long64A_dir": "/data/neon-build/validation/pg18-redo-64A-formal-native-20261102T190124Z-a3e6c1",
+  "long64A_result_sha256": "cdda3b6bb900cbe2475c7fb450a89e4a56e0ab58c96980935dc63c82ff42498c",
+  "long64A_exit": 0,
+  "long64A_matches_original4A_page": true,
+  "long64A_expected_lsn": "0/1596558",
+  "cold_dir": "/data/neon-build/validation/pg18-cold-data-smgr-once-fix-20261102T190338Z-3e1f4c",
+  "cold_result_sha256": "e95bfa3bea82a70e0d51c5ee73cea28dbeee4e3fa710a2bf66b148a5870f7a6d",
+  "cold_original_result_released": false,
+  "cold_seconds": 101.14760206104256,
+  "cold_sql_result_sha256": "90478837ac8b37f7c70ff70131550da21f25d11f82b2c26268d1f500e079da9c",
+  "independent_review_sha256": "e6ec010bc5236ce380020a509fc6722a3babb08c1bb05e89f887cd13b392db75",
+  "terminal_receipts": {
+    "metadata-terminal.json": "d0f94ed5aa824273e9a248416a79f81e4a494d17d6e3bd2c327fd031e9f51c52",
+    "broker-terminal.json": "36f1d6e4e4532b553d4567d85874d0cea9f8fc78aab9f554b826114daf072b3a",
+    "pageserver-terminal.json": "9955dd46586e0430ec6136e9cf0e168da1a2e2034867a4bbff9ef2daf67057de",
+    "compute-b-terminal.json": "7256b6399719489bc7022d87b977666226671135b326dda520c155cbce40d57e",
+    "safekeeper-terminal.json": "bf124bc6577229eb30a06d19f84f0b8a7fbd6425b6bec6587d75207949195af4",
+    "controller-terminal.json": "c98a00bc61d76b66fb864241740893d6865fef5e26a9bb8408cd326380545abe",
+    "compute-a-terminal.json": "1f65414e310e8691ae6bd8849a62ff3989e6785df42efdeadc35113ba320b862"
+  },
+  "real_PS_SK": true,
+  "peer_is_model": false,
+  "actual_compute_major": 18,
+  "warm_cold_data_equal": true,
+  "seven_container_instances_all_exit0_noOOM": true,
+  "on_proc_exit_limit_unchanged": true,
+  "DSGA_enabled": false,
+  "Source": false,
+  "normal": false,
+  "E": 0,
+  "K8s": false
+}

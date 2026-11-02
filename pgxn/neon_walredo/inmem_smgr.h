@@ -13,5 +13,8 @@
 
 extern const f_smgr *smgr_inmem(ProcNumber backend, NRelFileInfo rinfo);
 extern void smgr_init_inmem(void);
+#if PG_MAJORVERSION_NUM >= 18
+extern void smgr_reset_inmem(void);
+#endif
 
 #endif /* INMEM_SMGR_H */
