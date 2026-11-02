@@ -66,6 +66,25 @@ class SourceLockTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "full commit SHA"):
             validate_postgres_sources(self.root)
 
+    def test_parallel_revision_pin_is_checked_without_enabling_build_matrix(self):
+        self.revisions["v18"] = ["18.2", "b" * 40]
+        self.write_manifests()
+        self.git("update-index", "--add", "--cacheinfo", "160000", "b" * 40, "vendor/postgres-v18")
+        self.assertEqual(validate_postgres_sources(self.root, "index"), self.lock["postgres"])
+        self.git("update-index", "--cacheinfo", "160000", "c" * 40, "vendor/postgres-v18")
+        with self.assertRaisesRegex(ValueError, "differs from gitlink"):
+            validate_postgres_sources(self.root, "index")
+
+    def test_parallel_revision_rejects_short_sha_and_missing_gitlink(self):
+        self.revisions["v18"] = ["18.2", "b" * 12]
+        self.write_manifests()
+        with self.assertRaisesRegex(ValueError, "full commit SHA"):
+            validate_postgres_sources(self.root, "index")
+        self.revisions["v18"][1] = "b" * 40
+        self.write_manifests()
+        with self.assertRaisesRegex(ValueError, "differs from gitlink"):
+            validate_postgres_sources(self.root, "index")
+
     def test_missing_checkout_does_not_resolve_parent_repo(self):
         (self.root / "vendor/postgres-v17").mkdir()
         with self.assertRaisesRegex(ValueError, "not initialized"):

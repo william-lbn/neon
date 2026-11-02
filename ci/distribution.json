@@ -1,7 +1,7 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "5fe2a34cc32da69b06799cab8fb4363f63c344e0",
+  "autoscaling_commit": "5d7f276286a0f2caf057545a9cc98388a41f6a21",
   "postgres_repository": "william-lbn/postgres",
   "postgres": {
     "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",
@@ -45,6 +45,7 @@
     "neonvm-daemon",
     "autoscale-scheduler",
     "autoscaler-agent",
-    "cluster-autoscaler-neonvm"
+    "cluster-autoscaler-neonvm",
+    "dsga-platform-qualifier"
   ]
 }

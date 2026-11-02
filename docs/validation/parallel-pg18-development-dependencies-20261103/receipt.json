@@ -1,0 +1,27 @@
+{
+  "nonce": "20261102T213218Z-e9759e",
+  "scope": "source dependency metadata unit tests only; no build-matrix expansion",
+  "test_exit": 0,
+  "sources": {
+    "ci/source_lock.py": "2b4dc0033412d3d802574371ee466e025a70cadac6a06ec7a95672bc9b2b25a4",
+    "ci/test_source_lock.py": "aca6c2162db93d05f4064fb4409fe4ce97a52d4941fa314902bdb5cf318f62cd"
+  },
+  "Source": false,
+  "E": 0,
+  "K8s": false,
+  "index_validation": "PASS",
+  "required_clean_checkouts": [
+    "v17",
+    "v18"
+  ],
+  "default_pg_build_matrix": [
+    "v14",
+    "v15",
+    "v16",
+    "v17"
+  ],
+  "autoscaling_commit": "5d7f276286a0f2caf057545a9cc98388a41f6a21",
+  "parallel_pg18_commit": "1e9bf010a841195752f2948ef54ecb34a0fcc749",
+  "qualification_image_in_manifest": true,
+  "release_accepted": false
+}
