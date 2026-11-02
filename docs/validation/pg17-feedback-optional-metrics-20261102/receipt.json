@@ -1,0 +1,38 @@
+{
+  "source": "pgxn/neon/walproposer_pg.c",
+  "source_sha256": "b5c1d63449576e1a4abb5b39fa35913d60f3a4cc6e7eb1689ddb2829f8c5b994",
+  "commit_parent": "d070a3a3c04dbeef143b09c326a25a42df3e8253",
+  "mode": "neon.lakebase_mode PGC_POSTMASTER frozen; ordinary Neon has no optional Databricks metrics area",
+  "old_actual_crash": {
+    "run": "5183db",
+    "module_sha256": "1a06bf714ef7f20163566c57d6f04652995f00211add1c9483db09b3b6cd6fbe",
+    "exact_module_offset": "0x1071b09",
+    "function": "record_pageserver_feedback",
+    "source_line": 747,
+    "fault_address": "0xc",
+    "Root_symbol_evidence": "/data/neon-build/validation/pg17-walproposer-static-slot-fix-20261102/Root-crash-inline-symbols.json"
+  },
+  "build": {
+    "path": "/data/neon-build/validation/pg17-feedback-metrics-extension-build-20261102T095053Z-dae877/result.json",
+    "sha256": "73fa09993d9c4d48bb98640c7bfe876e665c2b6ed44d95eb1a61bfeec93cde1a",
+    "build_exit": 0,
+    "new_neon_so_sha256": "4b479d5bde1aeed38bad64ac11ca60cc14a015ec697ba90c2364ccc07f587d58",
+    "PG17_postgres_unchanged": "a766574d095a40d00c70bd753fa9d0fcfde9f48767e883ab3e2e59014c4956af"
+  },
+  "real_data_validation": {
+    "path": "/data/neon-build/validation/pg17-trusted-control-full-native-20261102T100501Z-1a37fb/result.json",
+    "sha256": "a1a8fe531f2302d3c4d8e690a186a405c6685ade0a6ee16301e9941d369e7401",
+    "setup_sql_done": 3,
+    "checksum_done": 1,
+    "whole_native_exit": 1,
+    "whole_native_seconds": 119.23453617299674,
+    "scope": "startup and data readback passed; later Host afterInitial rejection remains"
+  },
+  "storage_missing_module": "Separate environment defect: PS neon_walredo DSO missing; exact source-name hash matched six FATALs; correct private runtime copy repaired without changing original PG649 or old evidence",
+  "corruption_feedback_preserved": true,
+  "direct_injected_corruption_true_branch": "NOT_RUN",
+  "normal_accepted": false,
+  "Linux_full_E": 0,
+  "K8s_E": 0,
+  "PG17_parent_gitlink_and_release_lock_moved": false
+}

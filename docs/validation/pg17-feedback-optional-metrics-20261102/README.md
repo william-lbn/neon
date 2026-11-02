@@ -1,0 +1,9 @@
+# 修复普通Neon的可选反馈指标空指针
+
+问题：真实5183db在主WAL进程收到PS corruption反馈后，写入仅lakebase模式分配的指标区，普通Neon指针为NULL，最终后台崩溃并断开其他查询。精确原ELF内联栈与偏移见小收据，不将该故障误归到checksum SQL。
+
+实现：按原PGC_POSTMASTER冻结模式写可选指标；普通Neon保留原feedback内容并每WAL进程记一次固定DATA_CORRUPTED告警。不清除损坏位、不改反馈/LSN/槽/normal语义。
+
+验证：dae877必要扩展增量编译通过；另修复PS运行环境缺失neon_walredo动态库后，1a37fb真实完成三步SQL和checksum读回。原PS的CRITICAL由redo子进程缺库触发，并非已证明磁盘或WAL CRC损坏。原异常与ENV失败都留/data，不重标成PASS。
+
+边界：1a37fb后续在Host afterInitial生产组合拒绝，整体仍失败；直接注入corruption=true的分支测试尚NOT_RUN。不冒称normal降限或Linux/K8s全链验收，不移动PG17 gitlink/发行锁。

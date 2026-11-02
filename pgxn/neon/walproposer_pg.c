@@ -742,9 +742,26 @@ record_pageserver_feedback(PageserverFeedback *ps_feedback, shardno_t num_shards
 	Assert(ps_feedback->shard_number < MAX_SHARDS);
 	Assert(ps_feedback->shard_number < num_shards);
 
-	// Begin Hadron: Record any corruption signal from the pageserver first.
-	if (ps_feedback->corruption_detected) {
-		pg_atomic_write_u32(&databricks_metrics_shared->ps_corruption_detected, 1);
+	/*
+	 * Databricks 指标区仅在 lakebase 模式分配；普通 Neon 仍保留原始
+	 * 损坏反馈并明确告警，但不能访问未分配的可选指标区。
+	 */
+	if (ps_feedback->corruption_detected)
+	{
+		if (lakebase_mode)
+			pg_atomic_write_u32(&databricks_metrics_shared->ps_corruption_detected, 1);
+		else
+		{
+			static bool corruption_warning_logged = false;
+
+			if (!corruption_warning_logged)
+			{
+				ereport(WARNING,
+						(errcode(ERRCODE_DATA_CORRUPTED),
+						 errmsg("pageserver reported data corruption")));
+				corruption_warning_logged = true;
+			}
+		}
 	}
 
 	SpinLockAcquire(&walprop_shared->mutex);
