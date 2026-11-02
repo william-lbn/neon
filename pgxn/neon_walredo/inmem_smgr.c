@@ -25,6 +25,9 @@
 #include "storage/buf_internals.h"
 #include RELFILEINFO_HDR
 #include "storage/smgr.h"
+#if PG_MAJORVERSION_NUM >= 18
+#include "storage/aio.h"
+#endif
 
 #if PG_VERSION_NUM >= 150000
 #include "access/xlogutils.h"
@@ -250,7 +253,11 @@ inmem_readv(SMgrRelation reln, ForkNumber forknum, BlockNumber blkno,
 {
 	for (int i = 0; i < nblocks; i++)
 	{
+#if PG_MAJORVERSION_NUM >= 18
+		inmem_read(reln, forknum, blkno + i, buffers[i]);
+#else
 		inmem_read(reln, forknum, blkno, buffers[i]);
+#endif
 	}
 }
 #endif
@@ -314,7 +321,11 @@ inmem_writev(SMgrRelation reln, ForkNumber forknum, BlockNumber blkno,
 {
 	for (int i = 0; i < nblocks; i++)
 	{
+#if PG_MAJORVERSION_NUM >= 18
+		inmem_write(reln, forknum, blkno + i, buffers[i], skipFsync);
+#else
 		inmem_write(reln, forknum, blkno, buffers[i], skipFsync);
+#endif
 	}
 }
 #endif
@@ -361,8 +372,71 @@ inmem_registersync(SMgrRelation reln, ForkNumber forknum)
 }
 #endif
 
+#if PG_MAJORVERSION_NUM >= 18
+typedef struct InmemSynchronousRead
+{
+	SMgrRelation reln;
+	ForkNumber forknum;
+	BlockNumber blocknum;
+	void **buffers;
+	BlockNumber nblocks;
+} InmemSynchronousRead;
+
+static void
+inmem_synchronous_read(void *arg)
+{
+	InmemSynchronousRead *read = arg;
+
+	inmem_readv(read->reln, read->forknum, read->blocknum,
+				read->buffers, read->nblocks);
+}
+
+static void
+inmem_startreadv(PgAioHandle *ioh, SMgrRelation reln, ForkNumber forknum,
+				 BlockNumber blocknum, void **buffers, BlockNumber nblocks)
+{
+	InmemSynchronousRead read = {reln, forknum, blocknum, buffers, nblocks};
+
+	if (nblocks == 0 || nblocks > PG_IOV_MAX)
+		ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+						   errmsg("invalid PG18 in-memory redo read batch size")));
+	/* PG18的原生同步桥负责完成回调/错误释放，不伪造本地文件描述符。 */
+	pgaio_io_set_target_smgr(ioh, reln, forknum, blocknum, nblocks, false);
+	pgaio_io_start_readv_synchronous(ioh, (int) nblocks,
+									inmem_synchronous_read, &read);
+}
+
+static uint32
+inmem_maxcombine(SMgrRelation reln, ForkNumber forknum, BlockNumber blocknum)
+{
+	return Min((uint32) PG_IOV_MAX, (uint32) MAX_PAGES);
+}
+
+static int
+inmem_fd(SMgrRelation reln, ForkNumber forknum, BlockNumber blocknum, uint32 *off)
+{
+	ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+					 errmsg("in-memory WAL redo storage has no file descriptor")));
+	return -1;
+}
+
+static bool
+inmem_owns(RelFileLocator rlocator, ProcNumber backend, char relpersistence)
+{
+	Assert(am_wal_redo_postgres);
+	return true;
+}
+#endif
+
 static const struct f_smgr inmem_smgr =
 {
+#if PG_MAJORVERSION_NUM >= 18
+	.smgr_name = "neon_walredo_inmem",
+	.smgr_owns = inmem_owns,
+	.smgr_maxcombine = inmem_maxcombine,
+	.smgr_startreadv = inmem_startreadv,
+	.smgr_fd = inmem_fd,
+#endif
 	.smgr_init = inmem_init,
 	.smgr_shutdown = NULL,
 	.smgr_open = inmem_open,
@@ -392,9 +466,11 @@ static const struct f_smgr inmem_smgr =
 	.smgr_registersync = inmem_registersync,
 #endif
 
+#if PG_MAJORVERSION_NUM < 18
 	.smgr_start_unlogged_build = NULL,
 	.smgr_finish_unlogged_build_phase_1 = NULL,
 	.smgr_end_unlogged_build = NULL,
+#endif
 	/*- PG17已移除此结构成员；其它版本未列出的可选回调按C静态初始化保持NULL。 */
 };
 
@@ -412,5 +488,9 @@ smgr_inmem(ProcNumber backend, NRelFileInfo rinfo)
 void
 smgr_init_inmem()
 {
+#if PG_MAJORVERSION_NUM >= 18
+	/* PG18按真实smgr注册接口选择整个redo进程的易失存储。 */
+	(void) smgrregister(&inmem_smgr);
+#endif
 	inmem_init();
 }

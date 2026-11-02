@@ -100,6 +100,10 @@
 #include "replication/walsender.h"
 #include "storage/buf_internals.h"
 #include "storage/bufmgr.h"
+#if PG_MAJORVERSION_NUM >= 18
+#include "storage/aio.h"
+#include "storage/aio_subsys.h"
+#endif
 #include "storage/dsm.h"
 #if PG_MAJORVERSION_NUM >= 17
 #include "storage/dsm_registry.h"
@@ -269,8 +273,12 @@ WalRedoMain(int argc, char *argv[])
 	/*
 	 * install the simple in-memory smgr
 	 */
+#if PG_MAJORVERSION_NUM >= 18
+	smgr_init_inmem();
+#else
 	smgr_hook = smgr_inmem;
 	smgr_init_hook = smgr_init_inmem;
+#endif
 
 #if PG_VERSION_NUM >= 160000
 	/* make rmgr registry believe we can register the resource manager */
@@ -285,6 +293,11 @@ WalRedoMain(int argc, char *argv[])
 	max_parallel_workers = 0;
 	max_wal_senders = 0;
 	InitializeMaxBackends();
+#if PG_MAJORVERSION_NUM >= 18
+	/* 与PG18 bootstrap/single-user相同，核算shmem前初始化真实槽/fast-path几何。 */
+	InitPostmasterChildSlots();
+	InitializeFastPathLocks();
+#endif
 
 #if PG_VERSION_NUM >= 150000
 	process_shmem_requests();
@@ -314,6 +327,9 @@ WalRedoMain(int argc, char *argv[])
 	 * this before we can use LWLocks.
 	 */
 	InitAuxiliaryProcess();
+#if PG_MAJORVERSION_NUM >= 18
+	pgaio_init_backend();
+#endif
 
 	SetProcessingMode(NormalProcessing);
 
@@ -531,32 +547,56 @@ CreateFakeSharedMemoryAndSemaphores(void)
 	CommitTsShmemInit();
 	SUBTRANSShmemInit();
 	MultiXactShmemInit();
+#if PG_MAJORVERSION_NUM >= 18
+	BufferManagerShmemInit();
+#else
 	InitBufferPool();
+#endif
 
 	/*
 	 * Set up lock manager
 	 */
+#if PG_MAJORVERSION_NUM >= 18
+	LockManagerShmemInit();
+#else
 	InitLocks();
+#endif
 
 	/*
 	 * Set up predicate lock manager
 	 */
+#if PG_MAJORVERSION_NUM >= 18
+	PredicateLockShmemInit();
+#else
 	InitPredicateLocks();
+#endif
 
 	/*
 	 * Set up process table
 	 */
 	if (!IsUnderPostmaster)
 		InitProcGlobal();
+#if PG_MAJORVERSION_NUM >= 18
+	ProcArrayShmemInit();
+#else
 	CreateSharedProcArray();
+#endif
+#if PG_MAJORVERSION_NUM >= 18
+	BackendStatusShmemInit();
+#else
 	CreateSharedBackendStatus();
+#endif
 	TwoPhaseShmemInit();
 	BackgroundWorkerShmemInit();
 
 	/*
 	 * Set up shared-inval messaging
 	 */
+#if PG_MAJORVERSION_NUM >= 18
+	SharedInvalShmemInit();
+#else
 	CreateSharedInvalidationState();
+#endif
 
 	/*
 	 * Set up interprocess signaling mechanisms
@@ -581,6 +621,10 @@ CreateFakeSharedMemoryAndSemaphores(void)
 #endif
 	BTreeShmemInit();
 	SyncScanShmemInit();
+#if PG_MAJORVERSION_NUM >= 18
+	/* PG18将AIO状态独立纳入共享内存；沿原核算大小完成初始化。 */
+	AioShmemInit();
+#endif
 	/* Skip due to the 'pg_notify' directory check */
 	/* AsyncShmemInit(); */
 

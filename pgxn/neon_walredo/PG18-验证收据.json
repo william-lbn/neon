@@ -1,0 +1,50 @@
+{
+  "scope": "PG18 necessary WAL redo storage/AIO/shmem compatibility; component evidence only",
+  "source_sha256": {
+    "pgxn/neon_walredo/inmem_smgr.c": "d6cd5e6784640878ae6ee01333c117c3b350abe35f8c617af649bb4fbb9e5f42",
+    "pgxn/neon_walredo/walredoproc.c": "5bc075a12760f2c2f58d2ad9673bdf97292fcc2c7534125da19971a700ed4e6d",
+    "ci/pg18_walredo_native_probe.py": "c0edc602a3827acc53ea86074e803782c2bbe2e901fd520e386d22e95d2ad0c1",
+    "ci/pg18_walredo_vectors_probe.c": "0f1ac3bc6918b4289470312ca2c352e69de41059f5db504f7b0e0fddef3a3512",
+    "pgxn/neon_walredo/PG18-\u9a8c\u8bc1\u8bf4\u660e.md": "dc5cd4ae85d45460d1d79ecac624326c17d73b57a19a892f230d16f5377bc77c"
+  },
+  "compiled_base": "4226739833523b980b8cfb5c1ecdc9c97e43cd82",
+  "original_frozen_proposal": "/data/neon-build/validation/pg18-redo-pg18-compat-final-freeze-20261102/stage-proposal.json",
+  "original_frozen_receipt": {
+    "path": "/data/neon-build/validation/pg18-redo-pg18-compat-final-freeze-20261102/receipt.json",
+    "sha256": "57109571527e18564e9fdf9e59ffdbc91946073a01a7e308114e0ed8d3ecf4b9"
+  },
+  "independent_review": {
+    "path": "/data/neon-build/validation/pg18-redo-apply-aio-native-20261102T123522Z-89f1d7/independent-callback-wal-review.json",
+    "sha256": "28502cf82730e1decb78138888e00514b46c9144aa1e373934a2236618a7ca12"
+  },
+  "unique_component_targets": [
+    "default_loader_and_create_extension",
+    "two_block_vectors_and_boundary_rejections",
+    "formal_walredo_entry_page_roundtrip_and_EOF",
+    "actual_AIO_handle_startreadv_complete_and_reuse",
+    "actual_PG18_WAL_Apply_Get_final_page_match"
+  ],
+  "unique_target_count": 5,
+  "runs_are_not_summed_as_extra_targets": true,
+  "mode4_error_scope": "precondition ERROR with handed-out handle/ResourceOwner recovery; NOT new inner callback PG_CATCH coverage",
+  "AIO_result_units": "successful blocks, confirmed against actual PG18 smgr/bufmgr callbacks",
+  "actual_WAL": {
+    "record_bytes": 677,
+    "CRC32C_valid": true,
+    "FPI_present": true,
+    "pushed_pages": 7,
+    "local_buffer_capacity": 4,
+    "final_page_equal_bytes": 8192,
+    "helper_Wait_exit": 0
+  },
+  "test_shim_never_production": true,
+  "raw_driver_not_printed_during_review": true,
+  "readme_review_clarification_only": true,
+  "PG17_conditional_branches_preserved": true,
+  "PG17_parent_gitlink_or_release_lock_moved": false,
+  "PG18_PS_SK_real_timeline": "NOT_RUN",
+  "Root_normal_VM_K8s": "NOT_ACCEPTED",
+  "Source": false,
+  "normal": false,
+  "E": 0
+}
