@@ -411,7 +411,8 @@ DecodeXLogTuple(char *data, Size len, ReorderBufferTupleBuf *tuple)
 }
 #endif
 
-#if PG_MAJORVERSION_NUM == 17
+/* PG18的Neon WAL结构与17逐字相同，保留相同解码逻辑；分配API在本模块头适配。 */
+#if PG_MAJORVERSION_NUM == 17 || PG_MAJORVERSION_NUM == 18
 
 /* individual record(group)'s handlers */
 static void DecodeNeonInsert(LogicalDecodingContext *ctx, XLogRecordBuffer *buf);

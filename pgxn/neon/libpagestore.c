@@ -1647,10 +1647,15 @@ pg_init_libpagestore(void)
 	if (pageserver_connstring[0])
 	{
 		neon_log(PageStoreTrace, "set neon_smgr hook");
+#if PG_MAJORVERSION_NUM >= 18
+		/* PG18注册真实storage manager，不能把已删除的hook当作可用能力。 */
+		smgr_register_neon();
+#else
 		smgr_hook = smgr_neon;
 		smgr_init_hook = smgr_init_neon;
+#endif
 		dbsize_hook = neon_dbsize;
-#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION == 2
+#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && (NEON_SLRU_DOWNLOAD_API_VERSION == 2 || NEON_SLRU_DOWNLOAD_API_VERSION == 3)
 		/* SLRU不是relation：新接口单独注册，仍只在真实远端存储模式启用。 */
 		read_slru_segment_hook = neon_download_slru_segment;
 #endif

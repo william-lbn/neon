@@ -1,0 +1,4 @@
+pgxn/neon/libpagestore.c:18:10: fatal error: libpq-int.h: No such file or directory
+   18 | #include "libpq-int.h"
+      |          ^~~~~~~~~~~~~
+compilation terminated.

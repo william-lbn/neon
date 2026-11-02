@@ -1,0 +1,88 @@
+{
+  "before_pid": 158,
+  "after_first": {
+    "enabled": true,
+    "maximum_buffers": 8192,
+    "startup_buffers": 256,
+    "active_completions": 0,
+    "paused_completions": 0,
+    "completed_aio": "340",
+    "released_aio_pins": "340",
+    "completion_lock_available": true,
+    "resize_authorized": false,
+    "normal_permit": false,
+    "arrays": [
+      {
+        "base": "137306131517440",
+        "maximum_bytes": "524288",
+        "reserved_bytes": "524288",
+        "committed_bytes": "16384"
+      },
+      {
+        "base": "137306064408576",
+        "maximum_bytes": "67108864",
+        "reserved_bytes": "67108864",
+        "committed_bytes": "2097152"
+      },
+      {
+        "base": "137306064277504",
+        "maximum_bytes": "131072",
+        "reserved_bytes": "131072",
+        "committed_bytes": "4096"
+      },
+      {
+        "base": "137306064113664",
+        "maximum_bytes": "163840",
+        "reserved_bytes": "163840",
+        "committed_bytes": "8192"
+      }
+    ]
+  },
+  "before_retry": {
+    "calls": "1",
+    "errors": "1"
+  },
+  "after_retry": {
+    "enabled": true,
+    "maximum_buffers": 8192,
+    "startup_buffers": 256,
+    "active_completions": 0,
+    "paused_completions": 0,
+    "completed_aio": "341",
+    "released_aio_pins": "341",
+    "completion_lock_available": true,
+    "resize_authorized": false,
+    "normal_permit": false,
+    "arrays": [
+      {
+        "base": "137306131517440",
+        "maximum_bytes": "524288",
+        "reserved_bytes": "524288",
+        "committed_bytes": "16384"
+      },
+      {
+        "base": "137306064408576",
+        "maximum_bytes": "67108864",
+        "reserved_bytes": "67108864",
+        "committed_bytes": "2097152"
+      },
+      {
+        "base": "137306064277504",
+        "maximum_bytes": "131072",
+        "reserved_bytes": "131072",
+        "committed_bytes": "4096"
+      },
+      {
+        "base": "137306064113664",
+        "maximum_bytes": "163840",
+        "reserved_bytes": "163840",
+        "committed_bytes": "8192"
+      }
+    ]
+  },
+  "last_counts": {
+    "calls": "2",
+    "errors": "2"
+  },
+  "after_pid": 158
+}

@@ -18,6 +18,7 @@
 #include "utils/wait_event.h"
 
 #include "slru_download.h"
+#include "neon_pgversioncompat.h"
 
 #if PG_VERSION_NUM >= 170000
 #include "utils/injection_point.h"
@@ -132,7 +133,7 @@ neon_publish_slru_segment(const char *path, const void *data, int nblocks)
 		if (cleanup->fd < 0)
 			ereport(ERROR, (errcode_for_file_access(),
 							errmsg("could not create Neon SLRU temporary file: %m")));
-		INJECTION_POINT("neon-slru-before-write");
+		NEON_INJECTION_POINT("neon-slru-before-write");
 		pgstat_report_wait_start(WAIT_EVENT_SLRU_WRITE);
 		errno = 0;
 		if (pg_pwrite(cleanup->fd, data, bytes, 0) != bytes)
@@ -155,7 +156,7 @@ neon_publish_slru_segment(const char *path, const void *data, int nblocks)
 								errmsg("could not close Neon SLRU temporary file: %m")));
 		}
 		CHECK_FOR_INTERRUPTS();
-		INJECTION_POINT("neon-slru-before-publish");
+		NEON_INJECTION_POINT("neon-slru-before-publish");
 		if (link(cleanup->temp, path) != 0 && errno != EEXIST)
 			ereport(ERROR, (errcode_for_file_access(),
 							errmsg("could not publish Neon SLRU file \"%s\": %m", path)));
@@ -163,7 +164,7 @@ neon_publish_slru_segment(const char *path, const void *data, int nblocks)
 		/*
 		 * 已发布后任何错误都只保留目标；重试以核心重新打开的当前事实为准。
 		 */
-		INJECTION_POINT("neon-slru-after-publish");
+		NEON_INJECTION_POINT("neon-slru-after-publish");
 		fsync_fname(directory, true);
 		if (unlink(cleanup->temp) != 0)
 			ereport(ERROR, (errcode_for_file_access(),

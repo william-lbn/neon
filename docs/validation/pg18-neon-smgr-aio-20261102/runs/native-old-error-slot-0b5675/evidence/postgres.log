@@ -1,0 +1,38 @@
+2026-11-02 01:24:04.001 UTC [42] LOG:  registered custom resource manager "neon" with ID 134
+2026-11-02 01:24:04.001 UTC [42] LOG:  Missing NEON_CONTROL_PLANE_TOKEN environment variable, forwarding will not be authenticated
+2026-11-02 01:24:04.012 UTC [42] LOG:  starting PostgreSQL 18.2 (dsga-pg18-native-TEST_ONLY) on x86_64-pc-linux-gnu, compiled by gcc-12 (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-02 01:24:04.013 UTC [42] LOG:  listening on Unix socket "/tmp/pg18-neon-1278c7q8/s/.s.PGSQL.55438"
+2026-11-02 01:24:04.017 UTC [50] LOG:  database system was shut down at 2026-11-02 01:24:03 UTC
+2026-11-02 01:24:04.019 UTC [50] LOG:  Continue writing WAL at 0/1516A48
+2026-11-02 01:24:04.020 UTC [51] LOG:  communicator threads started
+2026-11-02 01:24:04.020 UTC [51] INFO:  [COMMUNICATOR] communicator process logging started
+2026-11-02 01:24:04.020 UTC [51] INFO:  [COMMUNICATOR] control socket listener spawned
+2026-11-02 01:24:04.023 UTC [42] LOG:  database system is ready to accept connections
+2026-11-02 01:24:04.026 UTC [57] WARNING:  [WP] Safekeepers list is empty
+2026-11-02 01:24:04.037 UTC [60] FATAL:  database "dsg_admin" does not exist
+2026-11-02 01:24:04.139 UTC [62] LOG:  Save replication slot at pg_replslot/decode18_slot/state restart_lsn=0/1884B88
+2026-11-02 01:24:04.139 UTC [62] STATEMENT:  SELECT pg_create_logical_replication_slot('decode18_slot','pgoutput');
+2026-11-02 01:24:04.140 UTC [62] LOG:  logical decoding found consistent point at 0/1884B88
+2026-11-02 01:24:04.140 UTC [62] DETAIL:  There are no running transactions.
+2026-11-02 01:24:04.140 UTC [62] STATEMENT:  SELECT pg_create_logical_replication_slot('decode18_slot','pgoutput');
+2026-11-02 01:24:04.140 UTC [62] LOG:  Save replication slot at pg_replslot/decode18_slot/state restart_lsn=0/1884B88
+2026-11-02 01:24:04.140 UTC [62] STATEMENT:  SELECT pg_create_logical_replication_slot('decode18_slot','pgoutput');
+2026-11-02 01:24:04.141 UTC [62] LOG:  starting logical decoding for slot "decode18_slot"
+2026-11-02 01:24:04.141 UTC [62] DETAIL:  Streaming transactions committing after 0/1884BC0, reading WAL from 0/1884B88.
+2026-11-02 01:24:04.141 UTC [62] STATEMENT:  INSERT INTO dsg_evidence SELECT 'logical_decode',jsonb_agg(encode(data,'hex') ORDER BY lsn) FROM pg_logical_slot_get_binary_changes('decode18_slot',NULL,NULL,'proto_version','1','publication_names','decode18_publication');
+2026-11-02 01:24:04.142 UTC [62] LOG:  logical decoding found consistent point at 0/1884B88
+2026-11-02 01:24:04.142 UTC [62] DETAIL:  There are no running transactions.
+2026-11-02 01:24:04.142 UTC [62] STATEMENT:  INSERT INTO dsg_evidence SELECT 'logical_decode',jsonb_agg(encode(data,'hex') ORDER BY lsn) FROM pg_logical_slot_get_binary_changes('decode18_slot',NULL,NULL,'proto_version','1','publication_names','decode18_publication');
+2026-11-02 01:24:04.144 UTC [62] LOG:  Drop replication slot pg_replslot/decode18_slot
+2026-11-02 01:24:04.144 UTC [62] STATEMENT:  SELECT pg_drop_replication_slot('decode18_slot');
+2026-11-02 01:24:04.151 UTC [42] LOG:  received fast shutdown request
+2026-11-02 01:24:04.152 UTC [42] LOG:  aborting any active transactions
+2026-11-02 01:24:04.152 UTC [56] FATAL:  terminating background worker "Logical replication monitor" due to administrator command
+2026-11-02 01:24:04.154 UTC [42] LOG:  background worker "logical replication launcher" (PID 58) exited with exit code 1
+2026-11-02 01:24:04.154 UTC [42] LOG:  background worker "Logical replication monitor" (PID 56) exited with exit code 1
+2026-11-02 01:24:04.154 UTC [48] LOG:  shutting down
+2026-11-02 01:24:04.156 UTC [48] LOG:  checkpoint starting: shutdown immediate
+2026-11-02 01:24:04.156 UTC [48] LOG:  checkpoint complete: wrote 53 buffers (20.7%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.003 s; sync files=74, longest=0.001 s, average=0.001 s; distance=3529 kB, estimate=3529 kB; lsn=0/1888F80, redo lsn=0/1888F80
+2026-11-02 01:24:04.157 UTC [51] WARNING:  24 communicator log messages were dropped because the log buffer was full
+2026-11-02 01:24:04.157 UTC [51] FATAL:  terminating background worker "Storage communicator process" due to administrator command
+2026-11-02 01:24:04.167 UTC [42] LOG:  database system is shut down

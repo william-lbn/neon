@@ -1,0 +1,6 @@
+test_PG18_S_NEON_SLRU3_001_real_rpc_and_narrowing_rejections (__main__.RemoteAio.test_PG18_S_NEON_SLRU3_001_real_rpc_and_narrowing_rejections) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.989s
+
+OK

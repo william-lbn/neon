@@ -1,0 +1,11 @@
+{
+  "protocol_version": 1,
+  "nonce": "20261102T013023Z-36bcc1",
+  "unit": "neon-pg18-formal-adapter-20261102t013023z-36bcc1.service",
+  "kind": "heavy",
+  "evidence_dir": "/data/neon-build/validation/pg18-neon-formal-error-slot-fix-build-20261102T013023Z-36bcc1",
+  "argv": [
+    "/usr/bin/python3",
+    "/data/neon-build/validation/pg18-neon-formal-error-slot-fix-build-20261102T013023Z-36bcc1/worker.py"
+  ]
+}

@@ -1,0 +1,23 @@
+BINDIR = /usr/local/pgsql/bin
+DOCDIR = /usr/local/pgsql/share/doc
+HTMLDIR = /usr/local/pgsql/share/doc
+INCLUDEDIR = /usr/local/pgsql/include
+PKGINCLUDEDIR = /usr/local/pgsql/include
+INCLUDEDIR-SERVER = /usr/local/pgsql/include/server
+LIBDIR = /usr/local/pgsql/lib
+PKGLIBDIR = /usr/local/pgsql/lib
+LOCALEDIR = /usr/local/pgsql/share/locale
+MANDIR = /usr/local/pgsql/share/man
+SHAREDIR = /usr/local/pgsql/share
+SYSCONFDIR = /usr/local/pgsql/etc
+PGXS = /usr/local/pgsql/lib/pgxs/src/makefiles/pgxs.mk
+CONFIGURE =  'CFLAGS=-O2 -g3 -fsigned-char' '--enable-debug' '--with-openssl' '--with-uuid=ossp' '--with-icu' '--with-libxml' '--with-libxslt' '--with-lz4' '--with-zstd' '--disable-rpath'
+CC = gcc
+CPPFLAGS = -D_GNU_SOURCE -I/usr/include/libxml2
+CFLAGS = -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Werror=vla -Wendif-labels -Wmissing-format-attribute -Wimplicit-fallthrough=3 -Wcast-function-type -Wshadow=compatible-local -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard -Wno-format-truncation -Wno-stringop-truncation -g -O2 -g3 -fsigned-char
+CFLAGS_SL = -fPIC
+LDFLAGS = -Wl,--as-needed
+LDFLAGS_EX = 
+LDFLAGS_SL = 
+LIBS = -lpgcommon -lpgport -lzstd -llz4 -lxslt -lxml2 -lssl -lcrypto -lz -lreadline -lm 
+VERSION = PostgreSQL 17.11

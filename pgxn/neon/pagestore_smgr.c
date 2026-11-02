@@ -55,6 +55,10 @@
 #include "port/pg_iovec.h"
 #include "replication/walsender.h"
 #include "storage/bufmgr.h"
+#if PG_MAJORVERSION_NUM >= 18
+#include "storage/aio.h"
+#include "storage/aio_subsys.h"
+#endif
 #include "storage/buf_internals.h"
 #include "storage/fsm_internals.h"
 #include "storage/md.h"
@@ -2183,14 +2187,18 @@ neon_read_slru_segment(SMgrRelation reln, const char* path, int segno, void* buf
 	return n_blocks;
 }
 
-#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION == 2
+#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && (NEON_SLRU_DOWNLOAD_API_VERSION == 2 || NEON_SLRU_DOWNLOAD_API_VERSION == 3)
 /*-
  * v2核心只在文件缺失时调用并在true后重新打开。保持原请求LSN与远端协议，
  * 下载到私有缓冲区后完整发布；0页/不适用的SLRU返回false，通信/落盘错误
  * 按原生ERROR处理。不存在用空文件或旧bool强转冒充成功的兼容路径。
  */
 bool
+#if NEON_SLRU_DOWNLOAD_API_VERSION == 3
+neon_download_slru_segment(const char *path, int64 segno)
+#else
 neon_download_slru_segment(const char *path, int segno)
+#endif
 {
 	char	   *buffer;
 	int			nblocks;
@@ -2209,14 +2217,27 @@ neon_download_slru_segment(const char *path, int segno)
 		  (STRPREFIX(path, "pg_multixact/members/") && leaf == path + strlen("pg_multixact/members")) ||
 		  (STRPREFIX(path, "pg_multixact/offsets/") && leaf == path + strlen("pg_multixact/offsets"))))
 		return false;
+#if NEON_SLRU_DOWNLOAD_API_VERSION == 3
+	/* PG18核心接受int64，但当前Neon wire是UInt32且原请求字段为int。
+	 * 支持的CLOG/multixact核心仍用<=24bit短名，先精确拒绝再缩窄，绝不截断。 */
+	if ((uint64) segno > UINT32_MAX || segno > INT_MAX)
+		ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+					   errmsg("Neon SLRU segment exceeds the current wire request range")));
+	snprintf(expected, sizeof(expected), "%04X", (unsigned int) segno);
+#else
 	snprintf(expected, sizeof(expected), "%04X", segno);
+#endif
 	if (strcmp(leaf + 1, expected) != 0)
 		ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
 						errmsg("Neon SLRU filename does not match segment number")));
 	/* 独立hook可能先于任何relation的smgr_open；须幂等建立本进程通信状态。 */
 	communicator_init();
 	buffer = palloc(BLCKSZ * SLRU_PAGES_PER_SEGMENT);
+	#if NEON_SLRU_DOWNLOAD_API_VERSION == 3
+	nblocks = neon_read_slru_segment(NULL, path, (int) segno, buffer);
+#else
 	nblocks = neon_read_slru_segment(NULL, path, segno, buffer);
+#endif
 	if (nblocks > 0)
 		neon_publish_slru_segment(path, buffer, nblocks);
 	pfree(buffer);
@@ -2259,9 +2280,94 @@ AtEOXact_neon(XactEvent event, void *arg)
 	communicator_reconfigure_timeout_if_needed();
 }
 
+#if PG_MAJORVERSION_NUM >= 18
+#if !defined(NEON_PGAIO_SYNC_READV_API_VERSION) || NEON_PGAIO_SYNC_READV_API_VERSION != 1
+#error "PG18 Neon smgr requires the actual synchronous AIO completion API"
+#endif
+
+typedef struct NeonSynchronousRead
+{
+	SMgrRelation reln;
+	ForkNumber forknum;
+	BlockNumber blocknum;
+	void **buffers;
+	BlockNumber nblocks;
+} NeonSynchronousRead;
+
+static void
+neon_synchronous_read(void *arg)
+{
+	NeonSynchronousRead *read = arg;
+
+	/* 原真实page cache/Pageserver RPC，只有全部数据完成才返回。 */
+	neon_readv(read->reln, read->forknum, read->blocknum,
+			   read->buffers, read->nblocks);
+}
+
+static bool
+neon_uses_local_fork(SMgrRelation reln)
+{
+	return reln->smgr_relpersistence == RELPERSISTENCE_TEMP ||
+		reln->smgr_relpersistence == RELPERSISTENCE_UNLOGGED ||
+		(reln->smgr_relpersistence == RELPERSISTENCE_PERMANENT &&
+		 RelFileInfoEquals(unlogged_build_rel_info, InfoFromSMgrRel(reln)));
+}
+
+void
+neon_startreadv(PgAioHandle *ioh, SMgrRelation reln, ForkNumber forknum,
+				BlockNumber blocknum, void **buffers, BlockNumber nblocks)
+{
+	NeonSynchronousRead read = {reln, forknum, blocknum, buffers, nblocks};
+
+	if (neon_uses_local_fork(reln))
+	{
+		mdstartreadv(ioh, reln, forknum, blocknum, buffers, nblocks);
+		return;
+	}
+	if (nblocks == 0 || nblocks > PG_IOV_MAX)
+		ereport(ERROR, (errcode(ERRCODE_INVALID_PARAMETER_VALUE),
+					   errmsg("invalid PG18 Neon read batch size")));
+	pgaio_io_set_target_smgr(ioh, reln, forknum, blocknum, nblocks, false);
+	pgaio_io_start_readv_synchronous(ioh, (int) nblocks,
+									neon_synchronous_read, &read);
+}
+
+static uint32
+neon_maxcombine(SMgrRelation reln, ForkNumber forknum, BlockNumber blocknum)
+{
+	/* 同时保留原本地segment边界和真实Neon请求数组的固定容量。 */
+	return Min((uint32) PG_IOV_MAX, mdmaxcombine(reln, forknum, blocknum));
+}
+
+static int
+neon_fd(SMgrRelation reln, ForkNumber forknum, BlockNumber blocknum, uint32 *off)
+{
+	if (!neon_uses_local_fork(reln))
+		ereport(ERROR, (errcode(ERRCODE_FEATURE_NOT_SUPPORTED),
+					   errmsg("remote Neon storage has no local read file descriptor")));
+	return mdfd(reln, forknum, blocknum, off);
+}
+
+static bool
+neon_owns(RelFileLocator rlocator, ProcNumber backend, char relpersistence)
+{
+	/* 保持原版本temp交md、其他relation由Neon按persistence细分的语义。 */
+	return backend == INVALID_PROC_NUMBER;
+}
+#endif
+
 static const struct f_smgr neon_smgr =
 {
+#if PG_MAJORVERSION_NUM >= 18
+	.smgr_name = "neon",
+	.smgr_init = smgr_init_neon,
+	.smgr_owns = neon_owns,
+	.smgr_maxcombine = neon_maxcombine,
+	.smgr_startreadv = neon_startreadv,
+	.smgr_fd = neon_fd,
+#else
 	.smgr_init = neon_init,
+#endif
 	.smgr_shutdown = NULL,
 	.smgr_open = neon_open,
 	.smgr_close = neon_close,
@@ -2289,9 +2395,11 @@ static const struct f_smgr neon_smgr =
 #if PG_MAJORVERSION_NUM >= 17
 	.smgr_registersync = neon_registersync,
 #endif
+#if PG_MAJORVERSION_NUM < 18
 	.smgr_start_unlogged_build = neon_start_unlogged_build,
 	.smgr_finish_unlogged_build_phase_1 = neon_finish_unlogged_build_phase_1,
 	.smgr_end_unlogged_build = neon_end_unlogged_build,
+#endif
 
 #if !defined(NEON_SLRU_DOWNLOAD_API_VERSION)
 	/* 旧发行继续由核心落盘；不得向新f_smgr写入已经删除的字段。 */
@@ -2299,6 +2407,16 @@ static const struct f_smgr neon_smgr =
 #endif
 };
 
+#if PG_MAJORVERSION_NUM >= 18
+void
+smgr_register_neon(void)
+{
+	(void) smgrregister(&neon_smgr);
+	start_unlogged_build_hook = neon_start_unlogged_build;
+	finish_unlogged_build_phase_1_hook = neon_finish_unlogged_build_phase_1;
+	end_unlogged_build_hook = neon_end_unlogged_build;
+}
+#else
 const f_smgr *
 smgr_neon(ProcNumber backend, NRelFileInfo rinfo)
 {
@@ -2309,13 +2427,17 @@ smgr_neon(ProcNumber backend, NRelFileInfo rinfo)
 	else
 		return &neon_smgr;
 }
+#endif
 
 void
 smgr_init_neon(void)
 {
 	RegisterXactCallback(AtEOXact_neon, NULL);
 
+#if PG_MAJORVERSION_NUM < 18
+	/* PG18核心自行初始化所有已注册smgr，不能在此二次初始化md。 */
 	smgr_init_standard();
+#endif
 	neon_init();
 	communicator_init();
 }

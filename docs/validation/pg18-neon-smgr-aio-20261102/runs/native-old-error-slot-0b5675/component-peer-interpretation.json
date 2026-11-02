@@ -1,0 +1,17 @@
+{
+  "classification": "native PG component with protocol model peer, not formal Pageserver E",
+  "peer_is_model": true,
+  "model_program": "/data/neon-build/validation/pg18-neon-formal-sql-native-20261102T012354Z-0b5675/test_dsg_pg18_remote_aio.py",
+  "model_sha256": "36ed01618df4a5a4195841cd20be446725a6c9a063f2516d0d14fc174498ce9f",
+  "GetPage_data_source": "the same isolated PG CHECKPOINTed aio18_data physical relation bytes; program reads pg_relation_filepath result; old runs did not store separate payload digest",
+  "SLRU_data_source": "synthetic 3*8192 bytes of M",
+  "actual_production_calls": [
+    "neon_startreadv",
+    "PG18 original AIO stage/completion",
+    "neon_download_slru_segment v3"
+  ],
+  "test_adapter_scope": "only the isolated target relation uses md metadata plus actual exported Neon read callback; production all-relation selector not runtime proved by this fixture",
+  "normal": false,
+  "Source": false,
+  "E": 0
+}

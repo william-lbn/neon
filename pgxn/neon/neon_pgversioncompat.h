@@ -8,6 +8,17 @@
 
 #include "fmgr.h"
 #include "storage/buf_internals.h"
+#if PG_MAJORVERSION_NUM >= 18
+/* PG18将WL_*放到独立wait-event头，不依赖旧间接include。 */
+#include "storage/latch.h"
+#define NEON_INJECTION_POINT(name) INJECTION_POINT(name, NULL)
+/* 保持PG17的已获取失效slot行为，由原调用方处理其生命周期。 */
+#define NEON_REPLICATION_SLOT_ACQUIRE(name, nowait) ReplicationSlotAcquire(name, nowait, false)
+#else
+#define NEON_INJECTION_POINT(name) INJECTION_POINT(name)
+#define NEON_REPLICATION_SLOT_ACQUIRE(name, nowait) ReplicationSlotAcquire(name, nowait)
+#endif
+
 
 #if PG_MAJORVERSION_NUM < 16
 typedef PGAlignedBlock PGIOAlignedBlock;
@@ -171,8 +182,16 @@ extern void InitMaterializedSRF(FunctionCallInfo fcinfo, bits32 flags);
 extern TimeLineID GetWALInsertionTimeLine(void);
 #endif
 
-/* format codes not present in PG17-; but available in PG18+ */
+/*-
+ * PG18把固定宽度整数切到标准inttypes格式，并移除了INT64_MODIFIER。
+ * 只在该版本使用PRIx64；旧PG分支保留原格式，日志与wire业务均不改变。
+ */
+#if PG_MAJORVERSION_NUM >= 18
+#define INT64_HEX_FORMAT "%" PRIx64
+#define UINT64_HEX_FORMAT "%" PRIx64
+#else
 #define INT64_HEX_FORMAT "%" INT64_MODIFIER "x"
 #define UINT64_HEX_FORMAT "%" INT64_MODIFIER "x"
+#endif
 
 #endif							/* NEON_PGVERSIONCOMPAT_H */

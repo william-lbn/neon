@@ -1,0 +1,46 @@
+#0 building with "neon-data" instance using remote driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.64kB done
+#1 DONE 0.2s
+
+#2 [internal] load metadata for 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020
+#2 DONE 0.0s
+
+#3 [internal] setting cache mount permissions
+#3 DONE 0.0s
+
+#4 [check 1/5] FROM 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020
+#4 resolve 127.0.0.1:5001/neon/compute-v17-stage@sha256:ece1e02faadce8c6c0c949e8314226ccfa958cef74902b89f790d89a0e28c020 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 6.06MB 0.1s
+#5 transferring context: 326.40MB 2.0s done
+#5 DONE 3.0s
+
+#6 [check 2/5] WORKDIR /home/nonroot/neon-extension-source
+#6 CACHED
+
+#7 [check 3/5] COPY --chown=1000:1000 pg18-install/ /opt/pg18/
+#7 CACHED
+
+#3 [internal] setting cache mount permissions
+#3 CACHED
+
+#8 [check 4/5] COPY --chown=1000:1000 . .
+#8 DONE 10.4s
+
+#9 [check 5/5] RUN --network=none --mount=type=cache,id=neon-cargo-registry-amd64,target=/home/nonroot/.cargo/registry,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-cargo-git-amd64,target=/home/nonroot/.cargo/git,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-core-target-amd64,target=/home/nonroot/target,uid=1000,gid=1000,sharing=locked --mount=type=cache,id=neon-ccache-amd64,target=/home/nonroot/.cache/ccache,uid=1000,gid=1000,sharing=locked set -eu;  mkdir -p /home/nonroot/extension-proof/artifacts;  test "$(cat /sys/fs/cgroup/memory.max)" = 8589934592; test "$(cat /sys/fs/cgroup/cpu.max)" = "600000 100000";  cat /sys/fs/cgroup/cpu.max >/home/nonroot/extension-proof/cpu.max; cat /sys/fs/cgroup/memory.max >/home/nonroot/extension-proof/memory.max;  sha256sum -c .required-extension-inputs.sha256 >/home/nonroot/extension-proof/actual-input-verification.txt;  sha256sum /opt/pg18/bin/postgres >/home/nonroot/extension-proof/PG-identity-before.txt;  rustc --version >/home/nonroot/extension-proof/rustc-version.txt; cargo --version >/home/nonroot/extension-proof/cargo-version.txt;  /opt/pg18/bin/pg_config >/home/nonroot/extension-proof/pg-config.txt;  printenv CARGO_TARGET_DIR CARGO_BUILD_JOBS CARGO_NET_OFFLINE >/home/nonroot/extension-proof/cargo-execution-env.txt;  touch /home/nonroot/neon-extension-source/pgxn/neon/communicator/build.rs;  set +e; make -k -C /home/nonroot/neon-extension-source/pgxn -j6 -f /home/nonroot/neon-extension-source/pgxn/Makefile PG_CONFIG=/opt/pg18/bin/pg_config NEON_CARGO_ARTIFACT_TARGET_DIR=/home/nonroot/target/debug CARGO_BUILD_FLAGS='--locked --offline --message-format=json-render-diagnostics' CARGO_PROFILE='--profile=dev' neon neon_rmgr >/home/nonroot/extension-proof/build.log 2>&1;  rc=$?; echo "$rc" >/home/nonroot/extension-proof/build.exitcode; set -e;  if test "$rc" = 0; then   cp /opt/pg18/lib/postgresql/neon.so /opt/pg18/lib/postgresql/neon_rmgr.so /home/nonroot/extension-proof/artifacts/;   mkdir -p /home/nonroot/extension-proof/artifacts/extension; cp /opt/pg18/share/postgresql/extension/neon* /home/nonroot/extension-proof/artifacts/extension/;   sha256sum /opt/pg18/lib/postgresql/neon.so /opt/pg18/lib/postgresql/neon_rmgr.so >/home/nonroot/extension-proof/extension-ELF.sha256;   sha256sum /home/nonroot/target/debug/libcommunicator.a /home/nonroot/neon-extension-source/pgxn/neon/communicator/communicator_bindings.h >/home/nonroot/extension-proof/cargo-artifacts.sha256;   readelf -d /opt/pg18/lib/postgresql/neon.so >/home/nonroot/extension-proof/neon.dynamic.txt;   readelf -d /opt/pg18/lib/postgresql/neon_rmgr.so >/home/nonroot/extension-proof/neon-rmgr.dynamic.txt;  fi;  sha256sum /opt/pg18/bin/postgres >/home/nonroot/extension-proof/PG-identity-after.txt;  cat /sys/fs/cgroup/cpu.stat >/home/nonroot/extension-proof/cpu.stat; cat /sys/fs/cgroup/memory.peak >/home/nonroot/extension-proof/memory.peak; cat /sys/fs/cgroup/io.stat >/home/nonroot/extension-proof/io.stat
+#9 DONE 34.8s
+
+#10 [stage-1 1/1] COPY --from=check /home/nonroot/extension-proof/ /
+#10 DONE 0.2s
+
+#11 exporting to client directory
+#11 copying files 14.63MB 0.1s
+#11 copying files 203.16MB 1.3s done
+#11 DONE 1.3s
+
+#12 resolving provenance for metadata file
+#12 DONE 0.1s

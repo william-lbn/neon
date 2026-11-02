@@ -1,0 +1,11 @@
+{
+  "protocol_version": 1,
+  "nonce": "20261101T234524Z-a5f41c",
+  "unit": "neon-pg18-formal-ext-20261101t234524z-a5f41c.service",
+  "kind": "heavy",
+  "evidence_dir": "/data/neon-build/validation/pg18-neon-formal-extensions-build-20261101T234524Z-a5f41c",
+  "argv": [
+    "/usr/bin/python3",
+    "/data/neon-build/validation/pg18-neon-formal-extensions-build-20261101T234524Z-a5f41c/worker.py"
+  ]
+}

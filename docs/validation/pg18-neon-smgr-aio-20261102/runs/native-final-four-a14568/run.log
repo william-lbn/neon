@@ -1,0 +1,14 @@
+test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers (__main__.FormalExtension.test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.896s
+
+OK
+test_PG18_S_NEON_REMOTE_AIO_001_real_rpc_success (__main__.RemoteAio.test_PG18_S_NEON_REMOTE_AIO_001_real_rpc_success) ... ok
+test_PG18_S_NEON_REMOTE_AIO_002_real_rpc_ERROR_pin_cleanup_same_backend_retry (__main__.RemoteAio.test_PG18_S_NEON_REMOTE_AIO_002_real_rpc_ERROR_pin_cleanup_same_backend_retry) ... ok
+test_PG18_S_NEON_SLRU3_001_real_rpc_and_narrowing_rejections (__main__.RemoteAio.test_PG18_S_NEON_SLRU3_001_real_rpc_and_narrowing_rejections) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 3.033s
+
+OK

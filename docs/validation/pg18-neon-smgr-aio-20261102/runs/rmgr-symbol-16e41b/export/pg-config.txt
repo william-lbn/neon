@@ -1,0 +1,23 @@
+BINDIR = /opt/pg18/bin
+DOCDIR = /opt/pg18/share/doc/postgresql
+HTMLDIR = /opt/pg18/share/doc/postgresql
+INCLUDEDIR = /opt/pg18/include
+PKGINCLUDEDIR = /opt/pg18/include/postgresql
+INCLUDEDIR-SERVER = /opt/pg18/include/postgresql/server
+LIBDIR = /opt/pg18/lib
+PKGLIBDIR = /opt/pg18/lib/postgresql
+LOCALEDIR = /opt/pg18/share/locale
+MANDIR = /opt/pg18/share/man
+SHAREDIR = /opt/pg18/share/postgresql
+SYSCONFDIR = /opt/pg18/etc/postgresql
+PGXS = /opt/pg18/lib/postgresql/pgxs/src/makefiles/pgxs.mk
+CONFIGURE =  '--prefix=/opt/pg18' '--enable-debug' '--enable-cassert' '--enable-injection-points' '--with-openssl' '--with-icu' '--with-liburing' '--with-extra-version= (dsga-pg18-native-TEST_ONLY)' 'CFLAGS=-fsigned-char -O2 -g3' 'ICU_CFLAGS=-I/usr/local/icu/include -DU_STATIC_IMPLEMENTATION' 'ICU_LIBS=-L/usr/local/icu/lib -L/usr/local/icu/lib64 -licui18n -licuuc -licudata -lstdc++ -Wl,-Bdynamic -lm' 'CC=ccache /usr/bin/gcc-12'
+CC = ccache /usr/bin/gcc-12
+CPPFLAGS = -D_GNU_SOURCE -I/usr/local/icu/include -DU_STATIC_IMPLEMENTATION
+CFLAGS = -Wall -Wmissing-prototypes -Wpointer-arith -Wdeclaration-after-statement -Werror=vla -Wendif-labels -Wmissing-format-attribute -Wimplicit-fallthrough=3 -Wcast-function-type -Wshadow=compatible-local -Wformat-security -fno-strict-aliasing -fwrapv -fexcess-precision=standard -Wno-format-truncation -Wno-stringop-truncation -g -fsigned-char -O2 -g3
+CFLAGS_SL = -fPIC
+LDFLAGS = -Wl,--as-needed -Wl,-rpath,'/opt/pg18/lib',--enable-new-dtags
+LDFLAGS_EX = 
+LDFLAGS_SL = 
+LIBS = -lpgcommon -lpgport -lssl -lcrypto -lz -lreadline -lm 
+VERSION = PostgreSQL 18.2 (dsga-pg18-native-TEST_ONLY)

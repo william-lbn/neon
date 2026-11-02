@@ -1,0 +1,27 @@
+2026-11-02 01:18:27.809 UTC [82] LOG:  registered custom resource manager "neon" with ID 134
+2026-11-02 01:18:27.809 UTC [82] LOG:  Missing NEON_CONTROL_PLANE_TOKEN environment variable, forwarding will not be authenticated
+2026-11-02 01:18:27.817 UTC [82] LOG:  starting PostgreSQL 18.2 (dsga-pg18-native-TEST_ONLY) on x86_64-pc-linux-gnu, compiled by gcc-12 (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-02 01:18:27.817 UTC [82] LOG:  listening on Unix socket "/tmp/pg18-rpc-84x5geri/s/.s.PGSQL.55438"
+2026-11-02 01:18:27.821 UTC [89] LOG:  database system was shut down at 2026-11-02 01:18:27 UTC
+2026-11-02 01:18:27.822 UTC [89] LOG:  Continue writing WAL at 0/1516A48
+2026-11-02 01:18:27.823 UTC [90] LOG:  communicator threads started
+2026-11-02 01:18:27.823 UTC [90] INFO:  [COMMUNICATOR] communicator process logging started
+2026-11-02 01:18:27.823 UTC [90] INFO:  [COMMUNICATOR] control socket listener spawned
+2026-11-02 01:18:27.824 UTC [82] LOG:  database system is ready to accept connections
+2026-11-02 01:18:27.826 UTC [95] WARNING:  [WP] Safekeepers list is empty
+2026-11-02 01:18:27.831 UTC [98] FATAL:  role "nonroot" does not exist
+2026-11-02 01:18:27.870 UTC [87] LOG:  checkpoint starting: immediate force wait
+2026-11-02 01:18:27.872 UTC [87] LOG:  checkpoint complete: wrote 255 buffers (99.6%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.002 s; sync files=44, longest=0.001 s, average=0.001 s; distance=3286 kB, estimate=3286 kB; lsn=0/184C450, redo lsn=0/184C3F8
+2026-11-02 01:18:27.890 UTC [82] LOG:  received SIGHUP, reloading configuration files
+2026-11-02 01:18:27.891 UTC [82] LOG:  parameter "neon.pageserver_connstring" changed to "host=127.0.0.1 port=56043 user=fixture dbname=fixture sslmode=disable gssencmode=disable"
+2026-11-02 01:18:27.905 UTC [111] LOG:  [NEON_SMGR] [shard 0] libpagestore: connected to 'host=127.0.0.1 port=56043 user=fixture dbname=fixture sslmode=disable gssencmode=disable' with protocol version 3
+2026-11-02 01:18:28.070 UTC [82] LOG:  received fast shutdown request
+2026-11-02 01:18:28.070 UTC [82] LOG:  aborting any active transactions
+2026-11-02 01:18:28.070 UTC [94] FATAL:  terminating background worker "Logical replication monitor" due to administrator command
+2026-11-02 01:18:28.072 UTC [82] LOG:  background worker "Logical replication monitor" (PID 94) exited with exit code 1
+2026-11-02 01:18:28.072 UTC [82] LOG:  background worker "logical replication launcher" (PID 96) exited with exit code 1
+2026-11-02 01:18:28.073 UTC [87] LOG:  shutting down
+2026-11-02 01:18:28.074 UTC [87] LOG:  checkpoint starting: shutdown immediate
+2026-11-02 01:18:28.074 UTC [87] LOG:  checkpoint complete: wrote 74 buffers (28.9%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=5, longest=0.001 s, average=0.001 s; distance=38 kB, estimate=2961 kB; lsn=0/1855D80, redo lsn=0/1855D80
+2026-11-02 01:18:28.074 UTC [90] FATAL:  terminating background worker "Storage communicator process" due to administrator command
+2026-11-02 01:18:28.085 UTC [82] LOG:  database system is shut down

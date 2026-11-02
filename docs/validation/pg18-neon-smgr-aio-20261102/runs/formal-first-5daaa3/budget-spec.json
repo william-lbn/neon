@@ -1,0 +1,11 @@
+{
+  "protocol_version": 1,
+  "nonce": "20261102T001805Z-5daaa3",
+  "unit": "neon-pg18-formal-adapter-20261102t001805z-5daaa3.service",
+  "kind": "heavy",
+  "evidence_dir": "/data/neon-build/validation/pg18-neon-formal-adapter-retry-build-20261102T001805Z-5daaa3",
+  "argv": [
+    "/usr/bin/python3",
+    "/data/neon-build/validation/pg18-neon-formal-adapter-retry-build-20261102T001805Z-5daaa3/worker.py"
+  ]
+}

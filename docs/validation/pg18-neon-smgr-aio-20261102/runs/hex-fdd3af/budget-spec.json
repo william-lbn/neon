@@ -1,0 +1,11 @@
+{
+  "protocol_version": 1,
+  "nonce": "20261101T235217Z-fdd3af",
+  "unit": "neon-pg18-formal-hexfix-20261101t235217z-fdd3af.service",
+  "kind": "heavy",
+  "evidence_dir": "/data/neon-build/validation/pg18-neon-formal-extensions-hexfix-build-20261101T235217Z-fdd3af",
+  "argv": [
+    "/usr/bin/python3",
+    "/data/neon-build/validation/pg18-neon-formal-extensions-hexfix-build-20261101T235217Z-fdd3af/worker.py"
+  ]
+}

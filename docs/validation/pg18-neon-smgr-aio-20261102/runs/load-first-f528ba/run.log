@@ -1,0 +1,25 @@
+test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers (__main__.FormalExtension.test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers) ... FAIL
+
+======================================================================
+FAIL: test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers (__main__.FormalExtension.test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/input/test_dsg_pg18_formal_extension.py", line 50, in test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers
+    self.fail((EVIDENCE / "postgres.log").read_text())
+AssertionError: 2026-11-02 01:02:41.271 UTC [42] FATAL:  could not load library "/opt/pg18/lib/postgresql/neon_rmgr.so": /opt/pg18/lib/postgresql/neon_rmgr.so: undefined symbol: neon_rm_decode
+2026-11-02 01:02:41.271 UTC [42] LOG:  database system is shut down
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/input/test_dsg_pg18_formal_extension.py", line 118, in test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers
+    self.assertEqual(code, 0, (EVIDENCE / "postgres.log").read_text()[-8000:])
+AssertionError: 1 != 0 : 2026-11-02 01:02:41.271 UTC [42] FATAL:  could not load library "/opt/pg18/lib/postgresql/neon_rmgr.so": /opt/pg18/lib/postgresql/neon_rmgr.so: undefined symbol: neon_rm_decode
+2026-11-02 01:02:41.271 UTC [42] LOG:  database system is shut down
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.969s
+
+FAILED (failures=1)

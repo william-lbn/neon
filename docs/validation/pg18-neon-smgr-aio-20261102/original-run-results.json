@@ -1,0 +1,179 @@
+{
+  "macro-a5f41c": {
+    "build_exit": 0,
+    "extension_make_exit": 2,
+    "seconds": 48.644879,
+    "PG_rebuilt": false,
+    "PG18_source_head": "8912380d95f3f66b335b03cbe5dfb4b281d85ac2",
+    "full_Rust_services_rebuilt": false,
+    "normal": false,
+    "E": 0
+  },
+  "hex-fdd3af": {
+    "build_exit": 0,
+    "extension_make_exit": 2,
+    "seconds": 11.420096,
+    "PG_rebuilt": false,
+    "PG18_source_head": "8912380d95f3f66b335b03cbe5dfb4b281d85ac2",
+    "full_Rust_services_rebuilt": false,
+    "normal": false,
+    "E": 0
+  },
+  "core-first-a41804": {
+    "core_build_exit": 0,
+    "extension_build_exit": 0,
+    "extension_make_exit": 2,
+    "postgres_sha256": "95001525a1e80c07e337fa001a3e04680f8a6cd4e9b2f0c006dca314b497bd6d",
+    "test_DSO_sha256": "cada2bc8f6b62de9e92be5b3863c9603dc2ef099ae53966d1e27b16c065c5b49",
+    "seconds": 61.394177294976544,
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "formal-first-5daaa3": {
+    "build_exit": 0,
+    "extension_make_exit": 0,
+    "seconds": 51.220949,
+    "PG_rebuilt": false,
+    "PG18_source_head": "8912380d95f3f66b335b03cbe5dfb4b281d85ac2",
+    "full_Rust_services_rebuilt": false,
+    "normal": false,
+    "E": 0
+  },
+  "load-first-f528ba": {
+    "status": "FAIL_ACTUAL_PG18_FORMAL_EXTENSION_COMPONENT",
+    "unique_Wait_exit": 1,
+    "OOMKilled": false,
+    "seconds": 4.344733191013802,
+    "targets": 1,
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "rmgr-symbol-fail-6235ac": {
+    "build_exit": 1,
+    "extension_make_exit": null,
+    "seconds": 43.744368,
+    "PG_rebuilt": false,
+    "PG18_source_head": "8912380d95f3f66b335b03cbe5dfb4b281d85ac2",
+    "full_Rust_services_rebuilt": false,
+    "normal": false,
+    "E": 0
+  },
+  "rmgr-symbol-16e41b": {
+    "build_exit": 0,
+    "extension_make_exit": 0,
+    "seconds": 27.437765,
+    "PG_rebuilt": false,
+    "PG18_source_head": "8912380d95f3f66b335b03cbe5dfb4b281d85ac2",
+    "full_Rust_services_rebuilt": false,
+    "normal": false,
+    "E": 0
+  },
+  "native-catch-assert-a534ea": {
+    "status": "FAIL_ACTUAL_PG18_FORMAL_EXTENSION_COMPONENT",
+    "unique_Wait_exit": 1,
+    "OOMKilled": false,
+    "seconds": 8.113051368010929,
+    "targets": 4,
+    "phase_exits": {
+      "formal": 0,
+      "probe_compile": 0,
+      "remote": 1
+    },
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "core-catch-fixed-ff51b4": {
+    "core_build_exit": 0,
+    "postgres_sha256": "95b4c4a86b0e365aaef080572959ade5f0ab7875aa55c40f38aef95abcb431d9",
+    "test_DSO_sha256": "cada2bc8f6b62de9e92be5b3863c9603dc2ef099ae53966d1e27b16c065c5b49",
+    "seconds": 5.3709288369864225,
+    "scope": "ERROR_CATCH_HOLDOFF_ONLY_NO_EXTENSION_REBUILD",
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "native-old-error-slot-0b5675": {
+    "status": "FAIL_ACTUAL_PG18_FORMAL_EXTENSION_COMPONENT",
+    "unique_Wait_exit": 1,
+    "OOMKilled": false,
+    "seconds": 8.858922322979197,
+    "targets": 4,
+    "phase_exits": {
+      "formal": 0,
+      "probe_compile": 0,
+      "remote": 1
+    },
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "error-slot-build-36bcc1": {
+    "build_exit": 0,
+    "extension_make_exit": 0,
+    "seconds": 34.710963,
+    "PG_rebuilt": false,
+    "PG18_source_head": "8912380d95f3f66b335b03cbe5dfb4b281d85ac2",
+    "full_Rust_services_rebuilt": false,
+    "normal": false,
+    "E": 0
+  },
+  "native-final-four-a14568": {
+    "status": "PASS_FORMAL_PG18_NEON_SQL_COMPONENT",
+    "unique_Wait_exit": 0,
+    "OOMKilled": false,
+    "seconds": 7.806415255006868,
+    "peer_is_model": true,
+    "formal_SQL_uses_storage_peer": false,
+    "peer_program": "ci/test_dsg_pg18_remote_aio.py::PageStream",
+    "targets": 4,
+    "phase_exits": {
+      "formal": 0,
+      "probe_compile": 0,
+      "remote": 0
+    },
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "native-slru-boundary-24d151": {
+    "status": "PASS_PG18_SLRU3_BOUNDARY_COMPONENT",
+    "unique_Wait_exit": 0,
+    "OOMKilled": false,
+    "seconds": 6.402289333986118,
+    "peer_is_model": true,
+    "targets": 1,
+    "normal": false,
+    "Source": false,
+    "E": 0
+  },
+  "legacy-header-path-b8c7d5": {
+    "build_exit": 1,
+    "seven_syntax_passed": false,
+    "seconds": 4.2868011470127385,
+    "U": 0,
+    "S": 0,
+    "E": 0,
+    "normal": false
+  },
+  "legacy-six-ca2f25": {
+    "build_exit": 0,
+    "seven_syntax_passed": false,
+    "seconds": 4.228241006989265,
+    "U": 0,
+    "S": 0,
+    "E": 0,
+    "normal": false
+  },
+  "legacy-one-cc9858": {
+    "build_exit": 0,
+    "one_syntax_passed": false,
+    "seconds": 2.234290753985988,
+    "U": 0,
+    "S": 0,
+    "E": 0,
+    "normal": false
+  }
+}

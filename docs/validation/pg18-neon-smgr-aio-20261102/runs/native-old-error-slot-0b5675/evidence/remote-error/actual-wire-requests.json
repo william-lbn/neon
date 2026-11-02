@@ -1,0 +1,12 @@
+[
+  {
+    "kind": "slru",
+    "segment": 10,
+    "raw_hex": "040000009e00000001ffffffffffffffff00000000015169d0000000000a"
+  },
+  {
+    "kind": "getpage",
+    "block": 0,
+    "raw_hex": "020000009e00000002ffffffffffffffff00000000015169d00000067f000000050000401a0000000000"
+  }
+]

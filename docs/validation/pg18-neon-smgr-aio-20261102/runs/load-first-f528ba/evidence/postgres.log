@@ -1,0 +1,2 @@
+2026-11-02 01:02:41.271 UTC [42] FATAL:  could not load library "/opt/pg18/lib/postgresql/neon_rmgr.so": /opt/pg18/lib/postgresql/neon_rmgr.so: undefined symbol: neon_rm_decode
+2026-11-02 01:02:41.271 UTC [42] LOG:  database system is shut down

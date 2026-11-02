@@ -1,0 +1,32 @@
+2026-11-02 01:18:30.027 UTC [179] LOG:  registered custom resource manager "neon" with ID 134
+2026-11-02 01:18:30.027 UTC [179] LOG:  Missing NEON_CONTROL_PLANE_TOKEN environment variable, forwarding will not be authenticated
+2026-11-02 01:18:30.035 UTC [179] LOG:  starting PostgreSQL 18.2 (dsga-pg18-native-TEST_ONLY) on x86_64-pc-linux-gnu, compiled by gcc-12 (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-02 01:18:30.035 UTC [179] LOG:  listening on Unix socket "/tmp/pg18-rpc-eswk4v92/s/.s.PGSQL.55438"
+2026-11-02 01:18:30.039 UTC [187] LOG:  database system was shut down at 2026-11-02 01:18:29 UTC
+2026-11-02 01:18:30.039 UTC [189] FATAL:  the database system is starting up
+2026-11-02 01:18:30.040 UTC [187] LOG:  Continue writing WAL at 0/1516A48
+2026-11-02 01:18:30.041 UTC [188] LOG:  communicator threads started
+2026-11-02 01:18:30.041 UTC [188] INFO:  [COMMUNICATOR] communicator process logging started
+2026-11-02 01:18:30.041 UTC [188] INFO:  [COMMUNICATOR] control socket listener spawned
+2026-11-02 01:18:30.042 UTC [179] LOG:  database system is ready to accept connections
+2026-11-02 01:18:30.045 UTC [194] WARNING:  [WP] Safekeepers list is empty
+2026-11-02 01:18:30.075 UTC [197] FATAL:  role "nonroot" does not exist
+2026-11-02 01:18:30.101 UTC [179] LOG:  received SIGHUP, reloading configuration files
+2026-11-02 01:18:30.101 UTC [179] LOG:  parameter "neon.pageserver_connstring" changed to "host=127.0.0.1 port=34305 user=fixture dbname=fixture sslmode=disable gssencmode=disable"
+2026-11-02 01:18:30.115 UTC [206] LOG:  [NEON_SMGR] [shard 0] libpagestore: connected to 'host=127.0.0.1 port=34305 user=fixture dbname=fixture sslmode=disable gssencmode=disable' with protocol version 3
+2026-11-02 01:18:30.123 UTC [208] ERROR:  invalid Neon SLRU download identity
+2026-11-02 01:18:30.123 UTC [208] STATEMENT:  SELECT test_neon18_slru('pg_xact/000A',-1)
+2026-11-02 01:18:30.131 UTC [210] ERROR:  Neon SLRU segment exceeds the current wire request range
+2026-11-02 01:18:30.131 UTC [210] STATEMENT:  SELECT test_neon18_slru('pg_xact/000A',4294967296)
+2026-11-02 01:18:30.140 UTC [212] ERROR:  Neon SLRU filename does not match segment number
+2026-11-02 01:18:30.140 UTC [212] STATEMENT:  SELECT test_neon18_slru('pg_xact/000B',10)
+2026-11-02 01:18:30.219 UTC [179] LOG:  received fast shutdown request
+2026-11-02 01:18:30.219 UTC [179] LOG:  aborting any active transactions
+2026-11-02 01:18:30.219 UTC [193] FATAL:  terminating background worker "Logical replication monitor" due to administrator command
+2026-11-02 01:18:30.221 UTC [179] LOG:  background worker "logical replication launcher" (PID 195) exited with exit code 1
+2026-11-02 01:18:30.222 UTC [179] LOG:  background worker "Logical replication monitor" (PID 193) exited with exit code 1
+2026-11-02 01:18:30.222 UTC [185] LOG:  shutting down
+2026-11-02 01:18:30.223 UTC [185] LOG:  checkpoint starting: shutdown immediate
+2026-11-02 01:18:30.223 UTC [185] LOG:  checkpoint complete: wrote 58 buffers (22.7%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.002 s; sync files=22, longest=0.001 s, average=0.001 s; distance=329 kB, estimate=329 kB; lsn=0/1569070, redo lsn=0/1569070
+2026-11-02 01:18:30.224 UTC [188] FATAL:  terminating background worker "Storage communicator process" due to administrator command
+2026-11-02 01:18:30.234 UTC [179] LOG:  database system is shut down

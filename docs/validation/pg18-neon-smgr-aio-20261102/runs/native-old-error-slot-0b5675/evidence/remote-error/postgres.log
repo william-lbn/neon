@@ -1,0 +1,36 @@
+2026-11-02 01:24:06.463 UTC [127] LOG:  registered custom resource manager "neon" with ID 134
+2026-11-02 01:24:06.463 UTC [127] LOG:  Missing NEON_CONTROL_PLANE_TOKEN environment variable, forwarding will not be authenticated
+2026-11-02 01:24:06.472 UTC [127] LOG:  starting PostgreSQL 18.2 (dsga-pg18-native-TEST_ONLY) on x86_64-pc-linux-gnu, compiled by gcc-12 (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-02 01:24:06.472 UTC [127] LOG:  listening on Unix socket "/tmp/pg18-rpc-ktj9gi35/s/.s.PGSQL.55438"
+2026-11-02 01:24:06.476 UTC [134] LOG:  database system was shut down at 2026-11-02 01:24:06 UTC
+2026-11-02 01:24:06.477 UTC [134] LOG:  Continue writing WAL at 0/1516A48
+2026-11-02 01:24:06.478 UTC [135] LOG:  communicator threads started
+2026-11-02 01:24:06.478 UTC [135] INFO:  [COMMUNICATOR] communicator process logging started
+2026-11-02 01:24:06.478 UTC [135] INFO:  [COMMUNICATOR] control socket listener spawned
+2026-11-02 01:24:06.479 UTC [139] FATAL:  the database system is starting up
+2026-11-02 01:24:06.479 UTC [127] LOG:  database system is ready to accept connections
+2026-11-02 01:24:06.482 UTC [142] WARNING:  [WP] Safekeepers list is empty
+2026-11-02 01:24:06.517 UTC [145] FATAL:  role "nonroot" does not exist
+2026-11-02 01:24:06.553 UTC [132] LOG:  checkpoint starting: immediate force wait
+2026-11-02 01:24:06.556 UTC [132] LOG:  checkpoint complete: wrote 255 buffers (99.6%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.003 s; sync files=44, longest=0.001 s, average=0.001 s; distance=3286 kB, estimate=3286 kB; lsn=0/184C450, redo lsn=0/184C3F8
+2026-11-02 01:24:06.573 UTC [127] LOG:  received SIGHUP, reloading configuration files
+2026-11-02 01:24:06.573 UTC [127] LOG:  parameter "neon.pageserver_connstring" changed to "host=127.0.0.1 port=33669 user=fixture dbname=fixture sslmode=disable gssencmode=disable"
+2026-11-02 01:24:06.574 UTC [135] WARNING:  96458652412032 communicator log messages were dropped because the log buffer was full
+2026-11-02 01:24:06.587 UTC [158] LOG:  [NEON_SMGR] [shard 0] libpagestore: connected to 'host=127.0.0.1 port=33669 user=fixture dbname=fixture sslmode=disable gssencmode=disable' with protocol version 3
+2026-11-02 01:24:06.588 UTC [158] ERROR:  [NEON_SMGR] [shard 0, reqid 9e00000002] could not read block 0 in rel 1663/5/16410.0 from page server at lsn 0/015169D0
+2026-11-02 01:24:06.588 UTC [158] DETAIL:  page server returned error: forced-pg18-aio-read-error
+2026-11-02 01:24:06.588 UTC [158] STATEMENT:  SELECT 'EVIDENCE '||json_build_object('case','first_rows','value',json_build_object('rows',count(*),'sum',sum(i)))::text FROM aio18_data;
+2026-11-02 01:24:06.589 UTC [158] ERROR:  [NEON_SMGR] [shard 0, reqid 9e00000002] could not read block 0 in rel 1663/5/16410.0 from page server at lsn 0/015169D0
+2026-11-02 01:24:06.589 UTC [158] DETAIL:  page server returned error: forced-pg18-aio-read-error
+2026-11-02 01:24:06.589 UTC [158] STATEMENT:  SELECT 'EVIDENCE '||json_build_object('case','retry_rows','value',json_build_object('rows',count(*),'sum',sum(i)))::text FROM aio18_data;
+2026-11-02 01:24:06.593 UTC [127] LOG:  received fast shutdown request
+2026-11-02 01:24:06.593 UTC [127] LOG:  aborting any active transactions
+2026-11-02 01:24:06.593 UTC [141] FATAL:  terminating background worker "Logical replication monitor" due to administrator command
+2026-11-02 01:24:06.595 UTC [127] LOG:  background worker "Logical replication monitor" (PID 141) exited with exit code 1
+2026-11-02 01:24:06.595 UTC [127] LOG:  background worker "logical replication launcher" (PID 143) exited with exit code 1
+2026-11-02 01:24:06.595 UTC [132] LOG:  shutting down
+2026-11-02 01:24:06.596 UTC [132] LOG:  checkpoint starting: shutdown immediate
+2026-11-02 01:24:06.596 UTC [132] LOG:  checkpoint complete: wrote 10 buffers (3.9%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.001 s; distance=38 kB, estimate=2961 kB; lsn=0/1855D80, redo lsn=0/1855D80
+2026-11-02 01:24:06.596 UTC [135] WARNING:  26992 communicator log messages were dropped because the log buffer was full
+2026-11-02 01:24:06.596 UTC [135] FATAL:  terminating background worker "Storage communicator process" due to administrator command
+2026-11-02 01:24:06.606 UTC [127] LOG:  database system is shut down

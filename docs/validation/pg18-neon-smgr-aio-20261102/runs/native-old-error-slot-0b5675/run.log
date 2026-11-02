@@ -1,0 +1,25 @@
+test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers (__main__.FormalExtension.test_PG18_S_NEON_FORMAL_SQL_001_shared_contract_resize_and_observers) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.990s
+
+OK
+test_PG18_S_NEON_REMOTE_AIO_001_real_rpc_success (__main__.RemoteAio.test_PG18_S_NEON_REMOTE_AIO_001_real_rpc_success) ... ok
+test_PG18_S_NEON_REMOTE_AIO_002_real_rpc_ERROR_pin_cleanup_same_backend_retry (__main__.RemoteAio.test_PG18_S_NEON_REMOTE_AIO_002_real_rpc_ERROR_pin_cleanup_same_backend_retry) ... ERROR
+test_PG18_S_NEON_SLRU3_001_real_rpc_and_narrowing_rejections (__main__.RemoteAio.test_PG18_S_NEON_SLRU3_001_real_rpc_and_narrowing_rejections) ... ok
+
+======================================================================
+ERROR: test_PG18_S_NEON_REMOTE_AIO_002_real_rpc_ERROR_pin_cleanup_same_backend_retry (__main__.RemoteAio.test_PG18_S_NEON_REMOTE_AIO_002_real_rpc_ERROR_pin_cleanup_same_backend_retry)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/input/test_dsg_pg18_remote_aio.py", line 248, in test_PG18_S_NEON_REMOTE_AIO_002_real_rpc_ERROR_pin_cleanup_same_backend_retry
+    self.remote_read(True)
+  File "/input/test_dsg_pg18_remote_aio.py", line 225, in remote_read
+    self.assertEqual(ev['retry_rows'], {'rows': 600, 'sum': 180300})
+                     ~~^^^^^^^^^^^^^^
+KeyError: 'retry_rows'
+
+----------------------------------------------------------------------
+Ran 3 tests in 2.989s
+
+FAILED (errors=1)

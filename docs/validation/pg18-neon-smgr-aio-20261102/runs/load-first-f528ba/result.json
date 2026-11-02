@@ -1,0 +1,10 @@
+{
+  "status": "FAIL_ACTUAL_PG18_FORMAL_EXTENSION_COMPONENT",
+  "unique_Wait_exit": 1,
+  "OOMKilled": false,
+  "seconds": 4.344733191013802,
+  "targets": 1,
+  "normal": false,
+  "Source": false,
+  "E": 0
+}

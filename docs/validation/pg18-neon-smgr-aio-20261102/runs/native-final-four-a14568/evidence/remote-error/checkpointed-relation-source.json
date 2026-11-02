@@ -1,0 +1,10 @@
+{
+  "peer_is_model": true,
+  "model_program": "ci/test_dsg_pg18_remote_aio.py::PageStream",
+  "original_path_inside_isolated_PG": "/tmp/pg18-rpc-1u3gaq4r/data/base/5/16410",
+  "relation_path": "base/5/16410",
+  "checkpointed_relation_bytes": 4915200,
+  "checkpointed_relation_sha256": "d10a28b3246fcf224e723c26faac1163200b3fae1a5f789d95892e09f4fcc81f",
+  "formal_Pageserver": false,
+  "storage_E": false
+}

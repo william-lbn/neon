@@ -1,0 +1,11 @@
+{
+  "protocol_version": 1,
+  "nonce": "20261102T013805Z-ca2f25",
+  "unit": "neon-pg17-compat-syntax-20261102t013805z-ca2f25.service",
+  "kind": "native",
+  "evidence_dir": "/data/neon-build/validation/pg17-neon-compat-owned-syntax-diagnostic-20261102T013805Z-ca2f25",
+  "argv": [
+    "/usr/bin/python3",
+    "/data/neon-build/validation/pg17-neon-compat-owned-syntax-diagnostic-20261102T013805Z-ca2f25/worker.py"
+  ]
+}

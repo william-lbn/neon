@@ -1,0 +1,11 @@
+{
+  "protocol_version": 1,
+  "nonce": "20261102T014723Z-24d151",
+  "unit": "neon-pg18-formal-sql-20261102t014723z-24d151.service",
+  "kind": "native",
+  "evidence_dir": "/data/neon-build/validation/pg18-neon-formal-sql-native-20261102T014723Z-24d151",
+  "argv": [
+    "/usr/bin/python3",
+    "/data/neon-build/validation/pg18-neon-formal-sql-native-20261102T014723Z-24d151/worker.py"
+  ]
+}

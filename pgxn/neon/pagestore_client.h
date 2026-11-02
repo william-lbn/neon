@@ -246,7 +246,14 @@ extern int  neon_protocol_version;
 
 extern shardno_t get_shard_number(BufferTag* tag);
 
+#if PG_MAJORVERSION_NUM >= 18
+extern void smgr_register_neon(void);
+extern PGDLLEXPORT void neon_startreadv(PgAioHandle *ioh, SMgrRelation reln,
+									  ForkNumber forknum, BlockNumber blocknum,
+									  void **buffers, BlockNumber nblocks);
+#else
 extern const f_smgr *smgr_neon(ProcNumber backend, NRelFileInfo rinfo);
+#endif
 extern void smgr_init_neon(void);
 extern void readahead_buffer_resize(int newsize, void *extra);
 

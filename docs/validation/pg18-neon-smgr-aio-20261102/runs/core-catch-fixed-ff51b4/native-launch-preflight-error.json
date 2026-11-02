@@ -1,0 +1,5 @@
+{
+  "classification": "launcher pointer absent before nonce/unit",
+  "S_executed": false,
+  "fix": "publish exact already completed ff51 core pointer without changing artifact/source"
+}

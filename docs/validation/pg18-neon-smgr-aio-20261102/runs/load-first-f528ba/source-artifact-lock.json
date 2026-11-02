@@ -1,0 +1,18 @@
+{
+  "scope": "FIRST_FORMAL_PG18_NEON_SQL_COMPONENT_ONLY_NOT_NORMAL",
+  "Neon_base": "13802483a9844df6e0a2735d2cdc9439ede54b66",
+  "PG18_head": "8912380d95f3f66b335b03cbe5dfb4b281d85ac2",
+  "extension_build": "/data/neon-build/validation/pg18-neon-formal-adapter-retry-build-20261102T001805Z-5daaa3",
+  "extension_build_source_lock_sha256": "c0c826393a93185ddcdaf786b0c37e0d4015b29c2ff38fa4d9a622c4627e9784",
+  "runtime_image": "127.0.0.1:5001/neon/pg18-native-tools@sha256:68c6b14f76f04bdcebbf15dba0c97de2bdcb2bed5850654797cc6d631f694ee6",
+  "driver_sha256": "e98565fff4759b4bbbbae8d14d281a192462937713f231cc6b54f6d565317da9",
+  "artifacts": {
+    "bin/postgres": "95001525a1e80c07e337fa001a3e04680f8a6cd4e9b2f0c006dca314b497bd6d",
+    "lib/postgresql/test_dsg_region18.so": "cada2bc8f6b62de9e92be5b3863c9603dc2ef099ae53966d1e27b16c065c5b49",
+    "lib/postgresql/neon.so": "8890d7358578a960a6f06a840ce431585c909c26be69481ebdbb9248db89c30e",
+    "lib/postgresql/neon_rmgr.so": "69a9651127a722451f59baa681b225d91419f8b994f488fb8d9aaad15cd6b767"
+  },
+  "normal": false,
+  "Source": false,
+  "E": 0
+}

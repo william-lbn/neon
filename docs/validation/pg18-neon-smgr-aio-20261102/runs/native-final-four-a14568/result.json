@@ -1,0 +1,18 @@
+{
+  "status": "PASS_FORMAL_PG18_NEON_SQL_COMPONENT",
+  "unique_Wait_exit": 0,
+  "OOMKilled": false,
+  "seconds": 7.806415255006868,
+  "peer_is_model": true,
+  "formal_SQL_uses_storage_peer": false,
+  "peer_program": "ci/test_dsg_pg18_remote_aio.py::PageStream",
+  "targets": 4,
+  "phase_exits": {
+    "formal": 0,
+    "probe_compile": 0,
+    "remote": 0
+  },
+  "normal": false,
+  "Source": false,
+  "E": 0
+}

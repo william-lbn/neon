@@ -1,0 +1,10 @@
+{
+  "build_exit": 1,
+  "extension_make_exit": null,
+  "seconds": 43.744368,
+  "PG_rebuilt": false,
+  "PG18_source_head": "8912380d95f3f66b335b03cbe5dfb4b281d85ac2",
+  "full_Rust_services_rebuilt": false,
+  "normal": false,
+  "E": 0
+}

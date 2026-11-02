@@ -3,7 +3,7 @@
 
 #include "storage/smgr.h"
 
-#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION != 2
+#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION != 2 && NEON_SLRU_DOWNLOAD_API_VERSION != 3
 #error "unsupported Neon SLRU download API: adapt the storage protocol explicitly"
 #endif
 
@@ -12,7 +12,9 @@ extern PGDLLEXPORT void neon_publish_slru_segment(const char *path,
 												  const void *data, int nblocks);
 extern void neon_cleanup_slru_downloads(void);
 
-#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION == 2
+#if defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION == 3
+extern PGDLLEXPORT bool neon_download_slru_segment(const char *path, int64 segno);
+#elif defined(NEON_SLRU_DOWNLOAD_API_VERSION) && NEON_SLRU_DOWNLOAD_API_VERSION == 2
 extern PGDLLEXPORT bool neon_download_slru_segment(const char *path, int segno);
 #endif
 

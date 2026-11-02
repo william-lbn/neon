@@ -1,0 +1,74 @@
+2026-11-02 01:18:28.862 UTC [125] LOG:  registered custom resource manager "neon" with ID 134
+2026-11-02 01:18:28.862 UTC [125] LOG:  Missing NEON_CONTROL_PLANE_TOKEN environment variable, forwarding will not be authenticated
+2026-11-02 01:18:28.870 UTC [125] LOG:  starting PostgreSQL 18.2 (dsga-pg18-native-TEST_ONLY) on x86_64-pc-linux-gnu, compiled by gcc-12 (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+2026-11-02 01:18:28.870 UTC [125] LOG:  listening on Unix socket "/tmp/pg18-rpc-rmz2nfew/s/.s.PGSQL.55438"
+2026-11-02 01:18:28.874 UTC [132] LOG:  database system was shut down at 2026-11-02 01:18:28 UTC
+2026-11-02 01:18:28.875 UTC [132] LOG:  Continue writing WAL at 0/1516A48
+2026-11-02 01:18:28.876 UTC [133] LOG:  communicator threads started
+2026-11-02 01:18:28.876 UTC [133] INFO:  [COMMUNICATOR] communicator process logging started
+2026-11-02 01:18:28.876 UTC [133] INFO:  [COMMUNICATOR] control socket listener spawned
+2026-11-02 01:18:28.877 UTC [125] LOG:  database system is ready to accept connections
+2026-11-02 01:18:28.880 UTC [138] WARNING:  [WP] Safekeepers list is empty
+2026-11-02 01:18:28.885 UTC [141] FATAL:  role "nonroot" does not exist
+2026-11-02 01:18:28.925 UTC [130] LOG:  checkpoint starting: immediate force wait
+2026-11-02 01:18:28.927 UTC [130] LOG:  checkpoint complete: wrote 255 buffers (99.6%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.002 s; sync files=44, longest=0.001 s, average=0.001 s; distance=3286 kB, estimate=3286 kB; lsn=0/184C450, redo lsn=0/184C3F8
+2026-11-02 01:18:28.948 UTC [125] LOG:  received SIGHUP, reloading configuration files
+2026-11-02 01:18:28.948 UTC [125] LOG:  parameter "neon.pageserver_connstring" changed to "host=127.0.0.1 port=59191 user=fixture dbname=fixture sslmode=disable gssencmode=disable"
+2026-11-02 01:18:28.964 UTC [154] LOG:  [NEON_SMGR] [shard 0] libpagestore: connected to 'host=127.0.0.1 port=59191 user=fixture dbname=fixture sslmode=disable gssencmode=disable' with protocol version 3
+TRAP: failed Assert("InterruptHoldoffCount > 0"), File: "../../../../../src/src/backend/storage/aio/aio.c", Line: 520, PID: 154
+postgres: dsg_admin postgres [local] SELECT(ExceptionalCondition+0x59)[0x58fd857e8539]
+postgres: dsg_admin postgres [local] SELECT(pgaio_io_start_readv_synchronous+0x403)[0x58fd8561d933]
+/opt/pg18/lib/postgresql/neon.so(neon_startreadv+0x6c)[0x7039e9a6bf4c]
+/evidence/pg18_neon_aio_probe.so(+0x1538)[0x7039e2ef4538]
+postgres: dsg_admin postgres [local] SELECT(smgrstartreadv+0x2d)[0x58fd8567c4ed]
+postgres: dsg_admin postgres [local] SELECT(+0x246f386)[0x58fd8563a386]
+postgres: dsg_admin postgres [local] SELECT(StartReadBuffers+0x6b3)[0x58fd8563cf63]
+postgres: dsg_admin postgres [local] SELECT(+0x2457ef4)[0x58fd85622ef4]
+postgres: dsg_admin postgres [local] SELECT(+0x2458323)[0x58fd85623323]
+postgres: dsg_admin postgres [local] SELECT(read_stream_next_buffer+0x38f)[0x58fd8562384f]
+postgres: dsg_admin postgres [local] SELECT(+0x20b9659)[0x58fd85284659]
+postgres: dsg_admin postgres [local] SELECT(heap_getnextslot+0x1e)[0x58fd85284cde]
+postgres: dsg_admin postgres [local] SELECT(+0x22dd46f)[0x58fd854a846f]
+postgres: dsg_admin postgres [local] SELECT(+0x22b7051)[0x58fd85482051]
+postgres: dsg_admin postgres [local] SELECT(+0x22ba7d4)[0x58fd854857d4]
+postgres: dsg_admin postgres [local] SELECT(standard_ExecutorRun+0x19b)[0x58fd8546c28b]
+postgres: dsg_admin postgres [local] SELECT(+0x24bbb78)[0x58fd85686b78]
+postgres: dsg_admin postgres [local] SELECT(PortalRun+0x14a)[0x58fd8568817a]
+postgres: dsg_admin postgres [local] SELECT(+0x24b7cdd)[0x58fd85682cdd]
+postgres: dsg_admin postgres [local] SELECT(PostgresMain+0x181a)[0x58fd85684b4a]
+postgres: dsg_admin postgres [local] SELECT(BackendMain+0x4d)[0x58fd8567e37d]
+postgres: dsg_admin postgres [local] SELECT(postmaster_child_launch+0x10c)[0x58fd855ae1cc]
+postgres: dsg_admin postgres [local] SELECT(+0x23e70c9)[0x58fd855b20c9]
+postgres: dsg_admin postgres [local] SELECT(PostmasterMain+0xd3f)[0x58fd855b3c4f]
+postgres: dsg_admin postgres [local] SELECT(main+0x336)[0x58fd854d2dd6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a)[0x7039ec39024a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85)[0x7039ec390305]
+postgres: dsg_admin postgres [local] SELECT(_start+0x21)[0x58fd8522d321]
+2026-11-02 01:18:29.146 UTC [125] LOG:  client backend (PID 154) was terminated by signal 6: Aborted
+2026-11-02 01:18:29.146 UTC [125] DETAIL:  Failed process was running: SELECT 'EVIDENCE '||json_build_object('case','first_rows','value',json_build_object('rows',count(*),'sum',sum(i)))::text FROM aio18_data;
+2026-11-02 01:18:29.146 UTC [125] LOG:  terminating any other active server processes
+2026-11-02 01:18:29.148 UTC [125] LOG:  all server processes terminated; reinitializing
+2026-11-02 01:18:29.160 UTC [157] LOG:  database system was interrupted; last known up at 2026-11-02 01:18:28 UTC
+2026-11-02 01:18:29.167 UTC [157] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-02 01:18:29.168 UTC [157] LOG:  redo starts at 0/184C3F8
+2026-11-02 01:18:29.168 UTC [157] LOG:  invalid record length at 0/1852168: expected at least 24, got 0
+2026-11-02 01:18:29.168 UTC [157] LOG:  redo done at 0/1852140 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-11-02 01:18:29.168 UTC [157] LOG:  Continue writing WAL at 0/1852168
+2026-11-02 01:18:29.170 UTC [158] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-02 01:18:29.170 UTC [158] LOG:  checkpoint complete: wrote 4 buffers (1.6%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=4, longest=0.001 s, average=0.001 s; distance=23 kB, estimate=23 kB; lsn=0/1852168, redo lsn=0/1852168
+2026-11-02 01:18:29.172 UTC [125] LOG:  database system is ready to accept connections
+2026-11-02 01:18:29.177 UTC [162] LOG:  communicator threads started
+2026-11-02 01:18:29.177 UTC [162] INFO:  [COMMUNICATOR] communicator process logging started
+2026-11-02 01:18:29.177 UTC [162] WARNING:  [COMMUNICATOR] removed stale control socket
+2026-11-02 01:18:29.177 UTC [162] INFO:  [COMMUNICATOR] control socket listener spawned
+2026-11-02 01:18:29.246 UTC [125] LOG:  received fast shutdown request
+2026-11-02 01:18:29.246 UTC [125] LOG:  aborting any active transactions
+2026-11-02 01:18:29.247 UTC [161] FATAL:  terminating background worker "Logical replication monitor" due to administrator command
+2026-11-02 01:18:29.249 UTC [125] LOG:  background worker "logical replication launcher" (PID 163) exited with exit code 1
+2026-11-02 01:18:29.249 UTC [125] LOG:  background worker "Logical replication monitor" (PID 161) exited with exit code 1
+2026-11-02 01:18:29.249 UTC [158] LOG:  shutting down
+2026-11-02 01:18:29.250 UTC [158] LOG:  checkpoint starting: shutdown immediate
+2026-11-02 01:18:29.250 UTC [158] LOG:  checkpoint complete: wrote 0 buffers (0.0%), wrote 0 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.001 s, sync=0.001 s, total=0.001 s; sync files=0, longest=0.000 s, average=0.000 s; distance=0 kB, estimate=21 kB; lsn=0/18521E0, redo lsn=0/18521E0
+2026-11-02 01:18:29.250 UTC [162] WARNING:  97846440223104 communicator log messages were dropped because the log buffer was full
+2026-11-02 01:18:29.250 UTC [162] FATAL:  terminating background worker "Storage communicator process" due to administrator command
+2026-11-02 01:18:29.259 UTC [125] LOG:  database system is shut down

@@ -11,6 +11,8 @@
 #include "postmaster/interrupt.h"
 #include "replication/slot.h"
 #include "storage/fd.h"
+/* PG18不再经其他头间接带入WaitLatch事件位；直接声明其真实来源。 */
+#include "storage/latch.h"
 #include "storage/procsignal.h"
 #include "tcop/tcopprot.h"
 #include "utils/guc.h"

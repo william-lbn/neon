@@ -2242,6 +2242,12 @@ Retry:
 				break;
 			}
 			case T_NeonErrorResponse:
+#if PG_MAJORVERSION_NUM == 18
+				/* PG18同步AIO桥要允许同一backend在ERROR后重新发起读。原错误文本
+				 * 先由errfinish保存，再退役已收到的失败slot，不能复用同一旧ERROR。 */
+				PG_TRY();
+				{
+#endif
 				ereport(ERROR,
 						(errcode(ERRCODE_IO_ERROR),
 						 errmsg(NEON_TAG "[shard %d, reqid " UINT64_HEX_FORMAT "] could not read block %u in rel %u/%u/%u.%u from page server at lsn %X/%08X",
@@ -2249,6 +2255,16 @@ Retry:
 								forkNum, LSN_FORMAT_ARGS(reqlsns->effective_request_lsn)),
 						 errdetail("page server returned error: %s",
 								   ((NeonErrorResponse *) resp)->message)));
+#if PG_MAJORVERSION_NUM == 18
+				}
+				PG_CATCH();
+				{
+					prefetch_set_unused(ring_index);
+					prefetch_cleanup_trailing_unused();
+					PG_RE_THROW();
+				}
+				PG_END_TRY();
+#endif
 				break;
 			default:
 				NEON_PANIC_CONNECTION_STATE(slot->shard_no, PANIC,

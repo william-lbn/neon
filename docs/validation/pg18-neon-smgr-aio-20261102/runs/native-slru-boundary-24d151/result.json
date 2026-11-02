@@ -1,0 +1,11 @@
+{
+  "status": "PASS_PG18_SLRU3_BOUNDARY_COMPONENT",
+  "unique_Wait_exit": 0,
+  "OOMKilled": false,
+  "seconds": 6.402289333986118,
+  "peer_is_model": true,
+  "targets": 1,
+  "normal": false,
+  "Source": false,
+  "E": 0
+}
