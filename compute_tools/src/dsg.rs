@@ -164,6 +164,30 @@ impl ComputeNode {
     }
 
     /// state只用于同步拷贝已验证启动契约；绝不能持std Mutex跨数据库await。
+    /// Root资源通道不依赖PG配置完成；Init仅允许原冻结身份的签名透传。
+    /// 此getter不创建PG管理连接、不打开准入、不产生normal预算或resize许可。
+    /// 原dsg_spec和verify_dsg_running继续限制全部PG操作生命周期。
+    pub(crate) fn dsg_resource_spec(&self) -> Result<DynamicSharedBuffersSpec> {
+        let state = self
+            .state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("Compute state poisoned"))?;
+        ensure!(
+            !matches!(
+                state.status,
+                ComputeStatus::Empty
+                    | ComputeStatus::ConfigurationPending
+                    | ComputeStatus::Terminated
+            ),
+            "Compute has no available Root resource lifecycle"
+        );
+        let spec = self
+            .frozen_dsg_startup()
+            .context("DSGA original Root resource identity unavailable")?;
+        spec.validate()?;
+        Ok(spec)
+    }
+
     pub(crate) fn dsg_spec(&self) -> Result<DynamicSharedBuffersSpec> {
         let state = self
             .state
@@ -259,4 +283,65 @@ mod creation_tests {
         assert!(node.verify_dsg_storage(&changed).is_err());
         Ok(())
     }
+    fn resource_node() -> Result<ComputeNode> {
+        let spec = crate::dsg_roles::tests::fixture();
+        let node = ComputeNode::new(
+            crate::dsg_roles::tests::parameters(),
+            ComputeConfig {
+                spec: Some(spec.clone()),
+                compute_ctl_config: ComputeCtlConfig {
+                    jwks: jsonwebtoken::jwk::JwkSet { keys: vec![] },
+                    tls: None,
+                },
+            },
+        )?;
+        assert!(node.frozen_dsg_startup().is_some());
+        Ok(node)
+    }
+
+    #[test]
+    fn root_resource_init_uses_original_frozen_identity_only() -> Result<()> {
+        let node = resource_node()?;
+        node.state.lock().unwrap().status = ComputeStatus::Init;
+        let original = node.frozen_dsg_startup().unwrap();
+        assert_eq!(node.dsg_resource_spec()?, original);
+        assert!(node.dsg_spec().is_err());
+        assert!(node.verify_dsg_running().is_err());
+        {
+            let mut state = node.state.lock().unwrap();
+            let changed = state.pspec.as_mut().unwrap().spec.dynamic_shared_buffers.as_mut().unwrap();
+            changed.vm_uid = "changed-vm".into();
+            changed.compute_instance_id = "changed-compute".into();
+        }
+        assert_eq!(node.dsg_resource_spec()?, original);
+        assert!(node.dsg_spec().is_err());
+        Ok(())
+    }
+
+    #[test]
+    fn root_resource_rejects_empty_unfrozen_and_disallowed_lifecycles() -> Result<()> {
+        let node = resource_node()?;
+        for status in [ComputeStatus::Empty, ComputeStatus::ConfigurationPending, ComputeStatus::Terminated] {
+            node.state.lock().unwrap().status = status;
+            assert!(node.dsg_resource_spec().is_err());
+            assert!(node.dsg_spec().is_err());
+        }
+        let empty = ComputeNode::new(
+            crate::dsg_roles::tests::parameters(),
+            ComputeConfig {
+                spec: None,
+                compute_ctl_config: ComputeCtlConfig {
+                    jwks: jsonwebtoken::jwk::JwkSet { keys: vec![] },
+                    tls: None,
+                },
+            },
+        )?;
+        empty.state.lock().unwrap().status = ComputeStatus::Init;
+        assert!(empty.dsg_resource_spec().is_err());
+        assert!(empty.dsg_spec().is_err());
+        node.state.lock().unwrap().status = ComputeStatus::Running;
+        assert_eq!(node.dsg_resource_spec()?, node.dsg_spec()?);
+        Ok(())
+    }
+
 }

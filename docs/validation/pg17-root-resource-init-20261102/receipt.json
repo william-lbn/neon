@@ -1,0 +1,20 @@
+{
+  "scope": "Root resource Init getter only; PG Running gates retained",
+  "source_sha256": {
+    "compute_tools/src/dsg.rs": "56876956ab556a099cbfe7b28e58e29b177c0d16d0f3c49e0f03f0f77b8ef5b5",
+    "compute_tools/src/http/routes/dsg_resource.rs": "80a08d9ecb9d6a3e59152971da7a5dd4a223396f6af21e9ecd0540f42ea1e900"
+  },
+  "validation_run": "/data/neon-build/validation/pg17-root-proxy-init-compute-build-20261102T071240Z-595134",
+  "source_lock_sha256": "c48001522a30bed8cf46adf3e36d08373303ce5f5f80e2a526f9d3b8b92b1928",
+  "test_targets": 3,
+  "root_init_test_exit": 0,
+  "proxy_test_exit": 0,
+  "binary_build_exit": 0,
+  "binary_sha256": "fc190efaaa9b954c46d469b1e8df7f73e48fa77c1c54b4ac12fdee18e5544d79",
+  "seconds": 222.71537487700698,
+  "Source": false,
+  "normal": false,
+  "E": 0,
+  "K8s": false,
+  "rustfmt_executed": false
+}

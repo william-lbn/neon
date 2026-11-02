@@ -27,7 +27,7 @@ pub(super) async fn proxy(
     request: Request<Body>,
 ) -> Response {
     let deny = |status| JsonResponse::error(status, "resource_unconfirmed");
-    let Ok(spec) = compute.dsg_spec() else {
+    let Ok(spec) = compute.dsg_resource_spec() else {
         return deny(StatusCode::PRECONDITION_FAILED);
     };
     if claims.vm_uid != spec.vm_uid || claims.compute_instance_id != spec.compute_instance_id {
