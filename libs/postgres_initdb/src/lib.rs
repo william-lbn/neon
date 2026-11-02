@@ -45,6 +45,23 @@ impl fmt::Display for Error {
     }
 }
 
+// Neon现有远端WAL/redo页合同使用checksum profile 0。PG18把initdb默认改为1，
+// 新目录必须显式选择已支持格式；不修改旧目录，也不放宽页头/WAL/控制文件校验。
+fn configure_neon_storage_checksums(
+    command: &mut tokio::process::Command,
+    pg_version: PgMajorVersion,
+) {
+    match pg_version {
+        PgMajorVersion::PG18 => {
+            command.arg("--no-data-checksums");
+        }
+        PgMajorVersion::PG14
+        | PgMajorVersion::PG15
+        | PgMajorVersion::PG16
+        | PgMajorVersion::PG17 => {}
+    }
+}
+
 pub async fn do_run_initdb(args: RunInitdbArgs<'_>) -> Result<(), Error> {
     let RunInitdbArgs {
         superuser,
@@ -94,6 +111,8 @@ pub async fn do_run_initdb(args: RunInitdbArgs<'_>) -> Result<(), Error> {
         initdb_command.args(["--locale-provider", locale_provider]);
     }
 
+    configure_neon_storage_checksums(&mut initdb_command, pg_version);
+
     let initdb_proc = initdb_command.spawn().map_err(Error::Spawn)?;
 
     // Ideally we'd select here with the cancellation token, but the problem is that
@@ -113,4 +132,52 @@ pub async fn do_run_initdb(args: RunInitdbArgs<'_>) -> Result<(), Error> {
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod checksum_profile_tests {
+    use super::*;
+
+    fn arguments(version: PgMajorVersion) -> Vec<String> {
+        let mut command = tokio::process::Command::new("initdb");
+        command.args(["--encoding", "utf8", "--locale", "C", "--no-sync"]);
+        configure_neon_storage_checksums(&mut command, version);
+        command
+            .as_std()
+            .get_args()
+            .map(|arg| arg.to_str().unwrap().to_owned())
+            .collect()
+    }
+
+    #[test]
+    fn pg18_neon_storage_explicit_checksum_profile_zero() {
+        let args = arguments(PgMajorVersion::PG18);
+        assert_eq!(
+            args,
+            [
+                "--encoding",
+                "utf8",
+                "--locale",
+                "C",
+                "--no-sync",
+                "--no-data-checksums",
+            ]
+        );
+        assert!(!args.iter().any(|arg| arg == "--data-checksums"));
+    }
+
+    #[test]
+    fn legacy_neon_storage_initdb_arguments_unchanged() {
+        for version in [
+            PgMajorVersion::PG14,
+            PgMajorVersion::PG15,
+            PgMajorVersion::PG16,
+            PgMajorVersion::PG17,
+        ] {
+            assert_eq!(
+                arguments(version),
+                ["--encoding", "utf8", "--locale", "C", "--no-sync"]
+            );
+        }
+    }
 }

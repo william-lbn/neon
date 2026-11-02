@@ -1,0 +1,34 @@
+{
+  "scope": "new PG18 Neon timeline initdb supported profile0 only",
+  "source_sha256": {
+    "libs/postgres_initdb/src/lib.rs": "edc2614ab704b03d5184eb344818eac6779b4894bf51da2fd30a236c3e9e69b8"
+  },
+  "legacy_versions_arguments_unchanged": [
+    14,
+    15,
+    16,
+    17
+  ],
+  "exact_new_unit_names": [
+    "test checksum_profile_tests::pg18_neon_storage_explicit_checksum_profile_zero ... ok",
+    "test checksum_profile_tests::legacy_neon_storage_initdb_arguments_unchanged ... ok"
+  ],
+  "unit_passed": 2,
+  "unit_failed": 0,
+  "unit_ignored": 0,
+  "build_run": "pg18-initdb-checksum-profile-build-20261102T150431Z-e1e587",
+  "pageserver_binary_sha256": "7a1580d6d31d27cceeeb6bd1b25355a8babe4595c279f7534fc2ca4e92302813",
+  "actual_native_initdb_run": "pg18-initdb-profile-zero-native-20261102T151107Z-5c35c8",
+  "actual_native_fields": [
+    "pg_control version number:            1800",
+    "Catalog version number:               202506291",
+    "Database cluster state:               shut down",
+    "Data page checksum version:           0"
+  ],
+  "existing_data_changed": false,
+  "page_verifier_changed": false,
+  "SQL_chain_status": "PENDING",
+  "normal": false,
+  "E": 0,
+  "K8s": 0
+}
