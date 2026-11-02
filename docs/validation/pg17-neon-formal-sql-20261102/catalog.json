@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "stable_id": "PG17-S-NEON-FORMAL-SQL-CURRENT-001",
+  "class": "S",
+  "status": "PASS_COMPONENT_ONLY",
+  "U_roots": 0,
+  "S_roots": 1,
+  "E_roots": 0,
+  "safe_normal_accepted": false,
+  "original_run": "/data/neon-build/validation/pg17-neon-formal-sql-functional-20261101T232003Z-f7b18b",
+  "actual_unique_Wait_exit": 0,
+  "duration_seconds": 4.101826708007138,
+  "not_a_new_test_for_each_assertion": true
+}

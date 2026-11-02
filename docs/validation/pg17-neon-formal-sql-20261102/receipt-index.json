@@ -1,0 +1,23 @@
+{
+  "scope": "formal-neon-sql-component-only",
+  "normal_lowering": false,
+  "E": 0,
+  "files": {
+    "source-artifact-lock.json": {
+      "sha256": "03eea89283d9730abd3076e733510662e3fceca6d006d0879ad451cffd5353b6",
+      "bytes": 23846
+    },
+    "functional.sql": {
+      "sha256": "f989a5330de19fb48030f6cf3356f9700d7da691f424e722c305e1e688ef4c0f",
+      "bytes": 3174
+    },
+    "result.json": {
+      "sha256": "e2cb9873553236893ca6df2345b2bbb4bce2753611db0366554b2107c6e4c4e4",
+      "bytes": 80416
+    },
+    "container-terminal.json": {
+      "sha256": "b9b7c6dc8084e628ad6ab3da1b6733d67a093be68fc2b59193d0e94c6713c86d",
+      "bytes": 768
+    }
+  }
+}

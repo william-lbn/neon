@@ -1,0 +1,2307 @@
+{
+  "status": "PASS_FORMAL_NEON_SQL_COMPONENT",
+  "actual_unique_Wait_exit": 0,
+  "OOMKilled": false,
+  "seconds": 4.101826708007138,
+  "assertion_error": "",
+  "actual_evidence": {
+    "capabilities": {
+      "enabled": true,
+      "instance": {
+        "vm_uid": "linux-pg17-formal-sql-component",
+        "pg_boot_id": "18289632592699805737",
+        "compute_instance_id": "isolated-functional-case"
+      },
+      "supported": true,
+      "instance_bound": true,
+      "history_capacity": 16,
+      "production_ready": false,
+      "protocol_version": 1,
+      "vm_shrink_permit": false,
+      "buffer_api_version": 6,
+      "provider_can_release": true
+    },
+    "data_after_grow": {
+      "rows": 600,
+      "checksum": "f76a324b58c4a9bd13199ae8cc6dc270"
+    },
+    "data_after_regrow": {
+      "rows": 600,
+      "checksum": "f76a324b58c4a9bd13199ae8cc6dc270"
+    },
+    "data_after_shrink": {
+      "rows": 600,
+      "checksum": "f76a324b58c4a9bd13199ae8cc6dc270"
+    },
+    "data_before": {
+      "rows": 600,
+      "bytes": 4915200,
+      "checksum": "f76a324b58c4a9bd13199ae8cc6dc270"
+    },
+    "expired": {
+      "receipt": {
+        "key": {
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "revision": "4",
+          "issuer_epoch": "1",
+          "operation_id": {
+            "low": "4",
+            "high": "18364758544493064720"
+          }
+        },
+        "result": null,
+        "has_result": false,
+        "disposition": "rejected"
+      },
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "507904",
+              "affected_offset": "16384",
+              "requested_bytes": "507904",
+              "requested_offset": "16384",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "131072",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "65011712",
+              "affected_offset": "2097152",
+              "requested_bytes": "65011712",
+              "requested_offset": "2097152",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16777216",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "126976",
+              "affected_offset": "4096",
+              "requested_bytes": "126976",
+              "requested_offset": "4096",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "32768",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "155648",
+              "affected_offset": "8192",
+              "requested_bytes": "158720",
+              "requested_offset": "5120",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "40960",
+            "release_capacity_generation": "3"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": {
+          "key": {
+            "instance": {
+              "vm_uid": "linux-pg17-formal-sql-component",
+              "pg_boot_id": "18289632592699805737",
+              "compute_instance_id": "isolated-functional-case"
+            },
+            "revision": "3",
+            "issuer_epoch": "1",
+            "operation_id": {
+              "low": "3",
+              "high": "18364758544493064720"
+            }
+          },
+          "kind": "grow",
+          "phase": "committed",
+          "reason": "none",
+          "replayed": false,
+          "cancel_closed": true,
+          "context_sha256": "ad61fbc65f89f06e4c935b9dad118b824c0a4c4268b65219eac97a7583c24236",
+          "target_buffers": 2048,
+          "cancel_requested": false,
+          "expected_capacity_generation": "3"
+        },
+        "low_buffers": 2048,
+        "high_buffers": 2048,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "1",
+        "capacity_generation": "4",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    },
+    "final": {
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "507904",
+              "affected_offset": "16384",
+              "requested_bytes": "507904",
+              "requested_offset": "16384",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "131072",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "65011712",
+              "affected_offset": "2097152",
+              "requested_bytes": "65011712",
+              "requested_offset": "2097152",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16777216",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "126976",
+              "affected_offset": "4096",
+              "requested_bytes": "126976",
+              "requested_offset": "4096",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "32768",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "155648",
+              "affected_offset": "8192",
+              "requested_bytes": "158720",
+              "requested_offset": "5120",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "40960",
+            "release_capacity_generation": "3"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": {
+          "key": {
+            "instance": {
+              "vm_uid": "linux-pg17-formal-sql-component",
+              "pg_boot_id": "18289632592699805737",
+              "compute_instance_id": "isolated-functional-case"
+            },
+            "revision": "3",
+            "issuer_epoch": "1",
+            "operation_id": {
+              "low": "3",
+              "high": "18364758544493064720"
+            }
+          },
+          "kind": "grow",
+          "phase": "committed",
+          "reason": "none",
+          "replayed": false,
+          "cancel_closed": true,
+          "context_sha256": "ad61fbc65f89f06e4c935b9dad118b824c0a4c4268b65219eac97a7583c24236",
+          "target_buffers": 2048,
+          "cancel_requested": false,
+          "expected_capacity_generation": "3"
+        },
+        "low_buffers": 2048,
+        "high_buffers": 2048,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "1",
+        "capacity_generation": "4",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    },
+    "grow": {
+      "receipt": {
+        "key": {
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "revision": "1",
+          "issuer_epoch": "1",
+          "operation_id": {
+            "low": "1",
+            "high": "18364758544493064720"
+          }
+        },
+        "result": {
+          "arrays": [
+            {
+              "array": "descriptors",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "65536",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "blocks",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "8388608",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "iocv",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "16384",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "checkpoint",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "20480",
+              "release_capacity_generation": "0"
+            }
+          ],
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "operation": {
+            "key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "1",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "1",
+                "high": "18364758544493064720"
+              }
+            },
+            "kind": "grow",
+            "phase": "committed",
+            "reason": "none",
+            "replayed": false,
+            "cancel_closed": true,
+            "context_sha256": "0adb21c9aa7bde1ae774d3310d836f997ec7fc92b4b9fcdc153b5647fff98000",
+            "target_buffers": 1024,
+            "cancel_requested": false,
+            "expected_capacity_generation": "1"
+          },
+          "low_buffers": 1024,
+          "high_buffers": 1024,
+          "admission_open": true,
+          "maximum_buffers": 8192,
+          "admission_revision": "0",
+          "issuer_floor_epoch": "1",
+          "capacity_generation": "2",
+          "startup_shared_upper_bytes": "16809984"
+        },
+        "has_result": true,
+        "disposition": "accepted"
+      },
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "unknown",
+              "has_result": false,
+              "system_errno": 0,
+              "affected_bytes": "0",
+              "affected_offset": "0",
+              "requested_bytes": "0",
+              "requested_offset": "0",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": false
+            },
+            "release_key": null,
+            "release_state": "none",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "65536",
+            "release_capacity_generation": "0"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "unknown",
+              "has_result": false,
+              "system_errno": 0,
+              "affected_bytes": "0",
+              "affected_offset": "0",
+              "requested_bytes": "0",
+              "requested_offset": "0",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": false
+            },
+            "release_key": null,
+            "release_state": "none",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "8388608",
+            "release_capacity_generation": "0"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "unknown",
+              "has_result": false,
+              "system_errno": 0,
+              "affected_bytes": "0",
+              "affected_offset": "0",
+              "requested_bytes": "0",
+              "requested_offset": "0",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": false
+            },
+            "release_key": null,
+            "release_state": "none",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16384",
+            "release_capacity_generation": "0"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "unknown",
+              "has_result": false,
+              "system_errno": 0,
+              "affected_bytes": "0",
+              "affected_offset": "0",
+              "requested_bytes": "0",
+              "requested_offset": "0",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": false
+            },
+            "release_key": null,
+            "release_state": "none",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "20480",
+            "release_capacity_generation": "0"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": {
+          "key": {
+            "instance": {
+              "vm_uid": "linux-pg17-formal-sql-component",
+              "pg_boot_id": "18289632592699805737",
+              "compute_instance_id": "isolated-functional-case"
+            },
+            "revision": "1",
+            "issuer_epoch": "1",
+            "operation_id": {
+              "low": "1",
+              "high": "18364758544493064720"
+            }
+          },
+          "kind": "grow",
+          "phase": "committed",
+          "reason": "none",
+          "replayed": false,
+          "cancel_closed": true,
+          "context_sha256": "0adb21c9aa7bde1ae774d3310d836f997ec7fc92b4b9fcdc153b5647fff98000",
+          "target_buffers": 1024,
+          "cancel_requested": false,
+          "expected_capacity_generation": "1"
+        },
+        "low_buffers": 1024,
+        "high_buffers": 1024,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "1",
+        "capacity_generation": "2",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    },
+    "historical_status": {
+      "receipt": {
+        "key": {
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "revision": "1",
+          "issuer_epoch": "1",
+          "operation_id": {
+            "low": "1",
+            "high": "18364758544493064720"
+          }
+        },
+        "result": {
+          "arrays": [
+            {
+              "array": "descriptors",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "65536",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "blocks",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "8388608",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "iocv",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "16384",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "checkpoint",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "20480",
+              "release_capacity_generation": "0"
+            }
+          ],
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "operation": {
+            "key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "1",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "1",
+                "high": "18364758544493064720"
+              }
+            },
+            "kind": "grow",
+            "phase": "committed",
+            "reason": "none",
+            "replayed": true,
+            "cancel_closed": true,
+            "context_sha256": "0adb21c9aa7bde1ae774d3310d836f997ec7fc92b4b9fcdc153b5647fff98000",
+            "target_buffers": 1024,
+            "cancel_requested": false,
+            "expected_capacity_generation": "1"
+          },
+          "low_buffers": 1024,
+          "high_buffers": 1024,
+          "admission_open": true,
+          "maximum_buffers": 8192,
+          "admission_revision": "0",
+          "issuer_floor_epoch": "1",
+          "capacity_generation": "2",
+          "startup_shared_upper_bytes": "16809984"
+        },
+        "has_result": true,
+        "disposition": "replayed"
+      },
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "507904",
+              "affected_offset": "16384",
+              "requested_bytes": "507904",
+              "requested_offset": "16384",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "131072",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "65011712",
+              "affected_offset": "2097152",
+              "requested_bytes": "65011712",
+              "requested_offset": "2097152",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16777216",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "126976",
+              "affected_offset": "4096",
+              "requested_bytes": "126976",
+              "requested_offset": "4096",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "32768",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "155648",
+              "affected_offset": "8192",
+              "requested_bytes": "158720",
+              "requested_offset": "5120",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "40960",
+            "release_capacity_generation": "3"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": {
+          "key": {
+            "instance": {
+              "vm_uid": "linux-pg17-formal-sql-component",
+              "pg_boot_id": "18289632592699805737",
+              "compute_instance_id": "isolated-functional-case"
+            },
+            "revision": "3",
+            "issuer_epoch": "1",
+            "operation_id": {
+              "low": "3",
+              "high": "18364758544493064720"
+            }
+          },
+          "kind": "grow",
+          "phase": "committed",
+          "reason": "none",
+          "replayed": false,
+          "cancel_closed": true,
+          "context_sha256": "ad61fbc65f89f06e4c935b9dad118b824c0a4c4268b65219eac97a7583c24236",
+          "target_buffers": 2048,
+          "cancel_requested": false,
+          "expected_capacity_generation": "3"
+        },
+        "low_buffers": 2048,
+        "high_buffers": 2048,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "1",
+        "capacity_generation": "4",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    },
+    "initial": {
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "unknown",
+              "has_result": false,
+              "system_errno": 0,
+              "affected_bytes": "0",
+              "affected_offset": "0",
+              "requested_bytes": "0",
+              "requested_offset": "0",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": false
+            },
+            "release_key": null,
+            "release_state": "none",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16384",
+            "release_capacity_generation": "0"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "unknown",
+              "has_result": false,
+              "system_errno": 0,
+              "affected_bytes": "0",
+              "affected_offset": "0",
+              "requested_bytes": "0",
+              "requested_offset": "0",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": false
+            },
+            "release_key": null,
+            "release_state": "none",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "2097152",
+            "release_capacity_generation": "0"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "unknown",
+              "has_result": false,
+              "system_errno": 0,
+              "affected_bytes": "0",
+              "affected_offset": "0",
+              "requested_bytes": "0",
+              "requested_offset": "0",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": false
+            },
+            "release_key": null,
+            "release_state": "none",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "4096",
+            "release_capacity_generation": "0"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "unknown",
+              "has_result": false,
+              "system_errno": 0,
+              "affected_bytes": "0",
+              "affected_offset": "0",
+              "requested_bytes": "0",
+              "requested_offset": "0",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": false
+            },
+            "release_key": null,
+            "release_state": "none",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "8192",
+            "release_capacity_generation": "0"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": null,
+        "low_buffers": 256,
+        "high_buffers": 256,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "0",
+        "capacity_generation": "1",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    },
+    "regrow": {
+      "receipt": {
+        "key": {
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "revision": "3",
+          "issuer_epoch": "1",
+          "operation_id": {
+            "low": "3",
+            "high": "18364758544493064720"
+          }
+        },
+        "result": {
+          "arrays": [
+            {
+              "array": "descriptors",
+              "provider": {
+                "status": "ok",
+                "has_result": true,
+                "system_errno": 0,
+                "affected_bytes": "507904",
+                "affected_offset": "16384",
+                "requested_bytes": "507904",
+                "requested_offset": "16384",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": true
+              },
+              "release_key": {
+                "instance": {
+                  "vm_uid": "linux-pg17-formal-sql-component",
+                  "pg_boot_id": "18289632592699805737",
+                  "compute_instance_id": "isolated-functional-case"
+                },
+                "revision": "2",
+                "issuer_epoch": "1",
+                "operation_id": {
+                  "low": "2",
+                  "high": "18364758544493064720"
+                }
+              },
+              "release_state": "verified",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "131072",
+              "release_capacity_generation": "3"
+            },
+            {
+              "array": "blocks",
+              "provider": {
+                "status": "ok",
+                "has_result": true,
+                "system_errno": 0,
+                "affected_bytes": "65011712",
+                "affected_offset": "2097152",
+                "requested_bytes": "65011712",
+                "requested_offset": "2097152",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": true
+              },
+              "release_key": {
+                "instance": {
+                  "vm_uid": "linux-pg17-formal-sql-component",
+                  "pg_boot_id": "18289632592699805737",
+                  "compute_instance_id": "isolated-functional-case"
+                },
+                "revision": "2",
+                "issuer_epoch": "1",
+                "operation_id": {
+                  "low": "2",
+                  "high": "18364758544493064720"
+                }
+              },
+              "release_state": "verified",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "16777216",
+              "release_capacity_generation": "3"
+            },
+            {
+              "array": "iocv",
+              "provider": {
+                "status": "ok",
+                "has_result": true,
+                "system_errno": 0,
+                "affected_bytes": "126976",
+                "affected_offset": "4096",
+                "requested_bytes": "126976",
+                "requested_offset": "4096",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": true
+              },
+              "release_key": {
+                "instance": {
+                  "vm_uid": "linux-pg17-formal-sql-component",
+                  "pg_boot_id": "18289632592699805737",
+                  "compute_instance_id": "isolated-functional-case"
+                },
+                "revision": "2",
+                "issuer_epoch": "1",
+                "operation_id": {
+                  "low": "2",
+                  "high": "18364758544493064720"
+                }
+              },
+              "release_state": "verified",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "32768",
+              "release_capacity_generation": "3"
+            },
+            {
+              "array": "checkpoint",
+              "provider": {
+                "status": "ok",
+                "has_result": true,
+                "system_errno": 0,
+                "affected_bytes": "155648",
+                "affected_offset": "8192",
+                "requested_bytes": "158720",
+                "requested_offset": "5120",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": true
+              },
+              "release_key": {
+                "instance": {
+                  "vm_uid": "linux-pg17-formal-sql-component",
+                  "pg_boot_id": "18289632592699805737",
+                  "compute_instance_id": "isolated-functional-case"
+                },
+                "revision": "2",
+                "issuer_epoch": "1",
+                "operation_id": {
+                  "low": "2",
+                  "high": "18364758544493064720"
+                }
+              },
+              "release_state": "verified",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "40960",
+              "release_capacity_generation": "3"
+            }
+          ],
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "operation": {
+            "key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "3",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "3",
+                "high": "18364758544493064720"
+              }
+            },
+            "kind": "grow",
+            "phase": "committed",
+            "reason": "none",
+            "replayed": false,
+            "cancel_closed": true,
+            "context_sha256": "ad61fbc65f89f06e4c935b9dad118b824c0a4c4268b65219eac97a7583c24236",
+            "target_buffers": 2048,
+            "cancel_requested": false,
+            "expected_capacity_generation": "3"
+          },
+          "low_buffers": 2048,
+          "high_buffers": 2048,
+          "admission_open": true,
+          "maximum_buffers": 8192,
+          "admission_revision": "0",
+          "issuer_floor_epoch": "1",
+          "capacity_generation": "4",
+          "startup_shared_upper_bytes": "16809984"
+        },
+        "has_result": true,
+        "disposition": "accepted"
+      },
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "507904",
+              "affected_offset": "16384",
+              "requested_bytes": "507904",
+              "requested_offset": "16384",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "131072",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "65011712",
+              "affected_offset": "2097152",
+              "requested_bytes": "65011712",
+              "requested_offset": "2097152",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16777216",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "126976",
+              "affected_offset": "4096",
+              "requested_bytes": "126976",
+              "requested_offset": "4096",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "32768",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "155648",
+              "affected_offset": "8192",
+              "requested_bytes": "158720",
+              "requested_offset": "5120",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "40960",
+            "release_capacity_generation": "3"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": {
+          "key": {
+            "instance": {
+              "vm_uid": "linux-pg17-formal-sql-component",
+              "pg_boot_id": "18289632592699805737",
+              "compute_instance_id": "isolated-functional-case"
+            },
+            "revision": "3",
+            "issuer_epoch": "1",
+            "operation_id": {
+              "low": "3",
+              "high": "18364758544493064720"
+            }
+          },
+          "kind": "grow",
+          "phase": "committed",
+          "reason": "none",
+          "replayed": false,
+          "cancel_closed": true,
+          "context_sha256": "ad61fbc65f89f06e4c935b9dad118b824c0a4c4268b65219eac97a7583c24236",
+          "target_buffers": 2048,
+          "cancel_requested": false,
+          "expected_capacity_generation": "3"
+        },
+        "low_buffers": 2048,
+        "high_buffers": 2048,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "1",
+        "capacity_generation": "4",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    },
+    "replay": {
+      "receipt": {
+        "key": {
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "revision": "1",
+          "issuer_epoch": "1",
+          "operation_id": {
+            "low": "1",
+            "high": "18364758544493064720"
+          }
+        },
+        "result": {
+          "arrays": [
+            {
+              "array": "descriptors",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "65536",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "blocks",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "8388608",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "iocv",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "16384",
+              "release_capacity_generation": "0"
+            },
+            {
+              "array": "checkpoint",
+              "provider": {
+                "status": "unknown",
+                "has_result": false,
+                "system_errno": 0,
+                "affected_bytes": "0",
+                "affected_offset": "0",
+                "requested_bytes": "0",
+                "requested_offset": "0",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": false
+              },
+              "release_key": null,
+              "release_state": "none",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "20480",
+              "release_capacity_generation": "0"
+            }
+          ],
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "operation": {
+            "key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "1",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "1",
+                "high": "18364758544493064720"
+              }
+            },
+            "kind": "grow",
+            "phase": "committed",
+            "reason": "none",
+            "replayed": true,
+            "cancel_closed": true,
+            "context_sha256": "0adb21c9aa7bde1ae774d3310d836f997ec7fc92b4b9fcdc153b5647fff98000",
+            "target_buffers": 1024,
+            "cancel_requested": false,
+            "expected_capacity_generation": "1"
+          },
+          "low_buffers": 1024,
+          "high_buffers": 1024,
+          "admission_open": true,
+          "maximum_buffers": 8192,
+          "admission_revision": "0",
+          "issuer_floor_epoch": "1",
+          "capacity_generation": "2",
+          "startup_shared_upper_bytes": "16809984"
+        },
+        "has_result": true,
+        "disposition": "replayed"
+      },
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "507904",
+              "affected_offset": "16384",
+              "requested_bytes": "507904",
+              "requested_offset": "16384",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "131072",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "65011712",
+              "affected_offset": "2097152",
+              "requested_bytes": "65011712",
+              "requested_offset": "2097152",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16777216",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "126976",
+              "affected_offset": "4096",
+              "requested_bytes": "126976",
+              "requested_offset": "4096",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "32768",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "155648",
+              "affected_offset": "8192",
+              "requested_bytes": "158720",
+              "requested_offset": "5120",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "40960",
+            "release_capacity_generation": "3"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": {
+          "key": {
+            "instance": {
+              "vm_uid": "linux-pg17-formal-sql-component",
+              "pg_boot_id": "18289632592699805737",
+              "compute_instance_id": "isolated-functional-case"
+            },
+            "revision": "3",
+            "issuer_epoch": "1",
+            "operation_id": {
+              "low": "3",
+              "high": "18364758544493064720"
+            }
+          },
+          "kind": "grow",
+          "phase": "committed",
+          "reason": "none",
+          "replayed": false,
+          "cancel_closed": true,
+          "context_sha256": "ad61fbc65f89f06e4c935b9dad118b824c0a4c4268b65219eac97a7583c24236",
+          "target_buffers": 2048,
+          "cancel_requested": false,
+          "expected_capacity_generation": "3"
+        },
+        "low_buffers": 2048,
+        "high_buffers": 2048,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "1",
+        "capacity_generation": "4",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    },
+    "same_key_conflict": {
+      "receipt": {
+        "key": {
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "revision": "1",
+          "issuer_epoch": "1",
+          "operation_id": {
+            "low": "1",
+            "high": "18364758544493064720"
+          }
+        },
+        "result": null,
+        "has_result": false,
+        "disposition": "conflict"
+      },
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "507904",
+              "affected_offset": "16384",
+              "requested_bytes": "507904",
+              "requested_offset": "16384",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "131072",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "65011712",
+              "affected_offset": "2097152",
+              "requested_bytes": "65011712",
+              "requested_offset": "2097152",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16777216",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "126976",
+              "affected_offset": "4096",
+              "requested_bytes": "126976",
+              "requested_offset": "4096",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "32768",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "155648",
+              "affected_offset": "8192",
+              "requested_bytes": "158720",
+              "requested_offset": "5120",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "40960",
+            "release_capacity_generation": "3"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": {
+          "key": {
+            "instance": {
+              "vm_uid": "linux-pg17-formal-sql-component",
+              "pg_boot_id": "18289632592699805737",
+              "compute_instance_id": "isolated-functional-case"
+            },
+            "revision": "3",
+            "issuer_epoch": "1",
+            "operation_id": {
+              "low": "3",
+              "high": "18364758544493064720"
+            }
+          },
+          "kind": "grow",
+          "phase": "committed",
+          "reason": "none",
+          "replayed": false,
+          "cancel_closed": true,
+          "context_sha256": "ad61fbc65f89f06e4c935b9dad118b824c0a4c4268b65219eac97a7583c24236",
+          "target_buffers": 2048,
+          "cancel_requested": false,
+          "expected_capacity_generation": "3"
+        },
+        "low_buffers": 2048,
+        "high_buffers": 2048,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "1",
+        "capacity_generation": "4",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    },
+    "shrink": {
+      "receipt": {
+        "key": {
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "revision": "2",
+          "issuer_epoch": "1",
+          "operation_id": {
+            "low": "2",
+            "high": "18364758544493064720"
+          }
+        },
+        "result": {
+          "arrays": [
+            {
+              "array": "descriptors",
+              "provider": {
+                "status": "ok",
+                "has_result": true,
+                "system_errno": 0,
+                "affected_bytes": "507904",
+                "affected_offset": "16384",
+                "requested_bytes": "507904",
+                "requested_offset": "16384",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": true
+              },
+              "release_key": {
+                "instance": {
+                  "vm_uid": "linux-pg17-formal-sql-component",
+                  "pg_boot_id": "18289632592699805737",
+                  "compute_instance_id": "isolated-functional-case"
+                },
+                "revision": "2",
+                "issuer_epoch": "1",
+                "operation_id": {
+                  "low": "2",
+                  "high": "18364758544493064720"
+                }
+              },
+              "release_state": "verified",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "16384",
+              "release_capacity_generation": "3"
+            },
+            {
+              "array": "blocks",
+              "provider": {
+                "status": "ok",
+                "has_result": true,
+                "system_errno": 0,
+                "affected_bytes": "65011712",
+                "affected_offset": "2097152",
+                "requested_bytes": "65011712",
+                "requested_offset": "2097152",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": true
+              },
+              "release_key": {
+                "instance": {
+                  "vm_uid": "linux-pg17-formal-sql-component",
+                  "pg_boot_id": "18289632592699805737",
+                  "compute_instance_id": "isolated-functional-case"
+                },
+                "revision": "2",
+                "issuer_epoch": "1",
+                "operation_id": {
+                  "low": "2",
+                  "high": "18364758544493064720"
+                }
+              },
+              "release_state": "verified",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "2097152",
+              "release_capacity_generation": "3"
+            },
+            {
+              "array": "iocv",
+              "provider": {
+                "status": "ok",
+                "has_result": true,
+                "system_errno": 0,
+                "affected_bytes": "126976",
+                "affected_offset": "4096",
+                "requested_bytes": "126976",
+                "requested_offset": "4096",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": true
+              },
+              "release_key": {
+                "instance": {
+                  "vm_uid": "linux-pg17-formal-sql-component",
+                  "pg_boot_id": "18289632592699805737",
+                  "compute_instance_id": "isolated-functional-case"
+                },
+                "revision": "2",
+                "issuer_epoch": "1",
+                "operation_id": {
+                  "low": "2",
+                  "high": "18364758544493064720"
+                }
+              },
+              "release_state": "verified",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "4096",
+              "release_capacity_generation": "3"
+            },
+            {
+              "array": "checkpoint",
+              "provider": {
+                "status": "ok",
+                "has_result": true,
+                "system_errno": 0,
+                "affected_bytes": "155648",
+                "affected_offset": "8192",
+                "requested_bytes": "158720",
+                "requested_offset": "5120",
+                "release_may_be_partial": false,
+                "allocation_may_be_partial": false,
+                "physical_release_verified": true
+              },
+              "release_key": {
+                "instance": {
+                  "vm_uid": "linux-pg17-formal-sql-component",
+                  "pg_boot_id": "18289632592699805737",
+                  "compute_instance_id": "isolated-functional-case"
+                },
+                "revision": "2",
+                "issuer_epoch": "1",
+                "operation_id": {
+                  "low": "2",
+                  "high": "18364758544493064720"
+                }
+              },
+              "release_state": "verified",
+              "allocation_unknown": false,
+              "committed_upper_bytes": "8192",
+              "release_capacity_generation": "3"
+            }
+          ],
+          "instance": {
+            "vm_uid": "linux-pg17-formal-sql-component",
+            "pg_boot_id": "18289632592699805737",
+            "compute_instance_id": "isolated-functional-case"
+          },
+          "operation": {
+            "key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "kind": "shrink",
+            "phase": "committed",
+            "reason": "none",
+            "replayed": false,
+            "cancel_closed": true,
+            "context_sha256": "dd85d43d80b83cda7eb1c951b0c15a77ead7a1352bcd5c294a80b6b7d54d3106",
+            "target_buffers": 256,
+            "cancel_requested": false,
+            "expected_capacity_generation": "2"
+          },
+          "low_buffers": 256,
+          "high_buffers": 256,
+          "admission_open": true,
+          "maximum_buffers": 8192,
+          "admission_revision": "0",
+          "issuer_floor_epoch": "1",
+          "capacity_generation": "3",
+          "startup_shared_upper_bytes": "16809984"
+        },
+        "has_result": true,
+        "disposition": "accepted"
+      },
+      "observed": {
+        "arrays": [
+          {
+            "array": "descriptors",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "507904",
+              "affected_offset": "16384",
+              "requested_bytes": "507904",
+              "requested_offset": "16384",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "16384",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "blocks",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "65011712",
+              "affected_offset": "2097152",
+              "requested_bytes": "65011712",
+              "requested_offset": "2097152",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "2097152",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "iocv",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "126976",
+              "affected_offset": "4096",
+              "requested_bytes": "126976",
+              "requested_offset": "4096",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "4096",
+            "release_capacity_generation": "3"
+          },
+          {
+            "array": "checkpoint",
+            "provider": {
+              "status": "ok",
+              "has_result": true,
+              "system_errno": 0,
+              "affected_bytes": "155648",
+              "affected_offset": "8192",
+              "requested_bytes": "158720",
+              "requested_offset": "5120",
+              "release_may_be_partial": false,
+              "allocation_may_be_partial": false,
+              "physical_release_verified": true
+            },
+            "release_key": {
+              "instance": {
+                "vm_uid": "linux-pg17-formal-sql-component",
+                "pg_boot_id": "18289632592699805737",
+                "compute_instance_id": "isolated-functional-case"
+              },
+              "revision": "2",
+              "issuer_epoch": "1",
+              "operation_id": {
+                "low": "2",
+                "high": "18364758544493064720"
+              }
+            },
+            "release_state": "verified",
+            "allocation_unknown": false,
+            "committed_upper_bytes": "8192",
+            "release_capacity_generation": "3"
+          }
+        ],
+        "instance": {
+          "vm_uid": "linux-pg17-formal-sql-component",
+          "pg_boot_id": "18289632592699805737",
+          "compute_instance_id": "isolated-functional-case"
+        },
+        "operation": {
+          "key": {
+            "instance": {
+              "vm_uid": "linux-pg17-formal-sql-component",
+              "pg_boot_id": "18289632592699805737",
+              "compute_instance_id": "isolated-functional-case"
+            },
+            "revision": "2",
+            "issuer_epoch": "1",
+            "operation_id": {
+              "low": "2",
+              "high": "18364758544493064720"
+            }
+          },
+          "kind": "shrink",
+          "phase": "committed",
+          "reason": "none",
+          "replayed": false,
+          "cancel_closed": true,
+          "context_sha256": "dd85d43d80b83cda7eb1c951b0c15a77ead7a1352bcd5c294a80b6b7d54d3106",
+          "target_buffers": 256,
+          "cancel_requested": false,
+          "expected_capacity_generation": "2"
+        },
+        "low_buffers": 256,
+        "high_buffers": 256,
+        "admission_open": true,
+        "maximum_buffers": 8192,
+        "admission_revision": "0",
+        "issuer_floor_epoch": "1",
+        "capacity_generation": "3",
+        "startup_shared_upper_bytes": "16809984"
+      },
+      "protocol_version": 1,
+      "vm_shrink_permit": false
+    }
+  },
+  "PG_server_started": true,
+  "Root_arrays_production_profile": false,
+  "normal_lowering_executed": false,
+  "VM_shrink_permit": false,
+  "E": 0
+}
