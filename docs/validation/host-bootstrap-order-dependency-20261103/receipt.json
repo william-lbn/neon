@@ -1,0 +1,13 @@
+{
+  "scope": "development dependency closure, not final release",
+  "autoscaling": "56652e5efe0e2f0e6af4962257f562fd708dccc2",
+  "targeted_race_roots": 3,
+  "pass_events": 14,
+  "fail": 0,
+  "skip": 0,
+  "source_lock_index_actual_v17_v18_exit": 0,
+  "PG_gitlinks_unchanged": true,
+  "real_held_VM_UID": "758b7338-df2d-400b-9167-58cd75a1e2ab",
+  "Guest_released": false,
+  "K8s_memory_cycle_passed": false
+}

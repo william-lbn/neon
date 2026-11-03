@@ -1,0 +1,1 @@
+同步已推送AS56652e5的首次Host预算启动顺序修复，只在原ci/distribution.json更新AS依赖。未初始化时先Load再保护Pod，实际3根14项race通过。保留PG17/PG18原gitlink与源码锁，实际index/v17/v18检出校验通过；Scheduler单ELF正在有界构建。真实VM保持held，未将依赖提交冒称K8s内存循环通过。
