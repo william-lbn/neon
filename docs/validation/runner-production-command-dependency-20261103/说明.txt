@@ -1,0 +1,1 @@
+同步已推送eb9bf8c的生产Runner QEMU绝对路径及精确MiB表达修复；保持原严格启动门。14项直接Runner race及实际Birth/VM离线门通过，新Runner3799a9已三节点预载，尚未替换原失败VM。PG17/PG18锁/gitlink保持、原index和实际检出检查通过。本提交不是新VM启动、K8s扩缩容或最终产品生产验收。

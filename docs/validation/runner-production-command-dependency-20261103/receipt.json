@@ -1,0 +1,12 @@
+{
+  "scope": "development dependency closure, not production release",
+  "autoscaling": "eb9bf8cb1f36facdc8c1f1301bcb920bb18f36d2",
+  "runner_targeted_race_roots": 14,
+  "real_original_birth_geometry_strict_validator": "PASS_OFFLINE_ONLY",
+  "new_Runner_image": "127.0.0.1:5001/neon-candidate/neonvm-runner@sha256:3799a9b8f7322e3ab1b916aca9cec7de0b3cbb61f66ea9a00dc82583e80d34f7",
+  "three_workers_preloaded": true,
+  "PG17_PG18_locks_and_gitlinks_unchanged": true,
+  "source_lock_index_actual_v17_v18_exit": 0,
+  "new_VM_deployed": false,
+  "K8s_memory_E2E_accepted": false
+}
