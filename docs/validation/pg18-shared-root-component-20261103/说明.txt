@@ -1,0 +1,13 @@
+PG18共享Root组件资产阶段归档（2026-11-03）
+
+本次推进PG18独立内核轨的运行资产，保留原组件验证身份，不是生产Source、平台资格、真实normal降限或K8s验收。未启动VM，未重编PG内核，未改公共接口、PG17/PG18 gitlink、发行锁或默认PG14–17矩阵。
+
+原可启动PG18测试资产仍使用旧Root 3639a567。沿原Collector和Finalize入口接入PG17已使用的共享Root 76e6d940；System清单120项中仅Root程序与broker两个条目变化，Native18的10个实际PG/helper文件保持原字节，仅更新运行闭包对新System的引用。PG18实际ELF/helper来源依据原1e9源码与纯重链票核对，未复制PG17 Native清单或身份。
+
+首阶段23.199秒通过，随后沿原mkfs、ISO、qcow与镜像构建流程89.116秒完成。实际镜像导出磁盘与原qcow转换raw逐字节一致；从真实磁盘读回Root程序、System、Native18、broker四个摘要完全相等，Root保留root:root与04755。两阶段均独立归档，受2CPU/3Gi限制，保留旧资产与缓存。独立审查无阻断，不重复运行测试。
+
+118上可直接查看：
+  docker images --digests 'neon-pg18-visible/*'
+镜像易读标签为neon-pg18-visible/pg18-dev-guest:component-1e9bf01-root-73c1cb9；完整内容摘要和证据在receipt.json。此标签是本地可见性元数据，不改变镜像内容，也不表示生产部署。
+
+后续仍须PG18真实normal硬限下降、四数组物理回收、持续扩缩容与数据一致性及真实K8s回归。当前PG17 K8s启动权限修复的SYS_PTRACE仅是待用户明确批准的独立提案，本阶段未修改任何生产容器权限或集群对象。完整最新控制面仍在PG17真实K8s验收后获取和对接，不以本阶段资产替代最终目标。
