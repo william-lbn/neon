@@ -1,0 +1,11 @@
+Neon内存功能生产启动与预算作用域修复（组件阶段，2026-11-03）
+
+验收对象是Neon/autoscaling及直接相关组件，三节点仅为部署环境；不测试K8s平台通用功能。当前仍未完成PG17真实SQL、资格、safe normal、连续VM伸缩、自动策略与恢复的端到端，不能按本文组件PASS宣布封版。
+
+真实45物理实例越过此前Owner与跨UID读取问题，Guest内核报固定init入口ENOENT。实际盘缺/neonvm/bin/init，BusyBox/Musl/inittab/vminit及原程序均在；同BusyBox只读--list实含init。新Guest只增加该入口到原BusyBox的链接，由既有inittab启动并监督原vminit与服务。Builder现在在Guest根内解析并校验入口，错误vminit/副本/循环/目录等被拒，保留原ELF/解释器与角色协议。新盘1296条相对旧1295条仅新增init与派生System/Native清单变化，原Root/PG/helper/broker字节保持。
+
+同次真实v3捕获QEMU UID36/KVM及其根级CPU-only组memory.max=max；Runner位于10Gi Pod内，两个作用域不能混称。受管Runner现以已核绝对QEMU直接启动，保留原参数与身份门，共享原Pod资源限制，普通VM仍走原路径。真实新QEMU的共同祖先硬限与后续扩缩资源读回必须另验，源码与镜像通过不是运行期证明。
+
+两组定向验证与独审、同源Runner和正式vm-builder二进制、新Guest真盘读回、三节点OCI/CRI预载均有独立SHA索引。大日志和镜像保留118 /data，凭据不入Git。Controller仅先前能力修复版85b5已部署，其余未变组件继续复用；ci/distribution只同步autoscaling源码依赖，PG17/PG18内核引用与默认矩阵不变。
+
+提前核对还发现原宿主账本没有保留完整Pod硬限floor语义；该项仅只读定位并单独评估，不用未测调度优化或改平台feature冒充完成。PG normal真实硬降限、四数组回收及实际VM内存变化继续作为硬门槛，Host采用明确系统保留和Pod/VM硬预算，不增加整机内核绝对上界要求。

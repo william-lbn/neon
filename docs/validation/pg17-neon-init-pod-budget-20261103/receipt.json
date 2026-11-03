@@ -1,0 +1,40 @@
+{
+  "status": "FOCUSED_CODE_AND_IMAGE_PASS_REAL_NEON_E2E_PENDING",
+  "autoscaling_commit": "bc7095f0f4584c68eaa7bcc9b9e744817ff50185",
+  "failed_VM_UID": "45a4bddc-2f4b-4b2c-b677-015a2d6113c3",
+  "failed_Pod": "neon/cp-d8d85ed796068ab5-l5766",
+  "node": "worker-117",
+  "actual_defects": [
+    "kernel init /neonvm/bin/init ENOENT",
+    "QEMU outside Pod in root CPU-only group memory.max=max"
+  ],
+  "runner_tests": {
+    "roots": 14,
+    "pass_events": 34,
+    "result_sha256": "608c509872263c149f0fc44724d3df238d705fa9c15b3db4f6a675e5de5f268d",
+    "independent_review_sha256": "80c3d099975b7ac7919d2e2a6a5f8c21fb36b61cdb566b3bcccbfc0d79f22b8c"
+  },
+  "builder_tests": {
+    "roots": 5,
+    "pass_events": 29,
+    "result_sha256": "1ada10c013acc2873a44e88f8b19aebcc17ba6565b3bc15cee592aad91e2c00a",
+    "independent_review_sha256": "e7e4a54d99192d54e6840d2bda951d427655c93da1d8e5777635b998d1c88206"
+  },
+  "Runner_pin": "127.0.0.1:5001/neon-candidate/neonvm-runner@sha256:6bbe6e7f3ab3bc228ccb9643862f3077556d26e71154e26b9bcc431a45a04b71",
+  "Runner_three_node_preload_sha256": "ec27505902b5c30a8da1459e3914f60a828b2783e17e22cece95a673570fa11d",
+  "Guest_pin": "127.0.0.1:5001/neon-candidate/pg17-guest@sha256:577700106f0f3ce3046c422cc02294ab053922c2d9fa117798d1dceca0255880",
+  "Guest_image_id": "sha256:ee6f14f95f8c81445824eeaaf487c8433c9158b42bca41270ecb0e0a78903f07",
+  "Guest_actual_disk_readback_receipt_sha256": "7ca4555c3662f4dc8db9ebf9311a8e490c10363c26c383048b9dd058f5857c21",
+  "Guest_independent_review_sha256": "2f5a4068a2ffc43e513490b08c88a7a38495237da9647a612ee8e5bb07f673ec",
+  "Guest_three_node_preload_sha256": "f2a9c936c8b39a74e18815a6c201618af2f6eb8236e4e385f1e055d220a2b6a5",
+  "System_SHA256": "9d06ab732ac8535b58290ac8e0888aa1571a9b83bf12db11352063107743ec05",
+  "Native17_SHA256": "0948350f71d1255720da969ace80dd06aa2dfaa348594d2f985e1337c32e0a7b",
+  "Root_ELF_unchanged": "76e6d940f687af95bd88e45760a960849edbd429d52a0f3d04c11af4dffcd3e2",
+  "deployed_Controller_source": "85b5f08ceeabf3a608a22574029e9043e07baff0",
+  "Controller_pin_unchanged": "sha256:2f7cc4f7421ed5bfc13bce6fd910a98a0d030e926b40781cf1b953c5b5ae8d03",
+  "actual_new_init_and_joint_hardlimit_verification": "NOT_RUN",
+  "safe_normal_and_Neon_end_to_end": "NOT_ACCEPTED",
+  "Host_floor_accounting_followup": "READONLY_GAP_CONFIRMED_PLAN_PENDING_NO_UNTESTED_CODE_INCLUDED",
+  "unrelated_K8s_platform_tests": false,
+  "PG17_PG18_gitlinks_or_default_matrix_changed": false
+}
