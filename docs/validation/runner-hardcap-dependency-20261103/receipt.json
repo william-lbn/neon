@@ -1,0 +1,11 @@
+{
+  "scope": "development dependency closure; not final release",
+  "autoscaling": "e8c6c8b09387a1971eaa30f6613cdbe640f93ff2",
+  "source_lock_index_actual_v17_v18_exit": 0,
+  "PG_gitlinks_and_locks_changed": false,
+  "actual_controller_deployed_worker118": true,
+  "actual_Controller_ELF_sha256": "2f892b6b2cd84690b57b57bbd8fa5e4e9ba5b71c2cac0c90901c82eaaf29e2d0",
+  "actual_Controller_upgrade_receipt_sha256": "4528572eb01e2de8a35a61549b2b0f862ff5f9a57c00c326f391bca68dbc152f",
+  "Runner_and_Guest_unchanged": true,
+  "K8s_memory_E2E_passed": false
+}

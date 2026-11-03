@@ -1,0 +1,1 @@
+仅将开发发行配置的Autoscaling依赖同步到已推送e8c6c8b，包含真实受管Runner Pod与两内置init硬限。Controller实际单ELF构建、镜像薄包、三节点SSH预载和118部署就绪已验证。PG17/PG18 gitlink及源码锁未改，原index/实际v17/v18检出校验通过。此为开发依赖闭合，非最终发行或K8s内存端到端认证。
