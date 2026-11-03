@@ -1,0 +1,6 @@
+内部Host v10与Neon内存功能部署接续
+
+AS403eb25已推送原功能分支。Plan/Placement从真实同UID Pod绑定完整硬限；13个Host焦点根分阶段通过，Runtime14根67事件及CLI通过，21file独审通过。失败批次保持原状，不把成功子阶段冒充整轮通过。六读者同源编译与四镜像已实际通过，准确大收据留/data。
+六读者先更新再激活v10首次写入。镜像由118统一构建，经SSH预载117/118/119实际containerd k8s.io；Helm仅改Controller、Agent、Scheduler镜像，Runner由新VM准确digest指定。Loader、既有权限、资源、网络、存储配置保留。
+Pod预留完整11Gi（最大8Gi VM+3Gi开销），VM实际仍7↔8Gi，PG normal仍须真实安全降限和四数组回收；Host预算在Pod存活期间保留峰值，退出正式结清才释放。不增加K8s平台resize或整机内核证明。
+本批没有真实v10首次CAS、QEMU共同11Gi祖先硬限或SQL/内存端到端通过，不能冒称生产认证。PG17/PG18 gitlink、两份发行锁、默认14–17矩阵及公开合同不变。PG18 init收据只验构建/盘闭包，保留DEV边界；真实PG18 normal仍待验收。PG17真实功能通过后才获取届时最新控制面开展完整实现。

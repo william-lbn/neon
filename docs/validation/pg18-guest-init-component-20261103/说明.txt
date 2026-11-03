@@ -1,0 +1,13 @@
+PG18-B-INIT-CLOSURE-001：内存伸缩Guest的init入口构建闭包回归
+
+目的：复用PG17发现并修复的缺失init入口，避免PG18沿用不能启动的组件镜像。
+该用例只验构建与盘内文件，不冒充真实VM、SQL、normal降限或Neon端到端通过。
+
+前置：准确PG18 1e9bf01、原ed134/helper a186、共享Root76e、AS bc709 Builder0e083。
+使用原555 DEV输入cp-a复制后只补 /neonvm/bin/init→/neonvm/bin/busybox；保持旧输入与旧9984镜像。
+步骤：新Builder明确major18及原PG ELF收集NativeBirth→原Finalize→原mkfs/ISO/qcow流程；
+创建不启动的镜像容器取盘，进行八文件读回、04755/owner/link核验及qcow/raw字节比较，
+并将完整文件系统清单与原输入逐项对比。实际命令、限制、源码、unit、终态在receipt的run目录。
+断言：完整FS唯一新增init链接；System、Native18、broker均实际重算且保持原内容；
+Postgres/helper/Root字节不变；8读回与raw比较全部0；原DEV运行身份不能升级为生产来源。
+结果：106.131秒构建/静态盘闭包通过，P2独审通过。真实PG18 normal 7↔8GiB和三节点E2E仍待验证。

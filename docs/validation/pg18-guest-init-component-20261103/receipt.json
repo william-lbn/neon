@@ -1,0 +1,30 @@
+{
+  "case_id": "PG18-B-INIT-CLOSURE-001",
+  "classification": "构建/镜像闭包与实际盘读回；不是VM启动/normal功能验收",
+  "status": "PASS_COMPONENT_ONLY",
+  "actual_run": "/data/neon-build/validation/pg18-init-component-guest-20261103T162512Z-92eba0",
+  "result_SHA256": "a67773ac78e2e6e62b3d9f1c0086976c01a13fb0f393df972a78cc62738a3dec",
+  "independent_review_SHA256": "8bf5c93f4db1d2c82a22e14ea15975fd21b91f7587e76ec5aa2e29e768bb7d6a",
+  "PG18_source_commit": "1e9bf010a841195752f2948ef54ecb34a0fcc749",
+  "AS_builder_commit": "bc7095f0f4584c68eaa7bcc9b9e744817ff50185",
+  "Builder_ELF_SHA256": "0e083909182f0fcf3ac31170f9befa83597e9c5f37d3fa10cf31a8674317dbd2",
+  "image": "127.0.0.1:5001/neon-candidate/pg18-dev-guest@sha256:5df6f199f76862fb362e2a190d35b766536d6ed4d072fd143eb0b4368624c98c",
+  "readable_Docker_tag": "neon-pg18:memory-init-fixed-1e9bf01-bc7095f0",
+  "seconds": 106.131,
+  "assertions": [
+    "实际盘/neonvm/bin/init指向同源BusyBox",
+    "8个实际文件读回SHA与Builder/Finalize输出相符",
+    "Root保留root:root/04755与原ELF76e6",
+    "完整文件系统1100→1101，仅新增init符号链接",
+    "System/Native18/broker由新CLI实际重算并与旧555原字节相同",
+    "Native18十文件、Postgres ed134与helper a186均不变",
+    "qcow2转换回原raw全字节比较通过"
+  ],
+  "Source": false,
+  "normal_cycle": false,
+  "VM_started": false,
+  "K8s_E2E": false,
+  "production_acceptance": false,
+  "original_DEV_identities_preserved": true,
+  "old_images_and_evidence_preserved": true
+}

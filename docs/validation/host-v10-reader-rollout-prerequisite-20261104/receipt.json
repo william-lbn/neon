@@ -1,0 +1,42 @@
+{
+  "autoscaling_commit": "403eb25b6821536c26bb1d0dbb91c7afce3ec311",
+  "autoscaling_push_verified": true,
+  "scope": "完整Pod硬限计账；PG真实normal与VM伸缩不变",
+  "internal_Host_model_version": 10,
+  "public_PG_contract_changed": false,
+  "AS_independent_review_SHA256": "d73cd902309f4b4e120466f73b1f19bb648fb46dcba6e7fe398dae93ced817c4",
+  "Host_unique_test_roots": 13,
+  "Helm_Runtime_test_roots": 14,
+  "Helm_Runtime_pass_events": 67,
+  "preserved_failed_batches": [
+    "867527",
+    "40c93c",
+    "9f7061 overall failure"
+  ],
+  "last_Owner_pass_run": "181634",
+  "reader_build_run": "/data/neon-build/validation/host-v10-six-reader-release-20261103T172102Z-ffde4b",
+  "reader_build_result_SHA256": "aa1679710781539c0f2c9d50118bd272030b00d77a4198eb2c9bf0eeeb2758a5",
+  "reader_build_actual_PASS": true,
+  "required_readers": [
+    "Scheduler",
+    "Agent",
+    "Runner",
+    "Controller",
+    "Qualifier CLI",
+    "runtime-prepare CLI"
+  ],
+  "rollout": "four images all3nodeCRI preloaded first; Controller/Agent/Scheduler image-only Helm; fresh physical VM selects exact Runner digest",
+  "Pod_budget_bytes": 11811160064,
+  "VM_actual_bytes": [
+    7516192768,
+    8589934592
+  ],
+  "Host_holds_peak_until_formal_Pod_exit": true,
+  "normal_real_hard_shrink_required": true,
+  "actual_v10_migration": "NOT_RUN",
+  "actual_Guest_SQL_memory_E2E": false,
+  "latest_full_control_plane_phase_started": false,
+  "PG17_gitlink": "6c6ac086bc5aa69ff2da0b40da7ae087e08e5265",
+  "PG18_gitlink": "1e9bf010a841195752f2948ef54ecb34a0fcc749",
+  "default_PG_matrix_14_17_unchanged": true
+}
