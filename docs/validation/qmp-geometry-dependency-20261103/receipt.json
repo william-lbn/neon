@@ -1,0 +1,14 @@
+{
+  "scope": "development dependency closure, not final release",
+  "autoscaling": "c7001e8e1000eba384b8d54ad3f888e7878d55af",
+  "QMP_unique_roots": 9,
+  "QMP_subcases": 92,
+  "race_exit": 0,
+  "actual_original_29fe_frames_replayed": true,
+  "independent_review": true,
+  "source_lock_index_actual_checkout_v17_v18_exit": 0,
+  "PG_gitlinks_changed": false,
+  "normal_or_Guest_safety_gate_changed": false,
+  "actual_normal_functional_retest": "IN_PROGRESS",
+  "K8s_accepted": false
+}
