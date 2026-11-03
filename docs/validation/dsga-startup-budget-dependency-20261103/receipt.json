@@ -1,0 +1,10 @@
+{
+  "scope": "development dependency closure; no release acceptance",
+  "autoscaling": "f5580da4f4885cc162f26f66b2bc9825c1c89200",
+  "targeted_race_root_passed": 1,
+  "DSGA_startup_seconds": 35,
+  "legacy_startup_seconds": 15,
+  "source_lock_index_actual_v17_v18_exit": 0,
+  "PG_gitlinks_changed": false,
+  "real_K8s_cycle_accepted": false
+}

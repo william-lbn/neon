@@ -1,0 +1,1 @@
+同步已推送f5580da的仅DSGA首次Lease观察启动预算修复。PG17/PG18原gitlink/锁保持，原index和实际v17/v18检出检查通过；不改变Guest/PG协议、运行期Lease或legacy启动。原f2失败归档，新单Scheduler与真实Host初始化仍待后继，不以依赖更新冒签K8s循环。
