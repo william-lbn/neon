@@ -1,0 +1,33 @@
+{
+  "scope": "development dependency candidate, not production certification",
+  "autoscaling_commit": "73c1cb9464b4315e7087674c7ec3a5928c183481",
+  "source_gates": {
+    "initial_owner_and_NoStart": "b75286:9 roots/20 PASS events; race; no OOM",
+    "guest_artifact_stage1": "1659c4:3 roots/8 negative unit subcases",
+    "guest_artifact_HTTP_stage2": "39231f:7 roots/8 negative unit subcases",
+    "collector_publisher_stage3": "5df847:17 roots; race; no OOM; no real Guest yet",
+    "bootstrap_mode_contract": "402d98:test-only preserved original managed nil rejection"
+  },
+  "affected_final_ELF_targets": [
+    "neonvm-runner",
+    "autoscaler-agent",
+    "resource-guard",
+    "dsga-platform-qualifier"
+  ],
+  "new_images_building_or_pending": true,
+  "unchanged_existing_component_images_reused_with_original_provenance": true,
+  "PG17_PG18_locks_and_gitlinks_unchanged": true,
+  "source_lock_index_actual_v17_v18_exit": 0,
+  "default_PG_matrix": [
+    "v14",
+    "v15",
+    "v16",
+    "v17"
+  ],
+  "latest_actual_Compute_VM": "neon/cp-d8d85ed796068ab5",
+  "latest_actual_Compute_UID": "f1693bfc-e2f5-4b15-8a78-ab954b8ccddd",
+  "latest_actual_phase": "Failed",
+  "actual_Compute_Pod_exists": false,
+  "PG_SQL_started": false,
+  "K8s_memory_E2E_accepted": false
+}
