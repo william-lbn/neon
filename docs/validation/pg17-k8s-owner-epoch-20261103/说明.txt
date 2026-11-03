@@ -1,0 +1,11 @@
+PG17 K8s 初启Owner代次修复与验收边界（2026-11-03）
+
+现象与原因：真实Runner Pod neon/cp-d8d85ed796068ab5-fkftm在worker-117、启动QEMU之前退出。client-go首次创建Lease时Transitions=0；业务journal先建立bootstrap代次1，再通过正式CAS接管成为Owner代次2。两者来源不同，不能用Transitions+1推导业务代次。原简化单元夹具使用Transitions=1，未暴露这一真实接线错误。
+
+本轮修复：Runner等待、初始来源冻结和资格采集四处VM检查统一沿journal Owner及原Lease身份认证。跨Host来源读取后再次完整认证同一Owner和Lease UID。保留holder、新鲜度、Birth/Pod/Node、Root owner/floor及Runner publication检查；不修改Host独立Lease协议，不把Source初始issuer=1改成2。
+
+验证：直接复用正式client-go Elector，覆盖首CREATE0→Owner2及后继1→Owner3，贯穿完整freeze/source_frozen WAL；增加Host跨读身份漂移及资格采集负例。8根37通过和12根42通过均已独审，race、skip、OOM为0。原失败和完整证据保留在118 /data/neon-build/validation/对应nonce目录。这里只归档小型证据，不含凭据、大日志或镜像。
+
+验收边界：Linux单机真实7→8→7→8已验证PG normal硬限下降、四数组回收及数据/WAL一致性，但该票使用Host API模型，未验证真实Kubernetes选主、调度、RBAC和Pod生命周期。它不能代替三worker Helm端到端。本轮单元通过也不代表Guest启动或K8s内存回归通过。
+
+后续：仅重编受影响的Runner和资格采集器；复用已核Guest、Agent、Scheduler和Kernel，准确保留各镜像来源。失败571 UID不重置、不收养旧birth。真实新物理身份恢复后，完成configure、Proxy SQL、资格、Grow、真实safe normal Shrink与四数组释放、Regrow及自动策略，并串联Pageserver/Safekeeper/MinIO数据验证。所有结果按unit、组件API、E2E归档；最后才进入届时最新完整控制面阶段。

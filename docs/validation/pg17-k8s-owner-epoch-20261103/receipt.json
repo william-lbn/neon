@@ -1,0 +1,39 @@
+{
+  "status": "SOURCE_FIXED_FOCUSED_TESTS_PASS_K8S_COMPUTE_START_NOT_ACCEPTED",
+  "autoscaling_commit": "fff0a385ee5735068139bd33d9b1727ec6f5ed37",
+  "vm": "neon/cp-d8d85ed796068ab5",
+  "failed_vm_uid": "571f69e6-88f8-44c9-aaa9-849d69c3f77a",
+  "failed_runner_pod": "neon/cp-d8d85ed796068ab5-fkftm",
+  "node": "worker-117",
+  "failure_stage": "before_QEMU_Start",
+  "real_lease_transitions": 0,
+  "real_journal_owner_epoch": 2,
+  "fixed_VM_checks": 4,
+  "host_lease_protocol_changed": false,
+  "Source_initial_issuer_epoch": 1,
+  "initial_owner_tests": {
+    "roots": 8,
+    "pass_events": 37,
+    "seconds": 32.22315102099674,
+    "proposal_sha256": "c9452018bc4672ec8350fedcc64dbeebba9743fe493d6240d5972b2ddfef04fe",
+    "result_sha256": "6690232b053451e992e19855aa682f80befdac5715f6a244a43dea365f350d9b",
+    "independent_review_sha256": "f6ac6fabee95b867bd3930caa7a0cd19fc5392667457911db90d84c83e49279c"
+  },
+  "qualification_capture_tests": {
+    "roots": 12,
+    "pass_events": 42,
+    "seconds": 20.67703994299518,
+    "proposal_sha256": "f75e4de77ca5e9cb3c52feaf0ab0724259eb79623452cbdd223eb0334b80d0ac",
+    "result_sha256": "7e30c23e2e05192dea3992d53a2e5e7ab2a564b395efc0191a56ab3df58ee29b",
+    "independent_review_sha256": "ab01b40317ad8436f956dceb0f82dc41c2c5ab6cd645c9d6a668ffd851434a6d"
+  },
+  "race_failures": 0,
+  "skipped_tests": 0,
+  "oom_events": 0,
+  "PG17_K8s_memory_E2E": "NOT_RUN",
+  "new_runner_and_qualifier_images": "BUILD_PENDING",
+  "existing_guest_image_reused": "sha256:29e7b9597f4337a6ae62972b0bfa0612ea936eb56b5d1f22d929347910bfc16e",
+  "old_failed_uid_reset": false,
+  "PG_source_locks_changed": false,
+  "latest_full_control_plane_phase_started": false
+}
