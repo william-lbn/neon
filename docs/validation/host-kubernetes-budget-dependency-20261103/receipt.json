@@ -1,0 +1,17 @@
+{
+  "scope": "development dependency closure not final release",
+  "autoscaling": "a7f91f1b21605f7b6c5e47f9af20d41d1cba28a3",
+  "AS_race_unique_roots": 19,
+  "AS_race_subcases": 63,
+  "qualifier_cli_build_help_exit": 0,
+  "parent_source_lock_index_check_exit": 0,
+  "PG17_source": "6c6ac086bc5aa69ff2da0b40da7ae087e08e5265",
+  "PG18_submodule_unchanged": true,
+  "default_PG_matrix_unchanged": true,
+  "build_candidate_images": 7,
+  "image_distribution": "118 build OCI SSH preload k8s.io digest",
+  "Guest_or_normal_safety_gate_changed": false,
+  "K8s_accepted": false,
+  "Source_issued": false,
+  "updated_utc": "2026-11-03T01:20:53.281528+00:00"
+}
