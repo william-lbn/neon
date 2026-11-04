@@ -1,0 +1,9 @@
+PG17三节点候选：Runner核验预算修复与可选追踪显式关闭
+
+源码：autoscaling原功能分支ad31a02e96af405b1780969b3064bbf29db38eeb已推送；本批Neon只更新ci/distribution.json这一AS引用及本中文归档。PG17/PG18 gitlink、Compute及未改组件不重编。
+Runner新ELF f80189126fbf4d1c96ba1ee7072ee4759a557a7ddaf8e2f5c8833ab36efc8058，12精准roots/49PASS/race，原绝对期限/双authority/QMP2s/Unknown门保持。镜像只在原96f基底COPY /usr/bin/runner，Env/CMD/User/权限等原样；实际18.821545秒、7phase全0、entryELF读回一致。候选digest f2f3857f11ea1a6498fc273c6752a1904598723fba9a1045325c116685634613，Docker可见neon-pg17-visible/neonvm-runner:authority-budget-ad31a02-134831。
+Guest仅将原production plan的compute_env明确设置OTEL_SDK_DISABLED=true；没有真实OTLP接收端时不启动可选导出，保留stderr/file/Vector指标。影响plan、broker、System、Native四个文件；Root8153、Compute652a、PG/helper/vminit/Kernel及所有ELF保留原字节。新Guest digest f146b6de87cdfe2a5b0a7e1a2b953d5068ee3ab65f156679e1276a13ff51df91，System45a8d1e8c02ecf3c9875488c2d2c1c30c99f0b9213ff86b370437aeb363d632f，Native17f1135e5be0782a6cc986e89e1e114e5f6edb1db459113f04d8248826d77281f0。原pack72.69秒完成，但后检工具错误把需变的plan仍列为不可变，首FAIL保留；新nonce仅对同一已造镜像完成修正后的真实全manifest和8盘读回（43.39482秒），没有重建。最终scope票f22fd3a64a0998292c4ead7bbaa87c2451fc09768e60d2f178c2b06611746756。
+
+精确Linux归档：/data/neon-build/validation/runner-authority-rate-budget-20261104T134104Z-aa65d4/；/data/neon-build/validation/Runner-authority-budget-only-thin-PREPARED-20261104T134831Z/；/data/neon-build/validation/pg17-OTEL-explicit-disabled-Guest-PREPARED-20261104T134355Z-cbcd37/和pg17-OTEL-disabled-Guest-existing-image-eight-readback-20261104T135346Z-8740ef/。真实构建输入/命令/系统限制/源码与内容SHA/失败与成功日志均留原目录，不复制凭据到仓库。
+
+验收边界：本批是候选构建与组件通过，不是新镜像已部署或PG内存E2E通过。旧0b9b首次Grow受Runner限流阻塞后进入安全关闭，原Key/期限/账本保留；Proxy SQL真实连接被peer重置尚未取得身份，不能宣称SQL完成。下一步按117/118/119准确OCI预载与CRI引用固定、原正式保数据更新流程验证完整PG17链。不得只删安全关闭或Unknown来获得绿色结果。

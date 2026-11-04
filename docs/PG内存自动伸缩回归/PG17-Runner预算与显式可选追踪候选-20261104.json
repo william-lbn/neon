@@ -1,0 +1,11 @@
+{
+  "status": "CANDIDATE_BUILD_AND_COMPONENT_ONLY",
+  "autoscaling_commit": "ad31a02e96af405b1780969b3064bbf29db38eeb",
+  "Runner_digest": "f2f3857f11ea1a6498fc273c6752a1904598723fba9a1045325c116685634613",
+  "Runner_ELF_sha256": "f80189126fbf4d1c96ba1ee7072ee4759a557a7ddaf8e2f5c8833ab36efc8058",
+  "Guest_digest": "f146b6de87cdfe2a5b0a7e1a2b953d5068ee3ab65f156679e1276a13ff51df91",
+  "Guest_scope_receipt_sha256": "f22fd3a64a0998292c4ead7bbaa87c2451fc09768e60d2f178c2b06611746756",
+  "K8s_E2E_accepted": false,
+  "PG17_gitlink_changed": false,
+  "PG18_gitlink_changed": false
+}
