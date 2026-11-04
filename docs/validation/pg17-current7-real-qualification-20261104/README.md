@@ -1,0 +1,9 @@
+# PG17 当前7Gi正式资格闭环
+
+Gateway四条租约路由修复后，worker-117实际Agent的Owner和resource_state均恢复200。正式9e9 Collector沿同一原本地UDS、真实VM/Config/Runner/Node和Linux连续来源取得当前7Gi报告；独立核对原字节哈希链后，由原Issuer再次执行两次实际读取并发布受保护、不可变、原VM控制的资格CM。消费者原读回规则全部通过。这里唯一资格目标是当前7Gi，不将未来8Gi规格或瞬时RSS当成已证事实。
+
+Issuer复用原117本地Socket信任边界。专用最小SA由自有Helm管理；只在原Agent私有临时目录使用600秒scoped token配置，未复制管理员key或凭据，终态认证文件已删除，token不入日志/归档。原report、Linux/continuous文件及建议配置均保持原字节。Source的SHA是资格CM正文1b678，不是report的0b823，不能混用。
+
+已将该Source通过现有自有Helm neon-autoscaler的prepareQualifications接入实际VMUID；配置渲染仅改变Source、原checksum以及原代码为预算Claim创建所需的权限。所有镜像、资源、TLS和scheduler保持原值，三Agent真实新generation都Ready。后续原initialexec首次准入需另取真实证据，不能用发布成功或PodReady代替；Grow、安全normal硬降限、Regrow、自动策略仍0/4，Native初始化与Proxy SQL也各自验收。
+
+大日志与私有输入保存在收据所列Linux/data目录；这里只保存非敏感小收据。任何后继动作仍由原Owner/资格/Root真实来源控制，不删除Unknown门或用固定normal上限替代降限。

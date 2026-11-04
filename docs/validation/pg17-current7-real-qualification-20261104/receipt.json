@@ -1,0 +1,54 @@
+{
+  "scope": "实际当前7Gi Collector→原Issuer→原消费者→Agent Source接线，不是内存Grow/Shrink验收",
+  "VM_UID": "0aa42803-c500-455f-9ed6-633221671351",
+  "incarnation": "2142a80fc5d949baa88aa28a8f19e034",
+  "Compute_Pod": "cp-d8d85ed796068ab5-fb8mv",
+  "Node": "worker-117",
+  "original_CLI_SHA256": "9e9ceb70751c03c00f4985834030159a20edc97aa43975de72736094c667e088",
+  "collector_exit": 0,
+  "collector_seconds": 12.164,
+  "report_SHA256": "0b82343e52c30207d4344ee1cedae6bc6a30ea78e25d49c9f2d6e7b697b6a353",
+  "Issuer_exit": 0,
+  "Issuer_seconds": 8.451365527987946,
+  "Issuer_dedicated_SA": "neon/neon-pg17-qualification-issuer",
+  "short_scoped_token_seconds": 600,
+  "temporary_scoped_auth_removed": true,
+  "admin_credentials_not_copied_or_logged": true,
+  "original_report_limits_and_local117_UDS_preserved": true,
+  "source": {
+    "claim": {
+      "name": "dsga-q-0b82343e52c30207d4344ee1cedae6bc6a30ea78e25d49c9f2d6e7b6",
+      "uid": "24840ea5-b06a-455b-9d0f-ad4e747831b1"
+    },
+    "sha256": "1b678fcf41d8df662ceb095c7bb5476b2e37bed6822f51fbd3aa5442defdb22e"
+  },
+  "claim_immutable_protected_owned_and_original_consumer_readback_passed": true,
+  "only_current_VM_bytes": 7516192768,
+  "future8Gi_qualified": false,
+  "Agent_Helm_release": "default/neon-autoscaler",
+  "Agent_only_Source_checksum_original_Claim_create_updated": true,
+  "Agent_all3_new_generation_Ready": true,
+  "Agent_Gateway_Compute_images_unchanged_during_Source_update": true,
+  "Helm_source_commit": "dd4f417f96582525f88435e580a03ab9a3c17031",
+  "current_memory_actions_accepted": 0,
+  "current_memory_actions_total": 4,
+  "NativeInitialization_or_SQL_E2E_not_certified": true,
+  "evidence": [
+    {
+      "path": "/data/neon-k8s-pg17/runs/pg17-current7-formal-collect-post-Gateway-20261104T021249Z-82b77e/independent-current7-collected-source-readback-P2.json",
+      "SHA256": "f04d40de420cad42dc475d6d3a08dc788e7ab34f0b512218701b26b049acfc09"
+    },
+    {
+      "path": "/data/neon-k8s-pg17/runs/pg17-current7-dedicated-original-Issuer-20261104T030044Z-5cc93e/result.json",
+      "SHA256": "6035984c80e725c9cf08cb044587f3bc5cec935e1abc31b592e56983bb7fb2a7"
+    },
+    {
+      "path": "/data/neon-build/validation/pg17-2142-initial-admission-readonly-20261104T031146Z-5ab72c/independent-actual-current7-consumer-qualification-review-P2.json",
+      "SHA256": "712cefe147eb82cff797be97fac0f1430e161707901185a4e4a97c85a61527ef"
+    },
+    {
+      "path": "/data/neon-k8s-pg17/runs/pg17-current7-Agent-original-Source-rollout-20261104T031408Z-52743a/actual-all3-Source-readback.json",
+      "SHA256": "06a715be70bf20a3d3f5d2d2a594ff68a6d40ce6f943ed169b708e921e7660fa"
+    }
+  ]
+}
