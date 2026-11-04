@@ -39,8 +39,8 @@ struct DsgInitializationMajor(i32);
 impl DsgInitializationMajor {
     fn select(configured: &str) -> Result<Self> {
         let major = match configured {
-            "17" => 17,
-            "18" => 18,
+            "v17" | "17" => 17,
+            "v18" | "18" => 18,
             _ => anyhow::bail!("DSGA initialization requires an implemented PG major"),
         };
         Ok(Self(major))
@@ -321,7 +321,7 @@ mod creation_tests {
 
     #[test]
     fn initialization_requires_exact_supported_pg_major() -> Result<()> {
-        for (configured, expected) in [("17", 17), ("18", 18)] {
+        for (configured, expected) in [("17", 17), ("v17", 17), ("18", 18), ("v18", 18)] {
             let selected = DsgInitializationMajor::select(configured)?;
             assert!(selected.matches(expected));
             for actual in [-1, 0, 14, 16, 17, 18, 19, 170000, 180002] {
@@ -332,8 +332,31 @@ mod creation_tests {
                 );
             }
         }
-        for unsupported in ["", "14", "16", "19", "018", "17\n", "18.2", "+18"] {
+        for unsupported in [
+            "", "14", "16", "19", "v14", "v16", "v19", "v170", "v180", "018", "17\n", "18.2",
+            "v17.1", "v18.2", "v17x", "V17", " v17", "v18 ", "+18", "unknown",
+        ] {
             assert!(DsgInitializationMajor::select(unsupported).is_err());
+        }
+        Ok(())
+    }
+
+    // 直接消费 compute_ctl 参数生产者的同一枚举编码，避免裸数字夹具掩盖前缀差异。
+    #[test]
+    fn initialization_accepts_original_pg_major_v_str_producer() -> Result<()> {
+        use postgres_versioninfo::PgMajorVersion;
+
+        for (version, expected) in [
+            (PgMajorVersion::PG17, 17),
+            (PgMajorVersion::PG18, 18),
+        ] {
+            let configured = version.v_str();
+            let selected = DsgInitializationMajor::select(&configured)?;
+            assert!(selected.matches(expected));
+            assert!(!selected.matches(if expected == 17 { 18 } else { 17 }));
+        }
+        for version in [PgMajorVersion::PG14, PgMajorVersion::PG16] {
+            assert!(DsgInitializationMajor::select(&version.v_str()).is_err());
         }
         Ok(())
     }
