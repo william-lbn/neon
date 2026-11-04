@@ -24,3 +24,15 @@
 本记录不含密码、签名 seed、JWT、原配置/Secret 正文或 SQL 认证信息；大日志和镜像留在 Linux /data。
 
 本次定向验收结果：两条目标测试通过，编译、strip、源码核对和资源断言退出均为0，Compute ELF SHA256为652a13bde22ab34c48ee0b409f8a21924d1510377f1b9d92790963b13d51bb23（71153008字节）。实际SDK2CPU/3.75Gi/swap0，OOM为0。原统计FAILED及unit exit1原样保留，预算已按原终态reconcile0释放。修后真实Guest/SQL/内存端到端尚待下一镜像验证。
+
+## 修后真实三节点部署阶段
+
+修复版 Guest 已经 117/118/119 实际 CRI 核验，当前 Compute 在 worker-117。新物理身份完成唯一初始化 POST，原 Native capabilities、memory、initialization 三接口均真实返回200，原 Major=2误拒已经在实际PG17上消失。新实例独立资格已由原专用Issuer发布，消费者Source用实际保护对象UID及消费者SHA，不拿reportSHA替代。原Helm仅增加该VM的Source，三Agent就绪后，初始准入自然settled、PG读回floor9/revision1/open。
+
+原正式路由发布器已fresh核验Native后CAS，使用原证书严格校验及匿名FD探针凭据，经Proxy读回PG17.11、正确tenant/timeline/control_probe/neondb。SQL实际具备CONNECT/TEMP，两readOnly为off且非恢复模式；未重置app_owner密码、未GRANT、未改原业务表。
+
+本阶段只通过初始化、资格与Proxy SQL身份链路。Grow、安全normal Shrink、Regrow及原自动策略仍待真实执行，不能以接口200替代内存动作。Native的vm_shrink_permit固定false是原协议要求，ProductionReady同为Native层观测标记，不是复合VM授权：不改为true、不新增等待门，VM动作仍须完整原Owner/Prepare/ReleasePG/Root/VM/Host安全事务。
+
+复现部署时，Helm upgrade不支持template专属--kube-version；该参数只用于离线模板。systemd异步任务须在118显式引用原KUBECONFIG=/root/.kube/config，不能依赖SSH交互环境。临时专用SA配置仅通过匿名stdin到原Agent、本机UDS执行并finally清理，管理配置始终留118。原两次准备失败均在资格写入前，失败证据保留，没有重试未知PUT或放开身份检查。
+
+准确字段和日志SHA见runtime-phase.zh-CN.json；大日志仍在Linux /data，凭据不入库。
