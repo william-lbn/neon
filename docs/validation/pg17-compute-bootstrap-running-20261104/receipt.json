@@ -1,0 +1,76 @@
+{
+  "scope": "PG17-I/K8s actual affected Neon bootstrap/configure; not memory E acceptance",
+  "AS_commit": "aafcc8a985fb3edf6a18f3d696e1515662a89bbe",
+  "Neon_dependency_source_commit": "35c231aa05b2369a47a3afb764469a8b38d73d58",
+  "Helm_commit": "7b14be9737fd2b2444ace2c14f5c1d58c96260d9",
+  "logical_endpoint": "neon/cp-d8d85ed796068ab5",
+  "actual_VM_UID": "0aa42803-c500-455f-9ed6-633221671351",
+  "incarnation": "2142a80fc5d949baa88aa28a8f19e034",
+  "actual_Compute_Pod": "cp-d8d85ed796068ab5-fb8mv",
+  "actual_Pod_UID": "3c1c31e3-a429-4675-aa4d-23dab1782d49",
+  "Node": "worker-117",
+  "ConfigSecret_UID": "ed6275d9-336b-41fe-877b-bd879f36b829",
+  "Runtime_SHA256": "1fc883a7086638d76b61cea32991d03c4d470bb2e5b1d6aeac824e705dd419b2",
+  "management_Service_UID": "1812e5d3-f1f0-459e-8e24-f01b83123bdd",
+  "Runner_Ready_observed": true,
+  "Runner_restarts_observed": 0,
+  "actual_QEMU_KVM_identity_observed": true,
+  "actual_container_and_Pod_memory_max_bytes": 11811160064,
+  "sampled_oom": 0,
+  "sample_is_not_final_OOM_proof": true,
+  "OwnerLease_StateClaim_exact_RBAC_SAR": {
+    "total": 21,
+    "allowed": 13,
+    "denied": 8,
+    "old_VM_and_control_Node_denied": true
+  },
+  "wait_spec_log_marker_verified": true,
+  "authenticated_preconfigure_status": {
+    "HTTP_status": 200,
+    "status": "empty",
+    "separate_GET_only_reader_no_POST_capability": true
+  },
+  "unique_configure": {
+    "HTTP_status": 200,
+    "status": "running",
+    "exit_code": 0,
+    "seconds": 22.380895906011574,
+    "Root_durable_intent_fsync_file_and_parent": true,
+    "original_client_exclusive_POST_MAY_marker_preserved": true,
+    "POST_replay_forbidden": true,
+    "private_body_or_JWT_or_key_logged": false
+  },
+  "probe_unauthenticated_status_400_not_success": true,
+  "original_observe_only_requires_actual_POST_MAY_marker": true,
+  "wrong_prePOST_observe_advice_corrected": true,
+  "physical_PG_identity_SQL_qualification_and_memory_E_NOT_YET_verified": true,
+  "memory_core_actions_accepted": 0,
+  "memory_core_actions_total": 4,
+  "release_certified": false,
+  "evidence": [
+    {
+      "path": "/data/neon-k8s-pg17/runs/pg17-new2142-original-hold-20261104T004250Z-e45f3a/result.json",
+      "SHA256": "10c30423cc39c787565259fee3824bec1d4924890719893cdf3e797648c0e697"
+    },
+    {
+      "path": "/data/neon-k8s-pg17/runs/pg17-0aa4-held-helm-and-render-20261104T004342Z-f8aaed/result.json",
+      "SHA256": "bd5adee27fe14b5e9ebc2fbda2965318f9c14036cfaaef5180e0fd5eca4c1151"
+    },
+    {
+      "path": "/data/neon-k8s-pg17/runs/runner-access-next2142-UNBOUND-20261104T004044Z-6fb1c1/result.json",
+      "SHA256": "71998730446e302b62d7644d901b9836b28bdfa3054e4459578212c52495b837"
+    },
+    {
+      "path": "/data/neon-k8s-pg17/runs/pg17-0aa4-original-seal-20261104T004822Z-bb44fd/result.json",
+      "SHA256": "f89c3b0bb51eadb0dd4c0372810e10a32dfd104dd069ee17b44570ad2feafb93"
+    },
+    {
+      "path": "/data/neon-build/validation/pg17-2142-v3-readonly-20261104T004515Z-4c6abe/actual-Compute-wait-spec-marker-only-receipt.json",
+      "SHA256": "667cb151ad76d132a09c25f81157ea148f58447084be8ca7c584276da7395981"
+    },
+    {
+      "path": "/data/neon-k8s-pg17/private/pg17-2142-once-UNBOUND-WAIT-ACTUAL-20261104T004031Z-2d70f6/client-exec.BOUND.v3/post-result.json",
+      "SHA256": "9e3ce22bc51c94e4f1639c4b6ab38b354a6aac5bbc45618f27ead8ba9d06620c"
+    }
+  ]
+}
