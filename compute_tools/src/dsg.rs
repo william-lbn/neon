@@ -51,6 +51,40 @@ impl DsgInitializationMajor {
     }
 }
 
+// 初始化失败只记录请求内固定阶段，避免泛化503掩盖首个未确认门。
+// 不持有来源/凭据或原始错误，也不改变认证、PG事实、限额与公开响应。
+// 该栈守卫最后析构；局部状态/认证锁先释放。取消同样仅记未确认，不重试。
+#[derive(Clone, Copy)]
+#[repr(u8)]
+enum DsgInitializationStage {
+    Running = 1,
+    Major = 2,
+    Creation = 3,
+    AuthenticationReceipt = 4,
+    NativeBefore = 5,
+    PrivateObserver = 6,
+    Storage = 7,
+    Roles = 8,
+    AuthenticationLoaded = 9,
+    NativeAfter = 10,
+    ConfigurationUnchanged = 11,
+    AuthenticationUnchanged = 12,
+    Response = 13,
+}
+
+struct DsgInitializationDiagnostic {
+    stage: DsgInitializationStage,
+    confirmed: bool,
+}
+
+impl Drop for DsgInitializationDiagnostic {
+    fn drop(&mut self) {
+        if !self.confirmed {
+            warn!(stage = self.stage as u8, "DSGA_INITIALIZATION_UNCONFIRMED");
+        }
+    }
+}
+
 impl ComputeNode {
     /// 只读比较已冻结存储身份，不持锁/不访问网络。原创建缺UUID的旧配置仍可
     /// 沿原启动路径处理，但初始化证明必须拒绝补造来源；后续通知不能填补它。
@@ -73,8 +107,14 @@ impl ComputeNode {
     /// 锁只复制快照，不跨网络await；末尾再次比对spec、receipt代次和PG boot，
     /// 并发重配、文件漂移、连接断开或内部恢复都不能拼出成功。此GET不打开准入。
     pub(crate) async fn dsg_initialization(&self) -> Result<DsgInitializationResponse> {
+        let mut diagnostic = DsgInitializationDiagnostic {
+            stage: DsgInitializationStage::Running,
+            confirmed: false,
+        };
         self.verify_dsg_running()?;
+        diagnostic.stage = DsgInitializationStage::Major;
         let pg_major = DsgInitializationMajor::select(&self.params.pgversion)?;
+        diagnostic.stage = DsgInitializationStage::Creation;
         let (spec, tenant, timeline) = {
             let state = self
                 .state
@@ -89,18 +129,22 @@ impl ComputeNode {
             )
         };
         let startup = self.dsg_spec()?;
+        diagnostic.stage = DsgInitializationStage::AuthenticationReceipt;
         let authentication = self
             .dsg_authentication_receipt
             .read()
             .map_err(|_| anyhow::anyhow!("DSGA authentication state poisoned"))?
             .clone()
             .context("DSGA published authentication proof unavailable")?;
+        diagnostic.stage = DsgInitializationStage::NativeBefore;
         let client = self.dsg_management_client().await?;
         let before = client.memory_status().await?;
+        diagnostic.stage = DsgInitializationStage::PrivateObserver;
         let config = self.get_tokio_conn_conf(Some("compute_ctl:dsga_initialization"));
         let observer = management_connection(&config).await?;
         // PG实际启动的存储身份/大版本也须匹配ParsedSpec，不能只回显配置。
         // ParsedSpec允许官方GUC旧格式，直接读spec可选字段会误拒绝合法原配置。
+        diagnostic.stage = DsgInitializationStage::Storage;
         let storage = timeout(Duration::from_secs(5), observer.query_one(
             "SELECT current_setting('server_version_num')::int/10000,current_setting('neon.tenant_id'),current_setting('neon.timeline_id')", &[])).await??;
         ensure!(
@@ -109,17 +153,21 @@ impl ComputeNode {
                 && storage.get::<_, String>(2) == timeline,
             "DSGA PG storage identity or major version differs"
         );
+        diagnostic.stage = DsgInitializationStage::Roles;
         crate::dsg_roles::attest(&observer, &spec, &self.params.privileged_role_name).await?;
+        diagnostic.stage = DsgInitializationStage::AuthenticationLoaded;
         tokio::time::timeout(
             Duration::from_secs(10),
             crate::dsg_hba::verify_loaded(&config, &authentication),
         )
         .await??;
+        diagnostic.stage = DsgInitializationStage::NativeAfter;
         let observed = client.memory_status().await?.observed;
         ensure!(
             before.observed.instance == observed.instance,
             "DSGA boot changed during initialization proof"
         );
+        diagnostic.stage = DsgInitializationStage::ConfigurationUnchanged;
         self.verify_dsg_running()?;
         {
             let state = self
@@ -140,6 +188,7 @@ impl ComputeNode {
                 "DSGA configuration changed during initialization proof"
             );
         }
+        diagnostic.stage = DsgInitializationStage::AuthenticationUnchanged;
         {
             let current = self
                 .dsg_authentication_receipt
@@ -152,6 +201,7 @@ impl ComputeNode {
                 "DSGA authentication policy changed during initialization proof"
             );
         }
+        diagnostic.stage = DsgInitializationStage::Response;
         let response = DsgInitializationResponse {
             protocol_version: 1,
             vm_shrink_permit: false,
@@ -176,6 +226,7 @@ impl ComputeNode {
             &response.tenant_id,
             &response.timeline_id,
         )?;
+        diagnostic.confirmed = true;
         Ok(response)
     }
 

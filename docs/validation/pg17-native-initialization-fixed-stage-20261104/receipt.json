@@ -1,0 +1,27 @@
+{
+  "status": "PASS_EXACT_FOUR_TESTS_AND_SINGLE_COMPUTE_ELF_ROOT_VERIFIED",
+  "created_at": "2026-11-04T03:54:40.137128+00:00",
+  "result_sha256": "621bd5ab0dd128a734e2ac7f68436b615e5119b95f75bc5547b3b0c4556b6a24",
+  "actual_source_files_verified": 4550,
+  "tests_exact_names": [
+    "dsg::creation_tests::initialization_requires_exact_supported_pg_major",
+    "dsg::creation_tests::root_resource_init_uses_original_frozen_identity_only",
+    "dsg::creation_tests::root_resource_rejects_empty_unfrozen_and_disallowed_lifecycles",
+    "http::routes::dsg_resource::tests::fixed_resource_proxy_preserves_original_and_closes_connection"
+  ],
+  "actual_sdk_resources": {
+    "memory.max": "4026531840",
+    "memory.swap.max": "0",
+    "memory.peak": "4026531840",
+    "memory.events": "low 0\nhigh 0\nmax 17855\noom 0\noom_kill 0\noom_group_kill 0",
+    "cpu.max": "200000 100000"
+  },
+  "artifact": {
+    "path": "/data/neon-build/validation/native-initialization-fixed-stage-rust-PREPARED-20261104T033621Z-830a8b/export/compute_ctl.real",
+    "sha256": "c9b7061c70dba58b22c8f012bfe73ba658689db83d6475fc5645108f6240b95e",
+    "bytes": 71153008
+  },
+  "seconds": 485.9567578950082,
+  "budget_original_Wait_and_terminal_confirmed": true,
+  "not_runtime_E2E": true
+}
