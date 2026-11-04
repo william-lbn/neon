@@ -1,0 +1,49 @@
+{
+  "scope": "PG17-B: onlyRunner image and actual three-node preload; not PG17-E",
+  "AS_commit": "aafcc8a985fb3edf6a18f3d696e1515662a89bbe",
+  "Runner_ELF_SHA256": "9389fd50c9156c5fc122b4d907f5405eb7fb93d782b488db52e837038acfb8b2",
+  "image": "127.0.0.1:5001/neon-candidate/neonvm-runner@sha256:7b6eca30db6ce398fa567a4a2796c276d86326ff6bda6021a56609910a2194fa",
+  "image_ID": "sha256:9d04754eb9bc6e59f7ec30502588364b42cd9160c1bcc060e62595ef9e1264c7",
+  "Docker_visible_tag": "neon-pg17-visible/neonvm-runner:initial-state-read-aafcc8a-bc53bc",
+  "actual_nodes": [
+    "worker-117",
+    "worker-118",
+    "worker-119"
+  ],
+  "runtime_socket": "/run/containerd/containerd.sock",
+  "containerd_namespace": "k8s.io",
+  "all_three_actual_CRI_readback_passed": true,
+  "only_usr_bin_runner_layer_and_revision_label_changed": true,
+  "full_Docker_Config_or_Env_persisted": false,
+  "first_failed_dispatch_e504_preserved": true,
+  "first_failed_preload_1916_preserved": true,
+  "existing_OCI_reused_no_reexport_no_recompile": true,
+  "OCI_bytes": 316610560,
+  "OCI_SHA256": "036a5ee1dcb85819986fb844552742f063836393da756db50b21a5db7667c902",
+  "targeted_Go_unique_roots": 7,
+  "targeted_Go_PASS": 30,
+  "prior_VM_formally_retired": "f0eb7a4c-a5ae-4daa-acce-e2c528ddea2b",
+  "tenant_timeline_credentials_preserved": true,
+  "new_VM_started": false,
+  "PG17_cluster_memory_actions_accepted": 0,
+  "PG17_cluster_memory_actions_total": 4,
+  "release_certified": false,
+  "evidence": [
+    {
+      "path": "/data/neon-build/validation/runner-initial-claim-read-thin-OCI-20261104T001843Z-bc53bc/result.json",
+      "SHA256": "21a7ad59cbfbc1306ce28f89e3ba64c52478db75bdcde1f7dcd2f89a6220ec0c"
+    },
+    {
+      "path": "/data/neon-build/validation/runner-initial-claim-read-thin-OCI-20261104T001843Z-bc53bc/independent-actual-onlyRunner-content-review-P2.json",
+      "SHA256": "db220692b238a0a4705ce3de759b92125bc9947c58973f174bc5c61f4c145b7b"
+    },
+    {
+      "path": "/data/neon-k8s-pg17/runs/runner-pure-digest-alias-recovery-20261104T003015Z-de84b5/preload-acceptance.json",
+      "SHA256": "a8ca1ef6ceafd53e73f50580e5b47ad5cc682817804c9d9f070a1756771f74b0"
+    },
+    {
+      "path": "/data/neon-k8s-pg17/runs/pg17-f0eb-original-retire-observe-20261104T002820Z-4bde9a/result.json",
+      "SHA256": "e3d9865413580739753f9061f7dca3fefb86aabcedf6185cb7319bf7ef888c8e"
+    }
+  ]
+}
