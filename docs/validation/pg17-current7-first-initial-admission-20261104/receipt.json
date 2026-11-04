@@ -1,0 +1,43 @@
+{
+  "status": "PASS_ORIGINAL_INITIAL_ADMISSION_SETTLED_VALIDATED_STATE_AND_NATIVE_RECEIPT_READBACK",
+  "scope": "first current7 initial admission only; no Grow/Shrink",
+  "actual_Source": {
+    "claim": {
+      "name": "dsga-q-0b82343e52c30207d4344ee1cedae6bc6a30ea78e25d49c9f2d6e7b6",
+      "uid": "24840ea5-b06a-455b-9d0f-ad4e747831b1"
+    },
+    "sha256": "1b678fcf41d8df662ceb095c7bb5476b2e37bed6822f51fbd3aa5442defdb22e"
+  },
+  "actual_owner_epoch": "119",
+  "actual_sequence": "124",
+  "actual_admission_phase": "settled",
+  "original_InitialAdmissionReady_predicate": "journal/service_lifecycle.go326-328: validated Model InitialHeld.Admission.Phase == Settled",
+  "validated_original_ControlAPI_state_HTTP200": true,
+  "native_response_observed": {
+    "instance": {
+      "vm_uid": "0aa42803-c500-455f-9ed6-633221671351",
+      "compute_instance_id": "cp-d8d85ed796068ab5",
+      "pg_boot_id": "9013877430840229889"
+    },
+    "admission_open": true,
+    "admission_revision": "1",
+    "capacity_generation": "1",
+    "issuer_floor_epoch": "119"
+  },
+  "original_request": {
+    "instance": {
+      "vm_uid": "0aa42803-c500-455f-9ed6-633221671351",
+      "compute_instance_id": "cp-d8d85ed796068ab5",
+      "pg_boot_id": "9013877430840229889"
+    },
+    "issuer_epoch": "119",
+    "revision": "1",
+    "expected_capacity_generation": "1",
+    "open": true
+  },
+  "no_service_closure_in_current_original_state": true,
+  "State_response_SHA256": "c9efecf9423f292b056a0513f14e6c4b056967c7f0633845d6faccc1063a9be4",
+  "native_Init_latest503_not_covered_by_this_success": true,
+  "no_P2_Publish_Begin_admission_setter_or_Source_write": true,
+  "created_at": "2026-11-04T03:24:41.945981+00:00"
+}
