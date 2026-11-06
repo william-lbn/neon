@@ -524,6 +524,31 @@ class DsgPostgresLifecycle(unittest.TestCase):
         self.assertIn("committed high=256", self.shrink_call(3, 2).stdout)
         self.assertEqual(self.shrink_data_checksum(), expected)
 
+    def test_ordinary_committed_write_while_shrink_drains_a_real_tail_pin(self):
+        # 同一业务连接在真实尾页 pin 仍被占用时提交，原内核只收拢目标尾部。
+        # 这是 PG 单服务的并发对照。Guest normal 与 VM 验收另经真实产品链执行。
+        expected = self.prepare_shrink_fixture()
+        self.sql("CREATE ROLE dsg_application LOGIN; CREATE TABLE dsg_online_witness(n integer PRIMARY KEY); "
+                 "GRANT INSERT, SELECT ON dsg_online_witness TO dsg_application")
+        writer = PgWireConnection(self.socket, "dsg_application")
+        self.addCleanup(writer.close)
+        holder = self.hold_shrink_tail()
+        shrinking = self.background_sql("SELECT dsg_shrink(2,2,2,256,10000,false)", "dsg-online-shrinker")
+        try:
+            self.wait_sql("SELECT dsg_resize_state()::json->>'low'", "256")
+            self.assertIsNone(shrinking.poll())
+            replies = writer.exchange([(b"Q", b"BEGIN; INSERT INTO dsg_online_witness VALUES (1); COMMIT;\0")])
+            self.assertFalse(any(kind == b"E" for kind, _ in replies), replies)
+            self.assertIn((b"C", b"COMMIT\0"), replies)
+            self.assertIsNone(shrinking.poll())
+        finally:
+            self.release_shrink_tail(holder)
+        output, errors = shrinking.communicate(timeout=15)
+        self.assertEqual(shrinking.returncode, 0, errors)
+        self.assertIn("committed high=256", output)
+        self.assertEqual(self.sql("SELECT count(*) FROM dsg_online_witness").stdout.strip(), "1")
+        self.assertEqual(self.shrink_data_checksum(), expected)
+
     def test_shrink_waits_for_real_pin_and_completes_after_release(self):
         expected = self.prepare_shrink_fixture()
         holder = self.hold_shrink_tail()
