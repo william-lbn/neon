@@ -60,6 +60,91 @@ class DsgAdmissionLease(unittest.TestCase):
     def rearm_status(self, request):
         return self.call("neon_dsg_admission_rearm_status", request)
 
+    def test_enforced_budget_keeps_sql_across_management_silence(self):
+        """真实的同连接写读、失联后新连接，以及高代接管后的显式关闭。"""
+        self.assertNotIn("admission_policy", self.value("SELECT neon_dsg_capabilities()"))
+        self.pg.stop()
+        public = self.pg.socket
+        private = self.pg.data / "dsg_socket"
+        private.mkdir(mode=0o700)
+        self.pg.config(
+            f"unix_socket_directories='{public},{private}'\nunix_socket_permissions=0700\n"
+            "dynamic_shared_buffers_require_connection_gate=on\n"
+            "dynamic_shared_buffers_admission_lease_timeout='30s'\n"
+        )
+        self.pg.socket = private
+        self.pg.start(options="-c dynamic_shared_buffers_admission_policy=enforced_budget_v1")
+        caps = self.value("SELECT neon_dsg_capabilities()")
+        self.assertEqual(caps["admission_policy"], "enforced_budget_v1")
+        self.assertNotEqual(caps["instance"]["pg_boot_id"], self.instance["pg_boot_id"])
+        self.instance = caps["instance"]
+
+        def connect_public():
+            peer = lifecycle.PgWireConnection(public, "dsg_app")
+            self.addCleanup(peer.close)
+            return peer
+
+        def query(peer, sql):
+            return peer.exchange([(b"Q", (sql + "\0").encode())])
+
+        def one(peer, sql):
+            messages = query(peer, sql)
+            self.assertFalse(any(kind == b"E" for kind, _ in messages), messages)
+            rows = [body[6:].decode() for kind, body in messages if kind == b"D"]
+            self.assertEqual(len(rows), 1)
+            return rows[0]
+
+        self.assertFalse(self.fence()["observed"]["admission_open"])
+        with self.assertRaises((OSError, RuntimeError)):
+            connect_public()
+        rejected = self.call("neon_dsg_admission_lease", self.lease_request(), check=False)
+        self.assertNotEqual(rejected.returncode, 0)
+        self.assertIn("enforced budget policy", rejected.stderr)
+        self.assertEqual(self.open()["disposition"], "applied")
+        app = connect_public()
+        self.assertEqual(one(app, "SELECT pg_backend_pid()"), str(app.backend_pid))
+        messages = query(app, "CREATE TEMP TABLE admission_probe (i int primary key)")
+        self.assertFalse(any(kind == b"E" for kind, _ in messages), messages)
+
+        # 整个窗口只发业务 SQL，不轮询管理状态、更不续租。当前连接持续写读；
+        # 窗口过后再测一条全新普通连接，覆盖 Postmaster 和已有 backend 两条门。
+        start = time.monotonic()
+        count = 0
+        while True:
+            count += 1
+            self.assertEqual(one(app, f"INSERT INTO admission_probe VALUES ({count}) RETURNING i"), str(count))
+            self.assertEqual(one(app, "SELECT count(*) FROM admission_probe"), str(count))
+            if time.monotonic() - start > 31:
+                break
+            time.sleep(1)
+        fresh = connect_public()
+        self.assertEqual(one(fresh, "SELECT 42"), "42")
+        self.assertEqual(self.fence(2)["observed"]["issuer_floor_epoch"], "2")
+        self.assertEqual(self.open(epoch=1, revision=2, opened=False)["disposition"], "stale")
+        self.assertEqual(one(app, "SELECT max(i) FROM admission_probe"), str(count))
+        self.assertEqual(self.open(epoch=2, revision=2, opened=False)["disposition"], "applied")
+        denied = query(app, "SELECT count(*) FROM admission_probe")
+        self.assertTrue(any(kind == b"E" and b"admission is closed" in msg for kind, msg in denied))
+        with self.assertRaises((OSError, RuntimeError)):
+            connect_public()
+        self.assertEqual(self.open(epoch=2, revision=3)["disposition"], "applied")
+        self.assertEqual(one(app, "SELECT pg_backend_pid()"), str(app.backend_pid))
+        self.assertEqual(one(app, "SELECT sum(i) FROM admission_probe"), str(count * (count + 1) // 2))
+
+    def test_enforced_budget_rejects_saved_config_and_incomplete_gates(self):
+        self.pg.stop()
+        self.pg.config("dynamic_shared_buffers_admission_policy=enforced_budget_v1")
+        self.assertNotEqual(self.pg.start(check=False).returncode, 0)
+        self.assertIn("must be selected on the postmaster command line", self.pg.log.read_text())
+        # 即使可信启动参数选择了新策略，只具备 SQL 启动门、缺连接门也必须拒绝。
+        conf = self.pg.data / "postgresql.conf"
+        conf.write_text(conf.read_text().replace("dynamic_shared_buffers_admission_policy=enforced_budget_v1",
+                                                "# discarded restored policy"))
+        failed = self.pg.start(check=False, options="-c dynamic_shared_buffers_admission_policy=enforced_budget_v1")
+        self.assertNotEqual(failed.returncode, 0)
+        self.assertIn("enforced budget admission requires managed dynamic buffers and the connection gate",
+                      self.pg.log.read_text())
+
     def applied_rearm(self):
         self.fence()
         time.sleep(1.1)

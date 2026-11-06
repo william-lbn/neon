@@ -278,9 +278,27 @@ pub struct DsgDiscoveryIdentity {
     pub pg_boot_id: Option<DsgUint64>,
 }
 
+/// 只描述当前 PG boot 的准入策略。旧内核未发布该字段时继续协商原有期限。
+/// 发现此能力不产生开放、内存写入或 VM 缩容许可。
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DsgAdmissionPolicy {
+    #[default]
+    LeaseV1,
+    EnforcedBudgetV1,
+}
+
+impl DsgAdmissionPolicy {
+    fn is_legacy(&self) -> bool {
+        *self == Self::LeaseV1
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct DsgCapabilities {
+    #[serde(default, skip_serializing_if = "DsgAdmissionPolicy::is_legacy")]
+    pub admission_policy: DsgAdmissionPolicy,
     pub protocol_version: u32,
     pub production_ready: bool,
     pub vm_shrink_permit: bool,

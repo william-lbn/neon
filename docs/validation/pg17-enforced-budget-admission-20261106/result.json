@@ -1,0 +1,51 @@
+{
+  "阶段": "PG17 硬预算准入端到端的 Compute 与 PG 接口部分",
+  "PG17": "fef2816d76060532d33662695a81d2ae0594ba9b",
+  "Neon父提交": "d978e0eeece9367dce23b9d6ad4cdc9d03172c95",
+  "Compute输入": {
+    "libs/compute_api/src/dsg_state.rs": "1027e78a8a7de5730f90dffaff50d55fa8156500e08ee4ad15e5bbbfaa1a70ed",
+    "libs/compute_api/src/dynamic_shared_buffers.rs": "a4c6dfb9205fb35dfd1855dbb7db7e8a486ac41b496d3c22114b2a40dabafd2f",
+    "libs/compute_api/tests/dsg_state.rs": "abbfe5beb6ad6779e9f557231efe59145590e3a22c57656165d51c48ef9ae28c",
+    "compute_tools/src/compute.rs": "db0c2e3c747bbdb491764c11721520d84e668e6e1f2c35195f9cfc5fe3eeca22"
+  },
+  "Neon扩展输入": "9558954398552d1d63e3552acc52b87fffdef3312e434c2743f50848c5300f7a",
+  "compute_ctl_sha256": "7771dfe04b4241c36361e269202a16f71690be1d4620273601ced8eeb351efbe",
+  "neon_so_sha256": "e3d40f909fd4367f1dfee085c509f3eee8a65099a13f4bb4c519032d317fb0ee",
+  "Rust组件与生产二进制": {
+    "build_exit": 0,
+    "phases": {
+      "bootstrap": 0,
+      "discovery": 0,
+      "compute": 0
+    },
+    "seconds": 365.12753193301614,
+    "e2e_accepted": false,
+    "passed": true
+  },
+  "PG原生SQL": {
+    "source_lock_sha256": "a737908cd6c558629b8e87aba9ddea3c43a574edc732ff94d730c47708c04166",
+    "cases": [
+      "test_enforced_budget_keeps_sql_across_management_silence",
+      "test_enforced_budget_rejects_saved_config_and_incomplete_gates",
+      "test_background_loss_closes_without_external_coordinator_or_new_queries"
+    ],
+    "e2e_accepted": false,
+    "icu_sha256": {
+      "libicui18n.so.72": "6ff8ea51aebfa7b77587a4ac3b691e894263e08a2e9d93b636f0d276e4dcaeb2",
+      "libicudata.so.72": "5f572a055d6410ab50fc45770d529109dcc4fe8888f3b2834f76730ff19ebf58",
+      "libicuuc.so.72": "6ae74e03d74c29774be16f877aeba4b8c347ea83d8cb43b730fd283e205b375e"
+    },
+    "test_exit": 0,
+    "seconds": 54.209513301961124,
+    "pass_count": 3,
+    "skip_count": 0,
+    "ran": 3,
+    "passed": true
+  },
+  "Linux验证目录": [
+    "/data/neon-build/validation/PG17-budget-policy-Rust-Compute-20261106T080245Z-871a83",
+    "/data/neon-build/validation/PG17-budget-policy-extension-20261106T074013Z-2b1905",
+    "/data/neon-build/validation/PG17-admission-policy-real-SQL-20261106T074744Z-29c575"
+  ],
+  "三节点验收": false
+}

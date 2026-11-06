@@ -671,11 +671,24 @@ Datum
 neon_dsg_capabilities(PG_FUNCTION_ARGS)
 {
 	StringInfoData output;
+#ifdef NEON_DSG_CONTROL_SUPPORTED
+	const char *policy;
+#endif
 
 	NeonDsgCheckAdministrator();
 	initStringInfo(&output);
 	appendStringInfoString(&output, "{\"protocol_version\":1,\"production_ready\":false,\"vm_shrink_permit\":false,");
 #ifdef NEON_DSG_CONTROL_SUPPORTED
+	/*- 按运行内核读取出生策略。同一扩展在旧内核上不发布新能力；
+	 * 只有绑定的实际 boot 才能说明自身策略。旧模式响应字节保持兼容。 */
+	policy = GetConfigOption("dynamic_shared_buffers_admission_policy", true, false);
+	if (DSBCtrl != NULL && NeonDsgIdentityBound() &&
+		policy != NULL && strcmp(policy, "lease_v1") != 0)
+	{
+		appendStringInfoString(&output, "\"admission_policy\":");
+		escape_json(&output, policy);
+		appendStringInfoChar(&output, ',');
+	}
 	appendStringInfo(&output,
 					 "\"supported\":true,\"buffer_api_version\":%d,\"enabled\":%s,\"instance_bound\":%s,"
 					 "\"history_capacity\":%d,\"provider_can_release\":%s,\"instance\":{\"vm_uid\":",

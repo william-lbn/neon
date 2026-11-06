@@ -1973,6 +1973,9 @@ impl ComputeNode {
             self.verify_dsg_startup(&state.pspec.as_ref().unwrap().spec)?;
             self.verify_dsg_storage(state.pspec.as_ref().unwrap())?;
             if let Some(dsg) = &state.pspec.as_ref().unwrap().spec.dynamic_shared_buffers {
+                if let Some(policy) = dsg.admission_policy_argument() {
+                    dsg_arguments.extend(["-c".to_owned(), policy.to_owned()]);
+                }
                 for (name, value) in dsg.postgres_settings()? {
                     dsg_arguments.extend(["-c".to_owned(), format!("{name}={value}")]);
                 }

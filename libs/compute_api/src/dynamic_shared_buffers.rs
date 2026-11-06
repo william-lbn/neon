@@ -10,6 +10,8 @@ use serde::{Deserialize, Serialize};
 // 新启动契约必须绑定真实VM UID/Compute执行实例；旧实验v1缺少身份，明确拒绝，
 // 不能靠endpoint名字推断或默认为空后开放管理。普通未启用DSGA的spec保持兼容。
 pub const DSG_BOOTSTRAP_SPEC_VERSION: u32 = 2;
+/// 由受管 Compute 明确选择。沿用已有预算字段和单位，额外绑定 PG 准入语义。
+pub const DSG_ENFORCED_BUDGET_BOOTSTRAP_VERSION: u32 = 3;
 const PG_BLOCK_BYTES: u64 = 8192;
 const PG_MAX_BUFFERS: u64 = (i32::MAX / 2) as u64;
 
@@ -49,7 +51,10 @@ impl DynamicSharedBuffersSpec {
     /// 只接受完整协商的规格；未知版本、单位损失或不可能的预算均在启动前拒绝。
     pub fn validate(&self) -> Result<()> {
         ensure!(
-            self.protocol_version == DSG_BOOTSTRAP_SPEC_VERSION,
+            matches!(
+                self.protocol_version,
+                DSG_BOOTSTRAP_SPEC_VERSION | DSG_ENFORCED_BUDGET_BOOTSTRAP_VERSION
+            ),
             "unsupported dynamic shared buffers bootstrap protocol"
         );
         crate::dsg_control::validate_id(&self.vm_uid, "VM")?;
@@ -80,6 +85,13 @@ impl DynamicSharedBuffersSpec {
             "dynamic buffer bootstrap exceeds the minimum Guest startup budget"
         );
         Ok(())
+    }
+
+    /// 只由可信启动命令传递；从备份恢复的配置文件不能更换 SQL 安全策略。
+    /// 旧内核未注册这个 GUC 时会拒绝 v3 启动，不能悄悄降级为另一种策略。
+    pub fn admission_policy_argument(&self) -> Option<&'static str> {
+        (self.protocol_version == DSG_ENFORCED_BUDGET_BOOTSTRAP_VERSION)
+            .then_some("dynamic_shared_buffers_admission_policy=enforced_budget_v1")
     }
 
     fn shared_memory_budget_kb(&self) -> Result<u64> {
@@ -143,6 +155,25 @@ mod tests {
             minimum_guest_memory_bytes: 256 * 1024 * 1024,
             non_buffer_reserve_bytes: 128 * 1024 * 1024,
         }
+    }
+
+    #[test]
+    fn enforced_budget_bootstrap_only_changes_managed_process_arguments() {
+        let legacy = spec();
+        let mut budget = legacy.clone();
+        budget.protocol_version = DSG_ENFORCED_BUDGET_BOOTSTRAP_VERSION;
+        assert!(legacy.admission_policy_argument().is_none());
+        assert_eq!(
+            budget.admission_policy_argument(),
+            Some("dynamic_shared_buffers_admission_policy=enforced_budget_v1")
+        );
+        assert_eq!(
+            legacy.postgres_settings().unwrap(),
+            budget.postgres_settings().unwrap()
+        );
+        assert!(validate_reconfigure(Some(&legacy), Some(&budget)).is_err());
+        budget.protocol_version = 4;
+        assert!(budget.validate().is_err());
     }
 
     #[test]

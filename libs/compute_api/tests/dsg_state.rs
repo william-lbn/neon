@@ -398,3 +398,33 @@ fn nullable_fields_must_be_present_instead_of_silently_defaulted() {
         assert!(serde_json::from_value::<DsgControlResponse>(value).is_err());
     }
 }
+
+#[test]
+fn admission_policy_discovery_is_explicit_and_boot_bound() {
+    let raw = json!({
+        "protocol_version": 1, "production_ready": false, "vm_shrink_permit": false,
+        "supported": true, "buffer_api_version": 6, "enabled": true, "instance_bound": true,
+        "history_capacity": 16, "provider_can_release": true,
+        "instance": {"vm_uid": "test-vm", "compute_instance_id": "test-compute", "pg_boot_id": "19"}
+    });
+    let legacy: DsgCapabilities = serde_json::from_value(raw.clone()).unwrap();
+    assert_eq!(legacy.admission_policy, DsgAdmissionPolicy::LeaseV1);
+    assert_eq!(serde_json::to_value(&legacy).unwrap(), raw);
+    for (name, policy) in [
+        ("enforced_budget_v1", DsgAdmissionPolicy::EnforcedBudgetV1),
+        ("lease_v1", DsgAdmissionPolicy::LeaseV1),
+    ] {
+        let mut value = raw.clone();
+        value["admission_policy"] = json!(name);
+        let caps: DsgCapabilities = serde_json::from_value(value).unwrap();
+        assert_eq!(caps.admission_policy, policy);
+        let bound = caps.bind_instance("test-vm", "test-compute").unwrap();
+        assert_eq!(bound.pg_boot_id.get(), 19);
+        assert!(caps.bind_instance("other", "test-compute").is_err());
+    }
+    for bad in [json!(null), json!(""), json!("future_policy")] {
+        let mut value = raw.clone();
+        value["admission_policy"] = bad;
+        assert!(serde_json::from_value::<DsgCapabilities>(value).is_err());
+    }
+}
