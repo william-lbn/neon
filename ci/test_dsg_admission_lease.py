@@ -1,5 +1,6 @@
 """真实PG17失联关闭与deadline CAS；不把准入租约当作预算或VM许可。"""
 import copy
+import hashlib
 import json
 import os
 import signal
@@ -130,6 +131,40 @@ class DsgAdmissionLease(unittest.TestCase):
         self.assertEqual(self.open(epoch=2, revision=3)["disposition"], "applied")
         self.assertEqual(one(app, "SELECT pg_backend_pid()"), str(app.backend_pid))
         self.assertEqual(one(app, "SELECT sum(i) FROM admission_probe"), str(count * (count + 1) // 2))
+
+        # 在同一个 boot、同一普通业务连接上走扩、缩、再扩。这里实测 PG 共享缓冲区，
+        # Guest normal 的 cgroup 硬降限由独立的整链验收读取，不能用页数代替。
+        resize = control.DsgNeonControl("runTest")
+        resize.pg, resize.capabilities = self.pg, {"instance": self.instance}
+        self.assertEqual(resize.state()["high_buffers"], 256)
+        for generation, (kind, target) in enumerate((("grow", 1024), ("shrink", 256), ("grow", 2048)), start=1):
+            request = resize.request(revision=generation, generation=generation, target=target, kind=kind)
+            request["key"]["issuer_epoch"] = "2"
+            request["budget_commitment_id"] = self.opened()["budget_commitment_id"]
+            request["deadline_unix_ms"] = str(int(time.time() * 1000) + 30_000)
+            with self.subTest(kind=kind, target_buffers=target):
+                response = resize.call(request)
+                receipt = response["receipt"]
+                self.assertEqual(receipt["key"], request["key"])
+                self.assertEqual(receipt["disposition"], "accepted")
+                self.assertEqual(receipt["result"]["operation"]["phase"], "committed")
+                observed = resize.state()
+                self.assertEqual(observed["instance"], self.instance)
+                self.assertEqual(observed["capacity_generation"], str(generation + 1))
+                self.assertEqual((observed["low_buffers"], observed["high_buffers"]), (target, target))
+                self.assertTrue(observed["admission_open"])
+                self.assertFalse(any(a["allocation_unknown"] for a in observed["arrays"]))
+                pid = one(app, "SELECT pg_backend_pid()")
+                self.assertEqual(pid, str(app.backend_pid))
+                rows = one(app, "SELECT string_agg(i::text, ',' ORDER BY i) FROM admission_probe")
+                self.assertEqual(rows, ",".join(str(i) for i in range(1, count + 1)))
+                print(json.dumps({
+                    "action": kind, "buffers": observed["high_buffers"],
+                    "capacity_generation": observed["capacity_generation"],
+                    "pg_boot_id": observed["instance"]["pg_boot_id"], "backend_pid": pid,
+                    "rows": count, "rows_sha256": hashlib.sha256(rows.encode()).hexdigest(),
+                    "admission_open": observed["admission_open"],
+                }), flush=True)
 
     def test_enforced_budget_rejects_saved_config_and_incomplete_gates(self):
         self.pg.stop()

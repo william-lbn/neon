@@ -1,0 +1,44 @@
+{
+  "范围": "118 真实 PostgreSQL17 + Neon 扩展。硬预算配置，管理静默超过三十秒，再在原普通 SQL 连接上实测共享缓冲区三次伸缩和 TEMP 表逐行核对。",
+  "运行目录": "/data/neon-build/validation/PG17-真实SQL与内核缓冲区三次伸缩-20261106T084401Z-94860f",
+  "PG17固定提交": "fef2816d76060532d33662695a81d2ae0594ba9b",
+  "验证前Neon提交": "270c419d7fd8cf5cbcab8e74afe1ae071fa1a844",
+  "用例固定SHA256": "c39e4de992c83f0405461dfa4e8c12141f5e85edd656948842a7f6ccd5060a77",
+  "运行结果SHA256": "c09cc436d22df10317e50e0dde414e0b60822a28f755d0437cdc3ac258203fe7",
+  "逐步读回": [
+    {
+      "action": "grow",
+      "buffers": 1024,
+      "capacity_generation": "2",
+      "pg_boot_id": "15557942534048891760",
+      "backend_pid": "836588",
+      "rows": 32,
+      "rows_sha256": "4c43b48b74421a04ff1596df7c90a656a9363dbd33d29804946c9e57bd6a4b94",
+      "admission_open": true
+    },
+    {
+      "action": "shrink",
+      "buffers": 256,
+      "capacity_generation": "3",
+      "pg_boot_id": "15557942534048891760",
+      "backend_pid": "836588",
+      "rows": 32,
+      "rows_sha256": "4c43b48b74421a04ff1596df7c90a656a9363dbd33d29804946c9e57bd6a4b94",
+      "admission_open": true
+    },
+    {
+      "action": "grow",
+      "buffers": 2048,
+      "capacity_generation": "4",
+      "pg_boot_id": "15557942534048891760",
+      "backend_pid": "836588",
+      "rows": 32,
+      "rows_sha256": "4c43b48b74421a04ff1596df7c90a656a9363dbd33d29804946c9e57bd6a4b94",
+      "admission_open": true
+    }
+  ],
+  "退出状态": 0,
+  "跳过数": 0,
+  "K8s内存动作通过": 0,
+  "说明": "此票验证内核与同连接 SQL。Guest normal 的 cgroup 硬限、VM 实际内存与自动策略仍须由完整链路验收。"
+}
