@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "case": "missing-storage-extension",
+      "image": "127.0.0.1:5001/neon-candidate/pageserver@sha256:e6160b8bcb6eb3a4bb1a02d4bd43145f4396987d2d7ad40fbb9e83756674d055",
+      "PG_major": 18,
+      "actual_exit": 1,
+      "expected_success": false,
+      "seconds": 2.4566999439848587
+    },
+    {
+      "case": "complete-storage-extension",
+      "image": "127.0.0.1:5001/neon-candidate/pageserver@sha256:19a7b31b32c7ef3ec5de766a36a25c3bb225c56f8b982a68e3324b52d6898c1b",
+      "PG_major": 18,
+      "actual_exit": 0,
+      "expected_success": true,
+      "seconds": 2.0088981059379876
+    }
+  ]
+}

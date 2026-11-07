@@ -1,0 +1,2 @@
+2026-11-07 06:17:06.943 GMT [1] LOG:  registered custom resource manager "neon" with ID 134
+2026-11-07 06:17:06.944 GMT [1] LOG:  received EOF on stdin, shutting down

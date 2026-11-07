@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "Helm_revision": 10,
+  "pageserver_image": "127.0.0.1:5001/neon-candidate/pageserver@sha256:19a7b31b32c7ef3ec5de766a36a25c3bb225c56f8b982a68e3324b52d6898c1b",
+  "PVC_UIDs": {
+    "controller-db-data": "68cc654d-041d-48ac-a008-9591af851d95",
+    "minio-data": "06e22d8b-ae08-418d-b4b6-aa7be82a77e4",
+    "neon-control-v2-db": "dc39d2b2-aa6c-43e9-816b-2d0b38625f84",
+    "pageserver-cache": "347f3f2c-0a55-4561-ad6a-9d7c6d0c512a",
+    "safekeeper1-data": "ed950b94-8c0a-4894-bcce-3639a37879fc",
+    "safekeeper2-data": "76197655-6a85-4e28-bd1e-539f25ea28d4",
+    "safekeeper3-data": "bd61e19b-b4de-44cd-9208-668bcb3edb19"
+  },
+  "PG17_original_timeline_readable": true,
+  "PG18_tenant_created": true
+}
