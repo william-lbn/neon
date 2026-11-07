@@ -1,0 +1,40 @@
+{
+  "范围": "仅共用持续硬预算 SQL 用例；旧租约原生检查函数由专用用例创建。",
+  "原内核PG18": "940b25fbf8899edf91781d711639ed7cd28866e9",
+  "PG17与PG18": {
+    "PG17": {
+      "用例": [
+        "test_enforced_budget_keeps_sql_across_management_silence",
+        "test_enforced_budget_rejects_saved_config_and_incomplete_gates",
+        "test_background_loss_closes_without_external_coordinator_or_new_queries"
+      ],
+      "实际统计": {
+        "ran": 3,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0
+      },
+      "日志SHA256": "149041a0aa4643ff71d6db391916919bdd1acb96a6b7eb478659fc58984e6a28",
+      "结果SHA256": "869da25be46c81f2ef3c368b4bda9f405b76fa547d83312a21f4bed4a3d5cab1"
+    },
+    "PG18": {
+      "用例": [
+        "test_enforced_budget_keeps_sql_across_management_silence",
+        "test_enforced_budget_rejects_saved_config_and_incomplete_gates"
+      ],
+      "实际统计": {
+        "ran": 2,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0
+      },
+      "日志SHA256": "cc6ae5ef6ce6f502e79d55396c9930fe238170d12c0d1ae50d4920735822289c",
+      "结果SHA256": "121940e772f444eba46fafc1e8d1013ef75766ce96196f62941b630866202878"
+    }
+  },
+  "三节点PG18": "待正式独立数据库、真实内存动作和业务数据/WAL验收。"
+}

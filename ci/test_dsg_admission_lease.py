@@ -31,8 +31,6 @@ class DsgAdmissionLease(unittest.TestCase):
         self.pg.start()
         self.pg.sql("CREATE EXTENSION neon; CREATE ROLE dsg_app LOGIN")
         self.instance = self.value("SELECT neon_dsg_capabilities()")["instance"]
-        lib = self.pg.quote(self.pg.library)
-        self.pg.sql(f"CREATE FUNCTION dsg_raw_admission() RETURNS boolean AS '{lib}','test_dsg_admission_raw' LANGUAGE C")
 
     def value(self, sql):
         return json.loads(self.pg.sql(sql).stdout)
@@ -335,6 +333,9 @@ class DsgAdmissionLease(unittest.TestCase):
         return self.call("neon_dsg_set_admission", self.opened(**kwargs))
 
     def wait_expired(self):
+        # 只有旧租约用例需要读取原生准入位。两种 PG 版本的硬预算用例共用正式 Neon 接口。
+        lib = self.pg.quote(self.pg.library)
+        self.pg.sql(f"CREATE OR REPLACE FUNCTION dsg_raw_admission() RETURNS boolean AS '{lib}','test_dsg_admission_raw' LANGUAGE C")
         # SU在该消息开始时仍未过期；sleep后raw读取不触发任何原生expire。
         self.assertEqual(self.pg.sql("SELECT pg_sleep(2.2); SELECT dsg_raw_admission()").stdout.splitlines()[-1], "f")
         result = self.lease()
