@@ -13,7 +13,8 @@ permissions:
   contents: read
 concurrency:
   group: dsga-distribution-${{ github.ref }}-${{ inputs.arch || 'amd64' }}
-  cancel-in-progress: false
+  # New feature-branch commits supersede unfinished candidates; published versions stay immutable.
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 env:
   REGISTRY: docker.io/williamluckyli
   ARCH: ${{ inputs.arch || 'amd64' }}
@@ -67,7 +68,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@c7a3b3d777261ab2b9d85ca7dd67295f5ab20803
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@097598f3a46afc5be59ca1fb01cf3ae314db36db
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}

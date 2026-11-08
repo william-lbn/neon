@@ -17,7 +17,7 @@
 | --- | --- | --- | --- |
 | PostgreSQL 17 | `codex/dsga-pg17-v3-20261019` | `203e1e83eff9dcb73e03cbeff685f51f7da9539c` | 原 PG17 功能、原生门禁、按实际系统页几何核验四数组预算 |
 | PostgreSQL 18 | `codex/dsga-pg18-v1-20261031` | `cc9430edcce7b863ffcf0db5ddf3cccc1395065c` | 硬预算实现、原生门禁、配置视图期望及两层权限测试修复 |
-| Autoscaling | `codex/dsga-autoscaling-20261019` | `c7a3b3d777261ab2b9d85ca7dd67295f5ab20803` | 固定源码和可复用 workflow 为同一提交 |
+| Autoscaling | `codex/dsga-autoscaling-20261019` | `097598f3a46afc5be59ca1fb01cf3ae314db36db` | 固定源码和可复用 workflow 为同一提交 |
 | Helm | `codex/dsga-neon-helm-v3-20261019` | `bb9bce7aeae604366c687650cc318ca87d18ebb7` | 固定打包代码、模板和发行锁生成逻辑 |
 
 Neon 的来源为触发 run 的完整 `github.sha`；所有 checkout 均固定事件 SHA 或锁定的依赖 SHA。
@@ -27,11 +27,13 @@ PG17/18 gitlink、`vendor/revisions.json`、`ci/distribution.json` 三处一起�
 PG17/18 reusable workflow 的 `uses@SHA` 也与内核源码锁一致，同一次 Neon run 中执行真实构建及回归；
 不是查询另一个分支上曾经绿色的结果。
 
-Autoscaling 在固定源码的一次性 root、只读根容器中执行完整默认 Linux Go suite。
-`owner`/`journal` 顶层测试按稳定 hash 分成八片，其余包在第零片完整执行；
-保留 `-race -count=1`、Example 与 Fuzz seeds。独立聚合器要求八片来自同一
-source/architecture/run/attempt，并核对原始枚举、唯一执行和全部终态；现有条件 skip
-逐项记原因，不算通过。任一片失败、取消、缺失或混入旧 attempt 都阻止后续镜像构建。
+Autoscaling 在固定源码的一次性 root、只读根容器和独立集成作业中执行完整默认 Linux Go suite。
+`owner`/`journal` 顶层测试按稳定 hash 分成八片，其余普通包在第零片完整执行；
+需要真实 Docker 模拟服务和 Kubernetes 测试控制面的 `reporting`、`controllers/functests`
+两个完整包由第九个普通 Runner 作业执行，不向隔离 root 容器挂载宿主 Docker socket。
+保留 `-race -count=1`、Example 与 Fuzz seeds。独立聚合器要求九份报告来自同一
+source/architecture/run/attempt，并核对完整原始枚举、固定执行环境、唯一执行和全部终态；现有条件 skip
+逐项记原因，不算通过。任一作业失败、取消、缺失或混入旧 attempt 都阻止后续镜像构建。
 重跑应选择 **Re-run all jobs**，避免拿旧 attempt 的成功片拼成本次证据。
 
 依赖必须按 PG 两个分支 → Autoscaling → Helm → Neon 的顺序推送完整提交。依赖未在远端可读取时，
@@ -88,6 +90,10 @@ Helm 工作流产生 15 个 Chart 包、12 组 PG17/18 digest values、原始 di
 失败后使用 GitHub **Re-run all jobs**。仅 Re-run failed jobs 会复用旧 prepare version；下游写入前
 会因 run_attempt 不一致拒绝，从而保护旧镜像标签和收据。排障先看失败 job 的实际日志及同 attempt
 artifact；不要手工把未完成发行的 tag 提升为 latest。
+
+同一功能分支和架构的新 push 会取消尚未完成的旧候选运行，及时验证新提交。
+手工 dispatch 本身不主动取消前一运行。版本仍包含各自 run ID/attempt；取消的部分镜像
+没有完整发行清单和成功 Release，不得当作完整候选部署。已发布版本和摘要不覆盖。
 
 旧 `dockerhub.yml` / `validate-existing.yml` 继续只允许 main 的 legacy 入口；遇到这份带
 `postgres_profiles`/`helm_commit` 的 DSGA 锁时会在昂贵构建前明确拒绝 latest 流程。功能分支应使用

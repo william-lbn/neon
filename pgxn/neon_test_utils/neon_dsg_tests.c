@@ -7,11 +7,11 @@
  */
 #include "postgres.h"
 
+#include <signal.h>
 #include <sys/resource.h>
 
 #include "access/relation.h"
 #include "miscadmin.h"
-#include "libpq/pqsignal.h"
 #include "utils/builtins.h"
 #include "utils/pg_lsn.h"
 #include "utils/rel.h"
@@ -80,7 +80,11 @@ test_neon_slru_publish(PG_FUNCTION_ARGS)
 	int			fill;
 	char	   *data;
 	struct rlimit saved;
-	pqsigfunc	saved_handler = NULL;
+	struct rlimit limit;
+	struct sigaction saved_action;
+	struct sigaction ignored_action;
+	volatile bool limit_changed = false;
+	volatile bool signal_changed = false;
 	bool		short_write;
 
 	neon_test_require_superuser();
@@ -98,27 +102,47 @@ test_neon_slru_publish(PG_FUNCTION_ARGS)
 	memset(data, fill, BLCKSZ * SLRU_PAGES_PER_SEGMENT);
 	if (short_write)
 	{
-		struct rlimit limit;
-
 		if (getrlimit(RLIMIT_FSIZE, &saved) != 0)
 			ereport(ERROR, (errmsg("could not read test file-size limit: %m")));
+		if (sigaction(SIGXFSZ, NULL, &saved_action) != 0)
+			ereport(ERROR, (errmsg("could not read test file-size signal action: %m")));
 		limit = saved;
 		limit.rlim_cur = Min(saved.rlim_cur, (rlim_t) 1024);
-		if (setrlimit(RLIMIT_FSIZE, &limit) != 0)
-			ereport(ERROR, (errmsg("could not set test file-size limit: %m")));
-		saved_handler = pqsignal(SIGXFSZ, SIG_IGN);
+		memset(&ignored_action, 0, sizeof(ignored_action));
+		ignored_action.sa_handler = SIG_IGN;
+		sigemptyset(&ignored_action.sa_mask);
 	}
 	PG_TRY();
 	{
+		if (short_write)
+		{
+			/*-
+			 * PG18 的 pqsignal 不再返回旧处理器。直接保存/恢复完整 action，
+			 * 保留旧处理器、掩码和标志；安装失败同样走 FINALLY 回滚。
+			 * 跨 ERROR 长跳转读取的变更标志必须为 volatile。
+			 */
+			if (sigaction(SIGXFSZ, &ignored_action, NULL) != 0)
+				ereport(ERROR, (errmsg("could not ignore test file-size signal: %m")));
+			signal_changed = true;
+			if (setrlimit(RLIMIT_FSIZE, &limit) != 0)
+				ereport(ERROR, (errmsg("could not set test file-size limit: %m")));
+			limit_changed = true;
+		}
 		publish(path, data, nblocks);
 	}
 	PG_FINALLY();
 	{
-		if (short_write)
+		int			limit_errno = 0;
+
+		/* 一项恢复失败也必须尝试另一项，不能留下被修改的后端状态。 */
+		if (limit_changed && setrlimit(RLIMIT_FSIZE, &saved) != 0)
+			limit_errno = errno;
+		if (signal_changed && sigaction(SIGXFSZ, &saved_action, NULL) != 0)
+			ereport(FATAL, (errmsg("could not restore test file-size signal action: %m")));
+		if (limit_errno != 0)
 		{
-			if (setrlimit(RLIMIT_FSIZE, &saved) != 0)
-				ereport(FATAL, (errmsg("could not restore test file-size limit: %m")));
-			pqsignal(SIGXFSZ, saved_handler);
+			errno = limit_errno;
+			ereport(FATAL, (errmsg("could not restore test file-size limit: %m")));
 		}
 	}
 	PG_END_TRY();

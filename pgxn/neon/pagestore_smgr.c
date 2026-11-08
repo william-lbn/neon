@@ -1047,7 +1047,12 @@ neon_zeroextend(SMgrRelation reln, ForkNumber forkNum, BlockNumber blocknum,
 		ereport(ERROR,
 				(errcode(ERRCODE_PROGRAM_LIMIT_EXCEEDED),
 				 errmsg(NEON_TAG "cannot extend file \"%s\" beyond %u blocks",
+#if PG_VERSION_NUM >= 180000
+						/* PG18 返回定长结构，%s 必须读取其中的字符串。 */
+						relpath(reln->smgr_rlocator, forkNum).str,
+#else
 						relpath(reln->smgr_rlocator, forkNum),
+#endif
 						InvalidBlockNumber)));
 
 	if (debug_compare_local)
