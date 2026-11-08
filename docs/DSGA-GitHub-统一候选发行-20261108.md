@@ -135,6 +135,14 @@ bootstrap/资格证明，并对这组实际新镜像做 KVM/目标 K8s 的联合
 
 ## 已完成的独立云端门禁
 
+### Fork 的 Actions 开关
+
+2026-11-08 首次推送统一入口后，GitHub 没有建立任何运行记录。仓库 Actions 页面明确显示
+`Workflows on this fork have been disabled`，原因是 GitHub 为避免 fork 的无用计算自动停用。
+核对主线工作流没有定时任务后，已恢复该仓库 Actions，页面确认 `Actions Enabled`。
+停用期间的 push 不会自动补跑，因此恢复后需要再次推送功能分支；不要把“没有 run”当成门禁通过。
+本次恢复仅使既有事件能够执行，源码、精确 SHA 锁及候选资格检查仍由上述工作流负责。
+
 | 轨道 | 实际 GitHub Actions | 结果 |
 | --- | --- | --- |
 | PG17 `203e1e83…` | [42456653415](https://github.com/william-lbn/postgres/actions/runs/42456653415) | 225 项上游回归、DSGA SQL、5 项 isolation 全部通过；三处精确预算及错误预算拒绝均有真实结果 |
