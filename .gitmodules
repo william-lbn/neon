@@ -13,7 +13,7 @@
 [submodule "vendor/postgres-v17"]
 	path = vendor/postgres-v17
 	url = ../postgres.git
-	branch = REL_17_STABLE_neon
+	branch = codex/dsga-pg17-v3-20261019
 
 [submodule "vendor/postgres-v18"]
 	path = vendor/postgres-v18

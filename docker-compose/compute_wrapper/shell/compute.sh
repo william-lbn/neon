@@ -77,14 +77,20 @@ else
   fi
 fi
 
-if [[ ${PG_VERSION} -ge 17 ]]; then
-  ulid_extension=pgx_ulid
-else
-  ulid_extension=ulid
+# 发行 profile 明确决定测试拓扑可加载的扩展；PG18 核心包不加载未交付 ulid。
+if [[ "${COMPUTE_PROFILE:-full}" == full ]]; then
+  if [[ ${PG_VERSION} -ge 17 ]]; then
+    ulid_extension=pgx_ulid
+  else
+    ulid_extension=ulid
+  fi
+  echo "Adding pgx_ulid"
+  shared_libraries=$(jq -r '.spec.cluster.settings[] | select(.name=="shared_preload_libraries").value' ${CONFIG_FILE})
+  sed -i "s|${shared_libraries}|${shared_libraries},${ulid_extension}|" ${CONFIG_FILE}
+elif [[ "${COMPUTE_PROFILE:-full}" != dsga-core ]]; then
+  echo 'Unsupported compute profile' >&2
+  exit 2
 fi
-echo "Adding pgx_ulid"
-shared_libraries=$(jq -r '.spec.cluster.settings[] | select(.name=="shared_preload_libraries").value' ${CONFIG_FILE})
-sed -i "s|${shared_libraries}|${shared_libraries},${ulid_extension}|" ${CONFIG_FILE}
 echo "Overwrite tenant id and timeline id in spec file"
 sed -i "s|TENANT_ID|${tenant_id}|" ${CONFIG_FILE}
 sed -i "s|TIMELINE_ID|${timeline_id}|" ${CONFIG_FILE}
@@ -96,5 +102,5 @@ echo "Start compute node"
      -C "postgresql://cloud_admin@localhost:55433/postgres"  \
      -b /usr/local/bin/postgres                              \
      --compute-id "compute-${RANDOM}"                          \
-     --config "${CONFIG_FILE}"
+     --config "${CONFIG_FILE}" \
      --dev

@@ -1,13 +1,14 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "ad31a02e96af405b1780969b3064bbf29db38eeb",
+  "autoscaling_commit": "c7a3b3d777261ab2b9d85ca7dd67295f5ab20803",
   "postgres_repository": "william-lbn/postgres",
   "postgres": {
     "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",
     "v15": "2aaab3bb4a13557aae05bb2ae0ef0a132d0c4f85",
     "v16": "a42351fcd41ea01edede1daed65f651e838988fc",
-    "v17": "fef2816d76060532d33662695a81d2ae0594ba9b"
+    "v17": "203e1e83eff9dcb73e03cbeff685f51f7da9539c",
+    "v18": "cc9430edcce7b863ffcf0db5ddf3cccc1395065c"
   },
   "core_binaries": [
     "pageserver",
@@ -47,5 +48,14 @@
     "autoscaler-agent",
     "cluster-autoscaler-neonvm",
     "dsga-platform-qualifier"
-  ]
+  ],
+  "postgres_profiles": {
+    "v14": "full",
+    "v15": "full",
+    "v16": "full",
+    "v17": "full",
+    "v18": "dsga-core"
+  },
+  "helm_repository": "william-lbn/neon-helm",
+  "helm_commit": "bb9bce7aeae604366c687650cc318ca87d18ebb7"
 }

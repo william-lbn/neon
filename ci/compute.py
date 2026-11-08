@@ -7,11 +7,13 @@ The final image still uses the upstream EXTENSIONS=all assembly and runtime.
 """
 import argparse
 import json
+import os
 import pathlib
 import re
 import subprocess
 
 from source_lock import validate_postgres_sources
+from release import DSGA_VERSION, validate_current_execution
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOCK = json.loads((ROOT / "ci/distribution.json").read_text())
@@ -22,6 +24,38 @@ COMMON = [
     "rust-extensions-build-pgrx14", "compute-tools", "neon-ext-build",
 ]
 FROM = re.compile(r"^FROM\s+(.+?)(?:\s+AS\s+([\w-]+))?\s*$", re.I | re.M)
+
+
+def postgres_profile(pg):
+    """发行范围属于源码锁；不把 PG18 核心包误报成全第三方扩展已适配。"""
+    profiles = LOCK.get("postgres_profiles", {v: "full" for v in LOCK["postgres"]})
+    if set(profiles) != set(LOCK["postgres"]):
+        raise ValueError("Postgres profiles must cover exactly the pinned versions")
+    profile = profiles.get(pg)
+    if profile not in {"full", "dsga-core"}:
+        raise ValueError(f"Unsupported Postgres distribution profile: {pg}")
+    if (pg == "v18") != (profile == "dsga-core"):
+        raise ValueError("PG18 requires dsga-core until its full extensions are qualified")
+    return profile
+
+
+def postgres_matrix():
+    return {"include": [
+        {"pg": pg, "major": int(pg[1:]), "debian": "bookworm" if int(pg[1:]) >= 17 else "bullseye",
+         "profile": postgres_profile(pg)}
+        for pg in LOCK["postgres"]
+    ]}
+
+
+def common_stages(pg):
+    if pg is not None and postgres_profile(pg) == "dsga-core":
+        # 核心 Neon 扩展仍真实编译；不执行只适配到 PG17 的第三方 pgrx 构建。
+        return [name for name in COMMON if not name.startswith("rust-extensions-build")]
+    return COMMON
+
+
+def runtime_targets(pg):
+    return ["runtime", "extension-tests"] if postgres_profile(pg) == "full" else ["runtime"]
 
 
 def stages():
@@ -55,6 +89,9 @@ def records(directory):
 
 
 def render(args):
+    profile = postgres_profile(args.pg)
+    if profile == "dsga-core" and (args.payload or args.target == "extension-tests"):
+        raise ValueError("PG18 dsga-core has no full third-party extension/test image")
     header, blocks = stages()
     images = records(args.artifacts)
     output = ["# syntax=docker/dockerfile:1.7\n", header]
@@ -106,8 +143,15 @@ def record(args):
     aliases = [args.target]
     if args.target in extension_targets():
         aliases += re.findall(r"^COPY\s+--from=([\w-]+-src)", blocks[args.target], re.M)
+    tag = args.image.rsplit(":", 1)[-1]
+    # 中间 stage 的 tag 还包含 stage 后缀；其原始发行版本由环境 TAG 传入。
+    release_tag = os.environ.get("TAG", tag) if args.stage else tag
+    execution = validate_current_execution(release_tag) if DSGA_VERSION.fullmatch(release_tag) else None
     item = {"kind": "compute-stage" if args.stage else "runtime", "pg": args.pg,
+            "name": args.image.split("/")[-1].split(":")[0],
             "aliases": aliases, "image": args.image, "digest": digest,
+            "source_repository": "william-lbn/neon",
+            "architecture": "linux/" + args.arch, "execution": execution,
             "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()}
     path = pathlib.Path(args.output)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -127,7 +171,9 @@ def validate(source_ref="HEAD", require_checkout=False):
     for name in COMMON + targets:
         if name not in blocks:
             raise ValueError(f"Unknown stage {name}")
-    print(f"Validated {len(LOCK['core_binaries'])} binaries, 4 pinned PG versions, {len(targets)} extension stages")
+    for pg in LOCK["postgres"]:
+        postgres_profile(pg)
+    print(f"Validated {len(LOCK['core_binaries'])} binaries, {len(LOCK['postgres'])} pinned PG versions, {len(targets)} full-profile extension stages")
 
 
 def main():
@@ -137,7 +183,13 @@ def main():
     validation.add_argument("--source-ref", default="HEAD", help="HEAD, another commit, or index before committing")
     validation.add_argument("--require-pg-checkout", action="append", default=[], metavar="VERSION")
     sub.add_parser("matrix")
-    sub.add_parser("common")
+    sub.add_parser("postgres-matrix")
+    common = sub.add_parser("common")
+    common.add_argument("--pg")
+    runtime = sub.add_parser("runtime-targets")
+    runtime.add_argument("--pg", required=True)
+    profile = sub.add_parser("profile")
+    profile.add_argument("--pg", required=True)
     rendering = sub.add_parser("render")
     for name in ["pg", "target", "output"]:
         rendering.add_argument("--" + name, required=True)
@@ -147,13 +199,20 @@ def main():
     for name in ["pg", "target", "image", "metadata", "output"]:
         recording.add_argument("--" + name, required=True)
     recording.add_argument("--stage", action="store_true")
+    recording.add_argument("--arch", choices=["amd64", "arm64"], default=os.environ.get("ARCH", "amd64"))
     args = parser.parse_args()
     if args.command == "validate":
         validate(args.source_ref, args.require_pg_checkout)
     elif args.command == "matrix":
         print(json.dumps({"target": extension_targets()}, separators=(",", ":")))
+    elif args.command == "postgres-matrix":
+        print(json.dumps(postgres_matrix(), separators=(",", ":")))
     elif args.command == "common":
-        print(" ".join(COMMON))
+        print(" ".join(common_stages(args.pg)))
+    elif args.command == "runtime-targets":
+        print(" ".join(runtime_targets(args.pg)))
+    elif args.command == "profile":
+        print(postgres_profile(args.pg))
     elif args.command == "render":
         render(args)
     else:

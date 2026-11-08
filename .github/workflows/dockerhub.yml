@@ -22,6 +22,7 @@ defaults:
     shell: bash
 jobs:
   prepare:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -34,8 +35,16 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+      - name: Reject candidate source locks before legacy latest publication
+        run: |
+          python3 - <<'PYCODE'
+          import json
+          lock = json.load(open('ci/distribution.json'))
+          if 'postgres_profiles' in lock or 'helm_commit' in lock:
+              raise SystemExit('This is a DSGA candidate source lock. Run dsga-release.yml; legacy latest promotion is not allowed.')
+          PYCODE
       - run: python3 ci/compute.py validate
-      - run: python3 -m unittest discover -s ci -p 'test_*.py' -v
+      - run: python3 ci/run-release-contracts.py
       - id: meta
         run: |
           set -euo pipefail
@@ -224,7 +233,7 @@ jobs:
           persist-credentials: false
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
-          name: images-compute-v17
+          name: images-compute-v17-attempt${{ github.run_attempt }}
           path: artifacts
       - uses: ./.github/actions/dockerhub-setup
         with:

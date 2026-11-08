@@ -152,7 +152,7 @@ RUN case $DEBIAN_VERSION in \
     zlib1g-dev libxml2-dev libcurl4-openssl-dev libossp-uuid-dev wget ca-certificates pkg-config libssl-dev \
     libicu-dev libxslt1-dev liblz4-dev libzstd-dev zstd curl unzip g++ \
     libclang-dev \
-    jsonnet \
+    jsonnet jq \
     $VERSION_INSTALLS \
     && apt clean && rm -rf /var/lib/apt/lists/* \
     && useradd -ms /bin/bash nonroot -b /home \
@@ -174,10 +174,14 @@ ARG PG_VERSION
 ARG DSGA_RUNTIME_PROFILE
 ARG TARGETARCH
 COPY vendor/postgres-${PG_VERSION:?} postgres
+# 显式锁记录用于二进制 --version；CI 在构建前已校验锁、gitlink 与实际检出相等。
+COPY vendor/revisions.json /pg-revisions.json
 COPY compute/patches/postgres_fdw.patch .
 COPY compute/patches/pg_stat_statements_pg14-16.patch .
 COPY compute/patches/pg_stat_statements_pg17.patch .
 RUN cd postgres && \
+    PG_SOURCE_SHA=$(jq -er --arg pg "$PG_VERSION" '.[$pg][1]' /pg-revisions.json) && \
+    [[ "$PG_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]] && \
     # Apply patches to some contrib extensions
     # For example, we need to grant EXECUTE on pg_stat_statements_reset() to {privileged_role_name}.
     # In vanilla Postgres this function is limited to Postgres role superuser.
@@ -189,7 +193,7 @@ RUN cd postgres && \
     "v14" | "v15" | "v16") \
     patch -p1 < /pg_stat_statements_pg14-16.patch; \
     ;; \
-    "v17") \
+    "v17" | "v18") \
     patch -p1 < /pg_stat_statements_pg17.patch; \
     ;; \
     *) \
@@ -198,7 +202,7 @@ RUN cd postgres && \
     esac && \
     patch -p1 < /postgres_fdw.patch && \
     export CONFIGURE_CMD="./configure CFLAGS='-O2 -g3 -fsigned-char' --enable-debug --with-openssl --with-uuid=ossp \
-    --with-icu --with-libxml --with-libxslt --with-lz4" && \
+    --with-icu --with-libxml --with-libxslt --with-lz4 --with-extra-version=' ($PG_SOURCE_SHA)'" && \
     if [ "${PG_VERSION:?}" != "v14" ]; then \
         # zstd is available only from PG15
         export CONFIGURE_CMD="${CONFIGURE_CMD} --with-zstd"; \
@@ -2023,10 +2027,10 @@ COPY --chmod=0666 --chown=postgres compute/etc/pgbouncer.ini /etc/pgbouncer.ini
 COPY --from=postgres-cleanup-layer --chown=postgres /usr/local/pgsql /usr/local
 # PG17受管资源执行器将原出生PID与固定PG文件读回比对。官方COPY把PG程序也交
 # 给postgres；必须保护程序及可替换它的父目录，不能只锁文件而允许同目录rename。
-# 这里只收紧当前PG17的可执行入口，保留lib/share和扩展下载目录的既有权限。
-# 真实构建参数与vendor/postgres-${PG_VERSION}均使用v17；不能只在本地覆盖层修正。
+# PG17/18 共用此入口保护，保留 lib/share 和扩展下载目录的既有权限。
+# 此处仅固定镜像文件权限，不授予受管 Root/normal 运行资格。
 ARG PG_VERSION
-RUN if [ "${PG_VERSION:?}" = "v17" ]; then \
+RUN if [ "${PG_VERSION:?}" = "v17" ] || [ "${PG_VERSION:?}" = "v18" ]; then \
       chown root:root /usr/local /usr/local/bin /usr/local/bin/postgres && \
       chmod go-w /usr/local /usr/local/bin /usr/local/bin/postgres; \
     fi

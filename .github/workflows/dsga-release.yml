@@ -1,0 +1,434 @@
+name: DSGA unified candidate distribution
+on:
+  push:
+    branches: ['codex/dsga-neon-v3-20261019', 'ci/dsga-unified-release-*']
+  workflow_dispatch:
+    inputs:
+      arch:
+        description: Candidate platform (Helm currently supports amd64 only)
+        type: choice
+        options: [amd64]
+        default: amd64
+permissions:
+  contents: read
+concurrency:
+  group: dsga-distribution-${{ github.ref }}-${{ inputs.arch || 'amd64' }}
+  cancel-in-progress: false
+env:
+  REGISTRY: docker.io/williamluckyli
+  ARCH: ${{ inputs.arch || 'amd64' }}
+defaults:
+  run:
+    shell: bash
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.meta.outputs.tag }}
+      autoscaling: ${{ steps.meta.outputs.autoscaling }}
+      binaries: ${{ steps.meta.outputs.binaries }}
+      compute_components: ${{ steps.meta.outputs.compute_components }}
+      source_commit: ${{ steps.meta.outputs.source_commit }}
+      helm: ${{ steps.meta.outputs.helm }}
+      pg17: ${{ steps.meta.outputs.pg17 }}
+      pg18: ${{ steps.meta.outputs.pg18 }}
+      postgres_matrix: ${{ steps.meta.outputs.postgres_matrix }}
+      distribution_artifact: ${{ steps.meta.outputs.distribution_artifact }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - run: python3 ci/compute.py validate
+      - run: python3 ci/run-release-contracts.py
+      - name: Require configured publishing credentials before expensive builds
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          test -n "$DOCKER_USER" && test -n "$DOCKER_TOKEN" || {
+            echo 'Configure DOCKERHUB_USERNAME and DOCKERHUB_TOKEN in the Neon repository secrets' >&2
+            exit 1
+          }
+      - id: meta
+        run: python3 ci/dsga_release.py prepare --arch "$ARCH"
+  postgres-17:
+    needs: prepare
+    uses: william-lbn/postgres/.github/workflows/build.yml@203e1e83eff9dcb73e03cbeff685f51f7da9539c
+    with:
+      source_sha: ${{ needs.prepare.outputs.pg17 }}
+  postgres-18:
+    needs: prepare
+    uses: william-lbn/postgres/.github/workflows/build.yml@cc9430edcce7b863ffcf0db5ddf3cccc1395065c
+    with:
+      source_sha: ${{ needs.prepare.outputs.pg18 }}
+  autoscaling:
+    needs: [prepare, postgres-17, postgres-18]
+    permissions:
+      contents: read
+      packages: write
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@c7a3b3d777261ab2b9d85ca7dd67295f5ab20803
+    with:
+      tag: ${{ needs.prepare.outputs.tag }}
+      arch: ${{ inputs.arch || 'amd64' }}
+      source_ref: ${{ needs.prepare.outputs.autoscaling }}
+    secrets: inherit
+  build-tools:
+    needs: [prepare, postgres-17, postgres-18]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 90
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify immutable run and attempt before any registry write
+        env:
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: python3 ci/dsga_release.py verify-attempt --tag "$RELEASE_TAG" --arch "$ARCH"
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        id: build
+        with:
+          context: .
+          file: ci/build-tools.Dockerfile
+          platforms: linux/${{ env.ARCH }}
+          push: true
+          tags: ${{ env.REGISTRY }}/neon-build-tools:${{ needs.prepare.outputs.tag }}
+          cache-from: type=gha,scope=neon-build-tools-${{ env.ARCH }}
+          cache-to: type=gha,scope=neon-build-tools-${{ env.ARCH }},mode=min
+          provenance: mode=max
+          sbom: true
+      - env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: python3 ci/release.py record --name neon-build-tools --image "$REGISTRY/neon-build-tools:$TAG" --digest "$DIGEST" --output output/neon-build-tools.json
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-neon-build-tools-attempt${{ github.run_attempt }}
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  core:
+    needs: [prepare, build-tools]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 350
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          submodules: recursive
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify immutable run and attempt before any registry write
+        env:
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: python3 ci/dsga_release.py verify-attempt --tag "$RELEASE_TAG" --arch "$ARCH"
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        id: build
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/${{ env.ARCH }}
+          push: true
+          tags: ${{ env.REGISTRY }}/neon:${{ needs.prepare.outputs.tag }}
+          build-args: |
+            REPOSITORY=${{ env.REGISTRY }}
+            IMAGE=neon-build-tools
+            TAG=${{ needs.prepare.outputs.tag }}@${{ needs.build-tools.outputs.digest }}
+            GIT_VERSION=${{ github.sha }}
+            BUILD_TAG=${{ needs.prepare.outputs.tag }}
+            DEBIAN_VERSION=bookworm
+            IO_ALIGNMENT=512
+          labels: |
+            org.opencontainers.image.source=https://github.com/william-lbn/neon
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.prepare.outputs.tag }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/neon-build-cache:core-${{ env.ARCH }}
+          cache-to: type=registry,ref=${{ env.REGISTRY }}/neon-build-cache:core-${{ env.ARCH }},mode=max
+          provenance: mode=max
+          sbom: true
+      - name: Load every packaged PostgreSQL WAL redo binary from the immutable image
+        env:
+          IMAGE: ${{ env.REGISTRY }}/neon:${{ needs.prepare.outputs.tag }}@${{ steps.build.outputs.digest }}
+        run: |
+          docker pull "$IMAGE"
+          for major in $(jq -r '.postgres | keys[] | ltrimstr("v")' ci/distribution.json); do
+            bash scripts/verify-storage-distribution.sh "$IMAGE" "$major"
+          done
+      - id: record
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          python3 ci/release.py record --name neon --image "$REGISTRY/neon:$TAG" --digest "$DIGEST" --output output/neon.json
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-neon-core-attempt${{ github.run_attempt }}
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  core-components:
+    needs: [prepare, core]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJSON(needs.prepare.outputs.binaries) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Verify immutable run and attempt before any registry write
+        env:
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: python3 ci/dsga_release.py verify-attempt --tag "$RELEASE_TAG" --arch "$ARCH"
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - id: name
+        env:
+          BINARY: ${{ matrix.binary }}
+        run: echo "value=${BINARY//_/-}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        id: build
+        with:
+          context: .
+          file: ci/component.Dockerfile
+          platforms: linux/${{ env.ARCH }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ steps.name.outputs.value }}:${{ needs.prepare.outputs.tag }}
+          build-args: |
+            BASE_IMAGE=${{ env.REGISTRY }}/neon:${{ needs.prepare.outputs.tag }}@${{ needs.core.outputs.digest }}
+            BINARY=/usr/local/bin/${{ matrix.binary }}
+          provenance: mode=max
+          sbom: true
+      - env:
+          NAME: ${{ steps.name.outputs.value }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: python3 ci/release.py record --name "$NAME" --image "$REGISTRY/$NAME:$TAG" --digest "$DIGEST" --output "output/$NAME.json"
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-core-${{ steps.name.outputs.value }}-attempt${{ github.run_attempt }}
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  compute:
+    needs: [prepare, postgres-17, postgres-18]
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.postgres_matrix) }}
+    uses: ./.github/workflows/_compute-images.yml
+    with:
+      source_commit: ${{ needs.prepare.outputs.source_commit }}
+      profile: ${{ matrix.profile }}
+      pg: ${{ matrix.pg }}
+      debian: ${{ matrix.debian }}
+      tag: ${{ needs.prepare.outputs.tag }}
+      arch: ${{ inputs.arch || 'amd64' }}
+    secrets: inherit
+  compute-components:
+    needs: [prepare, compute]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.compute_components) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: images-compute-v17-attempt${{ github.run_attempt }}
+          path: artifacts
+      - name: Verify immutable run and attempt before any registry write
+        env:
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: python3 ci/dsga_release.py verify-attempt --tag "$RELEASE_TAG" --arch "$ARCH"
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - id: base
+        run: echo "image=$(python3 ci/release.py lookup --name compute-node-v17)" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # v6.15.0
+        id: build
+        with:
+          context: .
+          file: ci/compute-component.Dockerfile
+          platforms: linux/${{ env.ARCH }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ matrix.name }}:${{ needs.prepare.outputs.tag }}
+          build-args: |
+            BASE_IMAGE=${{ steps.base.outputs.image }}
+            BINARY=${{ matrix.binary }}
+          provenance: mode=max
+          sbom: true
+      - env:
+          NAME: ${{ matrix.name }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: python3 ci/release.py record --name "$NAME" --image "$REGISTRY/$NAME:$TAG" --digest "$DIGEST" --output "output/$NAME.json"
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-compute-component-${{ matrix.name }}-attempt${{ github.run_attempt }}
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  vm-compute:
+    needs: [prepare, compute, autoscaling]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.postgres_matrix) }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          pattern: images-*-attempt${{ github.run_attempt }}
+          path: artifacts
+      - name: Verify immutable run and attempt before any registry write
+        env:
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: python3 ci/dsga_release.py verify-attempt --tag "$RELEASE_TAG" --arch "$ARCH"
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build VM disk from our compute and our source-built vm-builder
+        env:
+          PG: ${{ matrix.pg }}
+          DEBIAN: ${{ matrix.debian }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          set -euo pipefail
+          builder=$(python3 ci/release.py lookup --name vm-builder)
+          daemon=$(python3 ci/release.py lookup --name neonvm-daemon)
+          source=$(python3 ci/release.py lookup --name "compute-node-$PG")
+          docker pull "$builder"
+          id=$(docker create "$builder")
+          docker cp "$id:/usr/local/bin/vm-builder" ./vm-builder
+          docker rm "$id"
+          chmod +x vm-builder
+          docker pull "$source"
+          docker pull "$daemon"
+          image="$REGISTRY/vm-compute-node-$PG:$TAG"
+          ./vm-builder -system-mode=legacy -size=4G -spec="compute/vm-image-spec-$DEBIAN.yaml" \
+            -src="$source" -dst="$image" -daemon-image="$daemon" -target-arch="linux/$ARCH"
+          docker push "$image"
+          digest=$(docker buildx imagetools inspect "$image" --format '{{json .Manifest}}' | jq -r .digest)
+          python3 ci/release.py record --name "vm-compute-node-$PG" --image "$image" --digest "$digest" --output "output/vm-compute-node-$PG.json"
+          id=$(docker create "$image" true)
+          docker cp "$id:/disk.qcow2" ./disk.qcow2
+          docker rm "$id"
+          sudo apt-get update && sudo apt-get install -y qemu-utils
+          qemu-img check disk.qcow2
+          qemu-img info --output=json disk.qcow2 | jq -e '.format == "qcow2" and .["virtual-size"] >= 4294967296'
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: images-vm-compute-${{ matrix.pg }}-attempt${{ github.run_attempt }}
+          path: output/*.json
+          retention-days: 90
+          if-no-files-found: error
+  validate:
+    needs: [prepare, postgres-17, postgres-18, autoscaling, core-components, compute-components, vm-compute]
+    permissions:
+      contents: read
+      actions: read
+      packages: write
+    uses: ./.github/workflows/_validate-dsga.yml
+    with:
+      tag: ${{ needs.prepare.outputs.tag }}
+      arch: amd64
+      source_commit: ${{ needs.prepare.outputs.source_commit }}
+      postgres_matrix: ${{ needs.prepare.outputs.postgres_matrix }}
+      distribution_artifact: ${{ needs.prepare.outputs.distribution_artifact }}
+    secrets: inherit
+  helm:
+    needs: [prepare, validate]
+    permissions:
+      contents: read
+      actions: read
+    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@bb9bce7aeae604366c687650cc318ca87d18ebb7
+    with:
+      helm_sha: ${{ needs.prepare.outputs.helm }}
+      release_version: ${{ needs.prepare.outputs.tag }}
+      distribution_artifact: ${{ needs.prepare.outputs.distribution_artifact }}
+  publish:
+    needs: [prepare, validate, helm]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: write
+      actions: read
+    env:
+      TAG: ${{ needs.prepare.outputs.tag }}
+      SOURCE_COMMIT: ${{ needs.prepare.outputs.source_commit }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.prepare.outputs.source_commit }}
+          persist-credentials: false
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: dsga-helm-${{ needs.prepare.outputs.tag }}
+          path: release
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: autoscaling-capabilities-attempt${{ github.run_attempt }}
+          path: release
+      - name: Verify the whole bundle before creating a tag or draft
+        run: |
+          set -euo pipefail
+          (cd release && sha256sum --check HELM-SHA256SUMS)
+          python3 ci/dsga_release.py assets --directory release --tag "$TAG" --source-commit "$SOURCE_COMMIT"
+          (cd release && sha256sum --check SHA256SUMS)
+      - name: Publish one complete immutable candidate (never latest)
+        run: |
+          set -euo pipefail
+          python3 ci/dsga_release.py verify-attempt --tag "$TAG" --arch amd64
+          if existing=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$TAG" --jq '.object.sha' 2>/dev/null); then
+            [[ "$existing" == "$SOURCE_COMMIT" ]]
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$TAG" -f "sha=$SOURCE_COMMIT" > /dev/null
+          fi
+          if existing_draft=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null); then
+            [[ "$existing_draft" == true ]] || { echo 'Published releases are immutable' >&2; exit 1; }
+          else
+            gh release create "$TAG" --verify-tag --draft --prerelease --latest=false \
+              --title "Neon DSGA candidate $TAG" --notes-file release/RELEASE_NOTES.md
+          fi
+          mapfile -d '' assets < <(find release -maxdepth 1 -type f -print0)
+          gh release upload "$TAG" "${assets[@]}" --clobber
+          gh release edit "$TAG" --draft=false --prerelease --latest=false --notes-file release/RELEASE_NOTES.md
+          cat release/RELEASE_NOTES.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: dsga-release-${{ needs.prepare.outputs.tag }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 90

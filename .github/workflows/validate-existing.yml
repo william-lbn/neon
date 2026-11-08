@@ -19,6 +19,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   prepare:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     outputs:
       tag: ${{ steps.verify.outputs.tag }}
@@ -28,6 +29,14 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      - name: Reject candidate source locks in the legacy resume path
+        run: |
+          python3 - <<'PYCODE'
+          import json
+          lock = json.load(open('ci/distribution.json'))
+          if 'postgres_profiles' in lock or 'helm_commit' in lock:
+              raise SystemExit('DSGA candidates must rerun all jobs of dsga-release.yml; legacy latest promotion is not allowed.')
+          PYCODE
       - name: Download image records across every artifact page
         env:
           BUILD_RUN: ${{ inputs.build_run_id }}

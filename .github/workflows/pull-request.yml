@@ -10,7 +10,7 @@ jobs:
         with:
           persist-credentials: false
       - run: python3 ci/compute.py validate
-      - run: python3 -m unittest discover -s ci -p 'test_*.py' -v
+      - run: python3 ci/run-release-contracts.py
   dsga-pg17:
     # 专项门禁必须真实运行，不能以contracts中的环境skip代替。只编译宿主PG，
     # 不打包镜像，不部署K8s；真实VM/Provider能力按V3另行验收。

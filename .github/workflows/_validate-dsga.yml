@@ -1,0 +1,176 @@
+name: Verify DSGA image distribution (no publication)
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      arch:
+        type: string
+        required: true
+      source_commit:
+        type: string
+        required: true
+      postgres_matrix:
+        type: string
+        required: true
+      distribution_artifact:
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+  packages: write
+env:
+  REGISTRY: docker.io/williamluckyli
+  ARCH: ${{ inputs.arch }}
+  TAG: ${{ inputs.tag }}
+defaults:
+  run:
+    shell: bash
+jobs:
+  manifest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.source_commit }}
+          persist-credentials: false
+      - name: Verify immutable source and this attempt
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          [[ "$(git rev-parse HEAD)" == "$SOURCE_COMMIT" ]]
+          python3 ci/dsga_release.py verify-attempt --tag "$TAG" --arch "$ARCH"
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          pattern: images-*-attempt${{ github.run_attempt }}
+          path: artifacts/images
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: autoscaling-capabilities-attempt${{ github.run_attempt }}
+          path: artifacts/capabilities
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          pattern: postgres-dsga-*-attempt${{ github.run_attempt }}
+          path: artifacts/native
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Verify complete source, native gate, image and kernel provenance
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          set -euo pipefail
+          mkdir -p output
+          python3 ci/release.py manifest --directory artifacts/images \
+            --tag "$TAG" --arch "$ARCH" --source-commit "$SOURCE_COMMIT" --channel dsga \
+            --capabilities artifacts/capabilities/autoscaling-capabilities.json \
+            --native-receipts artifacts/native --output output/distribution-manifest.json
+          jq -r '.images[] | .image + "@" + .digest' output/distribution-manifest.json | while read -r image; do
+            bash ci/registry-build.sh docker buildx imagetools inspect "$image" > /dev/null
+          done
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        with:
+          name: ${{ inputs.distribution_artifact }}
+          path: output/distribution-manifest.json
+          if-no-files-found: error
+          retention-days: 90
+  test-storage:
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 45
+    outputs:
+      server: ${{ steps.server.outputs.digest }}
+      client: ${{ steps.client.outputs.digest }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ inputs.source_commit }}
+          persist-credentials: false
+      - name: Verify this run attempt
+        run: python3 ci/dsga_release.py verify-attempt --tag "$TAG" --arch "$ARCH"
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr: 'true'
+      - name: Build the upstream test server from pinned source
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        id: server
+        with:
+          context: .
+          file: ci/minio.Dockerfile
+          target: server
+          platforms: linux/${{ inputs.arch }}
+          push: true
+          tags: ghcr.io/william-lbn/neon-ci-minio:${{ inputs.tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/william-lbn/neon
+          cache-from: type=gha,scope=ci-minio-${{ inputs.arch }}
+          cache-to: type=gha,scope=ci-minio-${{ inputs.arch }},mode=max
+          provenance: mode=max
+          sbom: true
+      - name: Build the matching test client from pinned source
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4
+        id: client
+        with:
+          context: .
+          file: ci/minio.Dockerfile
+          target: client
+          platforms: linux/${{ inputs.arch }}
+          push: true
+          tags: ghcr.io/william-lbn/neon-ci-mc:${{ inputs.tag }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/william-lbn/neon
+          cache-from: type=gha,scope=ci-mc-${{ inputs.arch }}
+          cache-to: type=gha,scope=ci-mc-${{ inputs.arch }},mode=max
+          provenance: mode=max
+          sbom: true
+  smoke:
+    needs: [test-storage, manifest]
+    runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(inputs.postgres_matrix) }}
+    env:
+      REPOSITORY: docker.io/williamluckyli
+      TAG: ${{ inputs.tag }}
+      PG_VERSION: ${{ matrix.major }}
+      COMPUTE_PROFILE: ${{ matrix.profile }}
+      DISTRIBUTION_MANIFEST: ${{ github.workspace }}/artifacts/distribution/distribution-manifest.json
+      MINIO_IMAGE: ghcr.io/william-lbn/neon-ci-minio@${{ needs.test-storage.outputs.server }}
+      MINIO_MC_IMAGE: ghcr.io/william-lbn/neon-ci-mc@${{ needs.test-storage.outputs.client }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ inputs.source_commit }}
+          persist-credentials: false
+      - name: Verify this run attempt
+        run: python3 ci/dsga_release.py verify-attempt --tag "$TAG" --arch "$ARCH"
+      - uses: ./.github/actions/dockerhub-setup
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr: 'true'
+      - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        with:
+          name: ${{ inputs.distribution_artifact }}
+          path: artifacts/distribution
+      - run: bash ci/smoke.sh
+      - name: Upstream extension and contrib regressions
+        if: matrix.profile == 'full' && matrix.major >= 16
+        env:
+          TEST_VERSION_ONLY: ${{ matrix.pg }}
+          PARALLEL_COMPUTES: 1
+        run: |
+          sudo chown -R 1000:1000 docker-compose/pageserver_config
+          ./docker-compose/docker_compose_test.sh
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1
+        if: always()
+        with:
+          name: logs-smoke-${{ matrix.pg }}-attempt${{ github.run_attempt }}
+          path: logs
+          retention-days: 30
