@@ -1128,7 +1128,7 @@ impl ComputeNode {
                 .dynamic_shared_buffers
                 .is_some()
                 .then(|| self.dsg_configuration_lock.lock().unwrap());
-            self.attest_dsg_read_only_roles(&pspec.spec)?;
+            self.attest_dsg_retained_roles(&pspec.spec)?;
             self.refresh_dsg_hba(&pspec.spec, true)?;
             self.configure_dsg_local_proxy(&pspec.spec)?;
         }
@@ -2455,9 +2455,8 @@ impl ComputeNode {
             self.pg_reload_conf()?;
         }
 
-        // 受管重配禁止先异步发布新JWT映射、后检查数据库。RO不能运行角色DDL，
-        // 必须核验自己已回放的目录；主库则已经完成上面的原子角色phase。
-        self.attest_dsg_read_only_roles(&spec)?;
+        // 副本和保留目录的主库须在发布认证前核验真实目录；其余主库已执行角色应用。
+        self.attest_dsg_retained_roles(&spec)?;
         self.refresh_dsg_hba(&spec, true)?;
         self.configure_dsg_local_proxy(&spec)?;
 
@@ -2471,8 +2470,11 @@ impl ComputeNode {
         Ok(())
     }
 
-    pub(crate) fn attest_dsg_read_only_roles(&self, spec: &ComputeSpec) -> Result<()> {
-        if spec.dynamic_shared_buffers.is_none() || spec.mode == ComputeMode::Primary {
+    pub(crate) fn attest_dsg_retained_roles(&self, spec: &ComputeSpec) -> Result<()> {
+        if spec.dynamic_shared_buffers.is_none()
+            || (spec.mode == ComputeMode::Primary
+                && !crate::dsg_roles::preserves_primary_catalog(spec))
+        {
             return Ok(());
         }
         crate::dsg_roles::validate_parameters(
@@ -2480,21 +2482,24 @@ impl ComputeNode {
             &self.params.privileged_role_name,
             self.params.lakebase_mode,
         )?;
-        let conf = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_RO_roles"));
-        // 此函数从启动/重配的blocking控制线程调用，不持state/ctx锁。RO绝不
-        // 进入旧zenith_admin回退创建分支，缺管理身份直接失败，不能尝试修复目录。
+        let conf = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_retained_roles"));
+        // 启动和重配均使用私有管理连接，只读原目录与实际恢复模式。
         tokio::runtime::Handle::current().block_on(async {
             let connection =
                 tokio::time::timeout(Duration::from_secs(5), conf.connect(NoTls)).await;
             let (client, driver) = match connection {
                 Ok(Ok(pair)) => pair,
-                _ => anyhow::bail!("DSGA replica private role connection unavailable"),
+                _ => anyhow::bail!("DSGA retained private role connection unavailable"),
             };
             tokio::spawn(async move {
                 let _ = driver.await;
             });
-            crate::dsg_roles::attest_read_only(&client, spec, &self.params.privileged_role_name)
-                .await
+            if spec.mode == ComputeMode::Primary {
+                crate::dsg_roles::attest(&client, spec, &self.params.privileged_role_name).await
+            } else {
+                crate::dsg_roles::attest_read_only(&client, spec, &self.params.privileged_role_name)
+                    .await
+            }
         })
     }
 
@@ -2546,7 +2551,11 @@ impl ComputeNode {
             }
             self.pg_reload_conf()?;
         }
-        self.post_apply_config()?;
+        if crate::dsg_roles::preserves_primary_catalog(&pspec.spec) {
+            self.attest_dsg_retained_roles(&pspec.spec)?;
+        } else {
+            self.post_apply_config()?;
+        }
         self.refresh_dsg_hba(&pspec.spec, true)?;
         self.configure_dsg_local_proxy(&pspec.spec)?;
 

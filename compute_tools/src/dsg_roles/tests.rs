@@ -75,7 +75,12 @@ fn managed_parsing_precedes_pgdata_and_redacts_verifiers() {
             .contains(&verifier())
     );
     spec.skip_pg_catalog_updates = true;
+    assert!(preserves_primary_catalog(&spec));
+    validate_spec(&spec).unwrap();
+    let changes = serde_json::json!([{"action":"delete_role", "name":"dsg_app"}]);
+    spec.delta_operations = serde_json::from_value(changes).unwrap();
     assert!(validate_spec(&spec).is_err());
+    spec.delta_operations = None;
     spec.mode = ComputeMode::Replica;
     validate_spec(&spec).unwrap(); // RO可以禁止目录写，但不能跳过后面的真实快照核验。
     spec.skip_pg_catalog_updates = false;
@@ -607,6 +612,64 @@ async fn native_fault_rollback_lock_deadline_and_session_identity() -> Result<()
 
 #[tokio::test]
 #[ignore = "requires explicit accurate PG17 bin/SHA and installed test libraries"]
+async fn native_retained_primary_attests_existing_roles_without_catalog_updates() -> Result<()> {
+    let (mut primary, admin, private, mut spec) = native_setup().await?;
+    production_phase(&private, &spec, context()).await?;
+    admin.batch_execute("CREATE TABLE retained_payload(n int PRIMARY KEY); INSERT INTO retained_payload VALUES (17), (18);").await?;
+    let original_xmin: String = admin
+        .query_one(
+            "SELECT xmin::text FROM pg_catalog.pg_authid WHERE rolname='dsg_app'",
+            &[],
+        )
+        .await?
+        .get(0);
+    spec.skip_pg_catalog_updates = true;
+    let mut params = parameters();
+    params.pgdata = primary.data.to_string_lossy().into_owned();
+    params
+        .connstr
+        .query_pairs_mut()
+        .append_pair("host", primary.socket.to_str().unwrap())
+        .append_pair("port", "55432");
+    let node = Arc::new(crate::compute::ComputeNode::new(
+        params,
+        compute_api::responses::ComputeConfig {
+            spec: Some(spec.clone()),
+            compute_ctl_config: compute_api::responses::ComputeCtlConfig {
+                jwks: jsonwebtoken::jwk::JwkSet { keys: vec![] },
+                tls: None,
+            },
+        },
+    )?);
+    let configured = node.clone();
+    let source = spec.clone();
+    tokio::task::spawn_blocking(move || configured.attest_dsg_retained_roles(&source)).await??;
+    let after_xmin: String = admin
+        .query_one(
+            "SELECT xmin::text FROM pg_catalog.pg_authid WHERE rolname='dsg_app'",
+            &[],
+        )
+        .await?
+        .get(0);
+    assert_eq!(after_xmin, original_xmin);
+    let rows: i64 = admin
+        .query_one("SELECT count(*) FROM retained_payload", &[])
+        .await?
+        .get(0);
+    assert_eq!(rows, 2);
+    let mut wrong = spec.clone();
+    wrong.cluster.roles[1].encrypted_password = Some(verifier());
+    assert!(
+        tokio::task::spawn_blocking(move || node.attest_dsg_retained_roles(&wrong))
+            .await?
+            .is_err()
+    );
+    primary.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "requires explicit accurate PG17 bin/SHA and installed test libraries"]
 async fn native_replica_attests_replayed_roles_without_catalog_writes() -> Result<()> {
     let (mut primary, admin, private, mut spec) = native_setup().await?;
     production_phase(&private, &spec, context()).await?;
@@ -640,7 +703,7 @@ async fn native_replica_attests_replayed_roles_without_catalog_writes() -> Resul
         },
     )?;
     let source = spec.clone();
-    tokio::task::spawn_blocking(move || node.attest_dsg_read_only_roles(&source)).await??;
+    tokio::task::spawn_blocking(move || node.attest_dsg_retained_roles(&source)).await??;
     let mut wrong = spec.clone();
     wrong.cluster.roles[1].encrypted_password = Some(verifier());
     assert!(
