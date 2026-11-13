@@ -20,6 +20,7 @@ pub(crate) struct CreationIdentity {
     operation_uuid: Option<String>,
     tenant_id: String,
     timeline_id: String,
+    preserves_primary_catalog: bool,
 }
 
 impl CreationIdentity {
@@ -28,6 +29,7 @@ impl CreationIdentity {
             operation_uuid: parsed.spec.operation_uuid.clone(),
             tenant_id: parsed.tenant_id.to_string(),
             timeline_id: parsed.timeline_id.to_string(),
+            preserves_primary_catalog: crate::dsg_roles::preserves_primary_catalog(&parsed.spec),
         })
     }
 }
@@ -99,6 +101,11 @@ impl ComputeNode {
                 original.tenant_id == parsed.tenant_id.to_string()
                     && original.timeline_id == parsed.timeline_id.to_string(),
                 "DSGA storage identity cannot change within a Compute"
+            );
+            ensure!(
+                original.preserves_primary_catalog
+                    == crate::dsg_roles::preserves_primary_catalog(&parsed.spec),
+                "DSGA primary catalog mode cannot change within a Compute"
             );
         }
         Ok(())
@@ -388,6 +395,9 @@ mod creation_tests {
                 .as_deref(),
             Some("original-create")
         );
+        changed.spec.skip_pg_catalog_updates = true;
+        assert!(node.verify_dsg_storage(&changed).is_err());
+        changed.spec.skip_pg_catalog_updates = false;
         changed.timeline_id = "ffffffffffffffffffffffffffffffff".parse()?;
         assert!(node.verify_dsg_storage(&changed).is_err());
         Ok(())

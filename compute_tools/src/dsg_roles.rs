@@ -218,13 +218,21 @@ fn plan(spec: &ComputeSpec) -> Result<Vec<PlannedRole<'_>>> {
 
 pub(crate) fn validate_spec(spec: &ComputeSpec) -> Result<()> {
     if spec.dynamic_shared_buffers.is_some() {
-        ensure!(
-            spec.mode != ComputeMode::Primary || !spec.skip_pg_catalog_updates,
-            "DSGA primary cannot skip mandatory role application"
-        );
+        if preserves_primary_catalog(spec) {
+            ensure!(
+                spec.delta_operations.as_ref().is_none_or(Vec::is_empty),
+                "DSGA retained primary cannot request catalog changes at startup"
+            );
+        }
         plan(spec)?;
     }
     Ok(())
+}
+
+pub(crate) fn preserves_primary_catalog(spec: &ComputeSpec) -> bool {
+    spec.dynamic_shared_buffers.is_some()
+        && spec.mode == ComputeMode::Primary
+        && spec.skip_pg_catalog_updates
 }
 
 pub(crate) fn validate_parameters(spec: &ComputeSpec, weak: &str, lakebase: bool) -> Result<()> {
