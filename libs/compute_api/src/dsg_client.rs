@@ -11,6 +11,7 @@ use std::time::Duration;
 
 use anyhow::{Context, Result, ensure};
 use serde::de::DeserializeOwned;
+use tokio::sync::RwLock;
 use tokio::time::timeout;
 use tokio_postgres::Client;
 
@@ -179,7 +180,7 @@ impl Drop for InFlight<'_> {
 /// 两个专用、已认证连接可借用或交由SDK拥有；调用方驱动driver，不记录连接串/密码。
 /// bind会固定这两个管理连接的search_path=pg_catalog，再核验扩展函数成员身份。
 pub struct DsgSqlClient<'a> {
-    execution: ManagementConnection<'a>,
+    execution: RwLock<Option<ManagementConnection<'a>>>,
     observer: ManagementConnection<'a>,
     execution_schema: String,
     observer_schema: String,
@@ -341,7 +342,7 @@ impl<'a> DsgSqlClient<'a> {
             "DSGA management sessions expose inconsistent capabilities"
         );
         Ok(Self {
-            execution,
+            execution: RwLock::new(Some(execution)),
             observer,
             execution_schema,
             observer_schema,
@@ -361,6 +362,31 @@ impl<'a> DsgSqlClient<'a> {
         &self.capabilities
     }
 
+    /// The caller must exclude new management mutations for the rest of this boot.
+    /// The observer remains available for native proofs and issuer takeover.
+    pub fn retire_execution_connection(&self) -> Result<()> {
+        let mut execution = self.execution.try_write()?;
+        ensure!(
+            !matches!(execution.as_ref(), Some(ManagementConnection::Borrowed(_))),
+            "cannot retire a session owned by the caller"
+        );
+        let state = self
+            .execution_state
+            .lock()
+            .map_err(|_| anyhow::anyhow!("DSGA execution fence is poisoned"))?;
+        ensure!(
+            state.pending.is_none()
+                && !state.in_flight
+                && state.admission_pending.is_none()
+                && state.admission_close.is_none()
+                && state.admission_continuation.is_none()
+                && !state.admission_in_flight,
+            "DSGA management still holds an unresolved command"
+        );
+        execution.take();
+        Ok(())
+    }
+
     /// 网络/SQL错误、验证失败或future被丢弃后，只允许原意图的完整幂等重放。
     /// 查询终态不清掉本地栅栏：原执行连接可能仍停在COMMITTED后的Provider中。
     /// 完整重放经过执行连接的协议队列，才能证明本客户端前次SQL已结束及意图未变。
@@ -372,10 +398,14 @@ impl<'a> DsgSqlClient<'a> {
         request.validate().map_err(DsgCallError::NotSent)?;
         let payload =
             serde_json::to_string(request).map_err(|error| DsgCallError::NotSent(error.into()))?;
+        let execution = self.execution.read().await;
+        let execution = execution.as_ref().ok_or_else(|| {
+            DsgCallError::NotSent(anyhow::anyhow!("DSGA execution session retired"))
+        })?;
         let mut flight = self.reserve(request).map_err(DsgCallError::NotSent)?;
         let result = self
             .call(
-                &self.execution,
+                execution,
                 &self.execution_schema,
                 "neon_dsg_request_resize",
                 &payload,

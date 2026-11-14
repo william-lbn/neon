@@ -1,17 +1,35 @@
 //! Compute运行时的专用管理连接。保留实例与进程内执行栅栏，不进行隐式重连换owner。
 
-use std::{sync::Arc, time::Duration};
+use std::{ops::Deref, sync::Arc, time::Duration};
 
 use anyhow::{Context, Result, ensure};
+use compute_api::dsg_admission::DsgAdmissionRequest;
 use compute_api::dsg_client::DsgSqlClient;
+use compute_api::dsg_control::DsgUint64;
 use compute_api::dsg_initialization::DsgInitializationResponse;
+use compute_api::dsg_prepared::DsgPreparedResponse;
+use compute_api::dsg_state::DsgPhase;
 use compute_api::dynamic_shared_buffers::DynamicSharedBuffersSpec;
 use compute_api::responses::ComputeStatus;
+use tokio::sync::RwLockReadGuard;
 use tokio::time::timeout;
 use tokio_postgres::{Client, Config, NoTls};
 use tracing::warn;
 
 use crate::compute::{ComputeNode, ParsedSpec};
+
+pub(crate) struct DsgManagementClient<'a> {
+    client: &'a DsgSqlClient<'static>,
+    _lifecycle: RwLockReadGuard<'a, bool>,
+}
+
+impl Deref for DsgManagementClient<'_> {
+    type Target = DsgSqlClient<'static>;
+
+    fn deref(&self) -> &Self::Target {
+        self.client
+    }
+}
 
 /// 本Compute首次接受的创建来源，冻结时使用ParsedSpec兼容官方旧GUC格式。
 /// operation_uuid只作为原创建来源；当前配置UUID仍用于官方配置追踪，不冻结
@@ -144,7 +162,7 @@ impl ComputeNode {
             .clone()
             .context("DSGA published authentication proof unavailable")?;
         diagnostic.stage = DsgInitializationStage::NativeBefore;
-        let client = self.dsg_management_client().await?;
+        let client = self.dsg_management_client(false).await?;
         let before = client.memory_status().await?;
         diagnostic.stage = DsgInitializationStage::PrivateObserver;
         let config = self.get_tokio_conn_conf(Some("compute_ctl:dsga_initialization"));
@@ -288,7 +306,40 @@ impl ComputeNode {
         Ok(spec)
     }
 
-    pub(crate) async fn dsg_management_client(&self) -> Result<&DsgSqlClient<'static>> {
+    pub(crate) async fn dsg_management_client(
+        &self,
+        observe_during_suspension: bool,
+    ) -> Result<DsgManagementClient<'_>> {
+        let lifecycle = self.dsg_suspension.read().await;
+        ensure!(
+            !*lifecycle || observe_during_suspension,
+            "DSGA Compute is draining for suspension"
+        );
+        Ok(DsgManagementClient {
+            client: self.dsg_sql_client().await?,
+            _lifecycle: lifecycle,
+        })
+    }
+
+    pub(crate) async fn dsg_suspension_drain(
+        &self,
+        close: &DsgAdmissionRequest,
+        epoch: DsgUint64,
+    ) -> Result<DsgPreparedResponse> {
+        let mut suspended = self.dsg_suspension.try_write()?;
+        let client = self.dsg_client.get().context("DSGA management is not bound")?;
+        let fact = timeout(Duration::from_secs(5), client.prepared_state()).await??;
+        verify_suspension_gate(&fact, close, epoch)?;
+        if !*suspended {
+            client.retire_execution_connection()?;
+            *suspended = true;
+        }
+        // Return the unchanged native observation. It may still count retiring
+        // connections until PostgreSQL notices EOF. The Owner must poll for zero.
+        Ok(fact)
+    }
+
+    async fn dsg_sql_client(&self) -> Result<&DsgSqlClient<'static>> {
         let spec = self.dsg_spec()?;
         self.dsg_client.get_or_try_init(|| async {
             let mut config = self.get_tokio_conn_conf(Some("compute_ctl:dsga"));
@@ -304,6 +355,30 @@ impl ComputeNode {
                 Duration::from_secs(70)).await
         }).await
     }
+}
+
+fn verify_suspension_gate(
+    fact: &DsgPreparedResponse,
+    close: &DsgAdmissionRequest,
+    epoch: DsgUint64,
+) -> Result<()> {
+    close.validate()?;
+    fact.validate_for(&close.instance)?;
+    let pg = &fact.connections.work.observed;
+    ensure!(
+        !close.open
+            && close.issuer_epoch <= epoch
+            && !pg.admission_open
+            && pg.admission_revision == close.revision
+            && pg.capacity_generation == close.expected_capacity_generation
+            && pg.issuer_floor_epoch == epoch
+            && fact.connections.private_management_ready
+            && fact.connections.public_connections_blocked
+            && fact.connections.work.observer_excluded
+            && !pg.operation.as_ref().is_some_and(|op| op.phase == DsgPhase::Preparing),
+        "DSGA suspension requires the original closed gate under the current issuer"
+    );
+    Ok(())
 }
 
 async fn management_connection(config: &Config) -> Result<Client> {

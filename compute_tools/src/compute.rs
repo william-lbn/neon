@@ -163,6 +163,8 @@ pub struct ComputeNode {
     /// DSGA执行栅栏须跨HTTP请求存活。只能初始化一次；连接失效不自动换客户端，
     /// 否则原执行结果未知时会丢掉本地原意图。持久恢复协议另由外层owner负责。
     pub(crate) dsg_client: tokio::sync::OnceCell<compute_api::dsg_client::DsgSqlClient<'static>>,
+    // Serialize the terminal drain transition with all management requests.
+    pub(crate) dsg_suspension: tokio::sync::RwLock<bool>,
     // 标记本Postmaster管理连接路由及端口初始化完成，不发布预算许可。启动前固定，禁止
     // 在线切换DSGA模式；getter不重新取state锁，避免配置流程中重入锁。
     dsg_private_connections: AtomicBool,
@@ -701,6 +703,7 @@ impl ComputeNode {
             extension_stats_task: Mutex::new(None),
             lfc_offload_task: Mutex::new(None),
             dsg_client: tokio::sync::OnceCell::new(),
+            dsg_suspension: tokio::sync::RwLock::new(false),
             dsg_private_connections: AtomicBool::new(dsg_private),
             dsg_configuration_lock: Mutex::new(()),
             dsg_authentication_receipt: RwLock::new(None),

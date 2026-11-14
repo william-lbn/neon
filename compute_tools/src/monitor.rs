@@ -119,6 +119,9 @@ impl ComputeMonitor {
         // but we don't want to count this as some user activity. So wait until
         // the compute fully started before monitoring activity.
         wait_for_postgres_start(&self.compute);
+        if *self.compute.dsg_suspension.blocking_read() {
+            return Ok(());
+        }
 
         // Define `client` outside of the loop to reuse existing connection if it's active.
         let mut client = conf.connect(NoTls);
@@ -130,7 +133,7 @@ impl ComputeMonitor {
         );
 
         loop {
-            if self.check_interrupts() {
+            if self.check_interrupts() || *self.compute.dsg_suspension.blocking_read() {
                 break;
             }
 

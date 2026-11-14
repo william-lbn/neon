@@ -80,6 +80,40 @@ async fn wait_gate(client: &Client) -> Result<()> {
 
 #[tokio::test]
 #[ignore = "strict gate creates a real isolated Neon PG cluster"]
+async fn retirement_drops_only_the_owned_execution_session() -> Result<()> {
+    let mut cluster = Cluster::new()?;
+    let business = cluster.connect().await?;
+    let execution = cluster.connect().await?;
+    let observer = cluster.connect().await?;
+    let execution_pid: i32 = execution
+        .query_one("SELECT pg_backend_pid()", &[])
+        .await?
+        .get(0);
+    let client = DsgSqlClient::bind_owned(execution, observer, VM, COMPUTE, WAIT).await?;
+    let original = request(&client, 1, 1, 1024, DsgResizeKind::Grow);
+    client.retire_execution_connection()?;
+    client.retire_execution_connection()?;
+    timeout(WAIT, async {
+        loop {
+            let row = business
+                .query_one("SELECT EXISTS (SELECT 1 FROM pg_stat_activity WHERE pid=$1)", &[&execution_pid])
+                .await?;
+            if !row.get::<_, bool>(0) {
+                return Ok::<_, anyhow::Error>(());
+            }
+            sleep(Duration::from_millis(10)).await;
+        }
+    })
+    .await??;
+    assert_eq!(business.query_one("SELECT 17", &[]).await?.get::<_, i32>(0), 17);
+    assert_eq!(client.memory_status().await?.observed.instance, *client.instance());
+    assert!(matches!(client.request_resize(&original).await, Err(DsgCallError::NotSent(_))));
+    cluster.passed = true;
+    Ok(())
+}
+
+#[tokio::test]
+#[ignore = "strict gate creates a real isolated Neon PG cluster"]
 async fn round_trip_history_and_quoted_schema() -> Result<()> {
     let mut cluster = Cluster::new()?;
     let execution = cluster.connect().await?;

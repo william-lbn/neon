@@ -14,7 +14,7 @@ use compute_api::dsg_admission::{
 };
 use compute_api::dsg_auth::DsgHttpClaims;
 use compute_api::dsg_client::{
-    DsgAdmissionCallError, DsgCallError, DsgFenceCallError, DsgSqlClient,
+    DsgAdmissionCallError, DsgCallError, DsgFenceCallError,
 };
 use compute_api::dsg_control::{
     DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery, DsgResizeRequest,
@@ -26,6 +26,7 @@ use serde::Serialize;
 use tower_http::auth::AsyncRequireAuthorizationLayer;
 
 use crate::compute::ComputeNode;
+use crate::dsg::DsgManagementClient;
 use crate::http::{JsonResponse, extract::Json, middleware::dsg_authorize::DsgAuthorize};
 
 /// 只合并到external。单独layer保证即使Hadron也必须专用签名/短期/身份认证。
@@ -38,6 +39,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         .route("/dsg/v1/work/state", get(work_state))
         .route("/dsg/v1/connections/state", get(connection_state))
         .route("/dsg/v1/work/prepared", get(prepared_state))
+        .route("/dsg/v1/suspension/drain", post(suspension_drain))
         .route("/dsg/v1/work/dsm", get(dsm_state))
         .route("/dsg/v1/resource/identity", get(super::dsg_resource::proxy))
         .route("/dsg/v1/resource/process", get(super::dsg_resource::proxy))
@@ -138,7 +140,7 @@ async fn admission_lease(
     if claims.authorize_fence(&owner).is_err() {
         return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
     }
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, false).await {
         Ok(client) => match client.admission_lease(&request).await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(StatusCode::CONFLICT, "lease_unconfirmed", None),
@@ -162,7 +164,7 @@ async fn admission_rearm_status(
     if claims.authorize_rearm_status(&request).is_err() {
         return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
     }
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, false).await {
         Ok(client) => match client.admission_rearm_status(&request).await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(StatusCode::CONFLICT, "rearm_status_unconfirmed", None),
@@ -181,14 +183,15 @@ async fn no_store(mut response: Response) -> Response {
 async fn client<'a>(
     compute: &'a ComputeNode,
     claims: &DsgHttpClaims,
-) -> Result<&'a DsgSqlClient<'static>, Response> {
+    observe_during_suspension: bool,
+) -> Result<DsgManagementClient<'a>, Response> {
     let spec = compute
         .dsg_spec()
         .map_err(|_| failure(StatusCode::PRECONDITION_FAILED, "not_available", None))?;
     if claims.vm_uid != spec.vm_uid || claims.compute_instance_id != spec.compute_instance_id {
         return Err(failure(StatusCode::FORBIDDEN, "wrong_instance", None));
     }
-    compute.dsg_management_client().await.map_err(|_| {
+    compute.dsg_management_client(observe_during_suspension).await.map_err(|_| {
         failure(
             StatusCode::SERVICE_UNAVAILABLE,
             "management_unavailable",
@@ -201,7 +204,7 @@ async fn capabilities(
     State(compute): State<Arc<ComputeNode>>,
     Extension(claims): Extension<DsgHttpClaims>,
 ) -> Response {
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, true).await {
         // 能力虽在bind固定，HTTP发现不能只返回缓存冒充存活实例。检查真实观察通道，
         // 断连/换boot即失败关闭；不通过自动重新初始化丢弃原执行栅栏。
         Ok(client) => match client.memory_status().await {
@@ -241,7 +244,7 @@ async fn memory(
     State(compute): State<Arc<ComputeNode>>,
     Extension(claims): Extension<DsgHttpClaims>,
 ) -> Response {
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, true).await {
         Ok(client) => match client.memory_status().await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(
@@ -258,7 +261,7 @@ async fn shared_cost(
     State(compute): State<Arc<ComputeNode>>,
     Extension(claims): Extension<DsgHttpClaims>,
 ) -> Response {
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, true).await {
         Ok(client) => match client.shared_cost().await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(
@@ -276,7 +279,7 @@ async fn work_state(
     State(compute): State<Arc<ComputeNode>>,
     Extension(claims): Extension<DsgHttpClaims>,
 ) -> Response {
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, true).await {
         Ok(client) => match client.work_state().await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(
@@ -294,7 +297,7 @@ async fn connection_state(
     State(compute): State<Arc<ComputeNode>>,
     Extension(claims): Extension<DsgHttpClaims>,
 ) -> Response {
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, true).await {
         Ok(client) => match client.connection_state().await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(
@@ -312,7 +315,7 @@ async fn prepared_state(
     State(compute): State<Arc<ComputeNode>>,
     Extension(claims): Extension<DsgHttpClaims>,
 ) -> Response {
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, true).await {
         Ok(client) => match client.prepared_state().await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(
@@ -325,12 +328,31 @@ async fn prepared_state(
     }
 }
 
+async fn suspension_drain(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+    Json(close): Json<DsgAdmissionRequest>,
+) -> Response {
+    if close.validate().is_err() || close.open {
+        return failure(StatusCode::BAD_REQUEST, "invalid_request", None);
+    }
+    // The selected close may belong to a predecessor. PostgreSQL must attest
+    // the authenticated caller's current issuer floor in the same snapshot.
+    if claims.authorize_admission(&close, false).is_err() {
+        return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
+    }
+    match compute.dsg_suspension_drain(&close, claims.issuer_epoch).await {
+        Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+        Err(_) => failure(StatusCode::SERVICE_UNAVAILABLE, "suspension_drain_unconfirmed", None),
+    }
+}
+
 // 固定只读DSM路径；原JWT/current issuer/实例检查后才取独立观察池，不接受调用方报数。
 async fn dsm_state(
     State(compute): State<Arc<ComputeNode>>,
     Extension(claims): Extension<DsgHttpClaims>,
 ) -> Response {
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, true).await {
         Ok(client) => match client.dsm_state().await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(
@@ -362,7 +384,7 @@ async fn resize(
             Some(&request.key),
         );
     }
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, false).await {
         Ok(client) => {
             if compute.verify_dsg_running().is_err() {
                 return failure(
@@ -404,7 +426,7 @@ async fn fence(
     if claims.authorize_fence(&request).is_err() {
         return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
     }
-    match client(&compute, &claims).await {
+    match client(&compute, &claims, true).await {
         Ok(client) => match client.fence_issuer(&request).await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(DsgFenceCallError::NotSent(_)) => failure(StatusCode::CONFLICT, "not_sent", None),
@@ -432,7 +454,7 @@ async fn query_operation(
             Some(&query.key),
         );
     }
-    match client(compute, claims).await {
+    match client(compute, claims, false).await {
         Ok(client) => control_result(
             if cancel {
                 client.cancel_resize(&query).await
@@ -478,7 +500,7 @@ async fn admission_operation(
     if !query && request.open && compute.verify_dsg_running().is_err() {
         return failure(StatusCode::PRECONDITION_FAILED, "not_available", None);
     }
-    match client(compute, claims).await {
+    match client(compute, claims, false).await {
         Ok(client) => admission_result(if query {
             client.admission_status(&request).await
         } else {
@@ -522,7 +544,7 @@ async fn admission_close_operation(
     {
         return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
     }
-    match client(compute, claims).await {
+    match client(compute, claims, false).await {
         Ok(client) => admission_result(if query {
             client
                 .admission_closure_status(&request.original, &request.close)
@@ -573,7 +595,7 @@ async fn admission_continue_operation(
     {
         return failure(StatusCode::FORBIDDEN, "wrong_instance_or_epoch", None);
     }
-    match client(compute, claims).await {
+    match client(compute, claims, false).await {
         Ok(client) => admission_result(if query {
             client.admission_continuation_status(&request).await
         } else {
