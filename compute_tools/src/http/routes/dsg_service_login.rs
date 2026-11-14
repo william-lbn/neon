@@ -1,4 +1,4 @@
-//! Scoped Managed Auth login on the private PostgreSQL management connection.
+//! Scoped branch service login on the private PostgreSQL management connection.
 
 use std::{sync::Arc, time::Duration};
 
@@ -19,10 +19,26 @@ use tokio_postgres::{Client, Config, NoTls};
 
 use crate::{compute::ComputeNode, http::JsonResponse};
 
+#[derive(Clone, Copy, Default, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum Service {
+    #[default]
+    ManagedAuth,
+    DataApi,
+}
+
+impl Service {
+    fn is_managed_auth(&self) -> bool {
+        *self == Self::ManagedAuth
+    }
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Login {
     protocol_version: u32,
+    #[serde(default)]
+    service: Service,
     project_id: String,
     branch_id: String,
     endpoint_id: String,
@@ -70,6 +86,8 @@ fn valid_id(value: &str, prefix: &str) -> bool {
 #[derive(Serialize)]
 struct Receipt {
     protocol_version: u32,
+    #[serde(skip_serializing_if = "Service::is_managed_auth")]
+    service: Service,
     branch_id: String,
     pg_boot_id: DsgUint64,
     generation: DsgUint64,
@@ -160,6 +178,7 @@ pub(crate) async fn reconcile(
         compute.refresh_dsg_hba(&spec, true)?;
         Ok::<_, anyhow::Error>(Receipt {
             protocol_version: 1,
+            service: input.service,
             branch_id: input.branch_id,
             pg_boot_id: input.pg_boot_id,
             generation: input.generation,
@@ -202,8 +221,18 @@ async fn apply(config: &Config, input: &Login, tenant: &str, timeline: &str) -> 
              SET auto_explain.log_min_duration=-1; SET pgaudit.log='none'; SET pgaudit.role='';
              SET pgaudit.log_parameter=off; SET pg_stat_statements.track='none'; SET neon.forward_ddl=false;"
         ).await?;
-        client.batch_execute(include_str!("../../dsg_service_login.sql")).await?;
-        client.query_one("SELECT pg_temp.dsga_apply_auth_login($1,$2,$3,$4,$5,$6)",
+        let (sql, function) = match input.service {
+            Service::ManagedAuth => (
+                include_str!("../../dsg_service_login.sql"),
+                "SELECT pg_temp.dsga_apply_auth_login($1,$2,$3,$4,$5,$6)",
+            ),
+            Service::DataApi => (
+                include_str!("../../dsg_data_api_login.sql"),
+                "SELECT pg_temp.dsga_apply_data_api_login($1,$2,$3,$4,$5,$6)",
+            ),
+        };
+        client.batch_execute(sql).await?;
+        client.query_one(function,
             &[&input.project_id, &input.branch_id, &tenant, &timeline, &generation, &verifier]).await
     }).await;
     match result {

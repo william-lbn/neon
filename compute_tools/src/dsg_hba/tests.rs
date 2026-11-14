@@ -626,3 +626,107 @@ async fn native_hba_peer_hold_scram_jwt_reload_proof_and_startup_overrides() -> 
     pg.passed = true;
     Ok(())
 }
+
+#[tokio::test]
+#[ignore = "requires locked PostgreSQL binaries and installed Neon test libraries"]
+async fn native_data_api_hba_is_bound_to_database_role_and_branch() -> Result<()> {
+    let mut pg = cluster::Cluster::new()?;
+    let initial = pg.connect().await?;
+    initial.batch_execute(
+        "SET password_encryption='scram-sha-256';
+         CREATE ROLE cloud_admin SUPERUSER LOGIN;
+         CREATE ROLE data_api_fixture_seed LOGIN PASSWORD 'DataApi-fixture-only-2026';"
+    ).await?;
+    let mut spec = fixture();
+    spec.branch_id = Some("br_0123456789abcdef".into());
+    spec.project_id = Some("prj_0123456789abcdef".into());
+    let mut child = spec.clone();
+    child.branch_id = Some("br_abcdef0123456789".into());
+
+    // The private Cluster owns this isolated postmaster. The production
+    // Guest launcher and its fixed binary path are covered separately.
+    prepare(&pg.data, 55432, &spec, false)?;
+    let current = fs::read_to_string(pg.data.join("postgresql.conf"))?;
+    let mut configuration = current
+        + "\nlisten_addresses='127.0.0.1'\n\
+           neon.project_id='prj_0123456789abcdef'\n\
+           neon.branch_id='br_0123456789abcdef'\n\
+           neon.tenant_id='11111111111111111111111111111111'\n\
+           neon.timeline_id='22222222222222222222222222222222'\n";
+    for (name, value) in startup_settings(&pg.data, 55432)? {
+        let setting = if name == "unix_socket_directories" {
+            value.trim_matches('"')
+        } else {
+            &value
+        };
+        configuration.push_str(&format!("{name}='{}'\n", setting.replace('\'', "''")));
+    }
+    fs::write(pg.data.join("postgresql.conf"), configuration)?;
+    drop(initial);
+    pg.restart()?;
+    let config = private_config(&pg.data, 55432, None);
+    let admin = sql_config(&config).await?;
+    admin.batch_execute(
+        "CREATE FUNCTION public.hba_boot() RETURNS bigint AS '$libdir/test_dsg_region','test_dsg_boot_id' LANGUAGE C;
+         CREATE FUNCTION public.hba_admit(bigint,bigint,bigint,bool) RETURNS bool AS '$libdir/test_dsg_region','test_dsg_admission' LANGUAGE C STRICT;
+         SELECT public.hba_admit(public.hba_boot(),1,1,true);"
+    ).await?;
+    let mut tcp = Config::new();
+    tcp.host("127.0.0.1").port(55432).dbname("postgres").password("DataApi-fixture-only-2026");
+    // Exercise the same SQL used by the signed service driver, then prove that
+    // the loaded policy authenticates only its exact login and database.
+    admin.batch_execute(
+        "CREATE ROLE control_probe NOLOGIN NOCREATEROLE;
+         GRANT CREATE ON DATABASE postgres TO control_probe;
+         GRANT CONNECT ON DATABASE postgres TO control_probe WITH GRANT OPTION;"
+    ).await?;
+    admin.batch_execute("CREATE DATABASE hba_other").await?;
+    admin.batch_execute(include_str!("../dsg_data_api_login.sql")).await?;
+    admin.batch_execute(
+        "SELECT pg_temp.dsga_apply_data_api_login(
+             'prj_0123456789abcdef','br_0123456789abcdef',
+             repeat('1',32),repeat('2',32),1,
+             (SELECT rolpassword FROM pg_authid WHERE rolname='data_api_fixture_seed'));"
+    ).await?;
+    let data_login = "control_da_0123456789abcdef";
+    let data_role = "app_da_0123456789abcdef";
+    let mut data = tcp.clone();
+    data.user(data_login);
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    let conn = sql_config(&data).await?;
+    assert_eq!(
+        conn.query_one("SELECT current_user::text", &[]).await?.get::<_, String>(0),
+        data_login
+    );
+    assert!(!conn.query_one(
+        "SELECT pg_has_role(current_user,'app_da_0123456789abcdef','USAGE')", &[]
+    ).await?.get::<_, bool>(0));
+    conn.batch_execute("SET ROLE app_da_0123456789abcdef").await?;
+    assert_eq!(
+        conn.query_one("SELECT current_user::text", &[]).await?.get::<_, String>(0),
+        data_role
+    );
+    drop(conn);
+    let mut wrong_database = data.clone();
+    wrong_database.dbname("hba_other");
+    denied(&wrong_database, "28000").await?;
+    let mut no_login = data.clone();
+    no_login.user(data_role);
+    denied(&no_login, "28000").await?;
+    refresh(&config, &pg.data, 55432, &child, true).await?;
+    denied(&data, "28000").await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    admin.batch_execute("GRANT pg_read_all_data TO app_da_0123456789abcdef").await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    denied(&data, "28000").await?;
+    admin.batch_execute(
+        "REVOKE pg_read_all_data FROM app_da_0123456789abcdef;
+         SELECT pg_temp.dsga_apply_data_api_login(
+             'prj_0123456789abcdef','br_0123456789abcdef',
+             repeat('1',32),repeat('2',32),2,NULL);"
+    ).await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    denied(&data, "28000").await?;
+    pg.passed = true;
+    Ok(())
+}

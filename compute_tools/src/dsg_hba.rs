@@ -341,16 +341,26 @@ async fn service_logins(config: &Config, spec: &ComputeSpec) -> Result<Vec<(Stri
         return Ok(Vec::new());
     }
     let client = connect(config).await?;
-    let prefix = format!("dsga_service_login_{branch}_");
-    let auth = format!("control_auth_{branch}");
-    let role_tag = format!("neon-control:managed-auth:{project}:br_{branch}");
+    let auth_prefix = format!("dsga_service_login_{branch}_");
+    let auth_login = format!("control_auth_{branch}");
+    let auth_tag = format!("neon-control:managed-auth:{project}:br_{branch}");
+    let data_prefix = format!("dsga_data_api_login_{branch}_");
+    let data_login = format!("control_da_{branch}");
+    let data_tag = format!("neon-control:data-api:{project}:br_{branch}");
+    let data_app = format!("app_da_{branch}");
     let rows = tokio::time::timeout(
         Duration::from_secs(3),
         client.query(
-            "SELECT d.datname::text, login.rolname::text
-             FROM pg_catalog.pg_database d
-             JOIN pg_catalog.pg_authid marker ON marker.rolname::text=$1 || d.oid::text
-             JOIN pg_catalog.pg_authid login ON login.rolname::text=$2
+            "WITH services(prefix, login_name, role_tag, app_name) AS (
+                 VALUES ($1::text,$2::text,$3::text,NULL::text), ($4,$5,$6,$7)
+             )
+             SELECT d.datname::text, login.rolname::text
+             FROM services s CROSS JOIN pg_catalog.pg_database d
+             JOIN pg_catalog.pg_authid marker ON marker.rolname::text=s.prefix || d.oid::text
+             JOIN pg_catalog.pg_authid login ON login.rolname::text=s.login_name
+             LEFT JOIN pg_catalog.pg_authid app ON app.rolname::text=s.app_name
+             CROSS JOIN LATERAL (SELECT s.role_tag || ':' || d.oid::text || ':v1:' || login.oid::text || ':' ||
+                 COALESCE(app.oid::text || ':','') AS prefix) AS receipt
              WHERE d.datallowconn AND NOT d.datistemplate
                AND pg_catalog.has_database_privilege(login.oid,d.oid,'CONNECT')
                AND NOT marker.rolcanlogin AND marker.rolpassword IS NULL
@@ -361,17 +371,26 @@ async fn service_logins(config: &Config, spec: &ComputeSpec) -> Result<Vec<(Stri
                AND NOT (login.rolsuper OR login.rolcreaterole OR login.rolcreatedb
                         OR login.rolreplication OR login.rolbypassrls)
                AND login.rolpassword LIKE 'SCRAM-SHA-256$%'
-               AND pg_catalog.shobj_description(login.oid,'pg_authid')=$3
-               AND pg_catalog.starts_with(pg_catalog.shobj_description(marker.oid,'pg_authid'),
-                   $3 || ':' || d.oid::text || ':v1:' || login.oid::text || ':')
-               AND pg_catalog.shobj_description(marker.oid,'pg_authid') ~ ':[1-9][0-9]{0,18}:enabled$'
-               AND NOT EXISTS (
-                   SELECT FROM pg_catalog.pg_auth_members other
-                   WHERE other.member=login.oid)
+               AND pg_catalog.shobj_description(login.oid,'pg_authid')=s.role_tag
+               AND pg_catalog.starts_with(pg_catalog.shobj_description(marker.oid,'pg_authid'),receipt.prefix)
+               AND pg_catalog.substr(pg_catalog.shobj_description(marker.oid,'pg_authid'),
+                     pg_catalog.length(receipt.prefix)+1) ~ '^[1-9][0-9]{0,18}:enabled$'
+               AND CASE WHEN s.app_name IS NULL THEN NOT EXISTS (
+                     SELECT FROM pg_catalog.pg_auth_members WHERE member=login.oid
+                   ) ELSE
+                     NOT app.rolcanlogin AND app.rolpassword IS NULL AND NOT app.rolinherit
+                     AND NOT (app.rolsuper OR app.rolcreaterole OR app.rolcreatedb
+                              OR app.rolreplication OR app.rolbypassrls)
+                     AND pg_catalog.shobj_description(app.oid,'pg_authid')=s.role_tag
+                     AND (SELECT count(*) FROM pg_catalog.pg_auth_members
+                           WHERE member=login.oid OR roleid=login.oid OR member=app.oid OR roleid=app.oid)=1
+                     AND EXISTS (SELECT FROM pg_catalog.pg_auth_members WHERE member=login.oid AND roleid=app.oid
+                           AND NOT inherit_option AND set_option AND NOT admin_option)
+                   END
                AND session_user='cloud_admin' AND current_user='cloud_admin'
                AND NOT pg_catalog.pg_is_in_recovery()
              ORDER BY d.oid, login.rolname LIMIT 129",
-            &[&prefix, &auth, &role_tag],
+            &[&auth_prefix, &auth_login, &auth_tag, &data_prefix, &data_login, &data_tag, &data_app],
         ),
     )
     .await
