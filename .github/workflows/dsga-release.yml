@@ -1,7 +1,7 @@
 name: DSGA unified candidate distribution
 on:
   push:
-    branches: ['codex/dsga-neon-v3-20261019', 'ci/dsga-unified-release-*']
+    branches: ['codex/dsga-neon-v3-20261019']
   workflow_dispatch:
     inputs:
       arch:
@@ -68,7 +68,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@097598f3a46afc5be59ca1fb01cf3ae314db36db
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@b5c0c278352ab0b127a3848514fca8ac4e20b845
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
@@ -373,7 +373,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@bb9bce7aeae604366c687650cc318ca87d18ebb7
+    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@7fffa57c07894e5e18b1f369c8be64e7ef0a8223
     with:
       helm_sha: ${{ needs.prepare.outputs.helm }}
       release_version: ${{ needs.prepare.outputs.tag }}

@@ -1,7 +1,7 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "097598f3a46afc5be59ca1fb01cf3ae314db36db",
+  "autoscaling_commit": "b5c0c278352ab0b127a3848514fca8ac4e20b845",
   "postgres_repository": "william-lbn/postgres",
   "postgres": {
     "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",
@@ -57,5 +57,5 @@
     "v18": "dsga-core"
   },
   "helm_repository": "william-lbn/neon-helm",
-  "helm_commit": "bb9bce7aeae604366c687650cc318ca87d18ebb7"
+  "helm_commit": "7fffa57c07894e5e18b1f369c8be64e7ef0a8223"
 }
