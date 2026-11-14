@@ -420,6 +420,8 @@ async fn native_hba_peer_hold_scram_jwt_reload_proof_and_startup_overrides() -> 
         .get(0);
     let mut spec = fixture();
     spec.cluster.roles[1].encrypted_password = verifier.clone();
+    spec.branch_id = Some("br_0123456789abcdef".into());
+    spec.project_id = Some("prj_0123456789abcdef".into());
     let quoted = "a,\"\\role";
     spec.cluster.roles.push(Role {
         name: quoted.into(),
@@ -562,6 +564,54 @@ async fn native_hba_peer_hold_scram_jwt_reload_proof_and_startup_overrides() -> 
     let mut su = tcp.clone();
     su.user("cloud_admin");
     denied(&su, "28000").await?;
+    let registered = "control_auth_0123456789abcdef";
+    let mut service = tcp.clone();
+    service.user(registered);
+    admin
+        .batch_execute(
+            "CREATE ROLE control_auth_0123456789abcdef LOGIN NOINHERIT PASSWORD 'Hba-fixture-only-2026';
+             CREATE ROLE fn_0123456789abcdef LOGIN NOINHERIT PASSWORD 'Hba-fixture-only-2026';
+             COMMENT ON ROLE control_auth_0123456789abcdef IS 'neon-control:managed-auth:prj_0123456789abcdef:br_0123456789abcdef';
+             DO $setup$ DECLARE marker text; database_oid oid; login_oid oid;
+             BEGIN
+                 SELECT 'dsga_service_login_0123456789abcdef_' || oid::text
+                   INTO STRICT marker FROM pg_catalog.pg_database WHERE datname='postgres';
+                 SELECT oid INTO STRICT database_oid FROM pg_catalog.pg_database WHERE datname='postgres';
+                 SELECT oid INTO STRICT login_oid FROM pg_catalog.pg_roles WHERE rolname='control_auth_0123456789abcdef';
+                 EXECUTE pg_catalog.format('CREATE ROLE %I NOLOGIN NOINHERIT',marker);
+                 EXECUTE pg_catalog.format(
+                     'COMMENT ON ROLE %I IS %L',marker,
+                     'neon-control:managed-auth:prj_0123456789abcdef:br_0123456789abcdef:' ||
+                     database_oid::text || ':v1:' || login_oid::text || ':1:enabled');
+             END $setup$;",
+        )
+        .await?;
+    let receipt = refresh(&config, &pg.data, 55432, &spec, true).await?;
+    verify_loaded(&config, &receipt).await?;
+    assert_eq!(
+        sql_config(&service)
+            .await?
+            .query_one("SELECT current_user::text", &[])
+            .await?
+            .get::<_, String>(0),
+        registered
+    );
+    let mut foreign_db = service.clone();
+    foreign_db.dbname("template1");
+    denied(&foreign_db, "28000").await?;
+    let mut unregistered = service.clone();
+    unregistered.user("fn_0123456789abcdef");
+    denied(&unregistered, "28000").await?;
+    let mut child = spec.clone();
+    child.branch_id = Some("br_abcdef0123456789".into());
+    refresh(&config, &pg.data, 55432, &child, true).await?;
+    denied(&service, "28000").await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    admin
+        .batch_execute("GRANT pg_read_all_data TO control_auth_0123456789abcdef")
+        .await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    denied(&service, "28000").await?;
     // 故意构造语法错误：SIGHUP返回true但PG保留旧HBA。新nonce必须识别失败，
     // 不把磁盘pg_hba_file_rules或信号发送当作实际生效回执。
     let stale = prepare(&pg.data, 55432, &spec, false)?;

@@ -171,7 +171,7 @@ pub struct ComputeNode {
     dsg_private_connections: AtomicBool,
     // 串行化受管角色核验、HBA hold/发布和代理配置。与state/ApplyContext锁
     // 分离，网络等待不占用状态API锁；同一配置流程不得再次获取此锁。
-    dsg_configuration_lock: Mutex<()>,
+    pub(crate) dsg_configuration_lock: Mutex<()>,
     // 仅成功发布的业务认证策略可产生初始化回执；配置开始即失效。异步检查
     // 拷贝Arc后释放锁，结束时比较同一代，不能跨await持std锁或用旧策略补成功。
     pub(crate) dsg_authentication_receipt: RwLock<Option<Arc<crate::dsg_hba::Receipt>>>,
@@ -2129,15 +2129,14 @@ impl ComputeNode {
             .dsg_authentication_receipt
             .write()
             .map_err(|_| anyhow::anyhow!("DSGA authentication state poisoned"))? = None;
-        let receipt = crate::dsg_hba::prepare(
+        let config = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_HBA"));
+        let receipt = tokio::runtime::Handle::current().block_on(crate::dsg_hba::refresh(
+            &config,
             Path::new(&self.params.pgdata),
             self.management_pg_port(),
             spec,
             publish,
-        )?;
-        let config = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_HBA"));
-        tokio::runtime::Handle::current()
-            .block_on(crate::dsg_hba::reload_and_verify(&config, &receipt))?;
+        ))?;
         if publish {
             *self
                 .dsg_authentication_receipt
@@ -2356,14 +2355,14 @@ impl ComputeNode {
     #[instrument(skip_all)]
     pub fn reconfigure(&self) -> Result<()> {
         let parsed = self.state.lock().unwrap().pspec.clone().unwrap();
-        self.verify_dsg_storage(&parsed)?;
-        let spec = parsed.spec;
-        self.verify_dsg_startup(&spec)?;
         anyhow::ensure!(
-            spec.dynamic_shared_buffers.is_some()
+            parsed.spec.dynamic_shared_buffers.is_some()
                 == self.dsg_private_connections.load(Ordering::Acquire),
             "DSGA mode cannot change within a running Postmaster"
         );
+        self.verify_dsg_storage(&parsed)?;
+        let spec = parsed.spec;
+        self.verify_dsg_startup(&spec)?;
         let _configuration = spec
             .dynamic_shared_buffers
             .is_some()

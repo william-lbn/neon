@@ -33,6 +33,7 @@ impl DsgAuthorize {
         token: &str,
         initialization: bool,
         array_authority: bool,
+        service_login: bool,
     ) -> Result<DsgHttpClaims> {
         ensure!(token.len() <= 8192, "oversized DSGA credential");
         let header = decode_header(token)?;
@@ -56,7 +57,7 @@ impl DsgAuthorize {
             _ => anyhow::bail!("unsupported DSGA signing algorithm"),
         };
         ensure!(header.alg == algorithm, "DSGA signing algorithm mismatch");
-        if array_authority {
+        if array_authority || service_login {
             ensure!(
                 algorithm == Algorithm::EdDSA && header.typ.as_deref() == Some("JWT"),
                 "bound Root credential requires Ed25519 JWT"
@@ -87,6 +88,8 @@ impl DsgAuthorize {
             decode::<DsgHttpClaims>(token, &DecodingKey::from_jwk(key)?, &validation)?.claims;
         if array_authority {
             claims.validate_array_authority_for_compute(&self.compute_id)?;
+        } else if service_login {
+            claims.validate_service_login_for_compute(&self.compute_id)?;
         } else if initialization
             && claims.scope == compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE
         {
@@ -120,8 +123,15 @@ impl AsyncAuthorizeRequest<Body> for DsgAuthorize {
                 && request.uri().path() == "/dsg/v1/initialization";
             let array_authority = request.method() == http::Method::POST
                 && compute_api::dsg_auth::is_array_authority_path(request.uri().path());
+            let service_login = request.method() == http::Method::POST
+                && request.uri().path() == compute_api::dsg_auth::DSG_SERVICE_LOGIN_PATH;
             let claims = policy
-                .verify(bearer.token(), initialization, array_authority)
+                .verify(
+                    bearer.token(),
+                    initialization,
+                    array_authority,
+                    service_login,
+                )
                 .map_err(|_| deny())?;
             request.extensions_mut().insert(claims);
             Ok(request)

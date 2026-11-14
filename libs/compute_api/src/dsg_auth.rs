@@ -13,6 +13,8 @@ pub const DSG_HTTP_SCOPE: &str = "compute_ctl:dsga";
 pub const DSG_HTTP_ARRAY_AUTHORITY_SCOPE: &str = "compute_ctl:dsga:array-authority";
 /// 创建控制面只读回执，不能借该token执行resize、接管或取消。
 pub const DSG_HTTP_INITIALIZATION_SCOPE: &str = "compute_ctl:dsga_initialization";
+pub const DSG_HTTP_SERVICE_LOGIN_SCOPE: &str = "compute_ctl:dsga:service-login";
+pub const DSG_SERVICE_LOGIN_PATH: &str = "/dsg/v1/catalog/service-login";
 /// 短期凭据限制暴露窗口；过期不撤销已发送SQL或预算，必须继续按原key对账。
 pub const DSG_HTTP_MAX_TOKEN_LIFETIME_SECONDS: u64 = 300;
 
@@ -36,10 +38,12 @@ pub struct DsgHttpRequestBinding {
 
 impl DsgHttpRequestBinding {
     pub fn validate(&self) -> Result<()> {
+        self.validate_for_path(is_array_authority_path(&self.path))
+    }
+
+    fn validate_for_path(&self, allowed: bool) -> Result<()> {
         ensure!(
-            self.protocol_version == 1
-                && self.method == "POST"
-                && is_array_authority_path(&self.path),
+            self.protocol_version == 1 && self.method == "POST" && allowed,
             "unsupported bound request"
         );
         ensure!(
@@ -72,6 +76,27 @@ pub struct DsgHttpClaims {
 }
 
 impl DsgHttpClaims {
+    pub fn validate_service_login_for_compute(&self, compute_id: &str) -> Result<()> {
+        self.validate_for_scope(compute_id, DSG_HTTP_SERVICE_LOGIN_SCOPE)?;
+        let binding = self
+            .request
+            .as_ref()
+            .ok_or_else(|| anyhow::anyhow!("bound request missing"))?;
+        binding.validate_for_path(binding.path == DSG_SERVICE_LOGIN_PATH)
+    }
+
+    pub fn authorize_service_login(&self, body: &[u8]) -> Result<()> {
+        self.validate_service_login_for_compute(&self.compute_id)?;
+        ensure!(
+            body.len() <= 4096
+                && self.request.as_ref().is_some_and(
+                    |binding| binding.body_sha256 == format!("{:x}", Sha256::digest(body))
+                ),
+            "original service login request differs"
+        );
+        Ok(())
+    }
+
     pub fn validate_array_authority_for_compute(&self, compute_id: &str) -> Result<()> {
         self.validate_for_scope(compute_id, DSG_HTTP_ARRAY_AUTHORITY_SCOPE)?;
         self.request
@@ -170,7 +195,10 @@ impl DsgHttpClaims {
         ensure!(self.aud == DSG_HTTP_AUDIENCE, "wrong DSGA audience");
         ensure!(self.scope == scope, "wrong DSGA scope");
         ensure!(
-            scope == DSG_HTTP_ARRAY_AUTHORITY_SCOPE || self.request.is_none(),
+            matches!(
+                scope,
+                DSG_HTTP_ARRAY_AUTHORITY_SCOPE | DSG_HTTP_SERVICE_LOGIN_SCOPE
+            ) || self.request.is_none(),
             "bound request cannot borrow legacy scope"
         );
         for (value, name) in [
@@ -280,6 +308,21 @@ mod array_authority_tests {
                 )
                 .is_err()
         );
+    }
+
+    #[test]
+    fn service_login_claims_bind_only_the_original_service_request() {
+        let mut c = claims();
+        c.scope = DSG_HTTP_SERVICE_LOGIN_SCOPE.into();
+        c.request.as_mut().unwrap().path = DSG_SERVICE_LOGIN_PATH.into();
+        c.validate_service_login_for_compute("compute").unwrap();
+        c.authorize_service_login(b"original bytes").unwrap();
+        assert!(c.authorize_service_login(b"original bytes ").is_err());
+        assert!(c.validate_service_login_for_compute("other").is_err());
+        assert!(c.validate_array_authority_for_compute("compute").is_err());
+        assert!(c.validate_for_compute("compute").is_err());
+        c.request.as_mut().unwrap().path = "/dsg/v1/resource/array-authorize".into();
+        assert!(c.validate_service_login_for_compute("compute").is_err());
     }
     #[test]
     fn bound_array_claims_reject_invalid_binding_and_identity() {

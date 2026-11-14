@@ -57,7 +57,7 @@ fn ordinary_name(name: &str) -> bool {
 
 /// 所有值最终仍转义。额外解析 SCRAM 是为了拒绝旧 MD5、畸形/超大 verifier 和
 /// 将任意 SQL 偷渡到旧 RoleExt 的输入，不把字符串前缀当作可信密码格式。
-fn scram(value: &str) -> bool {
+pub(crate) fn scram(value: &str) -> bool {
     if value.len() > 512 {
         return false;
     }

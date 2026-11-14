@@ -42,6 +42,9 @@ pub(crate) struct CreationIdentity {
     operation_uuid: Option<String>,
     tenant_id: String,
     timeline_id: String,
+    project_id: Option<String>,
+    branch_id: Option<String>,
+    endpoint_id: Option<String>,
     preserves_primary_catalog: bool,
 }
 
@@ -51,6 +54,9 @@ impl CreationIdentity {
             operation_uuid: parsed.spec.operation_uuid.clone(),
             tenant_id: parsed.tenant_id.to_string(),
             timeline_id: parsed.timeline_id.to_string(),
+            project_id: parsed.spec.project_id.clone(),
+            branch_id: parsed.spec.branch_id.clone(),
+            endpoint_id: parsed.spec.endpoint_id.clone(),
             preserves_primary_catalog: crate::dsg_roles::preserves_primary_catalog(&parsed.spec),
         })
     }
@@ -128,6 +134,12 @@ impl ComputeNode {
                 original.preserves_primary_catalog
                     == crate::dsg_roles::preserves_primary_catalog(&parsed.spec),
                 "DSGA primary catalog mode cannot change within a Compute"
+            );
+            ensure!(
+                original.project_id == parsed.spec.project_id
+                    && original.branch_id == parsed.spec.branch_id
+                    && original.endpoint_id == parsed.spec.endpoint_id,
+                "DSGA project, branch and endpoint cannot change within a Compute"
             );
         }
         Ok(())
@@ -347,7 +359,7 @@ impl ComputeNode {
         Ok(fact)
     }
 
-    async fn dsg_sql_client(&self) -> Result<&DsgSqlClient<'static>> {
+    pub(crate) async fn dsg_sql_client(&self) -> Result<&DsgSqlClient<'static>> {
         let spec = self.dsg_spec()?;
         self.dsg_client.get_or_try_init(|| async {
             let mut config = self.get_tokio_conn_conf(Some("compute_ctl:dsga"));

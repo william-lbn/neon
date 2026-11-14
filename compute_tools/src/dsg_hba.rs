@@ -10,7 +10,7 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use anyhow::{Context, Result, bail, ensure};
-use compute_api::spec::ComputeSpec;
+use compute_api::spec::{ComputeMode, ComputeSpec};
 use nix::unistd::{Uid, User};
 use tokio_postgres::{Client, Config, NoTls};
 use uuid::Uuid;
@@ -222,6 +222,16 @@ pub(crate) fn prepare(
     spec: &ComputeSpec,
     publish: bool,
 ) -> Result<Receipt> {
+    prepare_for_logins(pgdata, port, spec, publish, &[])
+}
+
+fn prepare_for_logins(
+    pgdata: &Path,
+    port: u16,
+    spec: &ComputeSpec,
+    publish: bool,
+    service_logins: &[(String, String)],
+) -> Result<Receipt> {
     ensure!(
         spec.dynamic_shared_buffers.is_some() && spec.databricks_settings.is_none(),
         "unsupported DSGA authentication mode"
@@ -281,6 +291,13 @@ pub(crate) fn prepare(
         hba.push_str(&format!(
             "local all {roles} scram-sha-256\nhost all {roles} all scram-sha-256\n"
         ));
+        for (database, role) in service_logins {
+            // These are actual database and role names. Keep the rules distinct
+            // from the ordinary role rules and from the local proxy trust list.
+            let database = token(database)?;
+            let role = token(role)?;
+            hba.push_str(&format!("host {database} {role} all scram-sha-256\n"));
+        }
     }
     hba.push_str("local all all reject\nlocal replication all reject\nhost all all all reject\nhost replication all all reject\n");
     replace(pgdata, IDENT, &ident)?;
@@ -304,6 +321,103 @@ async fn connect(config: &Config) -> Result<Client> {
         let _ = driver.await;
     });
     Ok(client)
+}
+
+/// Read service login admissions from the original Writer's catalog. The
+/// registration is a NOLOGIN role owned by the private administrator.
+/// Its comment pins the login OID and conveys no role access. Including branch ID and database OID
+/// keeps a copied or recreated database from inheriting network admission.
+async fn service_logins(config: &Config, spec: &ComputeSpec) -> Result<Vec<(String, String)>> {
+    let Some((branch, project)) = spec.branch_id.as_deref().zip(spec.project_id.as_deref()) else {
+        return Ok(Vec::new());
+    };
+    let Some(branch) = branch.strip_prefix("br_") else {
+        return Ok(Vec::new());
+    };
+    if spec.mode != ComputeMode::Primary
+        || !hex_id(branch)
+        || !project.strip_prefix("prj_").is_some_and(hex_id)
+    {
+        return Ok(Vec::new());
+    }
+    let client = connect(config).await?;
+    let prefix = format!("dsga_service_login_{branch}_");
+    let auth = format!("control_auth_{branch}");
+    let role_tag = format!("neon-control:managed-auth:{project}:br_{branch}");
+    let rows = tokio::time::timeout(
+        Duration::from_secs(3),
+        client.query(
+            "SELECT d.datname::text, login.rolname::text
+             FROM pg_catalog.pg_database d
+             JOIN pg_catalog.pg_authid marker ON marker.rolname::text=$1 || d.oid::text
+             JOIN pg_catalog.pg_authid login ON login.rolname::text=$2
+             WHERE d.datallowconn AND NOT d.datistemplate
+               AND pg_catalog.has_database_privilege(login.oid,d.oid,'CONNECT')
+               AND NOT marker.rolcanlogin AND marker.rolpassword IS NULL
+               AND NOT (marker.rolsuper OR marker.rolcreaterole OR marker.rolcreatedb
+                        OR marker.rolreplication OR marker.rolbypassrls)
+               AND NOT EXISTS (SELECT FROM pg_catalog.pg_auth_members WHERE member=marker.oid OR roleid=marker.oid)
+               AND login.rolcanlogin AND NOT login.rolinherit
+               AND NOT (login.rolsuper OR login.rolcreaterole OR login.rolcreatedb
+                        OR login.rolreplication OR login.rolbypassrls)
+               AND login.rolpassword LIKE 'SCRAM-SHA-256$%'
+               AND pg_catalog.shobj_description(login.oid,'pg_authid')=$3
+               AND pg_catalog.starts_with(pg_catalog.shobj_description(marker.oid,'pg_authid'),
+                   $3 || ':' || d.oid::text || ':v1:' || login.oid::text || ':')
+               AND pg_catalog.shobj_description(marker.oid,'pg_authid') ~ ':[1-9][0-9]{0,18}:enabled$'
+               AND NOT EXISTS (
+                   SELECT FROM pg_catalog.pg_auth_members other
+                   WHERE other.member=login.oid)
+               AND session_user='cloud_admin' AND current_user='cloud_admin'
+               AND NOT pg_catalog.pg_is_in_recovery()
+             ORDER BY d.oid, login.rolname LIMIT 129",
+            &[&prefix, &auth, &role_tag],
+        ),
+    )
+    .await
+    .context("DSGA service login catalog deadline")?
+    .context("DSGA service login catalog unavailable")?;
+    ensure!(
+        rows.len() <= 128,
+        "DSGA service login catalog exceeds capacity"
+    );
+    rows.into_iter()
+        .map(|row| {
+            let database: String = row.get(0);
+            let role: String = row.get(1);
+            // A leading slash matches PostgreSQL's HBA regular-expression
+            // syntax even in quoted tokens. Reject instead of widening scope.
+            ensure!(
+                !database.starts_with('/') && !role.starts_with('/'),
+                "DSGA service login cannot use HBA regular expressions"
+            );
+            Ok((database, role))
+        })
+        .collect()
+}
+
+fn hex_id(value: &str) -> bool {
+    value.len() == 16
+        && value
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+}
+
+pub(crate) async fn refresh(
+    config: &Config,
+    pgdata: &Path,
+    port: u16,
+    spec: &ComputeSpec,
+    publish: bool,
+) -> Result<Receipt> {
+    let logins = if publish {
+        service_logins(config, spec).await?
+    } else {
+        Vec::new()
+    };
+    let receipt = prepare_for_logins(pgdata, port, spec, publish, &logins)?;
+    reload_and_verify(config, &receipt).await?;
+    Ok(receipt)
 }
 
 /// SIGHUP只证明信号发送。等新nonce规则实际在新连接上拒绝，同时重新证明正常

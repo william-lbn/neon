@@ -1,6 +1,9 @@
 //! DSGA管理HTTP承载PG/Provider及独立Guest资源事实，不发放VM许可，
 //! 不借通用路由的认证豁免；root资源动作经固定UDS重新验签和持久fence。
 
+#[path = "dsg_service_login.rs"]
+mod service_login;
+
 use std::sync::Arc;
 
 use axum::{
@@ -34,6 +37,10 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
     Router::new()
         .route("/dsg/v1/capabilities", get(capabilities))
         .route("/dsg/v1/initialization", get(initialization))
+        .route(
+            compute_api::dsg_auth::DSG_SERVICE_LOGIN_PATH,
+            post(service_login::reconcile),
+        )
         .route("/dsg/v1/memory", get(memory))
         .route("/dsg/v1/budget/shared", get(shared_cost))
         .route("/dsg/v1/work/state", get(work_state))
