@@ -25,6 +25,7 @@ enum Service {
     #[default]
     ManagedAuth,
     DataApi,
+    Function,
 }
 
 impl Service {
@@ -44,6 +45,8 @@ struct Login {
     endpoint_id: String,
     pg_boot_id: DsgUint64,
     database: String,
+    function_id: Option<String>,
+    schema: Option<String>,
     generation: DsgUint64,
     // Explicit null disables the exact registered service authorization.
     verifier: serde_json::Value,
@@ -70,6 +73,14 @@ impl Login {
                     || self.verifier.as_str().is_some_and(crate::dsg_roles::scram)),
             "invalid service login request"
         );
+        let valid_scope = match self.service {
+            Service::Function => {
+                self.function_id.as_deref().is_some_and(|id| valid_id(id, "fnc_"))
+                    && self.schema.as_deref().is_some_and(valid_function_schema)
+            }
+            _ => self.function_id.is_none() && self.schema.is_none(),
+        };
+        ensure!(valid_scope, "invalid service login scope");
         Ok(())
     }
 }
@@ -83,6 +94,17 @@ fn valid_id(value: &str, prefix: &str) -> bool {
     })
 }
 
+fn valid_function_schema(name: &str) -> bool {
+    let mut bytes = name.bytes();
+    name.len() <= 63
+        && bytes.next().is_some_and(|b| b.is_ascii_alphabetic() || b == b'_')
+        && bytes.all(|b| b.is_ascii_alphanumeric() || b == b'_')
+        && !["pg_", "neon_", "control_"]
+            .iter()
+            .any(|prefix| name.to_ascii_lowercase().starts_with(prefix))
+        && !name.eq_ignore_ascii_case("information_schema")
+}
+
 #[derive(Serialize)]
 struct Receipt {
     protocol_version: u32,
@@ -90,6 +112,10 @@ struct Receipt {
     service: Service,
     branch_id: String,
     pg_boot_id: DsgUint64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    function_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    schema: Option<String>,
     generation: DsgUint64,
     enabled: bool,
 }
@@ -181,6 +207,8 @@ pub(crate) async fn reconcile(
             service: input.service,
             branch_id: input.branch_id,
             pg_boot_id: input.pg_boot_id,
+            function_id: input.function_id,
+            schema: input.schema,
             generation: input.generation,
             enabled: !input.verifier.is_null(),
         })
@@ -221,19 +249,24 @@ async fn apply(config: &Config, input: &Login, tenant: &str, timeline: &str) -> 
              SET auto_explain.log_min_duration=-1; SET pgaudit.log='none'; SET pgaudit.role='';
              SET pgaudit.log_parameter=off; SET pg_stat_statements.track='none'; SET neon.forward_ddl=false;"
         ).await?;
-        let (sql, function) = match input.service {
-            Service::ManagedAuth => (
-                include_str!("../../dsg_service_login.sql"),
-                "SELECT pg_temp.dsga_apply_auth_login($1,$2,$3,$4,$5,$6)",
-            ),
-            Service::DataApi => (
-                include_str!("../../dsg_data_api_login.sql"),
-                "SELECT pg_temp.dsga_apply_data_api_login($1,$2,$3,$4,$5,$6)",
-            ),
-        };
-        client.batch_execute(sql).await?;
-        client.query_one(function,
-            &[&input.project_id, &input.branch_id, &tenant, &timeline, &generation, &verifier]).await
+        match input.service {
+            Service::Function => {
+                client.batch_execute(include_str!("../../dsg_function_login.sql")).await?;
+                client.query_one("SELECT pg_temp.dsga_apply_function_login($1,$2,$3,$4,$5,$6,$7,$8)",
+                    &[&input.project_id, &input.branch_id, &tenant, &timeline, &generation, &verifier,
+                      &input.function_id, &input.schema]).await
+            }
+            service => {
+                let (sql, function) = if service == Service::ManagedAuth {
+                    (include_str!("../../dsg_service_login.sql"), "SELECT pg_temp.dsga_apply_auth_login($1,$2,$3,$4,$5,$6)")
+                } else {
+                    (include_str!("../../dsg_data_api_login.sql"), "SELECT pg_temp.dsga_apply_data_api_login($1,$2,$3,$4,$5,$6)")
+                };
+                client.batch_execute(sql).await?;
+                client.query_one(function,
+                    &[&input.project_id, &input.branch_id, &tenant, &timeline, &generation, &verifier]).await
+            }
+        }
     }).await;
     match result {
         Ok(Ok(_)) => Ok(()),

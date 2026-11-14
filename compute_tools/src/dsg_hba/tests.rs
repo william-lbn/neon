@@ -629,7 +629,7 @@ async fn native_hba_peer_hold_scram_jwt_reload_proof_and_startup_overrides() -> 
 
 #[tokio::test]
 #[ignore = "requires locked PostgreSQL binaries and installed Neon test libraries"]
-async fn native_data_api_hba_is_bound_to_database_role_and_branch() -> Result<()> {
+async fn native_backend_hba_is_bound_to_database_role_and_branch() -> Result<()> {
     let mut pg = cluster::Cluster::new()?;
     let initial = pg.connect().await?;
     initial.batch_execute(
@@ -727,6 +727,40 @@ async fn native_data_api_hba_is_bound_to_database_role_and_branch() -> Result<()
     ).await?;
     refresh(&config, &pg.data, 55432, &spec, true).await?;
     denied(&data, "28000").await?;
+    admin.batch_execute(
+        "CREATE SCHEMA function_app;
+         GRANT USAGE ON SCHEMA function_app TO control_probe WITH GRANT OPTION;"
+    ).await?;
+    admin.batch_execute(include_str!("../dsg_function_login.sql")).await?;
+    admin.batch_execute(
+        "SELECT pg_temp.dsga_apply_function_login(
+             'prj_0123456789abcdef','br_0123456789abcdef',
+             repeat('1',32),repeat('2',32),1,
+             (SELECT rolpassword FROM pg_authid WHERE rolname='data_api_fixture_seed'),
+             'fnc_0123456789abcdef','function_app');"
+    ).await?;
+    let mut function = tcp.clone();
+    function.user("fn_0123456789abcdef");
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    let conn = sql_config(&function).await?;
+    let row = conn.query_one("SELECT current_user::text,current_setting('search_path'),current_setting('statement_timeout')", &[]).await?;
+    assert_eq!(row.get::<_, String>(0), "fn_0123456789abcdef");
+    assert_eq!(row.get::<_, String>(1), "function_app, pg_catalog");
+    assert_eq!(row.get::<_, String>(2), "30s");
+    drop(conn);
+    let mut wrong_database = function.clone();
+    wrong_database.dbname("hba_other");
+    denied(&wrong_database, "28000").await?;
+    refresh(&config, &pg.data, 55432, &child, true).await?;
+    denied(&function, "28000").await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    admin.batch_execute(
+        "SELECT pg_temp.dsga_apply_function_login(
+             'prj_0123456789abcdef','br_0123456789abcdef',
+             repeat('1',32),repeat('2',32),2,NULL,'fnc_0123456789abcdef','function_app');"
+    ).await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    denied(&function, "28000").await?;
     pg.passed = true;
     Ok(())
 }
