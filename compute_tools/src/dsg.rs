@@ -1,6 +1,10 @@
 //! Compute运行时的专用管理连接。保留实例与进程内执行栅栏，不进行隐式重连换owner。
 
-use std::{ops::Deref, sync::Arc, time::Duration};
+use std::{
+    ops::Deref,
+    sync::{Arc, atomic::Ordering},
+    time::Duration,
+};
 
 use anyhow::{Context, Result, ensure};
 use compute_api::dsg_admission::DsgAdmissionRequest;
@@ -333,9 +337,13 @@ impl ComputeNode {
         if !*suspended {
             client.retire_execution_connection()?;
             *suspended = true;
+            anyhow::bail!("DSGA suspension started; a fresh native observation is required");
         }
-        // Return the unchanged native observation. It may still count retiring
-        // connections until PostgreSQL notices EOF. The Owner must poll for zero.
+        ensure!(
+            self.dsg_activity_monitor_stopped.load(Ordering::Acquire),
+            "DSGA activity monitor is still exiting"
+        );
+        // The Owner polls native counts until PostgreSQL has processed EOF.
         Ok(fact)
     }
 

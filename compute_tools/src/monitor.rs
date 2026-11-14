@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::Duration;
 
@@ -522,7 +523,14 @@ pub fn launch_monitor(compute: &Arc<ComputeNode>) -> thread::JoinHandle<()> {
         .spawn(move || {
             let span = span!(Level::INFO, "compute_monitor");
             let _enter = span.enter();
-            match monitor.run() {
+            let result = monitor.run();
+            // run owns the SQL client. Publish completion after that client
+            // has dropped and no monitor code can reconnect on this boot.
+            monitor
+                .compute
+                .dsg_activity_monitor_stopped
+                .store(true, Ordering::Release);
+            match result {
                 Ok(_) => info!("compute monitor thread terminated gracefully"),
                 Err(err) => error!("compute monitor thread terminated abnormally {:?}", err),
             }

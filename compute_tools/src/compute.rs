@@ -165,6 +165,7 @@ pub struct ComputeNode {
     pub(crate) dsg_client: tokio::sync::OnceCell<compute_api::dsg_client::DsgSqlClient<'static>>,
     // Serialize the terminal drain transition with all management requests.
     pub(crate) dsg_suspension: tokio::sync::RwLock<bool>,
+    pub(crate) dsg_activity_monitor_stopped: AtomicBool,
     // 标记本Postmaster管理连接路由及端口初始化完成，不发布预算许可。启动前固定，禁止
     // 在线切换DSGA模式；getter不重新取state锁，避免配置流程中重入锁。
     dsg_private_connections: AtomicBool,
@@ -704,6 +705,7 @@ impl ComputeNode {
             lfc_offload_task: Mutex::new(None),
             dsg_client: tokio::sync::OnceCell::new(),
             dsg_suspension: tokio::sync::RwLock::new(false),
+            dsg_activity_monitor_stopped: AtomicBool::new(false),
             dsg_private_connections: AtomicBool::new(dsg_private),
             dsg_configuration_lock: Mutex::new(()),
             dsg_authentication_receipt: RwLock::new(None),
