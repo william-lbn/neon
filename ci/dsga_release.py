@@ -10,6 +10,7 @@ import subprocess
 
 import compute
 import release
+import slo_acceptance
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -159,11 +160,21 @@ def main():
     assets.add_argument("--directory", required=True)
     assets.add_argument("--tag", required=True)
     assets.add_argument("--source-commit", required=True)
+    slo = sub.add_parser("verify-slo", help="Check a calibrated acceptance policy against measurements and their distribution manifest")
+    slo.add_argument("--policy", required=True)
+    slo.add_argument("--evidence", required=True)
+    slo.add_argument("--distribution", required=True)
     args = parser.parse_args()
     if args.command == "prepare":
         prepare(args.arch)
     elif args.command == "verify-attempt":
         verify_attempt(args.tag, args.arch, args.allow_legacy)
+    elif args.command == "verify-slo":
+        try:
+            report = slo_acceptance.verify(args.policy, args.evidence, args.distribution)
+        except (KeyError, OSError, TypeError, ValueError) as exc:
+            parser.error(str(exc))
+        print(json.dumps(report, sort_keys=True))
     else:
         finalize_assets(args.directory, args.tag, args.source_commit)
 
