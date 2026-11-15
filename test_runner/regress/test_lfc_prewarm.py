@@ -4,6 +4,7 @@ from threading import Thread
 from time import sleep
 from typing import Any
 
+import psutil
 import pytest
 from fixtures.endpoint.http import EndpointHttpClient
 from fixtures.log_helper import log
@@ -211,28 +212,32 @@ def test_lfc_prewarm_cancel(neon_simple_env: NeonEnv):
 
     thread = Thread(target=lambda: prewarm_endpoint(method, client, pg_cur, None))
     thread.start()
-    with endpoint.connect() as observer:
-        observer.autocommit = True
-        with observer.cursor() as observer_cur:
+    pid_file = endpoint.pg_data_dir_path() / "postmaster.pid"
+    postmaster = psutil.Process(int(pid_file.read_text().splitlines()[0]))
 
-            def prewarm_workers() -> int:
-                observer_cur.execute(
-                    "SELECT count(*) FROM pg_stat_activity "
-                    "WHERE backend_type = 'LFC prewarm worker'"
-                )
-                return observer_cur.fetchone()[0]
-
-            def assert_prewarmer_running():
-                assert prewarm_workers() > 0
-
+    def prewarm_workers() -> int:
+        # LFC workers have no database session and may be absent from pg_stat_activity.
+        count = 0
+        for worker in postmaster.children():
             try:
-                wait_until(assert_prewarmer_running, interval=0.05)
-            finally:
-                client.cancel_prewarm_lfc()
-                thread.join(timeout=30)
-            assert not thread.is_alive()
-            assert client.prewarm_lfc_status()["status"] == "cancelled"
-            assert prewarm_workers() == 0
+                if any("LFC prewarm worker " in argument for argument in worker.cmdline()):
+                    count += 1
+            except psutil.NoSuchProcess:
+                # The child may exit between discovery and reading its title.
+                continue
+        return count
+
+    def assert_prewarmer_running():
+        assert prewarm_workers() > 0
+
+    try:
+        wait_until(assert_prewarmer_running, interval=0.05)
+    finally:
+        client.cancel_prewarm_lfc()
+        thread.join(timeout=30)
+    assert not thread.is_alive()
+    assert client.prewarm_lfc_status()["status"] == "cancelled"
+    assert prewarm_workers() == 0
 
     prewarm_endpoint(method, client, pg_cur, None)
     assert client.prewarm_lfc_status()["status"] == "completed"

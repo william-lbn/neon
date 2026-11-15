@@ -3,7 +3,6 @@ use anyhow::{Context, Result, bail};
 use async_compression::tokio::bufread::{ZstdDecoder, ZstdEncoder};
 use compute_api::responses::LfcOffloadState;
 use compute_api::responses::LfcPrewarmState;
-use futures::TryStreamExt;
 use http::StatusCode;
 use reqwest::Client;
 use std::mem::replace;
@@ -153,34 +152,47 @@ impl ComputeNode {
         }
         .context("preparing neon.prewarm_local_cache()")?;
         let pg_token = client.cancel_token();
-        let params: Vec<&(dyn postgres_types::ToSql + Sync)> = vec![&uncompressed];
+        let params: &[&(dyn postgres_types::ToSql + Sync)] = &[&uncompressed];
         if token.is_cancelled() {
             return Ok(LfcPrewarmState::Cancelled);
         }
-        // Await the original BindComplete before sending a cancellation to this
-        // dedicated session. The server joins the original background workers
-        // before finishing the SQL command, including on a handled interrupt.
-        let responses = client
-            .query_raw(&statement, params)
-            .await
-            .context("starting PostgreSQL LFC prewarm")?;
-        let result = responses.try_collect::<Vec<_>>();
-        tokio::pin!(result);
+
+        // BindComplete can stay buffered until Execute ends. Poll the original
+        // query while dispatching CancelRequest on this dedicated connection.
+        // A first request sent before Execute can be ignored by PostgreSQL.
+        let query = client.query_one(&statement, params);
+        tokio::pin!(query);
         select! {
             biased;
-            res = &mut result => {
-                res.context("loading LFC state into postgres")?;
+            result = &mut query => {
+                result.context("loading LFC state into postgres")?;
             }
             _ = token.cancelled() => {
-                let sent = tokio::time::timeout(
-                    Duration::from_secs(5),
-                    pg_token.cancel_query(postgres::NoTls),
-                ).await;
-                if !matches!(sent, Ok(Ok(()))) {
-                    warn!("LFC cancellation dispatch unconfirmed, waiting for original query");
-                }
-                match result.await {
-                    Ok(_) if matches!(sent, Ok(Ok(()))) => return Ok(LfcPrewarmState::Cancelled),
+                let deadline = tokio::time::sleep(Duration::from_secs(5));
+                tokio::pin!(deadline);
+                let mut retry = tokio::time::interval(Duration::from_millis(250));
+                retry.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
+                let mut sent = false;
+                let result = loop {
+                    select! {
+                        biased;
+                        result = &mut query => break result,
+                        _ = &mut deadline => {
+                            if !sent {
+                                warn!("LFC cancellation dispatch unconfirmed, waiting for original query");
+                            }
+                            break query.await;
+                        }
+                        dispatch = async {
+                            retry.tick().await;
+                            pg_token.cancel_query(postgres::NoTls).await
+                        } => sent |= dispatch.is_ok(),
+                    }
+                };
+                // PostgreSQL joins the original background workers before
+                // this SQL resolves, even when its C handler catches SIGINT.
+                match result {
+                    Ok(_) if sent => return Ok(LfcPrewarmState::Cancelled),
                     Err(err) if err.code() == Some(&tokio_postgres::error::SqlState::QUERY_CANCELED) => {
                         return Ok(LfcPrewarmState::Cancelled);
                     }
