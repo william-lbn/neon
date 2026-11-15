@@ -79,7 +79,7 @@ jobs:
     needs: prepare
     permissions:
       contents: read
-    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@01550934c0b3a45b5bbc380408f19d78655cf99c
+    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@216ee202bb4a0bf3f3e1f8486e4e7b38c510f645
     with:
       source_sha: ${{ needs.prepare.outputs.control_plane }}
       release_tag: ${{ needs.prepare.outputs.tag }}
