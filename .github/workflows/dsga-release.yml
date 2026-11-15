@@ -79,7 +79,7 @@ jobs:
     needs: prepare
     permissions:
       contents: read
-    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@e6290ef872e8bcde113fcc40cc3ae07b7563b121
+    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@01550934c0b3a45b5bbc380408f19d78655cf99c
     with:
       source_sha: ${{ needs.prepare.outputs.control_plane }}
       release_tag: ${{ needs.prepare.outputs.tag }}
@@ -385,7 +385,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@cf609ee32f3ebfffa3afaacaadae3b676dbe6120
+    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@fd61f2f8f5f0a9483a8ae5d081fc1b4503852f76
     with:
       helm_sha: ${{ needs.prepare.outputs.helm }}
       release_version: ${{ needs.prepare.outputs.tag }}

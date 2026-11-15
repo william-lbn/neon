@@ -2507,6 +2507,34 @@ impl ComputeNode {
         })
     }
 
+    fn configure_dsg_logical_demand(&self, spec: &ComputeSpec) {
+        let enabled = spec
+            .cluster
+            .settings
+            .find("neon.logical_buffer_demand_enabled")
+            .is_some_and(|value| value == "on");
+        if !enabled || !self.dsg_private_connections.load(Ordering::Acquire) {
+            return;
+        }
+        let mut config = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_logical_demand"));
+        config.dbname("postgres").user("cloud_admin");
+        let result = tokio::runtime::Handle::current().block_on(async {
+            tokio::time::timeout(Duration::from_secs(12), async {
+                let (mut client, driver) = config.connect(NoTls).await?;
+                tokio::spawn(async move {
+                    let _ = driver.await;
+                });
+                crate::spec::prepare_dsg_logical_demand_schema(&mut client).await
+            })
+            .await
+        });
+        match result {
+            Ok(Ok(())) => info!("DSGA logical buffer observer schema ready"),
+            Ok(Err(error)) => warn!(error = %error, "DSGA logical buffer observer unavailable"),
+            Err(_) => warn!("DSGA logical buffer observer setup deadline elapsed"),
+        }
+    }
+
     fn configure_dsg_local_proxy(&self, spec: &ComputeSpec) -> Result<()> {
         if spec.dynamic_shared_buffers.is_some() {
             if let Some(config) = &spec.local_proxy_config {
@@ -2557,6 +2585,7 @@ impl ComputeNode {
         }
         if crate::dsg_roles::preserves_primary_catalog(&pspec.spec) {
             self.attest_dsg_retained_roles(&pspec.spec)?;
+            self.configure_dsg_logical_demand(&pspec.spec);
         } else {
             self.post_apply_config()?;
         }

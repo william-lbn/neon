@@ -239,6 +239,45 @@ pub async fn handle_neon_extension_upgrade(client: &mut Client) -> Result<()> {
     Ok(())
 }
 
+/// Install the additive observer function only in the original system database.
+#[instrument(skip_all)]
+pub(crate) async fn prepare_dsg_logical_demand_schema(client: &mut Client) -> Result<()> {
+    let tx = client.transaction().await?;
+    tx.batch_execute("SET LOCAL lock_timeout = '2s'; SET LOCAL statement_timeout = '5s'")
+        .await?;
+    let state = tx.query_one(
+        "SELECT pg_catalog.current_database()='postgres'
+                 AND CURRENT_USER='cloud_admin' AND NOT pg_catalog.pg_is_in_recovery(),
+                EXISTS (SELECT 1 FROM pg_catalog.pg_settings
+                        WHERE name='neon.logical_buffer_demand_enabled' AND setting='on'),
+                (SELECT extversion FROM pg_catalog.pg_extension WHERE extname='neon')",
+        &[],
+    ).await?;
+    anyhow::ensure!(
+        state.try_get::<_, bool>(0)? && state.try_get::<_, bool>(1)?,
+        "logical demand setup requires the original enabled management Primary"
+    );
+    let version: Option<String> = state.try_get(2)?;
+    if version.as_deref() == Some("1.17") {
+        tx.batch_execute("ALTER EXTENSION neon UPDATE TO '1.18'").await?;
+    }
+    let installed = tx.query_one(
+        "SELECT EXISTS (
+            SELECT 1 FROM pg_catalog.pg_extension e
+            JOIN pg_catalog.pg_depend d ON d.refobjid=e.oid
+                AND d.refclassid='pg_catalog.pg_extension'::pg_catalog.regclass
+                AND d.classid='pg_catalog.pg_proc'::pg_catalog.regclass AND d.deptype='e'
+            JOIN pg_catalog.pg_proc p ON p.oid=d.objid AND p.pronamespace=e.extnamespace
+            WHERE e.extname='neon' AND p.proname='neon_logical_buffer_demand'
+                AND p.probin='$libdir/neon' AND p.pronargs=0
+                AND p.prorettype='pg_catalog.jsonb'::pg_catalog.regtype
+        )", &[],
+    ).await?;
+    anyhow::ensure!(installed.try_get::<_, bool>(0)?, "Neon logical demand schema is unavailable");
+    tx.commit().await?;
+    Ok(())
+}
+
 #[instrument(skip_all)]
 pub async fn handle_migrations(
     params: ComputeNodeParams,
@@ -313,4 +352,43 @@ pub async fn handle_migrations(
         .await?;
 
     Ok(())
+}
+
+#[cfg(test)]
+mod dsg_logical_demand_tests {
+    use tokio_postgres::{Config, NoTls};
+
+    use super::prepare_dsg_logical_demand_schema;
+
+    #[tokio::test]
+    #[ignore = "requires the isolated PostgreSQL logical demand extension fixture"]
+    async fn upgrades_only_the_system_database_on_the_enabled_primary() {
+        let dsn = std::env::var("NEON_DSGA_LOGICAL_DEMAND_TEST_DSN")
+            .expect("explicit isolated logical demand test database required");
+        let config: Config = dsn.parse().unwrap();
+        let mut app = config.clone();
+        app.dbname("neondb");
+        let (mut application, stream) = app.connect(NoTls).await.unwrap();
+        tokio::spawn(async move { stream.await.unwrap() });
+        assert!(prepare_dsg_logical_demand_schema(&mut application).await.is_err());
+
+        let mut admin = config;
+        admin.dbname("postgres");
+        let (mut management, stream) = admin.connect(NoTls).await.unwrap();
+        tokio::spawn(async move { stream.await.unwrap() });
+        let version = "SELECT extversion FROM pg_catalog.pg_extension WHERE extname='neon'";
+        assert_eq!(management.query_one(version, &[]).await.unwrap().get::<_, String>(0), "1.17");
+
+        prepare_dsg_logical_demand_schema(&mut management).await.unwrap();
+        prepare_dsg_logical_demand_schema(&mut management).await.unwrap();
+        assert_eq!(management.query_one(version, &[]).await.unwrap().get::<_, String>(0), "1.18");
+        assert_eq!(
+            application.query_one(version, &[]).await.unwrap().get::<_, String>(0),
+            "1.17"
+        );
+        let value = management
+            .query_one("SELECT neon.neon_logical_buffer_demand()->>'version'", &[])
+            .await.unwrap();
+        assert_eq!(value.get::<_, String>(0), "1");
+    }
 }
