@@ -141,6 +141,19 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/MemoryResponse"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/cache/observation:
+    get:
+      operationId: getDsgCacheObservation
+      summary: PostgreSQL 数据库维度的累积缓冲命中与读取
+      description: 受当前实例、Postmaster boot 和 Tenant/Timeline 绑定的只读样本。统计不可用返回 503。命中与读取之和表示逻辑缓冲访问次数，无法作为独立页面总数或工作集大小。
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 当前 PG 实例单次统计采样，Cache-Control 为 no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/CacheObservation"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/resize:
     post:
       operationId: requestDsgResize
@@ -725,6 +738,34 @@ components:
         protocol_version: {type: integer, enum: [1]}
         vm_shrink_permit: {type: boolean, enum: [false]}
         observed: {$ref: "#/components/schemas/Snapshot"}
+    CacheObservation:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, instance, counters]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        instance: {$ref: "#/components/schemas/Instance"}
+        counters:
+          type: object
+          additionalProperties: false
+          required: [sampled_at_unix_micros, tenant_id, timeline_id, databases]
+          properties:
+            sampled_at_unix_micros: {$ref: "#/components/schemas/PositiveU64"}
+            tenant_id: {type: string, pattern: '^[0-9a-f]{32}$'}
+            timeline_id: {type: string, pattern: '^[0-9a-f]{32}$'}
+            databases:
+              type: array
+              minItems: 1
+              maxItems: 128
+              items:
+                type: object
+                additionalProperties: false
+                required: [database_oid, stats_reset_at_unix_micros, buffer_hits, buffer_reads]
+                properties:
+                  database_oid: {type: integer, minimum: 1, maximum: 4294967295}
+                  stats_reset_at_unix_micros: {type: string, nullable: true, pattern: '^[1-9][0-9]{0,19}$'}
+                  buffer_hits: {$ref: "#/components/schemas/U64"}
+                  buffer_reads: {$ref: "#/components/schemas/U64"}
     Capabilities:
       type: object
       additionalProperties: false
