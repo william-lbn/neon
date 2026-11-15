@@ -154,6 +154,19 @@ paths:
             application/json:
               schema: {$ref: "#/components/schemas/CacheObservation"}
         default: {$ref: "#/components/responses/Failure"}
+  /dsg/v1/cache/logical-demand:
+    get:
+      operationId: getDsgLogicalBufferDemand
+      summary: PostgreSQL 原共享缓冲访问的有界工作集观测
+      description: 样本绑定当前 Postmaster、Tenant 和 Timeline。每个完整分钟窗口分别报告共享缓冲 hit、miss 和按页去重后的并集，范围为 1 至 60 分钟。尚未覆盖完整窗口时数组为空。未启用或源不可用返回 503。
+      security: [{DsgJWT: []}]
+      responses:
+        "200":
+          description: 当前实例工作集估算。Cache-Control 为 no-store
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/LogicalDemandObservation"}
+        default: {$ref: "#/components/responses/Failure"}
   /dsg/v1/resize:
     post:
       operationId: requestDsgResize
@@ -738,6 +751,42 @@ components:
         protocol_version: {type: integer, enum: [1]}
         vm_shrink_permit: {type: boolean, enum: [false]}
         observed: {$ref: "#/components/schemas/Snapshot"}
+    LogicalDemandObservation:
+      type: object
+      additionalProperties: false
+      required: [protocol_version, instance, sample]
+      properties:
+        protocol_version: {type: integer, enum: [1]}
+        instance: {$ref: "#/components/schemas/Instance"}
+        sample:
+          type: object
+          additionalProperties: false
+          required: [sampled_at_unix_micros, tenant_id, timeline_id, demand]
+          properties:
+            sampled_at_unix_micros: {$ref: "#/components/schemas/PositiveU64"}
+            tenant_id: {type: string, pattern: "^[0-9a-f]{32}$"}
+            timeline_id: {type: string, pattern: "^[0-9a-f]{32}$"}
+            demand:
+              type: object
+              additionalProperties: false
+              required: [version, scope, block_bytes, covered_seconds, windows]
+              properties:
+                version: {type: integer, enum: [1]}
+                scope: {type: string, enum: [postmaster_shared_relation_demand]}
+                block_bytes: {type: integer, minimum: 512, maximum: 32768}
+                covered_seconds: {type: integer, minimum: 0, maximum: 3600}
+                windows:
+                  type: array
+                  maxItems: 60
+                  items:
+                    type: object
+                    additionalProperties: false
+                    required: [seconds, distinct_pages, shared_hit_pages, shared_miss_pages]
+                    properties:
+                      seconds: {type: integer, minimum: 60, maximum: 3600}
+                      distinct_pages: {type: integer, format: int64, minimum: 0, maximum: 4294967296}
+                      shared_hit_pages: {type: integer, format: int64, minimum: 0, maximum: 4294967296}
+                      shared_miss_pages: {type: integer, format: int64, minimum: 0, maximum: 4294967296}
     CacheObservation:
       type: object
       additionalProperties: false

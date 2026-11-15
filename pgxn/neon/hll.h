@@ -49,6 +49,8 @@
 #ifndef HLL_H
 #define HLL_H
 
+#include "port/atomics.h"
+
 #define HLL_BIT_WIDTH   10
 #define HLL_C_BITS      (32 - HLL_BIT_WIDTH)
 #define HLL_N_REGISTERS (1 << HLL_BIT_WIDTH)
@@ -81,6 +83,29 @@ typedef struct HyperLogLogState
 
 extern void   initSHLL(HyperLogLogState *cState);
 extern void   addSHLL(HyperLogLogState *cState, uint32 hash);
-extern double estimateSHLL(HyperLogLogState *cState, time_t dutration);
+extern double estimateSHLL(HyperLogLogState *cState, time_t duration);
+
+/*
+ * The logical demand observer uses the same register/rank layout. Monotonic
+ * seconds and atomic maximum updates keep independent backend writes ordered.
+ */
+#define SHLL_DEMAND_WINDOWS 60
+
+typedef struct ConcurrentSHLL
+{
+	pg_atomic_uint64 regs[HLL_N_REGISTERS][HLL_C_BITS + 1];
+} ConcurrentSHLL;
+
+typedef struct SHLLDemandEstimate
+{
+	uint64		combined;
+	uint64		hits;
+	uint64		misses;
+} SHLLDemandEstimate;
+
+extern void initConcurrentSHLL(ConcurrentSHLL *state);
+extern void addConcurrentSHLL(ConcurrentSHLL *state, uint32 hash, uint64 now);
+extern void estimateConcurrentSHLLDemand(ConcurrentSHLL *hits, ConcurrentSHLL *misses,
+                                        uint64 cutoff, SHLLDemandEstimate *estimates);
 
 #endif

@@ -43,6 +43,7 @@ pub(in crate::http) fn router(compute_id: String, jwks: JwkSet) -> Router<Arc<Co
         )
         .route("/dsg/v1/memory", get(memory))
         .route("/dsg/v1/cache/observation", get(cache_observation))
+        .route("/dsg/v1/cache/logical-demand", get(logical_demand_observation))
         .route("/dsg/v1/budget/shared", get(shared_cost))
         .route("/dsg/v1/work/state", get(work_state))
         .route("/dsg/v1/connections/state", get(connection_state))
@@ -273,6 +274,19 @@ async fn cache_observation(
         Ok(client) => match client.cache_observation().await {
             Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
             Err(_) => failure(StatusCode::SERVICE_UNAVAILABLE, "cache_observation_unavailable", None),
+        },
+        Err(error) => error,
+    }
+}
+
+async fn logical_demand_observation(
+    State(compute): State<Arc<ComputeNode>>,
+    Extension(claims): Extension<DsgHttpClaims>,
+) -> Response {
+    match client(&compute, &claims, false).await {
+        Ok(client) => match client.logical_demand_observation().await {
+            Ok(fact) => JsonResponse::success(StatusCode::OK, fact),
+            Err(_) => failure(StatusCode::SERVICE_UNAVAILABLE, "logical_demand_unavailable", None),
         },
         Err(error) => error,
     }

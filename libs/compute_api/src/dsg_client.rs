@@ -20,7 +20,7 @@ use crate::dsg_admission::{
     DsgAdmissionRequest, DsgAdmissionResponse,
 };
 
-use crate::dsg_cache::{DsgCacheCounters, DsgCacheObservation, MAX_CACHE_DATABASES};
+use crate::dsg_cache::{DsgCacheCounters, DsgCacheObservation, DsgDemandSample, DsgLogicalDemandObservation, MAX_CACHE_DATABASES};
 use crate::dsg_control::{
     DsgInstanceIdentity, DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery,
     DsgResizeRequest, validate_id,
@@ -495,6 +495,31 @@ impl<'a> DsgSqlClient<'a> {
             protocol_version: 1,
             instance: self.instance.clone(),
             counters,
+        };
+        observation.validate()?;
+        Ok(observation)
+    }
+
+    pub async fn logical_demand_observation(&self) -> Result<DsgLogicalDemandObservation> {
+        const FUNCTION: &str = "neon_logical_buffer_demand";
+        self.memory_status().await?;
+        self.formal_function(FUNCTION, 0).await?;
+        let schema = &self.observer_schema;
+        let query = format!(
+            "SELECT pg_catalog.jsonb_build_object(
+                'sampled_at_unix_micros', ((EXTRACT(EPOCH FROM pg_catalog.clock_timestamp()) * 1000000)::bigint)::text,
+                'tenant_id', pg_catalog.current_setting('neon.tenant_id', true),
+                'timeline_id', pg_catalog.current_setting('neon.timeline_id', true),
+                'demand', {schema}.{FUNCTION}()
+            )::pg_catalog.text"
+        );
+        let sample: DsgDemandSample =
+            read_json(&self.observer, &query, None, self.response_timeout).await?;
+        self.memory_status().await?;
+        let observation = DsgLogicalDemandObservation {
+            protocol_version: 1,
+            instance: self.instance.clone(),
+            sample,
         };
         observation.validate()?;
         Ok(observation)

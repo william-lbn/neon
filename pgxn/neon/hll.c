@@ -144,24 +144,10 @@ getMaximum(const TimestampTz* reg, TimestampTz since)
 }
 
 
-/*
- * Estimates cardinality, based on elements added so far
- */
-double
-estimateSHLL(HyperLogLogState *cState, time_t duration)
+static double
+estimateCardinality(double sum, unsigned int zero_count)
 {
 	double		result;
-	double		sum = 0.0;
-	size_t		i;
-	uint8       R[HLL_N_REGISTERS];
-	/* 0 indicates uninitialized timestamp, so if we need to cover the whole range than starts with 1 */
-	TimestampTz since = duration == (time_t)-1 ? 1 : GetCurrentTimestamp() - duration * USECS_PER_SEC;
-
-	for (i = 0; i < HLL_N_REGISTERS; i++)
-	{
-		R[i] = getMaximum(cState->regs[i], since);
-		sum += 1.0 / pow(2.0, R[i]);
-	}
 
 	/* result set to "raw" HyperLogLog estimate (E in the HyperLogLog paper) */
 	result = ALPHA_MM / sum;
@@ -169,13 +155,6 @@ estimateSHLL(HyperLogLogState *cState, time_t duration)
 	if (result <= (5.0 / 2.0) * HLL_N_REGISTERS)
 	{
 		/* Small range correction */
-		int			zero_count = 0;
-
-		for (i = 0; i < HLL_N_REGISTERS; i++)
-		{
-			zero_count += R[i] == 0;
-		}
-
 		if (zero_count != 0)
 			result = HLL_N_REGISTERS * log((double) HLL_N_REGISTERS /
 										   zero_count);
@@ -189,3 +168,113 @@ estimateSHLL(HyperLogLogState *cState, time_t duration)
 	return result;
 }
 
+/*
+ * Estimates cardinality, based on elements added so far
+ */
+double
+estimateSHLL(HyperLogLogState *cState, time_t duration)
+{
+	double		sum = 0.0;
+	size_t		i;
+	unsigned int zero_count = 0;
+	/* 0 indicates uninitialized timestamp, so if we need to cover the whole range than starts with 1 */
+	TimestampTz since = duration == (time_t)-1 ? 1 : GetCurrentTimestamp() - duration * USECS_PER_SEC;
+
+	for (i = 0; i < HLL_N_REGISTERS; i++)
+	{
+		const uint8 rank = getMaximum(cState->regs[i], since);
+
+		zero_count += rank == 0;
+		sum += 1.0 / pow(2.0, rank);
+	}
+
+	return estimateCardinality(sum, zero_count);
+}
+
+void
+initConcurrentSHLL(ConcurrentSHLL *state)
+{
+	for (unsigned int i = 0; i < HLL_N_REGISTERS; i++)
+		for (unsigned int j = 0; j <= HLL_C_BITS; j++)
+			pg_atomic_init_u64(&state->regs[i][j], 0);
+}
+
+void
+addConcurrentSHLL(ConcurrentSHLL *state, uint32 hash, uint64 now)
+{
+	uint32		index = hash >> HLL_C_BITS;
+	uint8		rank = rho(hash << HLL_BIT_WIDTH, HLL_C_BITS) - 1;
+	pg_atomic_uint64 *reg = &state->regs[index][rank];
+	uint64		previous = pg_atomic_read_u64(reg);
+
+	while (previous < now && !pg_atomic_compare_exchange_u64(reg, &previous, now))
+		;
+}
+
+/*
+ * Accumulate all windows in one scan. Merge corresponding hit and miss
+ * registers before estimating the union, so repeated or overlapping pages
+ * cannot inflate combined cardinality.
+ */
+void
+estimateConcurrentSHLLDemand(ConcurrentSHLL *hits, ConcurrentSHLL *misses,
+							 uint64 cutoff, SHLLDemandEstimate *estimates)
+{
+	enum {HITS, MISSES, COMBINED, N_SERIES};
+	double		weights[HLL_C_BITS + 2];
+	double		sums[N_SERIES][SHLL_DEMAND_WINDOWS] = {{0}};
+	unsigned int empties[N_SERIES][SHLL_DEMAND_WINDOWS] = {{0}};
+
+	for (unsigned int rank = 0; rank <= HLL_C_BITS + 1; rank++)
+		weights[rank] = ldexp(1.0, -((int) rank));
+
+	for (unsigned int i = 0; i < HLL_N_REGISTERS; i++)
+	{
+		uint8		first_rank[N_SERIES][SHLL_DEMAND_WINDOWS] = {{0}};
+
+		for (unsigned int j = 0; j <= HLL_C_BITS; j++)
+		{
+			uint64 hit_second = pg_atomic_read_u64(&hits->regs[i][j]);
+			uint64 miss_second = pg_atomic_read_u64(&misses->regs[i][j]);
+			uint64 observed[] = {hit_second, miss_second, Max(hit_second, miss_second)};
+
+			for (unsigned int k = 0; k < N_SERIES; k++)
+			{
+				uint64 age = cutoff - Min(cutoff, observed[k]);
+
+				if (observed[k] != 0 && age < SHLL_DEMAND_WINDOWS * 60)
+					first_rank[k][age / 60] = j + 1;
+			}
+		}
+
+		for (unsigned int k = 0; k < N_SERIES; k++)
+		{
+			uint8 rank = 0;
+
+			for (unsigned int w = 0; w < SHLL_DEMAND_WINDOWS; w++)
+			{
+				rank = Max(rank, first_rank[k][w]);
+				sums[k][w] += weights[rank];
+				empties[k][w] += rank == 0;
+			}
+		}
+	}
+
+	for (unsigned int w = 0; w < SHLL_DEMAND_WINDOWS; w++)
+	{
+		uint64 cardinalities[N_SERIES];
+
+		for (unsigned int k = 0; k < N_SERIES; k++)
+		{
+			double estimate = estimateCardinality(sums[k][w], empties[k][w]);
+
+			/* Page hashes have a 32-bit domain, including at saturation. */
+			cardinalities[k] = estimate >= 0.0 && estimate < POW_2_32
+				? (uint64) round(estimate) : UINT64CONST(4294967296);
+		}
+
+		estimates[w].combined = cardinalities[COMBINED];
+		estimates[w].hits = cardinalities[HITS];
+		estimates[w].misses = cardinalities[MISSES];
+	}
+}

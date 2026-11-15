@@ -11,6 +11,7 @@ OBJS = \
 	file_cache.o \
 	hll.o \
 	libpagestore.o \
+	logical_buffer_demand.o \
 	logical_replication_monitor.o \
 	neon.o \
 	neon_lwlsncache.o \
@@ -71,6 +72,8 @@ DATA = \
 	neon--1.15--1.16.sql \
 	neon--1.16--1.15.sql \
 	neon--1.16--1.17.sql \
+	neon--1.17--1.18.sql \
+	neon--1.18--1.17.sql \
 	neon--1.17--1.16.sql \
 	neon--1.6--1.5.sql \
 	neon--1.5--1.4.sql \

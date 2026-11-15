@@ -14,6 +14,8 @@ paths:
     $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1memory"
   /dsg/v1/cache/observation:
     $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1cache~1observation"
+  /dsg/v1/cache/logical-demand:
+    $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1cache~1logical-demand"
   /dsg/v1/resize:
     $ref: "./dsg_openapi.yaml#/paths/~1dsg~1v1~1resize"
   /dsg/v1/resize/status:

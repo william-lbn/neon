@@ -41,6 +41,7 @@
 #include "slru_download.h"
 #include "neon_perf_counters.h"
 #include "logical_replication_monitor.h"
+#include "logical_buffer_demand.h"
 #include "unstable_extensions.h"
 #include "walsender_hooks.h"
 #if PG_MAJORVERSION_NUM >= 16
@@ -637,6 +638,7 @@ _PG_init(void)
 	 * loaded, otherwise any settings to GUCs that were set before the
 	 * extension was loaded will be removed.
 	 */
+	LogicalBufferDemandRegister();
 	EmitWarningsOnPlaceholders("neon");
 
 	ReportSearchPath();
@@ -831,6 +833,7 @@ neon_shmem_request_hook(void)
 #endif
 
 	LfcShmemRequest();
+	LogicalBufferDemandShmemRequest();
 	NeonPerfCountersShmemRequest();
 	PagestoreShmemRequest();
 	RelsizeCacheShmemRequest();
@@ -853,6 +856,7 @@ neon_shmem_startup_hook(void)
 	LWLockAcquire(AddinShmemInitLock, LW_EXCLUSIVE);
 
 	LfcShmemInit();
+	LogicalBufferDemandShmemInit();
 	NeonPerfCountersShmemInit();
 	if (lakebase_mode) {
 		DatabricksMetricsShmemInit();
