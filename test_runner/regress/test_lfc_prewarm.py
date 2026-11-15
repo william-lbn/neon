@@ -176,6 +176,55 @@ def test_lfc_prewarm(neon_simple_env: NeonEnv, method: PrewarmMethod):
 
 
 @pytest.mark.skipif(not USE_LFC, reason="LFC is disabled, skipping")
+def test_lfc_prewarm_respects_destination_limit(neon_simple_env: NeonEnv):
+    endpoint = neon_simple_env.endpoints.create_start(
+        branch_name="main",
+        config_lines=[
+            "autovacuum = off",
+            "shared_buffers = 1MB",
+            "neon.max_file_cache_size = 1GB",
+            "neon.file_cache_size_limit = 1GB",
+            "neon.file_cache_chunk_size = 8",
+            "neon.file_cache_prewarm_limit = 1000",
+        ],
+    )
+    with endpoint.connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("CREATE SCHEMA neon; CREATE EXTENSION neon WITH SCHEMA neon")
+            cur.execute(
+                "CREATE TABLE prewarm_budget AS "
+                "SELECT i, repeat('x', 128) AS payload FROM generate_series(1, 50000) AS g(i)"
+            )
+            cur.execute("SELECT sum(length(payload)) FROM prewarm_budget")
+            assert cur.fetchone() == (6400000,)
+            cur.execute("SELECT neon.get_local_cache_state(1000)")
+            (state,) = cur.fetchone()
+            assert state is not None
+    endpoint.stop()
+    endpoint.start()
+
+    endpoint.safe_psql("ALTER SYSTEM SET neon.file_cache_prewarm_limit = 2")
+    endpoint.safe_psql("SELECT pg_reload_conf()")
+
+    def limit_installed():
+        assert endpoint.safe_psql("SHOW neon.file_cache_prewarm_limit") == [("2",)]
+
+    wait_until(limit_installed)
+    with endpoint.connect() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT neon.prewarm_local_cache(%s, 1)", (state,))
+            cur.execute(
+                "SELECT total_pages, prewarmed_pages, skipped_pages FROM neon.get_prewarm_info()"
+            )
+            total, prewarmed, skipped = cur.fetchone()
+            assert 0 < total <= 2 * 8
+            assert prewarmed > 0
+            assert total == prewarmed + skipped
+            cur.execute("SELECT count(*), sum(length(payload)) FROM prewarm_budget")
+            assert cur.fetchone() == (50000, 6400000)
+
+
+@pytest.mark.skipif(not USE_LFC, reason="LFC is disabled, skipping")
 def test_lfc_prewarm_cancel(neon_simple_env: NeonEnv):
     """
     Test we can cancel LFC prewarm and prewarm successfully after

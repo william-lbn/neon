@@ -23,6 +23,7 @@
 #include "miscadmin.h"
 #include "common/hashfn.h"
 #include "pgstat.h"
+#include "port/pg_bitutils.h"
 #include "port/pg_iovec.h"
 #include "postmaster/bgworker.h"
 #include "postmaster/interrupt.h"
@@ -207,7 +208,6 @@ typedef struct FileCacheControl
 
 #define FILE_CACHE_STATE_BITMAP(fcs)	((uint8*)&(fcs)->chunks[(fcs)->n_chunks])
 #define FILE_CACHE_STATE_SIZE_FOR_CHUNKS(n_chunks)	(sizeof(FileCacheState) + (n_chunks)*sizeof(BufferTag) + (((n_chunks) * lfc_blocks_per_chunk)+7)/8)
-#define FILE_CACHE_STATE_SIZE(fcs)		(sizeof(FileCacheState) + (fcs->n_chunks)*sizeof(BufferTag) + (((fcs->n_chunks) << fcs->chunk_size_log)+7)/8)
 
 static HTAB *lfc_hash;
 static int	lfc_desc = -1;
@@ -714,7 +714,10 @@ lfc_prewarm(FileCacheState* fcs, uint32 n_workers)
 	size_t n_entries;
 	size_t prewarm_batch = Min(lfc_prewarm_batch, readahead_buffer_size);
 	size_t fcs_size;
-	uint32_t max_prefetch_pages;
+	size_t snapshot_blocks;
+	size_t selected_blocks;
+	uint32 selected_pages;
+	const uint8 *bitmap;
 	dsm_segment *seg;
 	BackgroundWorkerHandle* bgw_handle[MAX_PREWARM_WORKERS];
 
@@ -733,36 +736,46 @@ lfc_prewarm(FileCacheState* fcs, uint32 n_workers)
 		elog(ERROR, "LFC: Too much prewarm workers, maximum is %d", MAX_PREWARM_WORKERS);
 	}
 
-	if (fcs == NULL || fcs->n_chunks == 0)
+	if (fcs == NULL)
 	{
 		elog(LOG, "LFC: nothing to prewarm");
 		return;
 	}
 
-	if (fcs->magic != FILE_CACHE_STATE_MAGIC)
-	{
-		elog(ERROR, "LFC: Invalid file cache state magic: %X", fcs->magic);
-	}
-
 	fcs_size = VARSIZE(fcs);
-	if (FILE_CACHE_STATE_SIZE(fcs) != fcs_size)
-	{
-		elog(ERROR, "LFC: Invalid file cache state size: %u vs. %u", (unsigned)FILE_CACHE_STATE_SIZE(fcs), VARSIZE(fcs));
-	}
+	if (fcs_size < sizeof(FileCacheState))
+		elog(ERROR, "LFC: Invalid file cache state size: %zu", fcs_size);
+
+	if (fcs->magic != FILE_CACHE_STATE_MAGIC)
+		elog(ERROR, "LFC: Invalid file cache state magic: %X", fcs->magic);
 
 	fcs_chunk_size_log = fcs->chunk_size_log;
 	if (fcs_chunk_size_log > MAX_BLOCKS_PER_CHUNK_LOG)
-	{
 		elog(ERROR, "LFC: Invalid chunk size log: %u", fcs->chunk_size_log);
+
+	snapshot_blocks = (size_t) fcs->n_chunks << fcs_chunk_size_log;
+	if (sizeof(FileCacheState) + (size_t) fcs->n_chunks * sizeof(BufferTag)
+		+ (snapshot_blocks + 7) / 8 != fcs_size)
+		elog(ERROR, "LFC: Invalid file cache state size: %zu", fcs_size);
+	if (fcs->n_pages > snapshot_blocks)
+		elog(ERROR, "LFC: Invalid file cache state page count: %u", fcs->n_pages);
+
+	if (fcs->n_chunks == 0)
+	{
+		elog(LOG, "LFC: nothing to prewarm");
+		return;
 	}
 
+	/* Restore a prefix of the offloaded state when this endpoint has a lower limit. */
 	n_entries = Min(fcs->n_chunks, lfc_prewarm_limit);
-	Assert(n_entries != 0);
-
-	max_prefetch_pages = n_entries << fcs_chunk_size_log;
-	if (fcs->n_pages > max_prefetch_pages) {
-		elog(ERROR, "LFC: Number of pages in file cache state (%d) is more than the limit (%d)", fcs->n_pages, max_prefetch_pages);
-	}
+	selected_blocks = n_entries << fcs_chunk_size_log;
+	bitmap = FILE_CACHE_STATE_BITMAP(fcs);
+	selected_pages = pg_popcount((const char *) bitmap, selected_blocks / 8);
+	for (size_t i = selected_blocks & ~(size_t) 7; i < selected_blocks; i++)
+		selected_pages += BITMAP_ISSET(bitmap, i) != 0;
+	if (selected_pages > fcs->n_pages ||
+		(n_entries == fcs->n_chunks && selected_pages != fcs->n_pages))
+		elog(ERROR, "LFC: Invalid file cache state page count: %u", fcs->n_pages);
 
 	LWLockAcquire(lfc_lock, LW_EXCLUSIVE);
 
@@ -784,12 +797,10 @@ lfc_prewarm(FileCacheState* fcs, uint32 n_workers)
 	lfc_ctl->prewarm_active = true;
 	lfc_ctl->prewarm_canceled = false;
 	lfc_ctl->prewarm_batch = prewarm_batch;
+	lfc_ctl->total_prewarm_pages = selected_pages;
 	memset(lfc_ctl->prewarm_workers, 0, n_workers*sizeof(PrewarmWorkerState));
 
 	LWLockRelease(lfc_lock);
-
-	/* Calculate total number of pages to be prewarmed */
-	lfc_ctl->total_prewarm_pages = fcs->n_pages;
 
 	seg = dsm_create(fcs_size, 0);
 	memcpy(dsm_segment_address(seg), fcs, fcs_size);
@@ -2050,7 +2061,7 @@ PG_FUNCTION_INFO_V1(prewarm_local_cache);
 Datum
 prewarm_local_cache(PG_FUNCTION_ARGS)
 {
-	bytea* state = PG_GETARG_BYTEA_PP(0);
+	bytea* state = PG_GETARG_BYTEA_P(0);
 	uint32 n_workers =  PG_GETARG_INT32(1);
 	FileCacheState* fcs = (FileCacheState*)state;
 
