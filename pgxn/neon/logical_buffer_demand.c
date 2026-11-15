@@ -24,6 +24,22 @@ typedef struct LogicalBufferDemand
 	ConcurrentSHLL misses;
 } LogicalBufferDemand;
 
+/*
+ * A backend can hit the same index or heap page many times in a second.
+ * Suppress an exact repeated update only after publishing it to the shared
+ * sketch. Keep hits and misses separate, and let a cache collision publish
+ * normally. These entries are private to the backend.
+ */
+#define RECENT_BUFFER_DEMAND_SLOTS 256
+
+typedef struct RecentBufferDemand
+{
+	uint64		second;
+	uint32		page_hash;
+} RecentBufferDemand;
+
+static RecentBufferDemand recent_demand[2][RECENT_BUFFER_DEMAND_SLOTS];
+
 static bool logical_buffer_demand_enabled;
 static LogicalBufferDemand *logical_demand;
 static shared_buffer_demand_hook_type previous_demand_hook;
@@ -45,13 +61,22 @@ observe_shared_buffer_demand(const RelFileLocator *locator, ForkNumber forknum,
 	const uint32 key[] = {locator->spcOid, locator->dbOid, locator->relNumber,
 						 (uint32) forknum, blocknum};
 	uint32		hash;
+	uint64		second;
+	RecentBufferDemand *recent;
 
 	if (previous_demand_hook)
 		previous_demand_hook(locator, forknum, blocknum, shared_hit);
 
 	hash = hash_bytes((const unsigned char *) key, sizeof(key));
+	second = demand_monotonic_millis() / 1000 + 1;
+	recent = &recent_demand[shared_hit][hash & (RECENT_BUFFER_DEMAND_SLOTS - 1)];
+	if (recent->second == second && recent->page_hash == hash)
+		return;
+
 	addConcurrentSHLL(shared_hit ? &logical_demand->hits : &logical_demand->misses,
-					  hash, demand_monotonic_millis() / 1000 + 1);
+					  hash, second);
+	recent->page_hash = hash;
+	recent->second = second;
 }
 #endif
 
