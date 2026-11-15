@@ -201,6 +201,83 @@ async fn native_initialization_observes_original_boot_roles_and_loaded_policy() 
     Ok(())
 }
 
+#[tokio::test]
+async fn initialization_reports_pending_for_original_init() -> Result<()> {
+    use base64::Engine;
+    use compute_api::responses::ComputeStatus;
+    use ring::signature::KeyPair;
+    use tower::ServiceExt;
+
+    let private =
+        ring::signature::Ed25519KeyPair::generate_pkcs8(&ring::rand::SystemRandom::new())?;
+    let pair = ring::signature::Ed25519KeyPair::from_pkcs8(private.as_ref())?;
+    let jwks = serde_json::from_value(serde_json::json!({"keys":[{
+        "kty":"OKP","crv":"Ed25519","alg":"EdDSA","use":"sig","kid":"init-native",
+        "x":base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(pair.public_key().as_ref())
+    }]}))?;
+    let data = tempfile::tempdir()?;
+    let compute = node_configured(fixture(), data.path(), None, jwks);
+    let app = axum::Router::from(&crate::http::server::Server::External {
+        port: 0,
+        config: compute.compute_ctl_config.clone(),
+        compute_id: compute.params.compute_id.clone(),
+        instance_id: None,
+    })
+    .with_state(compute.clone());
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)?
+        .as_secs();
+    let mut header = jsonwebtoken::Header::new(jsonwebtoken::Algorithm::EdDSA);
+    header.kid = Some("init-native".into());
+    for (status, vm_uid, expected) in [
+        (
+            ComputeStatus::Init,
+            cluster::VM,
+            http::StatusCode::SERVICE_UNAVAILABLE,
+        ),
+        (
+            ComputeStatus::Init,
+            "8ea1c967-72b9-4e2c-ba3f-907cf37d2085",
+            http::StatusCode::FORBIDDEN,
+        ),
+        (
+            ComputeStatus::Terminated,
+            cluster::VM,
+            http::StatusCode::PRECONDITION_FAILED,
+        ),
+    ] {
+        compute.state.lock().unwrap().status = status;
+        let claims = compute_api::dsg_auth::DsgHttpClaims {
+            aud: compute_api::dsg_auth::DSG_HTTP_AUDIENCE.into(),
+            scope: compute_api::dsg_auth::DSG_HTTP_INITIALIZATION_SCOPE.into(),
+            request: None,
+            compute_id: compute.params.compute_id.clone(),
+            vm_uid: vm_uid.into(),
+            compute_instance_id: cluster::COMPUTE.into(),
+            issuer_epoch: compute_api::dsg_control::DsgUint64::new(1),
+            nbf: now - 1,
+            exp: now + 60,
+        };
+        let token = jsonwebtoken::encode(
+            &header,
+            &claims,
+            &jsonwebtoken::EncodingKey::from_ed_der(private.as_ref()),
+        )?;
+        let response = app
+            .clone()
+            .oneshot(
+                http::Request::builder()
+                    .uri("/dsg/v1/initialization")
+                    .header("authorization", format!("Bearer {token}"))
+                    .body(axum::body::Body::empty())?,
+            )
+            .await?;
+        assert_eq!(response.status(), expected);
+        assert_eq!(response.headers()["cache-control"], "no-store");
+    }
+    Ok(())
+}
+
 #[test]
 fn private_endpoint_port_respects_query_and_rejects_ambiguous_targets() -> Result<()> {
     assert_eq!(

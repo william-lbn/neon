@@ -232,7 +232,10 @@ async fn initialization(
     State(compute): State<Arc<ComputeNode>>,
     Extension(claims): Extension<DsgHttpClaims>,
 ) -> Response {
-    let spec = match compute.dsg_spec() {
+    // A configure response may time out while the original Postmaster is
+    // still initializing. Its frozen identity is already available in Init.
+    // The receipt below still requires Running and the live PostgreSQL facts.
+    let spec = match compute.dsg_resource_spec() {
         Ok(spec) => spec,
         Err(_) => return failure(StatusCode::PRECONDITION_FAILED, "not_available", None),
     };
