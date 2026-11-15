@@ -35,6 +35,13 @@ class ReleaseContractTests(unittest.TestCase):
                 "source_repository": repo, "source_commit": commit,
                 "architecture": "linux/amd64", "execution": copy.deepcopy(self.execution),
             }
+        for version in self.lock["postgres"]:
+            name = f"vm-compute-node-{version}"
+            self.images[name]["guest_disk"] = {
+                "system_mode": "legacy", "format": "qcow2", "virtual_size": 4 * 2**30,
+                "image": release.image_reference(self.images[name]), "sha256": "e" * 64,
+                "inputs": release.vm_input_references(self.images, name),
+            }
         self.capabilities = {
             "kind": "distribution-capabilities", "schema_version": 1,
             "source_repository": self.lock["autoscaling_repository"],
@@ -137,6 +144,23 @@ class ReleaseContractTests(unittest.TestCase):
         self.images["pageserver"]["execution"]["run_attempt"] = "1"
         with self.assertRaisesRegex(ValueError, "run/attempt"):
             self.manifest()
+
+    def test_vm_disk_proof_must_match_its_output_and_each_input(self):
+        name = "vm-compute-node-v18"
+        disk = self.images[name].pop("guest_disk")
+        with self.assertRaisesRegex(ValueError, "VM disk proof"):
+            self.manifest()
+        self.images[name]["guest_disk"] = disk
+        for field, value in [
+            ("image", self.images["vm-compute-node-v17"]["guest_disk"]["image"]),
+            ("inputs", {**disk["inputs"], "compute": release.image_reference(self.images["compute-node-v17"])}),
+            ("inputs", {**disk["inputs"], "daemon": release.image_reference(self.images["vm-builder"])}),
+            ("sha256", "truncated"), ("system_mode", "normal-split-v3"), ("virtual_size", True),
+        ]:
+            with self.subTest(field=field):
+                self.images[name]["guest_disk"] = {**disk, field: value}
+                with self.assertRaisesRegex(ValueError, "VM disk"):
+                    self.manifest()
 
     def test_missing_profile_or_pg18_full_claim_is_rejected(self):
         self.lock["postgres_profiles"]["v18"] = "full"

@@ -1,10 +1,10 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "c1446b3565d1957f0e94563398e7490c5f296a61",
+  "autoscaling_commit": "caf20be36c7907f326f5e15a79b9c5974796f203",
   "control_plane": {
     "repository": "william-lbn/control-plane",
-    "commit": "216ee202bb4a0bf3f3e1f8486e4e7b38c510f645",
+    "commit": "afcbe20fd17ac1b060aba99ca85c38f4d5c6da5d",
     "images": [
       "control-api",
       "control-web",

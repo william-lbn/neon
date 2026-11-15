@@ -69,7 +69,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@c1446b3565d1957f0e94563398e7490c5f296a61
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@caf20be36c7907f326f5e15a79b9c5974796f203
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
@@ -79,7 +79,7 @@ jobs:
     needs: prepare
     permissions:
       contents: read
-    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@216ee202bb4a0bf3f3e1f8486e4e7b38c510f645
+    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@afcbe20fd17ac1b060aba99ca85c38f4d5c6da5d
     with:
       source_sha: ${{ needs.prepare.outputs.control_plane }}
       release_tag: ${{ needs.prepare.outputs.tag }}
@@ -353,13 +353,14 @@ jobs:
             -src="$source" -dst="$image" -daemon-image="$daemon" -target-arch="linux/$ARCH"
           docker push "$image"
           digest=$(docker buildx imagetools inspect "$image" --format '{{json .Manifest}}' | jq -r .digest)
-          python3 ci/release.py record --name "vm-compute-node-$PG" --image "$image" --digest "$digest" --output "output/vm-compute-node-$PG.json"
-          id=$(docker create "$image" true)
+          [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]]
+          docker pull "$image@$digest"
+          id=$(docker create "$image@$digest" true)
           docker cp "$id:/disk.qcow2" ./disk.qcow2
           docker rm "$id"
           sudo apt-get update && sudo apt-get install -y qemu-utils
-          qemu-img check disk.qcow2
-          qemu-img info --output=json disk.qcow2 | jq -e '.format == "qcow2" and .["virtual-size"] >= 4294967296'
+          python3 ci/release.py record --name "vm-compute-node-$PG" --image "$image" --digest "$digest" \
+            --vm-disk disk.qcow2 --vm-input-images artifacts --output "output/vm-compute-node-$PG.json"
       - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: images-vm-compute-${{ matrix.pg }}-attempt${{ github.run_attempt }}

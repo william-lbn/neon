@@ -159,6 +159,19 @@ jobs:
         with:
           name: ${{ inputs.distribution_artifact }}
           path: artifacts/distribution
+      - name: Independently read the released VM disk from its OCI digest
+        run: |
+          set -euo pipefail
+          record=$(jq -ec --arg name "vm-compute-node-v$PG_VERSION" '.images[$name].guest_disk' "$DISTRIBUTION_MANIFEST")
+          image=$(jq -er '.image' <<< "$record")
+          expected=$(jq -er '.sha256' <<< "$record")
+          disk=$(mktemp)
+          id=""
+          trap 'if [ -n "$id" ]; then docker rm "$id" >/dev/null; fi; rm -f "$disk"' EXIT
+          bash ci/registry-build.sh docker pull "$image"
+          id=$(docker create "$image" true)
+          docker cp "$id:/disk.qcow2" "$disk"
+          printf '%s  %s\n' "$expected" "$disk" | sha256sum -c -
       - run: bash ci/smoke.sh
       - name: Upstream extension and contrib regressions
         if: matrix.profile == 'full' && matrix.major >= 16

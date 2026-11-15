@@ -2,6 +2,7 @@
 """记录不可变镜像，并在所有源码、profile 和候选资格一致后生成发行清单。"""
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import pathlib
@@ -12,6 +13,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOCK = json.loads((ROOT / "ci/distribution.json").read_text())
 SHA = re.compile(r"[a-f0-9]{40}")
 DIGEST = re.compile(r"sha256:[a-f0-9]{64}")
+SHA256 = re.compile(r"[a-f0-9]{64}")
 DSGA_VERSION = re.compile(r"0\.2\.0-dsga\.([1-9][0-9]*)\.([1-9][0-9]*)\.amd64")
 
 CONTROL_PLANE_IMAGES = (
@@ -128,6 +130,41 @@ def verify_records(images, lock, tag, arch, neon_commit, channel):
                 raise ValueError(f"Image architecture differs from release: {name}")
             if item.get("execution") != execution_identity(tag):
                 raise ValueError(f"Image comes from another workflow run/attempt: {name}")
+    if channel == "dsga":
+        for version in lock["postgres"]:
+            name = f"vm-compute-node-{version}"
+            verify_vm_disk(images[name], vm_input_references(images, name))
+
+
+def image_reference(item):
+    return item["image"] + "@" + item["digest"]
+
+
+def vm_input_references(images, name):
+    inputs = {"compute": name.removeprefix("vm-"), "builder": "vm-builder", "daemon": "neonvm-daemon"}
+    return {role: image_reference(images[component]) for role, component in inputs.items()}
+
+
+def verify_vm_disk(item, inputs):
+    disk = item.get("guest_disk")
+    if not isinstance(disk, dict) or disk.get("image") != image_reference(item) or disk.get("inputs") != inputs:
+        raise ValueError(f"VM disk proof is missing or detached from its images: {item['name']}")
+    size = disk.get("virtual_size")
+    if (disk.get("system_mode") != "legacy" or disk.get("format") != "qcow2"
+            or type(size) is not int or size < 4 * 2**30
+            or not isinstance(disk.get("sha256"), str) or not SHA256.fullmatch(disk["sha256"])):
+        raise ValueError(f"VM disk format, size or digest is invalid: {item['name']}")
+
+
+def read_vm_disk(path, image, inputs):
+    info = json.loads(subprocess.check_output(["qemu-img", "info", "--output=json", "-f", "qcow2", path]))
+    if info.get("backing-filename") or info.get("format-specific", {}).get("data", {}).get("data-file"):
+        raise ValueError("The released guest disk must be self-contained")
+    subprocess.run(["qemu-img", "check", "-f", "qcow2", path], check=True)
+    with path.open("rb") as stream:
+        digest = hashlib.file_digest(stream, "sha256").hexdigest()
+    return {"system_mode": "legacy", "format": info["format"], "virtual_size": info["virtual-size"],
+            "sha256": digest, "image": image, "inputs": inputs}
 
 
 def verify_capabilities(capabilities, lock, tag, arch, images):
@@ -223,6 +260,8 @@ def main():
     for name in ["name", "image", "digest", "output"]:
         record.add_argument("--" + name, required=True)
     record.add_argument("--arch", choices=["amd64", "arm64"], default=os.environ.get("ARCH", "amd64"))
+    record.add_argument("--vm-disk", type=pathlib.Path, help="QCOW2 extracted from the published OCI digest")
+    record.add_argument("--vm-input-images", type=pathlib.Path, help="Same-run image records used by the builder")
     lookup = sub.add_parser("lookup")
     lookup.add_argument("--directory", default="artifacts")
     lookup.add_argument("--name", required=True)
@@ -245,17 +284,27 @@ def main():
         tag = args.image.rsplit(":", 1)[-1]
         if DSGA_VERSION.fullmatch(tag):
             execution = validate_current_execution(tag)
+        item = {"kind": "runtime", "name": args.name, "image": args.image,
+                "digest": args.digest, "source_repository": "william-lbn/neon",
+                "architecture": f"linux/{args.arch}", "execution": execution,
+                "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()}
+        needs_vm_disk = execution is not None and args.name.startswith("vm-compute-node-")
+        if needs_vm_disk:
+            if args.vm_disk is None or args.vm_input_images is None:
+                raise ValueError("DSGA VM images require the published disk and input records")
+            inputs = vm_input_references(load_images(args.vm_input_images), args.name)
+            item["guest_disk"] = read_vm_disk(args.vm_disk, image_reference(item), inputs)
+            verify_vm_disk(item, inputs)
+        elif args.vm_disk is not None or args.vm_input_images is not None:
+            raise ValueError("VM disk arguments are only supported by the DSGA VM build")
         path = pathlib.Path(args.output)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps({"kind": "runtime", "name": args.name, "image": args.image,
-            "digest": args.digest, "source_repository": "william-lbn/neon",
-            "architecture": f"linux/{args.arch}", "execution": execution,
-            "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()}, indent=2) + "\n")
+        path.write_text(json.dumps(item, indent=2) + "\n")
         return
     images = load_images(args.directory)
     if args.command == "lookup":
         item = images[args.name]
-        print(item["image"] + "@" + item["digest"])
+        print(image_reference(item))
         return
     verification_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
     neon_commit = args.source_commit or verification_commit
