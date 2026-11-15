@@ -69,7 +69,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@d46ecb2ce1a2f917fe45a6aed425554626c63ca9
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@c1446b3565d1957f0e94563398e7490c5f296a61
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
