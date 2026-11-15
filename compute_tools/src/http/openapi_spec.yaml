@@ -162,7 +162,7 @@ paths:
       operationId: cancelLfcPrewarm
       responses:
         202:
-          description: Prewarm cancelled
+          description: Cancellation requested. Read the current prewarm state to observe completion.
 
   /lfc/offload:
     post:

@@ -3,14 +3,15 @@ use anyhow::{Context, Result, bail};
 use async_compression::tokio::bufread::{ZstdDecoder, ZstdEncoder};
 use compute_api::responses::LfcOffloadState;
 use compute_api::responses::LfcPrewarmState;
+use futures::TryStreamExt;
 use http::StatusCode;
 use reqwest::Client;
 use std::mem::replace;
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use tokio::{io::AsyncReadExt, select, spawn};
 use tokio_util::sync::CancellationToken;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 /// A pair of url and a token to query endpoint storage for LFC prewarm-related tasks
 struct EndpointStoragePair {
@@ -57,16 +58,15 @@ impl ComputeNode {
     /// If there is a prewarm request ongoing, return `false`, `true` otherwise.
     /// Has a failpoint "compute-prewarm"
     pub fn prewarm_lfc(self: &Arc<Self>, from_endpoint: Option<String>) -> bool {
-        let token: CancellationToken;
-        {
+        let token = {
             let state = &mut self.state.lock().unwrap();
-            token = state.lfc_prewarm_token.clone();
-            if let LfcPrewarmState::Prewarming =
-                replace(&mut state.lfc_prewarm_state, LfcPrewarmState::Prewarming)
-            {
+            if matches!(state.lfc_prewarm_state, LfcPrewarmState::Prewarming) {
                 return false;
             }
-        }
+            state.lfc_prewarm_state = LfcPrewarmState::Prewarming;
+            state.lfc_prewarm_token = CancellationToken::new();
+            state.lfc_prewarm_token.clone()
+        };
         crate::metrics::LFC_PREWARMS.inc();
 
         let this = self.clone();
@@ -81,11 +81,7 @@ impl ComputeNode {
                 }
             };
 
-            let state = &mut this.state.lock().unwrap();
-            if let LfcPrewarmState::Cancelled = prewarm_state {
-                state.lfc_prewarm_token = CancellationToken::new();
-            }
-            state.lfc_prewarm_state = prewarm_state;
+            this.state.lock().unwrap().lfc_prewarm_state = prewarm_state;
         });
         true
     }
@@ -146,33 +142,63 @@ impl ComputeNode {
         let uncompressed_len = uncompressed.len();
         info!(%url, "downloaded LFC state, uncompressed size {uncompressed_len}");
 
-        // Client connection and prewarm info querying are fast and therefore don't need
-        // cancellation
-        let client = ComputeNode::get_maintenance_client(&self.tokio_conn_conf)
-            .await
-            .context("connecting to postgres")?;
+        let client = select! {
+            _ = token.cancelled() => return Ok(LfcPrewarmState::Cancelled),
+            client = ComputeNode::get_maintenance_client(&self.tokio_conn_conf) => client,
+        }
+        .context("connecting to postgres")?;
+        let statement = select! {
+            _ = token.cancelled() => return Ok(LfcPrewarmState::Cancelled),
+            statement = client.prepare("select neon.prewarm_local_cache($1)") => statement,
+        }
+        .context("preparing neon.prewarm_local_cache()")?;
         let pg_token = client.cancel_token();
-
         let params: Vec<&(dyn postgres_types::ToSql + Sync)> = vec![&uncompressed];
+        if token.is_cancelled() {
+            return Ok(LfcPrewarmState::Cancelled);
+        }
+        // Await the original BindComplete before sending a cancellation to this
+        // dedicated session. The server joins the original background workers
+        // before finishing the SQL command, including on a handled interrupt.
+        let responses = client
+            .query_raw(&statement, params)
+            .await
+            .context("starting PostgreSQL LFC prewarm")?;
+        let result = responses.try_collect::<Vec<_>>();
+        tokio::pin!(result);
         select! {
-            res = client.query_one("select neon.prewarm_local_cache($1)", &params) => res,
+            biased;
+            res = &mut result => {
+                res.context("loading LFC state into postgres")?;
+            }
             _ = token.cancelled() => {
-                pg_token.cancel_query(postgres::NoTls).await
-                    .context("cancelling neon.prewarm_local_cache()")?;
-                return Ok(LfcPrewarmState::Cancelled)
+                let sent = tokio::time::timeout(
+                    Duration::from_secs(5),
+                    pg_token.cancel_query(postgres::NoTls),
+                ).await;
+                if !matches!(sent, Ok(Ok(()))) {
+                    warn!("LFC cancellation dispatch unconfirmed, waiting for original query");
+                }
+                match result.await {
+                    Ok(_) if matches!(sent, Ok(Ok(()))) => return Ok(LfcPrewarmState::Cancelled),
+                    Err(err) if err.code() == Some(&tokio_postgres::error::SqlState::QUERY_CANCELED) => {
+                        return Ok(LfcPrewarmState::Cancelled);
+                    }
+                    other => {
+                        other.context("waiting for original LFC prewarm after cancellation")?;
+                    }
+                }
             }
         }
-        .context("loading LFC state into postgres")
-        .map(|_| ())?;
         let prewarm_time_ms = now.elapsed().as_millis() as u32;
 
         let row = client
             .query_one("select * from neon.get_prewarm_info()", &[])
             .await
             .context("querying prewarm info")?;
-        let total = row.try_get(0).unwrap_or_default();
-        let prewarmed = row.try_get(1).unwrap_or_default();
-        let skipped = row.try_get(2).unwrap_or_default();
+        let total = row.try_get(0).context("reading total LFC pages")?;
+        let prewarmed = row.try_get(1).context("reading prewarmed LFC pages")?;
+        let skipped = row.try_get(2).context("reading skipped LFC pages")?;
 
         Ok(LfcPrewarmState::Completed {
             total,
@@ -278,6 +304,9 @@ impl ComputeNode {
     }
 
     pub fn cancel_prewarm(self: &Arc<Self>) {
-        self.state.lock().unwrap().lfc_prewarm_token.cancel();
+        let state = self.state.lock().unwrap();
+        if matches!(state.lfc_prewarm_state, LfcPrewarmState::Prewarming) {
+            state.lfc_prewarm_token.cancel();
+        }
     }
 }

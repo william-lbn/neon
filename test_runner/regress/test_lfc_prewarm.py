@@ -211,11 +211,28 @@ def test_lfc_prewarm_cancel(neon_simple_env: NeonEnv):
 
     thread = Thread(target=lambda: prewarm_endpoint(method, client, pg_cur, None))
     thread.start()
-    # wait 2 seconds to ensure we cancel prewarm SQL query
-    sleep(2)
-    client.cancel_prewarm_lfc()
-    thread.join()
-    assert client.prewarm_lfc_status()["status"] == "cancelled"
+    with endpoint.connect() as observer:
+        observer.autocommit = True
+        with observer.cursor() as observer_cur:
+
+            def prewarm_workers() -> int:
+                observer_cur.execute(
+                    "SELECT count(*) FROM pg_stat_activity "
+                    "WHERE backend_type = 'LFC prewarm worker'"
+                )
+                return observer_cur.fetchone()[0]
+
+            def assert_prewarmer_running():
+                assert prewarm_workers() > 0
+
+            try:
+                wait_until(assert_prewarmer_running, interval=0.05)
+            finally:
+                client.cancel_prewarm_lfc()
+                thread.join(timeout=30)
+            assert not thread.is_alive()
+            assert client.prewarm_lfc_status()["status"] == "cancelled"
+            assert prewarm_workers() == 0
 
     prewarm_endpoint(method, client, pg_cur, None)
     assert client.prewarm_lfc_status()["status"] == "completed"
