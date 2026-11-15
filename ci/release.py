@@ -14,6 +14,11 @@ SHA = re.compile(r"[a-f0-9]{40}")
 DIGEST = re.compile(r"sha256:[a-f0-9]{64}")
 DSGA_VERSION = re.compile(r"0\.2\.0-dsga\.([1-9][0-9]*)\.([1-9][0-9]*)\.amd64")
 
+CONTROL_PLANE_IMAGES = (
+    "control-api", "control-web", "control-gateway", "control-dataapi", "control-postgrest",
+    "control-adapter", "control-auth", "control-ai", "control-storage-gateway",
+)
+
 
 def execution_identity(tag):
     match = DSGA_VERSION.fullmatch(tag)
@@ -45,12 +50,14 @@ def load_images(directory):
     return images
 
 
-def expected_images(lock=None):
+def expected_images(lock=None, channel="legacy"):
     lock = LOCK if lock is None else lock
     profiles = lock.get("postgres_profiles", {v: "full" for v in lock["postgres"]})
     images = {"neon", "neon-build-tools"}
     images |= {b.replace("_", "-") for b in lock["core_binaries"]}
     images |= set(lock["compute_components"]) | set(lock["autoscaling_images"])
+    if channel == "dsga":
+        images |= set(lock["control_plane"]["images"])
     for version in lock["postgres"]:
         images |= {f"compute-node-{version}", f"vm-compute-node-{version}"}
         if profiles[version] == "full":
@@ -75,6 +82,14 @@ def validate_lock(lock, channel):
         return
     if lock.get("helm_repository") != "william-lbn/neon-helm" or not SHA.fullmatch(lock.get("helm_commit", "")):
         raise ValueError("Missing pinned Helm source repository/commit")
+    control = lock.get("control_plane")
+    if (not isinstance(control, dict) or control.get("repository") != "william-lbn/control-plane"
+            or not isinstance(control.get("commit"), str) or not SHA.fullmatch(control["commit"])):
+        raise ValueError("Missing immutable Control Plane source repository/commit")
+    control_images = control.get("images")
+    if (not isinstance(control_images, list) or not all(isinstance(name, str) for name in control_images)
+            or sorted(control_images) != sorted(CONTROL_PLANE_IMAGES)):
+        raise ValueError("Control Plane image inventory differs from the locked product scope")
     profiles = lock.get("postgres_profiles", {})
     if set(profiles) != set(lock["postgres"]):
         raise ValueError("PostgreSQL profiles do not cover the exact source lock")
@@ -89,22 +104,24 @@ def verify_records(images, lock, tag, arch, neon_commit, channel):
         raise ValueError("Invalid Neon source commit")
     if channel == "dsga" and (arch != "amd64" or not DSGA_VERSION.fullmatch(tag)):
         raise ValueError("DSGA candidate requires the immutable amd64 SemVer tag")
-    expected = expected_images(lock)
+    expected = expected_images(lock, channel)
     if set(images) != expected:
         raise ValueError(f"Distribution incomplete. Missing={sorted(expected - images.keys())}; extra={sorted(images.keys() - expected)}")
+    source = {name: (lock["autoscaling_repository"], lock["autoscaling_commit"]) for name in lock["autoscaling_images"]}
+    if channel == "dsga":
+        control = lock["control_plane"]
+        source.update({name: (control["repository"], control["commit"]) for name in control["images"]})
     for name, item in images.items():
         if item.get("image") != f"{lock['registry']}/{name}:{tag}":
             raise ValueError(f"Image is outside this release: {name}")
         if not DIGEST.fullmatch(item.get("digest", "")):
             raise ValueError(f"Invalid digest: {name}")
-        autoscaling = name in lock["autoscaling_images"]
-        expected_commit = lock["autoscaling_commit"] if autoscaling else neon_commit
+        expected_repo, expected_commit = source.get(name, ("william-lbn/neon", neon_commit))
         if item.get("source_commit") != expected_commit:
             raise ValueError(f"Image source is not the locked commit: {name}")
         if channel == "dsga":
             if item.get("name") != name or item.get("kind") != "runtime":
                 raise ValueError(f"Image record name/kind differs from manifest key: {name}")
-            expected_repo = lock["autoscaling_repository"] if autoscaling else "william-lbn/neon"
             if item.get("source_repository") != expected_repo:
                 raise ValueError(f"Wrong image source repository: {name}")
             if item.get("architecture") != f"linux/{arch}":

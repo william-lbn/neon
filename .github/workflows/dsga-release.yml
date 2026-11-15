@@ -27,6 +27,7 @@ jobs:
     outputs:
       tag: ${{ steps.meta.outputs.tag }}
       autoscaling: ${{ steps.meta.outputs.autoscaling }}
+      control_plane: ${{ steps.meta.outputs.control_plane }}
       binaries: ${{ steps.meta.outputs.binaries }}
       compute_components: ${{ steps.meta.outputs.compute_components }}
       source_commit: ${{ steps.meta.outputs.source_commit }}
@@ -47,10 +48,10 @@ jobs:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          test -n "$DOCKER_USER" && test -n "$DOCKER_TOKEN" || {
+          if [[ -z "$DOCKER_USER" || -z "$DOCKER_TOKEN" ]]; then
             echo 'Configure DOCKERHUB_USERNAME and DOCKERHUB_TOKEN in the Neon repository secrets' >&2
             exit 1
-          }
+          fi
       - id: meta
         run: python3 ci/dsga_release.py prepare --arch "$ARCH"
   postgres-17:
@@ -68,12 +69,23 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@130c0576063cda8009bef3e61b55325fcb424a53
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@53b6faf0ab203c252410e28466edd301b879e44e
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
       source_ref: ${{ needs.prepare.outputs.autoscaling }}
     secrets: inherit
+  control-plane:
+    needs: prepare
+    permissions:
+      contents: read
+    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@c8dd3fe18d1863ef022b32a3a00a3335addb41d5
+    with:
+      source_sha: ${{ needs.prepare.outputs.control_plane }}
+      release_tag: ${{ needs.prepare.outputs.tag }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
   build-tools:
     needs: [prepare, postgres-17, postgres-18]
     runs-on: ${{ inputs.arch == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
@@ -355,7 +367,7 @@ jobs:
           retention-days: 90
           if-no-files-found: error
   validate:
-    needs: [prepare, postgres-17, postgres-18, autoscaling, core-components, compute-components, vm-compute]
+    needs: [prepare, postgres-17, postgres-18, autoscaling, control-plane, core-components, compute-components, vm-compute]
     permissions:
       contents: read
       actions: read
@@ -373,7 +385,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@7fffa57c07894e5e18b1f369c8be64e7ef0a8223
+    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@63980a0f2f04186a5f6f16e7264c49cd2c3e29aa
     with:
       helm_sha: ${{ needs.prepare.outputs.helm }}
       release_version: ${{ needs.prepare.outputs.tag }}

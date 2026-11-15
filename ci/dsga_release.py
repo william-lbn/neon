@@ -33,6 +33,7 @@ def verify_workflow_pins(lock):
     required = [
         ("william-lbn/autoscaling", "dockerhub.yml", lock["autoscaling_commit"]),
         ("william-lbn/neon-helm", "dsga-package.yml", lock["helm_commit"]),
+        (lock["control_plane"]["repository"], "dsga-control-artifacts.yml", lock["control_plane"]["commit"]),
         ("william-lbn/postgres", "build.yml", lock["postgres"]["v17"]),
         ("william-lbn/postgres", "build.yml", lock["postgres"]["v18"]),
     ]
@@ -57,6 +58,7 @@ def prepare(arch):
     outputs = {
         "tag": version, "source_commit": actual,
         "autoscaling": lock["autoscaling_commit"], "helm": lock["helm_commit"],
+        "control_plane": lock["control_plane"]["commit"],
         "pg17": lock["postgres"]["v17"], "pg18": lock["postgres"]["v18"],
         "postgres_matrix": json.dumps(compute.postgres_matrix(), separators=(",", ":")),
         "binaries": json.dumps({"binary": lock["core_binaries"]}, separators=(",", ":")),
@@ -115,6 +117,7 @@ def finalize_assets(directory, tag, source_commit):
 - PostgreSQL 18：{release.LOCK['postgres']['v18']}
 - Autoscaling：{release.LOCK['autoscaling_commit']}
 - Helm：{release.LOCK['helm_commit']}
+- Control Plane：{release.LOCK['control_plane']['commit']}
 - 镜像数量：{len(manifest['images'])}；Chart 数量：{len(charts)}。
 - 同 run 运行 PG17/18 原生内核回归、镜像源码/digest/架构校验、真实 WAL 装载、SQL/存储恢复 smoke、Helm lint/template/打包门禁。
 - PG14–17 保留 full profile；PG18 为 dsga-core，包含 PostgreSQL、contrib 与 Neon 必需扩展，不包含尚未联合适配的第三方全扩展集。

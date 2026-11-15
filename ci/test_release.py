@@ -20,14 +20,19 @@ class ReleaseContractTests(unittest.TestCase):
         self.neon = "f" * 40
         self.execution = release.execution_identity(self.tag)
         self.images = {}
-        for i, name in enumerate(sorted(release.expected_images(self.lock)), 1):
-            autoscaling = name in self.lock["autoscaling_images"]
+        control = self.lock["control_plane"]
+        for i, name in enumerate(sorted(release.expected_images(self.lock, "dsga")), 1):
+            if name in self.lock["autoscaling_images"]:
+                repo, commit = self.lock["autoscaling_repository"], self.lock["autoscaling_commit"]
+            elif name in control["images"]:
+                repo, commit = control["repository"], control["commit"]
+            else:
+                repo, commit = "william-lbn/neon", self.neon
             self.images[name] = {
                 "kind": "runtime", "name": name,
                 "image": f"{self.lock['registry']}/{name}:{self.tag}",
                 "digest": "sha256:" + f"{i:064x}",
-                "source_repository": self.lock["autoscaling_repository"] if autoscaling else "william-lbn/neon",
-                "source_commit": self.lock["autoscaling_commit"] if autoscaling else self.neon,
+                "source_repository": repo, "source_commit": commit,
                 "architecture": "linux/amd64", "execution": copy.deepcopy(self.execution),
             }
         self.capabilities = {
@@ -66,6 +71,31 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("vm-compute-node-v18", result["images"])
         self.assertNotIn("neon-test-extensions-v18", result["images"])
         self.assertEqual(set(result["postgres_native_validation"]), {"v17", "v18"})
+
+    def test_candidate_retains_complete_control_plane_source_inventory(self):
+        result = self.manifest()
+        control = result["source_lock"]["control_plane"]
+        self.assertEqual(len(control["images"]), 9)
+        self.assertTrue(all(result["images"][image]["source_commit"] == control["commit"] for image in control["images"]))
+        self.assertNotIn("control-api", release.expected_images(self.lock, "legacy"))
+
+    def test_control_plane_receipts_are_required_and_locked(self):
+        original = self.images.pop("control-api")
+        with self.assertRaisesRegex(ValueError, "Distribution incomplete"):
+            self.manifest()
+        self.images["control-api"] = original
+        for field, value, error in [
+            ("source_commit", self.neon, "locked commit"),
+            ("source_repository", "william-lbn/neon", "source repository"),
+            ("architecture", "linux/arm64", "architecture"),
+            ("execution", {**self.execution, "run_attempt": "1"}, "run/attempt"),
+        ]:
+            with self.subTest(field=field):
+                prior = self.images["control-api"][field]
+                self.images["control-api"][field] = value
+                with self.assertRaisesRegex(ValueError, error):
+                    self.manifest()
+                self.images["control-api"][field] = prior
 
     def test_missing_pg18_image_is_rejected(self):
         del self.images["compute-node-v18"]
