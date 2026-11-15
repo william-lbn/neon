@@ -69,7 +69,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@ce049a5e88961c75eff4d56bd29a4e112ee5e5fd
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@5b063f121ead3804fdfde900b8eda528dd25fdfe
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
@@ -79,7 +79,7 @@ jobs:
     needs: prepare
     permissions:
       contents: read
-    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@8c74fff5a0284ce2a122f5798f5928f486521ea3
+    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@4425c6ddfbda8c1c827fe23ea64f3d49336966ac
     with:
       source_sha: ${{ needs.prepare.outputs.control_plane }}
       release_tag: ${{ needs.prepare.outputs.tag }}
