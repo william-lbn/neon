@@ -40,6 +40,8 @@ ifeq ($(UNAME_S), Darwin)
     # Link against object files for the current macOS version, to avoid spurious linker warnings.
     MACOSX_DEPLOYMENT_TARGET := $(shell xcrun --sdk macosx --show-sdk-version)
     export MACOSX_DEPLOYMENT_TARGET
+else ifeq ($(UNAME_S), Linux)
+    SHLIB_LINK += -Wl,-z,noexecstack
 endif
 
 EXTENSION = neon
@@ -99,6 +101,7 @@ file_cache.o: communicator/communicator_bindings.h
 
 $(NEON_CARGO_ARTIFACT_TARGET_DIR)/libcommunicator.a communicator/communicator_bindings.h &:
 	(cd $(srcdir)/communicator && cargo build $(CARGO_BUILD_FLAGS) $(CARGO_PROFILE))
+	test -s $(srcdir)/communicator/communicator_bindings.h
 
 # Force `cargo build` every time. Some of the Rust sources might have
 # changed.
