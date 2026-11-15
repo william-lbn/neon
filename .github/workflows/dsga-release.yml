@@ -56,12 +56,12 @@ jobs:
         run: python3 ci/dsga_release.py prepare --arch "$ARCH"
   postgres-17:
     needs: prepare
-    uses: william-lbn/postgres/.github/workflows/build.yml@203e1e83eff9dcb73e03cbeff685f51f7da9539c
+    uses: william-lbn/postgres/.github/workflows/build.yml@646159ec9e7a5a53ca19cf77184efd8684431855
     with:
       source_sha: ${{ needs.prepare.outputs.pg17 }}
   postgres-18:
     needs: prepare
-    uses: william-lbn/postgres/.github/workflows/build.yml@cc9430edcce7b863ffcf0db5ddf3cccc1395065c
+    uses: william-lbn/postgres/.github/workflows/build.yml@55481bcfb9d2e72c4d4033babba58ac433a2bc88
     with:
       source_sha: ${{ needs.prepare.outputs.pg18 }}
   autoscaling:
@@ -69,7 +69,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@a978056c46cdfe5157c8d1d26828eba87ac12781
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@d46ecb2ce1a2f917fe45a6aed425554626c63ca9
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}

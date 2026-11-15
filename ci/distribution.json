@@ -1,7 +1,7 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "a978056c46cdfe5157c8d1d26828eba87ac12781",
+  "autoscaling_commit": "d46ecb2ce1a2f917fe45a6aed425554626c63ca9",
   "control_plane": {
     "repository": "william-lbn/control-plane",
     "commit": "01550934c0b3a45b5bbc380408f19d78655cf99c",
@@ -22,8 +22,8 @@
     "v14": "2155cb165d05f617eb2c8ad7e43367189b627703",
     "v15": "2aaab3bb4a13557aae05bb2ae0ef0a132d0c4f85",
     "v16": "a42351fcd41ea01edede1daed65f651e838988fc",
-    "v17": "203e1e83eff9dcb73e03cbeff685f51f7da9539c",
-    "v18": "cc9430edcce7b863ffcf0db5ddf3cccc1395065c"
+    "v17": "646159ec9e7a5a53ca19cf77184efd8684431855",
+    "v18": "55481bcfb9d2e72c4d4033babba58ac433a2bc88"
   },
   "core_binaries": [
     "pageserver",
