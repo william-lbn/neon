@@ -86,7 +86,9 @@ def finalize_assets(directory, tag, source_commit):
     raw_manifest = (path / "distribution-manifest.json").read_bytes()
     manifest_hash = hashlib.sha256(raw_manifest).hexdigest()
     receipt = json.loads((path / "helm-package-receipt.json").read_text())
+    control_commit = release.LOCK["control_plane"]["commit"]
     if (receipt.get("release_version") != tag or receipt.get("helm_commit") != release.LOCK["helm_commit"]
+            or receipt.get("control_plane_commit") != control_commit
             or receipt.get("distribution_manifest_sha256") != manifest_hash
             or receipt.get("qualification") != manifest["qualification"] or receipt.get("deployed") is not False):
         raise ValueError("Helm package receipt is not bound to this manifest/source/candidate")
@@ -101,10 +103,17 @@ def finalize_assets(directory, tag, source_commit):
     expected_charts = {item["file"]: item for item in receipt.get("charts", [])}
     if set(expected_charts) != {chart.name for chart in charts} or len(expected_charts) != len(receipt.get("charts", [])):
         raise ValueError("Helm chart asset set differs from the successful package receipt")
+    control_charts = {"neon-control-plane", "neon-storage-gateway"}
+    if not all(f"{chart}-{tag}.tgz" in expected_charts for chart in control_charts):
+        raise ValueError("Missing required Control Plane Chart in the unified release")
     for chart in charts:
         if not chart.name.endswith(f"-{tag}.tgz"):
             raise ValueError(f"Chart version differs from the image release: {chart.name}")
         item = expected_charts[chart.name]
+        chart_name = chart.name.removesuffix(f"-{tag}.tgz")
+        expected_commit = control_commit if chart_name in control_charts else release.LOCK["helm_commit"]
+        if item.get("chart") != chart_name or item.get("source_commit") != expected_commit:
+            raise ValueError(f"Chart source does not match the unified release: {chart.name}")
         if (item.get("sha256") != hashlib.sha256(chart.read_bytes()).hexdigest()
                 or item.get("lint") != "pass" or item.get("offline_render") != "pass"):
             raise ValueError(f"Chart package differs from its validation receipt: {chart.name}")

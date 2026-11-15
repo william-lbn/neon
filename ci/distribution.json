@@ -72,5 +72,5 @@
     "v18": "dsga-core"
   },
   "helm_repository": "william-lbn/neon-helm",
-  "helm_commit": "63980a0f2f04186a5f6f16e7264c49cd2c3e29aa"
+  "helm_commit": "cf609ee32f3ebfffa3afaacaadae3b676dbe6120"
 }
