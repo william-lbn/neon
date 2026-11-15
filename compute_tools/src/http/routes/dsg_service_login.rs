@@ -26,6 +26,7 @@ enum Service {
     ManagedAuth,
     DataApi,
     Function,
+    Realtime,
 }
 
 impl Service {
@@ -47,9 +48,18 @@ struct Login {
     database: String,
     function_id: Option<String>,
     schema: Option<String>,
+    realtime_id: Option<String>,
+    relations: Option<Vec<RealtimeRelation>>,
     generation: DsgUint64,
     // Explicit null disables the exact registered service authorization.
     verifier: serde_json::Value,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+struct RealtimeRelation {
+    schema: String,
+    name: String,
 }
 
 impl Login {
@@ -75,14 +85,49 @@ impl Login {
         );
         let valid_scope = match self.service {
             Service::Function => {
-                self.function_id.as_deref().is_some_and(|id| valid_id(id, "fnc_"))
+                self.function_id
+                    .as_deref()
+                    .is_some_and(|id| valid_id(id, "fnc_"))
                     && self.schema.as_deref().is_some_and(valid_function_schema)
+                    && self.realtime_id.is_none()
+                    && self.relations.is_none()
             }
-            _ => self.function_id.is_none() && self.schema.is_none(),
+            Service::Realtime => {
+                self.function_id.is_none()
+                    && self.schema.is_none()
+                    && self
+                        .realtime_id
+                        .as_deref()
+                        .zip(self.relations.as_deref())
+                        .is_some_and(|(id, relations)| {
+                            (valid_realtime_id(id, "rts_") && relations.is_empty())
+                                || (valid_realtime_id(id, "rtq_")
+                                    && (1..=32).contains(&relations.len())
+                                    && relations.iter().all(|relation| {
+                                        valid_function_schema(&relation.schema)
+                                            && valid_identifier(&relation.name)
+                                    }))
+                        })
+            }
+            _ => {
+                self.function_id.is_none()
+                    && self.schema.is_none()
+                    && self.realtime_id.is_none()
+                    && self.relations.is_none()
+            }
         };
         ensure!(valid_scope, "invalid service login scope");
         Ok(())
     }
+}
+
+fn valid_realtime_id(value: &str, prefix: &str) -> bool {
+    value.strip_prefix(prefix).is_some_and(|id| {
+        id.len() == 24
+            && id
+                .bytes()
+                .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+    })
 }
 
 fn valid_id(value: &str, prefix: &str) -> bool {
@@ -94,11 +139,17 @@ fn valid_id(value: &str, prefix: &str) -> bool {
     })
 }
 
-fn valid_function_schema(name: &str) -> bool {
+fn valid_identifier(name: &str) -> bool {
     let mut bytes = name.bytes();
     name.len() <= 63
-        && bytes.next().is_some_and(|b| b.is_ascii_alphabetic() || b == b'_')
+        && bytes
+            .next()
+            .is_some_and(|b| b.is_ascii_alphabetic() || b == b'_')
         && bytes.all(|b| b.is_ascii_alphanumeric() || b == b'_')
+}
+
+fn valid_function_schema(name: &str) -> bool {
+    valid_identifier(name)
         && !["pg_", "neon_", "control_"]
             .iter()
             .any(|prefix| name.to_ascii_lowercase().starts_with(prefix))
@@ -116,6 +167,8 @@ struct Receipt {
     function_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     schema: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    realtime_id: Option<String>,
     generation: DsgUint64,
     enabled: bool,
 }
@@ -209,6 +262,7 @@ pub(crate) async fn reconcile(
             pg_boot_id: input.pg_boot_id,
             function_id: input.function_id,
             schema: input.schema,
+            realtime_id: input.realtime_id,
             generation: input.generation,
             enabled: !input.verifier.is_null(),
         })
@@ -235,6 +289,11 @@ async fn connect(config: &Config) -> Result<Client> {
 async fn apply(config: &Config, input: &Login, tenant: &str, timeline: &str) -> Result<()> {
     let generation = i64::try_from(input.generation.get())?;
     let verifier = input.verifier.as_str();
+    let relations = input
+        .relations
+        .as_ref()
+        .map(serde_json::to_string)
+        .transpose()?;
     let client = tokio::time::timeout(Duration::from_secs(3), connect(config))
         .await
         .map_err(|_| anyhow::anyhow!("service login connection deadline"))?
@@ -250,6 +309,12 @@ async fn apply(config: &Config, input: &Login, tenant: &str, timeline: &str) -> 
              SET pgaudit.log_parameter=off; SET pg_stat_statements.track='none'; SET neon.forward_ddl=false;"
         ).await?;
         match input.service {
+            Service::Realtime => {
+                client.batch_execute(include_str!("../../dsg_realtime_login.sql")).await?;
+                client.query_one("SELECT pg_temp.dsga_apply_realtime_login($1,$2,$3,$4,$5,$6,$7,$8::text::jsonb)",
+                    &[&input.project_id, &input.branch_id, &tenant, &timeline, &generation, &verifier,
+                      &input.realtime_id, &relations]).await
+            }
             Service::Function => {
                 client.batch_execute(include_str!("../../dsg_function_login.sql")).await?;
                 client.query_one("SELECT pg_temp.dsga_apply_function_login($1,$2,$3,$4,$5,$6,$7,$8)",

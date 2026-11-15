@@ -350,6 +350,8 @@ async fn service_logins(config: &Config, spec: &ComputeSpec) -> Result<Vec<(Stri
     let data_app = format!("app_da_{branch}");
     let function_tag = format!("neon-control:function:{project}:br_{branch}:fnc_");
     let function_prefix = format!("dsga_fn_login_{branch}_");
+    let realtime_tag = format!("neon-control:realtime:{project}:br_{branch}:rt");
+    let realtime_prefix = format!("dsga_rtl_{branch}_");
     let rows = tokio::time::timeout(
         Duration::from_secs(3),
         client.query(
@@ -417,9 +419,45 @@ async fn service_logins(config: &Config, spec: &ComputeSpec) -> Result<Vec<(Stri
                     ~ ('^[A-Za-z_][A-Za-z0-9_]{0,62}:' || login.oid::text || ':[1-9][0-9]{0,18}:enabled$')
                AND session_user='cloud_admin' AND current_user='cloud_admin'
                AND NOT pg_catalog.pg_is_in_recovery()
+             UNION ALL
+             SELECT d.datname::text, login.rolname::text
+             FROM pg_catalog.pg_authid login
+             CROSS JOIN pg_catalog.pg_database d
+             CROSS JOIN LATERAL (
+                 SELECT pg_catalog.starts_with(login.rolname::text,'rtp_') AS replication,
+                        pg_catalog.substr(login.rolname::text,5) AS suffix
+             ) AS id
+             CROSS JOIN LATERAL (
+                 SELECT CASE WHEN id.replication THEN 's' ELSE 'q' END AS lane
+             ) AS scope
+             JOIN pg_catalog.pg_authid marker
+               ON marker.rolname::text=$11 || scope.lane || id.suffix || '_' || d.oid::text
+             CROSS JOIN LATERAL (
+                 SELECT $10 || scope.lane || '_' || id.suffix AS role_tag
+             ) AS receipt
+             CROSS JOIN LATERAL (
+                 SELECT receipt.role_tag || ':' || d.oid::text || ':v1:' AS prefix,
+                        pg_catalog.shobj_description(marker.oid,'pg_authid') AS marker_tag
+             ) AS binding
+             WHERE login.rolname::text ~ '^(rtp|rtr)_[0-9a-f]{24}$' AND d.datallowconn AND NOT d.datistemplate
+               AND pg_catalog.has_database_privilege(login.oid,d.oid,'CONNECT')
+               AND login.rolcanlogin AND NOT login.rolinherit AND login.rolreplication=id.replication
+               AND login.rolconnlimit=CASE WHEN id.replication THEN 2 ELSE 8 END
+               AND login.rolpassword LIKE 'SCRAM-SHA-256$%'
+               AND NOT (login.rolsuper OR login.rolcreaterole OR login.rolcreatedb OR login.rolbypassrls)
+               AND NOT marker.rolcanlogin AND NOT marker.rolinherit AND marker.rolpassword IS NULL
+               AND NOT (marker.rolsuper OR marker.rolcreaterole OR marker.rolcreatedb OR marker.rolreplication OR marker.rolbypassrls)
+               AND NOT EXISTS (SELECT FROM pg_catalog.pg_auth_members
+                   WHERE member IN (marker.oid,login.oid) OR roleid IN (marker.oid,login.oid))
+               AND pg_catalog.shobj_description(login.oid,'pg_authid')=receipt.role_tag
+               AND pg_catalog.starts_with(binding.marker_tag,binding.prefix)
+               AND pg_catalog.substr(binding.marker_tag,pg_catalog.length(binding.prefix)+1)
+                    ~ ('^[0-9a-f]{64}:' || login.oid::text || ':[1-9][0-9]{0,18}:enabled$')
+               AND session_user='cloud_admin' AND current_user='cloud_admin'
+               AND NOT pg_catalog.pg_is_in_recovery()
              ) scoped ORDER BY db, role LIMIT 129",
             &[&auth_prefix, &auth_login, &auth_tag, &data_prefix, &data_login, &data_tag,
-              &data_app, &function_tag, &function_prefix],
+              &data_app, &function_tag, &function_prefix, &realtime_tag, &realtime_prefix],
         ),
     )
     .await

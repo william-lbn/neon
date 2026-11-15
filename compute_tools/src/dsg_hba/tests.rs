@@ -761,6 +761,91 @@ async fn native_backend_hba_is_bound_to_database_role_and_branch() -> Result<()>
     ).await?;
     refresh(&config, &pg.data, 55432, &spec, true).await?;
     denied(&function, "28000").await?;
+    admin
+        .batch_execute(
+            "CREATE TABLE function_app.realtime_events(id int PRIMARY KEY);
+         INSERT INTO function_app.realtime_events VALUES (7);
+         CREATE TABLE function_app.unpublished(id int PRIMARY KEY);
+         GRANT SELECT ON function_app.realtime_events TO control_probe WITH GRANT OPTION;",
+        )
+        .await?;
+    admin
+        .batch_execute(include_str!("../dsg_realtime_login.sql"))
+        .await?;
+    admin.batch_execute(
+        "SELECT pg_temp.dsga_apply_realtime_login(
+             'prj_0123456789abcdef','br_0123456789abcdef',
+             repeat('1',32),repeat('2',32),1,
+             (SELECT rolpassword FROM pg_authid WHERE rolname='data_api_fixture_seed'),
+             'rts_1234567890abcdef12345678','[]');
+         SELECT pg_temp.dsga_apply_realtime_login(
+             'prj_0123456789abcdef','br_0123456789abcdef',
+             repeat('1',32),repeat('2',32),1,
+             (SELECT rolpassword FROM pg_authid WHERE rolname='data_api_fixture_seed'),
+             'rtq_1234567890abcdef12345678','[{\"schema\":\"function_app\",\"name\":\"realtime_events\"}]');"
+    ).await?;
+    let mut source = tcp.clone();
+    source.user("rtp_1234567890abcdef12345678");
+    let mut snapshot = tcp.clone();
+    snapshot.user("rtr_1234567890abcdef12345678");
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    let stream_login = sql_config(&source).await?;
+    let snapshot_login = sql_config(&snapshot).await?;
+    for (conn, expected) in [(&stream_login, true), (&snapshot_login, false)] {
+        assert_eq!(
+            conn.query_one(
+                "SELECT rolreplication FROM pg_roles WHERE rolname=current_user",
+                &[]
+            )
+            .await?
+            .get::<_, bool>(0),
+            expected
+        );
+    }
+    assert_eq!(
+        snapshot_login
+            .query_one("SELECT id FROM function_app.realtime_events", &[])
+            .await?
+            .get::<_, i32>(0),
+        7
+    );
+    assert!(
+        snapshot_login
+            .query_one("SELECT id FROM function_app.unpublished", &[])
+            .await
+            .is_err()
+    );
+    assert!(
+        snapshot_login
+            .execute("INSERT INTO function_app.realtime_events VALUES(8)", &[])
+            .await
+            .is_err()
+    );
+    assert!(
+        stream_login
+            .query_one("SELECT id FROM function_app.realtime_events", &[])
+            .await
+            .is_err()
+    );
+    let mut wrong_database = source.clone();
+    wrong_database.dbname("hba_other");
+    denied(&wrong_database, "28000").await?;
+    refresh(&config, &pg.data, 55432, &child, true).await?;
+    denied(&source, "28000").await?;
+    denied(&snapshot, "28000").await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    admin.batch_execute(
+        "SELECT pg_temp.dsga_apply_realtime_login(
+             'prj_0123456789abcdef','br_0123456789abcdef',
+             repeat('1',32),repeat('2',32),2,NULL,'rts_1234567890abcdef12345678','[]');
+         SELECT pg_temp.dsga_apply_realtime_login(
+             'prj_0123456789abcdef','br_0123456789abcdef',
+             repeat('1',32),repeat('2',32),2,NULL,
+             'rtq_1234567890abcdef12345678','[{\"schema\":\"function_app\",\"name\":\"realtime_events\"}]');"
+    ).await?;
+    refresh(&config, &pg.data, 55432, &spec, true).await?;
+    denied(&source, "28000").await?;
+    denied(&snapshot, "28000").await?;
     pg.passed = true;
     Ok(())
 }
