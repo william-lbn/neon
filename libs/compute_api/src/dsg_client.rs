@@ -20,6 +20,7 @@ use crate::dsg_admission::{
     DsgAdmissionRequest, DsgAdmissionResponse,
 };
 
+use crate::dsg_cache::{DsgCacheCounters, DsgCacheObservation, MAX_CACHE_DATABASES};
 use crate::dsg_control::{
     DsgInstanceIdentity, DsgIssuerFenceRequest, DsgOperationKey, DsgOperationQuery,
     DsgResizeRequest, validate_id,
@@ -456,6 +457,47 @@ impl<'a> DsgSqlClient<'a> {
         .await?;
         response.validate_for(&self.instance)?;
         Ok(response)
+    }
+
+    pub async fn cache_observation(&self) -> Result<DsgCacheObservation> {
+        self.memory_status().await?;
+        let limit = (MAX_CACHE_DATABASES + 1) as i64;
+        let sql = "
+            WITH sampled AS MATERIALIZED (
+              SELECT (EXTRACT(epoch FROM clock_timestamp()) * 1000000)::bigint AS stamp
+            ),
+            databases AS MATERIALIZED (
+              SELECT stats.datid, stats.stats_reset, stats.blks_hit, stats.blks_read
+              FROM pg_catalog.pg_stat_database AS stats
+              JOIN pg_catalog.pg_database AS db ON db.oid = stats.datid
+              WHERE NOT db.datistemplate
+              ORDER BY stats.datid LIMIT $1
+            )
+            SELECT jsonb_build_object(
+              'sampled_at_unix_micros', sampled.stamp::text,
+              'tenant_id', current_setting('neon.tenant_id', true),
+              'timeline_id', current_setting('neon.timeline_id', true),
+              'databases', COALESCE((
+                SELECT jsonb_agg(jsonb_build_object(
+                  'database_oid', datid::bigint,
+                  'stats_reset_at_unix_micros', ((EXTRACT(epoch FROM stats_reset) * 1000000)::bigint)::text,
+                  'buffer_hits', blks_hit::text,
+                  'buffer_reads', blks_read::text
+                ) ORDER BY datid) FROM databases
+              ), '[]'::jsonb)
+            )::text FROM sampled WHERE current_setting('track_counts')::boolean";
+        let row = timeout(self.response_timeout, self.observer.query_one(sql, &[&limit])).await??;
+        let raw: &str = row.try_get(0)?;
+        ensure!(raw.len() <= MAX_RESPONSE_BYTES, "cache observer response too large");
+        let counters: DsgCacheCounters = serde_json::from_str(raw)?;
+        self.memory_status().await?;
+        let observation = DsgCacheObservation {
+            protocol_version: 1,
+            instance: self.instance.clone(),
+            counters,
+        };
+        observation.validate()?;
+        Ok(observation)
     }
 
     /// 原生成本只读观察，原启动总量已含四数组。完整成本来自同一次native快照，
