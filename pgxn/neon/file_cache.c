@@ -12,6 +12,7 @@
 #include "postgres.h"
 
 #include <sys/file.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
 
@@ -20,6 +21,7 @@
 #include "access/parallel.h"
 #include "access/xlog.h"
 #include "funcapi.h"
+#include "lib/stringinfo.h"
 #include "miscadmin.h"
 #include "common/hashfn.h"
 #include "pgstat.h"
@@ -39,6 +41,8 @@
 #include "utils/builtins.h"
 #include "utils/dynahash.h"
 #include "utils/guc.h"
+#include "utils/jsonb.h"
+#include "utils/timestamp.h"
 
 #if PG_VERSION_NUM >= 150000
 #include "access/xlogrecovery.h"
@@ -153,6 +157,62 @@ typedef struct PrewarmWorkerState
 	TimestampTz completed;
 } PrewarmWorkerState;
 
+/*
+ * 此处只保留原执行器的有限观察，不持有额外文件引用，也不是降限回执。
+ * generation 只在关闭时改变，故单独记录目标执行序列以识别非零缩小。
+ * 最后事件允许覆盖；使用者丢失原序列时必须保留未知，不能套用新事件。
+ */
+typedef enum LfcReclaimTrigger
+{
+	LFC_RECLAIM_NONE,
+	LFC_RECLAIM_LIMIT,
+	LFC_RECLAIM_READ,
+	LFC_RECLAIM_WRITE,
+	LFC_RECLAIM_OPEN
+} LfcReclaimTrigger;
+
+typedef enum LfcReclaimFailure
+{
+	LFC_RECLAIM_FAILURE_NONE,
+	LFC_RECLAIM_FAILURE_UNSUPPORTED,
+	LFC_RECLAIM_FAILURE_PERMISSION,
+	LFC_RECLAIM_FAILURE_IO,
+	LFC_RECLAIM_FAILURE_SPACE,
+	LFC_RECLAIM_FAILURE_OTHER
+} LfcReclaimFailure;
+
+typedef struct LfcFileObservation
+{
+	bool		available;
+	LfcReclaimFailure failure;
+	uint64		device;
+	uint64		inode;
+	uint64		links;
+	uint64		size;
+	uint64		allocated_bytes;
+} LfcFileObservation;
+
+typedef struct LfcReclaimObservation
+{
+	bool		available;
+	LfcReclaimTrigger trigger;
+	uint64		sequence;
+	uint64		generation_before;
+	uint64		generation_after;
+	uint64		original_file_generation;
+	uint64		target_bytes;
+	uint32		pinned_before;
+	uint64		punch_attempts;
+	uint64		punch_failures;
+	LfcReclaimFailure punch_failure;
+	int			unlink_status; /* 0 未尝试，1 成功，2 失败 */
+	int			recreate_status;
+	LfcReclaimFailure unlink_failure;
+	LfcReclaimFailure recreate_failure;
+	LfcFileObservation original_file;
+	LfcFileObservation original_file_after;
+} LfcReclaimObservation;
+
 typedef struct FileCacheControl
 {
 	uint64		generation;		/* generation is needed to handle correct hash
@@ -169,6 +229,10 @@ typedef struct FileCacheControl
 	uint64		time_write;		/* time spent writing (us) */
 	uint64		resizes;        /* number of LFC resizes   */
 	uint64		evicted_pages;	/* number of evicted pages */
+	/* 原 lfc_lock 保护；序列耗尽后观察永久不可用，绝不回绕或复用旧号。 */
+	uint64		reclaim_sequence;
+	bool		reclaim_exhausted;
+	LfcReclaimObservation reclaim;
 	dlist_head	lru;			/* double linked list for LRU replacement
 								 * algorithm */
 	dlist_head  holes;          /* double linked list of punched holes */
@@ -236,6 +300,78 @@ bool AmPrewarmWorker;
 
 #define LFC_ENABLED() (lfc_ctl->limit != 0)
 
+static LfcReclaimFailure
+lfc_reclaim_failure(int error)
+{
+	switch (error)
+	{
+		case 0: return LFC_RECLAIM_FAILURE_NONE;
+		case ENOSYS:
+		case EOPNOTSUPP: return LFC_RECLAIM_FAILURE_UNSUPPORTED;
+		case EACCES:
+		case EPERM: return LFC_RECLAIM_FAILURE_PERMISSION;
+		case EIO: return LFC_RECLAIM_FAILURE_IO;
+		case ENOSPC:
+		case EDQUOT: return LFC_RECLAIM_FAILURE_SPACE;
+		default: return LFC_RECLAIM_FAILURE_OTHER;
+	}
+}
+
+static LfcFileObservation
+lfc_observe_file(int descriptor, bool path)
+{
+	LfcFileObservation result = {0};
+	struct stat st;
+	int saved_errno = errno;
+	int rc;
+
+	/* 不打开文件，不调用 ensure_opened；缺失/符号链接/溢出都不能伪装零。 */
+	if (!path && descriptor < 0)
+		return result;
+	rc = path ? lstat(lfc_path, &st) : fstat(descriptor, &st);
+	if (rc != 0)
+		result.failure = lfc_reclaim_failure(errno);
+	else if (!S_ISREG(st.st_mode) || st.st_size < 0 || st.st_blocks < 0 ||
+			 (uint64) st.st_blocks > PG_UINT64_MAX / 512)
+		result.failure = LFC_RECLAIM_FAILURE_OTHER;
+	else
+	{
+		result.available = true;
+		result.device = (uint64) st.st_dev;
+		result.inode = (uint64) st.st_ino;
+		result.links = (uint64) st.st_nlink;
+		result.size = (uint64) st.st_size;
+		result.allocated_bytes = (uint64) st.st_blocks * 512;
+	}
+	errno = saved_errno;
+	return result;
+}
+
+/* 仅在原目标变化/错误关闭的锁内慢路径调用；不增加每次读写的 stat。 */
+static void
+lfc_reclaim_begin(LfcReclaimTrigger trigger, uint64 target_bytes)
+{
+	LfcReclaimObservation *event = &lfc_ctl->reclaim;
+
+	memset(event, 0, sizeof(*event));
+	if (lfc_ctl->reclaim_exhausted || lfc_ctl->reclaim_sequence == PG_UINT64_MAX ||
+		lfc_ctl->generation == PG_UINT64_MAX)
+	{
+		lfc_ctl->reclaim_exhausted = true;
+		return;
+	}
+	event->available = true;
+	event->sequence = ++lfc_ctl->reclaim_sequence;
+	event->trigger = trigger;
+	event->generation_before = event->generation_after = lfc_ctl->generation;
+	/* 失败 IO 可能仍握着旧 FD，而其他后台已切换共享代次，不能把两者混同。 */
+	event->original_file_generation = lfc_generation;
+	event->target_bytes = target_bytes;
+	/* switch_off 会清空 pinned；必须先保留旧代次的原事实。 */
+	event->pinned_before = lfc_ctl->pinned;
+	event->original_file = lfc_observe_file(lfc_desc, false);
+}
+
 PGDLLEXPORT void lfc_prewarm_main(Datum main_arg);
 
 /*
@@ -287,13 +423,29 @@ lfc_switch_off(void)
 		 * We need to use unlink to to avoid races in LFC write, because it is not
 		 * protected by lock
 		 */
-		unlink(lfc_path);
+		if (unlink(lfc_path) == 0)
+			lfc_ctl->reclaim.unlink_status = 1;
+		else
+		{
+			lfc_ctl->reclaim.unlink_status = 2;
+			lfc_ctl->reclaim.unlink_failure = lfc_reclaim_failure(errno);
+		}
 
 		fd = BasicOpenFile(lfc_path, O_RDWR | O_CREAT | O_TRUNC);
 		if (fd < 0)
+		{
+			lfc_ctl->reclaim.recreate_status = 2;
+			lfc_ctl->reclaim.recreate_failure = lfc_reclaim_failure(errno);
 			elog(WARNING, "LFC: failed to recreate local file cache %s: %m", lfc_path);
+		}
 		else
+		{
+			lfc_ctl->reclaim.recreate_status = 1;
 			close(fd);
+		}
+		lfc_ctl->reclaim.generation_after = lfc_ctl->generation;
+		/* 原 descriptor 尚未关闭；观察不会替旧 inode 增添一个新引用。 */
+		lfc_ctl->reclaim.original_file_after = lfc_observe_file(lfc_desc, false);
 
 		/* Wakeup waiting backends */
 		for (int i = 0; i < N_COND_VARS; i++)
@@ -308,6 +460,9 @@ lfc_disable(char const *op)
 	elog(WARNING, "LFC: failed to %s local file cache at %s: %m, disabling local file cache", op, lfc_path);
 
 	LWLockAcquire(lfc_lock, LW_EXCLUSIVE);
+	if (LFC_ENABLED())
+		lfc_reclaim_begin(strcmp(op, "read") == 0 ? LFC_RECLAIM_READ :
+						  strcmp(op, "write") == 0 ? LFC_RECLAIM_WRITE : LFC_RECLAIM_OPEN, 0);
 	lfc_switch_off();
 	LWLockRelease(lfc_lock);
 }
@@ -457,6 +612,7 @@ static void
 lfc_change_limit_hook(int newval, void *extra)
 {
 	uint32		new_size = SIZE_MB_TO_CHUNKS(newval);
+	bool		new_reclaim = false;
 
 	if (!lfc_ctl || !is_normal_backend())
 		return;
@@ -482,6 +638,12 @@ lfc_change_limit_hook(int newval, void *extra)
 	{
 		lfc_ctl->resizes += 1;
 	}
+	if (lfc_ctl->limit != new_size || new_size < lfc_ctl->used)
+	{
+		lfc_reclaim_begin(LFC_RECLAIM_LIMIT,
+						 (uint64) new_size * lfc_blocks_per_chunk * BLCKSZ);
+		new_reclaim = true;
+	}
 
 	while (new_size < lfc_ctl->used && !dlist_is_empty(&lfc_ctl->lru))
 	{
@@ -498,8 +660,13 @@ lfc_change_limit_hook(int newval, void *extra)
 
 		CriticalAssert(victim->access_count == 0);
 #ifdef FALLOC_FL_PUNCH_HOLE
+		lfc_ctl->reclaim.punch_attempts++;
 		if (fallocate(lfc_desc, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE, (off_t) victim->offset * lfc_blocks_per_chunk * BLCKSZ, lfc_blocks_per_chunk * BLCKSZ) < 0)
+		{
+			lfc_ctl->reclaim.punch_failures++;
+			lfc_ctl->reclaim.punch_failure = lfc_reclaim_failure(errno);
 			neon_log(LOG, "Failed to punch hole in file: %m");
+		}
 #endif
 		/* We remove the old entry, and re-enter a hole to the hash table */
 		for (int i = 0; i < lfc_blocks_per_chunk; i++)
@@ -525,7 +692,11 @@ lfc_change_limit_hook(int newval, void *extra)
 	if (new_size == 0)
 		lfc_switch_off();
 	else
+	{
 		lfc_ctl->limit = new_size;
+		if (new_reclaim)
+			lfc_ctl->reclaim.original_file_after = lfc_observe_file(lfc_desc, false);
+	}
 
 	neon_log(DEBUG1, "set local file cache limit to %d", new_size);
 
@@ -1914,6 +2085,125 @@ lfc_writev(NRelFileInfo rinfo, ForkNumber forkNum, BlockNumber blkno,
 		nblocks -= blocks_in_chunk;
 	}
 	LWLockRelease(lfc_lock);
+}
+
+static const char *
+lfc_reclaim_failure_name(LfcReclaimFailure failure)
+{
+	static const char *const names[] = {"none", "unsupported", "permission", "io", "space", "other"};
+	return names[failure];
+}
+
+static void
+lfc_append_file_observation(StringInfo result, const LfcFileObservation *file)
+{
+	appendStringInfo(result, "{\"available\":%s,\"failure\":\"%s\"",
+					 file->available ? "true" : "false", lfc_reclaim_failure_name(file->failure));
+	if (file->available)
+		appendStringInfo(result,
+						 ",\"device\":\"" UINT64_FORMAT "\",\"inode\":\"" UINT64_FORMAT
+						 "\",\"links\":\"" UINT64_FORMAT "\",\"size_bytes\":\"" UINT64_FORMAT
+						 "\",\"allocated_bytes\":\"" UINT64_FORMAT "\"",
+						 file->device, file->inode, file->links, file->size, file->allocated_bytes);
+	appendStringInfoChar(result, '}');
+}
+
+PG_FUNCTION_INFO_V1(neon_lfc_reclaim_state);
+
+Datum
+neon_lfc_reclaim_state(PG_FUNCTION_ARGS)
+{
+	StringInfoData result;
+	LfcReclaimObservation event = {0};
+	LfcFileObservation descriptor = {0};
+	LfcFileObservation path = {0};
+	uint64 generation = 0, sequence = 0, limit_bytes = 0;
+	uint32 used = 0, pinned = 0;
+	bool exhausted = false, prewarm = false, stable = false;
+	static const char *const triggers[] = {"none", "limit_change", "read_failure", "write_failure", "open_failure"};
+	static const char *const statuses[] = {"not_attempted", "succeeded", "failed"};
+
+	if (lfc_ctl != NULL)
+	{
+		/* 锁内只复制固定大小状态。JSON 分配和观察系统调用都放在锁外。 */
+		LWLockAcquire(lfc_lock, LW_SHARED);
+		generation = lfc_ctl->generation;
+		sequence = lfc_ctl->reclaim_sequence;
+		exhausted = lfc_ctl->reclaim_exhausted;
+		limit_bytes = (uint64) lfc_ctl->limit * lfc_blocks_per_chunk * BLCKSZ;
+		used = lfc_ctl->used;
+		pinned = lfc_ctl->pinned;
+		prewarm = lfc_ctl->prewarm_active;
+		event = lfc_ctl->reclaim;
+		LWLockRelease(lfc_lock);
+
+		descriptor = lfc_observe_file(lfc_desc, false);
+		path = lfc_observe_file(-1, true);
+
+		LWLockAcquire(lfc_lock, LW_SHARED);
+		stable = generation == lfc_ctl->generation && sequence == lfc_ctl->reclaim_sequence &&
+			!lfc_ctl->reclaim_exhausted;
+		LWLockRelease(lfc_lock);
+	}
+
+	/*
+	 * 原读写 syscall 在锁外；即使序列未变，blocks 也只是该时点的内核值。
+	 * 未建立完整旧代次 backend 引用见证之前，任何分支都不签 release_proven。
+	 */
+	initStringInfo(&result);
+	appendStringInfo(&result,
+		"{\"version\":1,\"scope\":\"postmaster_lfc_executor_observation\","
+		"\"available\":%s,\"enabled\":%s,\"sequence_exhausted\":%s,"
+		"\"generation\":\"" UINT64_FORMAT "\",\"reclaim_sequence\":\"" UINT64_FORMAT "\","
+		"\"max_bytes\":\"" UINT64_FORMAT "\",\"configured_limit_bytes\":\"" UINT64_FORMAT "\","
+		"\"shared_limit_bytes\":\"" UINT64_FORMAT "\",\"used_chunks\":%u,\"pinned_chunks\":%u,"
+		"\"prewarm_active\":%s,\"generation_sequence_stable\":%s,"
+		"\"metadata_scope\":\"point_in_time_not_io_barrier\","
+		"\"old_references\":\"unknown\",\"release_proven\":false,"
+		"\"caller_descriptor_generation\":\"" UINT64_FORMAT "\","
+		"\"caller_descriptor_matches_shared_generation\":%s,\"caller_descriptor\":",
+		lfc_ctl != NULL && !exhausted ? "true" : "false", limit_bytes != 0 ? "true" : "false",
+		exhausted ? "true" : "false", generation, sequence,
+		(uint64) lfc_max_size * MB, (uint64) lfc_size_limit * MB, limit_bytes, used, pinned,
+		prewarm ? "true" : "false", stable ? "true" : "false", lfc_generation,
+		descriptor.available && lfc_generation == generation ? "true" : "false");
+	lfc_append_file_observation(&result, &descriptor);
+	appendStringInfoString(&result, ",\"current_path\":");
+	lfc_append_file_observation(&result, &path);
+	appendStringInfoString(&result, ",\"last_reclaim\":");
+	if (!event.available || exhausted)
+		appendStringInfoString(&result, "null");
+	else
+	{
+		appendStringInfo(&result,
+			"{\"sequence\":\"" UINT64_FORMAT "\",\"trigger\":\"%s\","
+			"\"generation_before\":\"" UINT64_FORMAT "\",\"generation_after\":\"" UINT64_FORMAT "\","
+			"\"original_file_generation\":\"" UINT64_FORMAT "\","
+			"\"original_file_matches_generation_before\":%s,"
+			"\"target_bytes\":\"" UINT64_FORMAT "\",\"pinned_before\":%u,"
+			"\"punch_attempts\":\"" UINT64_FORMAT "\",\"punch_failures\":\"" UINT64_FORMAT "\","
+			"\"punch_failure\":\"%s\",\"punch_support\":\"%s\","
+			"\"unlink_status\":\"%s\",\"unlink_failure\":\"%s\","
+			"\"recreate_status\":\"%s\",\"recreate_failure\":\"%s\",\"original_file\":",
+			event.sequence, triggers[event.trigger], event.generation_before, event.generation_after,
+			event.original_file_generation,
+			event.original_file.available && event.original_file_generation == event.generation_before ? "true" : "false",
+			event.target_bytes, event.pinned_before, event.punch_attempts, event.punch_failures,
+			lfc_reclaim_failure_name(event.punch_failure),
+#ifdef FALLOC_FL_PUNCH_HOLE
+			"compiled_supported",
+#else
+			"compiled_unsupported",
+#endif
+			statuses[event.unlink_status], lfc_reclaim_failure_name(event.unlink_failure),
+			statuses[event.recreate_status], lfc_reclaim_failure_name(event.recreate_failure));
+		lfc_append_file_observation(&result, &event.original_file);
+		appendStringInfoString(&result, ",\"original_file_after\":");
+		lfc_append_file_observation(&result, &event.original_file_after);
+		appendStringInfoString(&result, "}");
+	}
+	appendStringInfoString(&result, "}");
+	return DirectFunctionCall1(jsonb_in, CStringGetDatum(result.data));
 }
 
 /*
