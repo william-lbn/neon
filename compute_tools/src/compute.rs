@@ -2122,21 +2122,62 @@ impl ComputeNode {
     /// 调用方持dsg_configuration_lock。固定私有身份/单socket，不用旧管理
     /// URL的host/password/options；实际加载新HBA前不得发布代理映射或Running。
     pub(crate) fn refresh_dsg_hba(&self, spec: &ComputeSpec, publish: bool) -> Result<()> {
+        self.refresh_dsg_hba_source(spec, publish, None)
+    }
+
+    /// 与 Writer 共用原文件发布/回执生命周期，但 Reader 必须先后核对复制目录，
+    /// 且调用者仍持配置锁及生命周期读锁，不能由普通认证请求触发目录写入。
+    pub(crate) fn refresh_dsg_reader_catalog(
+        &self,
+        spec: &ComputeSpec,
+        source: &crate::dsg_hba::ReaderCatalogRole<'_>,
+    ) -> Result<()> {
+        // Reader 专用入口不能继承 legacy 的静默跳过；即使未来调用方绕过
+        // 当前 Running/frozen 检查，也必须先拒绝再触碰文件或网络。
+        anyhow::ensure!(
+            spec.dynamic_shared_buffers.is_some(),
+            "Reader catalog refresh requires managed Compute"
+        );
+        self.refresh_dsg_hba_source(spec, true, Some(source))
+    }
+
+    fn refresh_dsg_hba_source(
+        &self,
+        spec: &ComputeSpec,
+        publish: bool,
+        reader: Option<&crate::dsg_hba::ReaderCatalogRole<'_>>,
+    ) -> Result<()> {
         if spec.dynamic_shared_buffers.is_none() {
             return Ok(());
         }
-        *self
-            .dsg_authentication_receipt
-            .write()
-            .map_err(|_| anyhow::anyhow!("DSGA authentication state poisoned"))? = None;
+        let invalidate = || {
+            *self
+                .dsg_authentication_receipt
+                .write()
+                .map_err(|_| anyhow::anyhow!("DSGA authentication state poisoned"))? = None;
+            Ok(())
+        };
         let config = self.get_tokio_conn_conf(Some("compute_ctl:DSGA_HBA"));
-        let receipt = tokio::runtime::Handle::current().block_on(crate::dsg_hba::refresh(
-            &config,
-            Path::new(&self.params.pgdata),
-            self.management_pg_port(),
-            spec,
-            publish,
-        ))?;
+        let runtime = tokio::runtime::Handle::current();
+        let receipt = if let Some(source) = reader {
+            runtime.block_on(crate::dsg_hba::refresh_reader_catalog(
+                &config,
+                Path::new(&self.params.pgdata),
+                self.management_pg_port(),
+                spec,
+                source,
+                invalidate,
+            ))?
+        } else {
+            invalidate()?;
+            runtime.block_on(crate::dsg_hba::refresh(
+                &config,
+                Path::new(&self.params.pgdata),
+                self.management_pg_port(),
+                spec,
+                publish,
+            ))?
+        };
         if publish {
             *self
                 .dsg_authentication_receipt

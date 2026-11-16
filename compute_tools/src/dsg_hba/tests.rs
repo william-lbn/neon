@@ -926,3 +926,447 @@ async fn native_backend_hba_is_bound_to_database_role_and_branch() -> Result<()>
     pg.passed = true;
     Ok(())
 }
+
+/// 仅使用独占小规格物理主备；真实 recovery/WAL、原生产角色 SQL、实际 SCRAM
+/// 连接及只读 SQL 共同取证，不能用 HBA 文件字符串替代业务登录结果。
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+#[ignore = "requires locked PG17/18 binaries and installed full Neon/test libraries"]
+async fn native_reader_catalog_refresh_requires_replayed_original_role() -> Result<()> {
+    let mut primary = cluster::Cluster::new_catalog()?;
+    let configuration = fs::read_to_string(primary.data.join("postgresql.conf"))?
+        + "\nneon.project_id='prj_0123456789abcdef'\n\
+           neon.branch_id='br_0123456789abcdef'\n\
+           neon.tenant_id='11111111111111111111111111111111'\n\
+           neon.timeline_id='22222222222222222222222222222222'\n";
+    fs::write(primary.data.join("postgresql.conf"), configuration)?;
+    primary.restart()?;
+    let setup = primary.connect().await?;
+    setup
+        .batch_execute(
+            "SET password_encryption='scram-sha-256';
+         CREATE ROLE cloud_admin SUPERUSER LOGIN;
+         CREATE ROLE control_probe NOLOGIN NOCREATEROLE;
+         CREATE ROLE reader_seed LOGIN PASSWORD 'Reader-fixture-first-2026';
+         CREATE ROLE reader_seed_next LOGIN PASSWORD 'Reader-fixture-next-2026';
+         CREATE TABLE reader_payload(value integer); INSERT INTO reader_payload VALUES(42);
+         GRANT SELECT ON reader_payload TO PUBLIC;",
+        )
+        .await?;
+    // 两版只调用各自原测试模块的显式管理员门禁，不改名借用另一版 ABI。
+    if primary.catalog_pg18 {
+        setup.batch_execute("CREATE FUNCTION public.reader_admit(bool) RETURNS void AS '$libdir/test_dsg_region18','test_dsg_work18_admission' LANGUAGE C STRICT;").await?;
+    } else {
+        setup.batch_execute("CREATE FUNCTION public.reader_boot() RETURNS bigint AS '$libdir/test_dsg_region','test_dsg_boot_id' LANGUAGE C;
+            CREATE FUNCTION public.reader_admit(bigint,bigint,bigint,bool) RETURNS bool AS '$libdir/test_dsg_region','test_dsg_admission' LANGUAGE C STRICT;").await?;
+    }
+    let password: String = setup
+        .query_one(
+            "SELECT rolpassword FROM pg_catalog.pg_authid WHERE rolname='reader_seed'",
+            &[],
+        )
+        .await?
+        .get(0);
+    let next_password: String = setup
+        .query_one(
+            "SELECT rolpassword FROM pg_catalog.pg_authid WHERE rolname='reader_seed_next'",
+            &[],
+        )
+        .await?
+        .get(0);
+    let writer = connect(&private_config(&primary.data, 55432, None)).await?;
+    writer
+        .batch_execute(include_str!("../dsg_catalog_role.sql"))
+        .await?;
+    // 首次 Reader 的物理副本已经包含旧提交：当前换密角色应由冷启动所用
+    // 的原 HBA 发布函数恢复，撤销 tombstone 及旧密码均不能因此复活。
+    let cold_oid: u32 = writer.query_one(
+        "SELECT pg_temp.dsga_apply_catalog_role('prj_0123456789abcdef','br_0123456789abcdef',
+         repeat('1',32),repeat('2',32),1,'op_000000000000000000000011','create','cold_reader_customer',0,$1)",
+        &[&password],
+    ).await?.get(0);
+    writer.query_one(
+        "SELECT pg_temp.dsga_apply_catalog_role('prj_0123456789abcdef','br_0123456789abcdef',
+         repeat('1',32),repeat('2',32),2,'op_000000000000000000000012','rotate','cold_reader_customer',$1,$2)",
+        &[&cold_oid, &next_password],
+    ).await?;
+    let revoked_oid: u32 = writer.query_one(
+        "SELECT pg_temp.dsga_apply_catalog_role('prj_0123456789abcdef','br_0123456789abcdef',
+         repeat('1',32),repeat('2',32),1,'op_000000000000000000000021','create','cold_revoked_customer',0,$1)",
+        &[&password],
+    ).await?.get(0);
+    writer.query_one(
+        "SELECT pg_temp.dsga_apply_catalog_role('prj_0123456789abcdef','br_0123456789abcdef',
+         repeat('1',32),repeat('2',32),2,'op_000000000000000000000022','delete','cold_revoked_customer',$1,NULL)",
+        &[&revoked_oid],
+    ).await?;
+    let mut spec = fixture();
+    spec.project_id = Some("prj_0123456789abcdef".into());
+    spec.branch_id = Some("br_0123456789abcdef".into());
+    spec.mode = ComputeMode::Replica;
+    let mut standby = primary.standby(|data| {
+        initialize_socket(data, 55432)?;
+        prepare(data, 55432, &spec, false)?;
+        let mut text =
+            fs::read_to_string(data.join("postgresql.conf"))? + "\nlisten_addresses='127.0.0.1'\n";
+        for (name, value) in startup_settings(data, 55432)? {
+            let value = if name == "unix_socket_directories" {
+                value.trim_matches('"')
+            } else {
+                &value
+            };
+            text.push_str(&format!("{name}='{}'\n", value.replace('\'', "''")));
+        }
+        fs::write(data.join("postgresql.conf"), text)?;
+        Ok(())
+    })?;
+    let config = private_config(&standby.data, 55432, None);
+    let reader = connect(&config).await?;
+    reader
+        .batch_execute(if primary.catalog_pg18 {
+            "SELECT public.reader_admit(true)"
+        } else {
+            "SELECT public.reader_admit(public.reader_boot(),1,1,true)"
+        })
+        .await?;
+    let cold_compute = node(spec.clone(), &standby.data, None);
+    let cold_source = spec.clone();
+    let cold_target = cold_compute.clone();
+    tokio::task::spawn_blocking(move || {
+        let _guard = cold_target.dsg_configuration_lock.lock().unwrap();
+        cold_target.refresh_dsg_hba(&cold_source, true)
+    })
+    .await??;
+    let cold_names = catalog_logins(&config, &spec).await?;
+    assert!(cold_names.contains(&"cold_reader_customer".into()));
+    assert!(!cold_names.contains(&"cold_revoked_customer".into()));
+    let mut cold_login = Config::new();
+    cold_login
+        .host("127.0.0.1")
+        .port(55432)
+        .dbname("postgres")
+        .user("cold_reader_customer")
+        .password("Reader-fixture-next-2026");
+    let cold_connection = connect(&cold_login).await?;
+    let cold_fact = cold_connection
+        .query_one(
+            "SELECT session_user::text,pg_catalog.pg_is_in_recovery(),value FROM reader_payload",
+            &[],
+        )
+        .await?;
+    assert_eq!(cold_fact.get::<_, String>(0), "cold_reader_customer");
+    assert!(cold_fact.get::<_, bool>(1));
+    assert_eq!(cold_fact.get::<_, i32>(2), 42);
+    drop(cold_connection);
+    cold_login.password("Reader-fixture-first-2026");
+    denied(&cold_login, "28P01").await?;
+    cold_login.user("cold_revoked_customer");
+    denied(&cold_login, "28000").await?;
+    reader
+        .batch_execute("SELECT pg_catalog.pg_wal_replay_pause()")
+        .await?;
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(5);
+    while reader
+        .query_one(
+            "SELECT pg_catalog.pg_get_wal_replay_pause_state()='paused'",
+            &[],
+        )
+        .await?
+        .get::<_, bool>(0)
+        == false
+    {
+        ensure!(
+            tokio::time::Instant::now() < deadline,
+            "fixture replay pause deadline"
+        );
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+    let oid: u32 = writer.query_one(
+        "SELECT pg_temp.dsga_apply_catalog_role('prj_0123456789abcdef','br_0123456789abcdef',
+         repeat('1',32),repeat('2',32),1,'op_000000000000000000000001','create','reader_customer',0,$1)",
+        &[&password],
+    ).await?.get(0);
+    let mut source = ReaderCatalogRole {
+        project: "prj_0123456789abcdef",
+        branch: "br_0123456789abcdef",
+        tenant: "11111111111111111111111111111111",
+        timeline: "22222222222222222222222222222222",
+        generation: 1,
+        operation: "op_000000000000000000000001",
+        action: "create",
+        name: "reader_customer",
+        oid,
+        verifier: Some(&password),
+    };
+    let before = fs::read(standby.data.join(HBA))?;
+    let retained = cold_compute
+        .dsg_authentication_receipt
+        .read()
+        .unwrap()
+        .clone()
+        .unwrap();
+    assert!(
+        reader_catalog_create_refresh(cold_compute.clone(), spec.clone(), oid, password.clone())
+            .await
+            .is_err()
+    );
+    assert!(
+        cold_compute
+            .dsg_authentication_receipt
+            .read()
+            .unwrap()
+            .as_ref()
+            .is_some_and(|now| Arc::ptr_eq(now, &retained))
+    );
+    assert_eq!(before, fs::read(standby.data.join(HBA))?);
+    cold_login
+        .user("cold_reader_customer")
+        .password("Reader-fixture-next-2026");
+    assert_eq!(
+        connect(&cold_login)
+            .await?
+            .query_one("SELECT value FROM reader_payload", &[])
+            .await?
+            .get::<_, i32>(0),
+        42
+    );
+    reader
+        .batch_execute("SELECT pg_catalog.pg_wal_replay_resume()")
+        .await?;
+    reader_catalog_replay(&writer, &reader).await?;
+    // 来源已通过后，模拟首次认证文件替换失败。已经尝试发布的请求不能
+    // 沿用旧成功回执；恢复夹具文件也不补回回执，后续须重新完整发布。
+    let old_hba = fs::read(standby.data.join(HBA))?;
+    let old_ident = fs::read(standby.data.join(IDENT))?;
+    fs::remove_file(standby.data.join(HBA))?;
+    fs::create_dir(standby.data.join(HBA))?;
+    let failed_publish =
+        reader_catalog_create_refresh(cold_compute.clone(), spec.clone(), oid, password.clone())
+            .await;
+    fs::remove_dir(standby.data.join(HBA))?;
+    fs::write(standby.data.join(HBA), old_hba)?;
+    fs::write(standby.data.join(IDENT), old_ident)?;
+    assert!(failed_publish.is_err());
+    assert!(
+        cold_compute
+            .dsg_authentication_receipt
+            .read()
+            .unwrap()
+            .is_none()
+    );
+    let original: String = reader
+        .query_one(
+            "SELECT xmin::text FROM pg_catalog.pg_authid WHERE oid=$1",
+            &[&oid],
+        )
+        .await?
+        .get(0);
+    // 配置锁下走真实 Compute 包装器：成功才缓存原 HBA 回执。
+    let compute = node(spec.clone(), &standby.data, None);
+    reader_catalog_create_refresh(compute.clone(), spec.clone(), oid, password.clone()).await?;
+    assert!(compute.dsg_authentication_receipt.read().unwrap().is_some());
+    let after: String = reader
+        .query_one(
+            "SELECT xmin::text FROM pg_catalog.pg_authid WHERE oid=$1",
+            &[&oid],
+        )
+        .await?
+        .get(0);
+    assert_eq!(original, after, "Reader refresh changed the role catalog");
+    let mut ordinary = Config::new();
+    ordinary
+        .host("127.0.0.1")
+        .port(55432)
+        .user("reader_customer")
+        .dbname("postgres")
+        .password("Reader-fixture-first-2026");
+    let connection = connect(&ordinary).await?;
+    let row = connection.query_one(
+        "SELECT session_user::text,pg_catalog.pg_is_in_recovery(),current_setting('transaction_read_only'),value FROM reader_payload", &[]
+    ).await?;
+    assert_eq!(row.get::<_, String>(0), "reader_customer");
+    assert!(row.get::<_, bool>(1));
+    assert_eq!(row.get::<_, String>(2), "on");
+    assert_eq!(row.get::<_, i32>(3), 42);
+    let error = connection
+        .batch_execute("CREATE TEMP TABLE reader_forbidden(value int)")
+        .await
+        .unwrap_err();
+    assert_eq!(error.code().map(|c| c.code()), Some("25006"));
+    drop(connection);
+    // 同名不同 OID、旧/未来世代、错误动作、错误凭据和跨 Timeline 均不得刷新。
+    for bad in 0..7 {
+        let mut changed = ReaderCatalogRole { ..source };
+        match bad {
+            0 => changed.oid += 1,
+            1 => changed.generation += 1,
+            2 => changed.operation = "op_000000000000000000000099",
+            3 => changed.action = "rotate",
+            4 => changed.verifier = Some(&next_password),
+            5 => changed.timeline = "33333333333333333333333333333333",
+            _ => changed.tenant = "44444444444444444444444444444444",
+        }
+        let before = fs::read(standby.data.join(HBA))?;
+        assert!(
+            refresh_reader_catalog(&config, &standby.data, 55432, &spec, &changed, || Ok(()))
+                .await
+                .is_err(),
+            "accepted source mutation {bad}"
+        );
+        assert_eq!(before, fs::read(standby.data.join(HBA))?);
+    }
+    assert!(
+        verify_reader_catalog(&private_config(&primary.data, 55432, None), &spec, &source)
+            .await
+            .is_err()
+    );
+    let mut child = spec.clone();
+    child.branch_id = Some("br_abcdef0123456789".into());
+    let historical = ReaderCatalogRole {
+        branch: "br_abcdef0123456789",
+        ..source
+    };
+    assert!(
+        verify_reader_catalog(&config, &child, &historical)
+            .await
+            .is_err()
+    );
+    writer.query_one(
+        "SELECT pg_temp.dsga_apply_catalog_role('prj_0123456789abcdef','br_0123456789abcdef',
+         repeat('1',32),repeat('2',32),2,'op_000000000000000000000002','rotate','reader_customer',$1,$2)",
+        &[&oid,&next_password],
+    ).await?;
+    reader_catalog_replay(&writer, &reader).await?;
+    assert!(
+        verify_reader_catalog(&config, &spec, &source)
+            .await
+            .is_err()
+    );
+    source.generation = 2;
+    source.operation = "op_000000000000000000000002";
+    source.action = "rotate";
+    source.verifier = Some(&next_password);
+    refresh_reader_catalog(&config, &standby.data, 55432, &spec, &source, || Ok(())).await?;
+    denied(&ordinary, "28P01").await?;
+    ordinary.password("Reader-fixture-next-2026");
+    assert_eq!(
+        connect(&ordinary)
+            .await?
+            .query_one("SELECT value FROM reader_payload", &[])
+            .await?
+            .get::<_, i32>(0),
+        42
+    );
+    writer.query_one(
+        "SELECT pg_temp.dsga_apply_catalog_role('prj_0123456789abcdef','br_0123456789abcdef',
+         repeat('1',32),repeat('2',32),3,'op_000000000000000000000003','delete','reader_customer',$1,NULL)",
+        &[&oid],
+    ).await?;
+    reader_catalog_replay(&writer, &reader).await?;
+    source.generation = 3;
+    source.operation = "op_000000000000000000000003";
+    source.action = "delete";
+    source.verifier = None;
+    refresh_reader_catalog(&config, &standby.data, 55432, &spec, &source, || Ok(())).await?;
+    denied(&ordinary, "28000").await?;
+    writer
+        .batch_execute("CREATE ROLE reader_customer LOGIN")
+        .await?;
+    reader_catalog_replay(&writer, &reader).await?;
+    assert!(
+        verify_reader_catalog(&config, &spec, &source)
+            .await
+            .is_err()
+    );
+    assert!(
+        !catalog_logins(&config, &spec)
+            .await?
+            .contains(&"reader_customer".into())
+    );
+    primary.passed = true;
+    standby.passed = true;
+    Ok(())
+}
+
+async fn reader_catalog_create_refresh(
+    compute: Arc<ComputeNode>,
+    spec: ComputeSpec,
+    oid: u32,
+    password: String,
+) -> Result<()> {
+    tokio::task::spawn_blocking(move || {
+        let _guard = compute.dsg_configuration_lock.lock().unwrap();
+        compute.refresh_dsg_reader_catalog(
+            &spec,
+            &ReaderCatalogRole {
+                project: "prj_0123456789abcdef",
+                branch: "br_0123456789abcdef",
+                tenant: "11111111111111111111111111111111",
+                timeline: "22222222222222222222222222222222",
+                generation: 1,
+                operation: "op_000000000000000000000001",
+                action: "create",
+                name: "reader_customer",
+                oid,
+                verifier: Some(&password),
+            },
+        )
+    })
+    .await?
+}
+
+async fn reader_catalog_replay(writer: &Client, reader: &Client) -> Result<()> {
+    let lsn: String = writer
+        .query_one("SELECT pg_catalog.pg_current_wal_lsn()::text", &[])
+        .await?
+        .get(0);
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(10);
+    loop {
+        if reader
+            .query_one(
+                "SELECT pg_catalog.pg_last_wal_replay_lsn()>=$1::text::pg_lsn",
+                &[&lsn],
+            )
+            .await?
+            .get::<_, bool>(0)
+        {
+            return Ok(());
+        }
+        ensure!(
+            tokio::time::Instant::now() < deadline,
+            "fixture WAL replay deadline"
+        );
+        tokio::time::sleep(Duration::from_millis(20)).await;
+    }
+}
+
+#[test]
+fn reader_catalog_refresh_rejects_legacy_before_files_or_network() {
+    let mut spec = fixture();
+    spec.dynamic_shared_buffers = None;
+    spec.mode = ComputeMode::Replica;
+    let directory = tempfile::tempdir().unwrap();
+    let compute = node(spec.clone(), directory.path(), None);
+    let error = compute
+        .refresh_dsg_reader_catalog(
+            &spec,
+            &ReaderCatalogRole {
+                project: "prj_0123456789abcdef",
+                branch: "br_0123456789abcdef",
+                tenant: "11111111111111111111111111111111",
+                timeline: "22222222222222222222222222222222",
+                generation: 1,
+                operation: "op_000000000000000000000001",
+                action: "delete",
+                name: "reader_customer",
+                oid: 16395,
+                verifier: None,
+            },
+        )
+        .unwrap_err();
+    assert_eq!(
+        error.to_string(),
+        "Reader catalog refresh requires managed Compute"
+    );
+    assert!(fs::read_dir(directory.path()).unwrap().next().is_none());
+    assert!(compute.dsg_authentication_receipt.read().unwrap().is_none());
+}

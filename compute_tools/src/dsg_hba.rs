@@ -557,6 +557,121 @@ async fn catalog_logins(config: &Config, spec: &ComputeSpec) -> Result<Vec<Strin
         .collect()
 }
 
+/// Reader 请求只能引用 Writer 已经提交、并在本 Reader 复制目录中可见的原事实。
+/// verifier 仅用于等值核对，不写入目录，也不作为生成 HBA 名单的来源。
+pub(crate) struct ReaderCatalogRole<'a> {
+    pub(crate) project: &'a str,
+    pub(crate) branch: &'a str,
+    pub(crate) tenant: &'a str,
+    pub(crate) timeline: &'a str,
+    pub(crate) generation: u64,
+    pub(crate) operation: &'a str,
+    pub(crate) action: &'a str,
+    pub(crate) name: &'a str,
+    pub(crate) oid: u32,
+    pub(crate) verifier: Option<&'a str>,
+}
+
+/// 只读事务的单快照同时核对恢复态、实际存储范围、原 OID、凭据和登记标记。
+/// 不能把父 Timeline 的物理角色、同名重建角色或较新 generation 收养为本请求；
+/// delete 还必须证明原名字和原 OID 都不存在。任何 SQL 错误仅返回固定分类，
+/// 不将 PostgreSQL 错误文本或 SCRAM 参数写入 compute_ctl 日志。
+async fn verify_reader_catalog(
+    config: &Config,
+    spec: &ComputeSpec,
+    expected: &ReaderCatalogRole<'_>,
+) -> Result<()> {
+    ensure!(
+        spec.mode == ComputeMode::Replica
+            && spec.project_id.as_deref() == Some(expected.project)
+            && spec.branch_id.as_deref() == Some(expected.branch)
+            && expected.oid > 0
+            && expected.generation > 0
+            && expected.generation <= i64::MAX as u64
+            && matches!(expected.action, "create" | "rotate" | "delete")
+            && (expected.action == "delete") == expected.verifier.is_none(),
+        "DSGA Reader catalog request scope differs"
+    );
+    let result = tokio::time::timeout(Duration::from_secs(3), async {
+        let mut client = connect(config).await?;
+        client.batch_execute(
+            "SET search_path=''; SET statement_timeout='2s'; SET log_statement='none';
+             SET log_min_duration_statement=-1; SET log_min_duration_sample=-1;
+             SET log_parameter_max_length=0; SET log_parameter_max_length_on_error=0;
+             SET log_error_verbosity='terse'; SET debug_print_parse=off;
+             SET debug_print_plan=off; SET debug_print_rewritten=off;
+             SET auto_explain.log_min_duration=-1; SET pgaudit.log='none';
+             SET pgaudit.role=''; SET pgaudit.log_parameter=off; SET pg_stat_statements.track='none';"
+        ).await?;
+        let transaction = client.build_transaction()
+            .read_only(true)
+            .isolation_level(tokio_postgres::IsolationLevel::RepeatableRead)
+            .start().await?;
+        let generation = expected.generation.to_string();
+        let row = transaction.query_one(
+            "SELECT pg_catalog.pg_is_in_recovery()
+               AND current_setting('transaction_read_only')='on'
+               AND session_user='cloud_admin' AND current_user='cloud_admin'
+               AND current_setting('neon.project_id',true)=$1
+               AND current_setting('neon.branch_id',true)=$2
+               AND current_setting('neon.tenant_id',true)=$3
+               AND current_setting('neon.timeline_id',true)=$4
+               AND EXISTS (
+                 SELECT FROM pg_catalog.pg_authid marker
+                 CROSS JOIN LATERAL (SELECT pg_catalog.encode(pg_catalog.sha256(
+                     pg_catalog.convert_to($8::text,'UTF8')),'hex') AS name_hash) id
+                 WHERE marker.rolname::text='dsga_catalog_role_' || pg_catalog.substr($2,4)
+                         || '_' || pg_catalog.substr(id.name_hash,1,20)
+                   AND NOT (marker.rolcanlogin OR marker.rolsuper OR marker.rolcreaterole OR
+                            marker.rolcreatedb OR marker.rolreplication OR marker.rolbypassrls OR marker.rolinherit)
+                   AND marker.rolpassword IS NULL
+                   AND NOT EXISTS (SELECT FROM pg_catalog.pg_auth_members
+                                   WHERE member=marker.oid OR roleid=marker.oid)
+                   AND pg_catalog.shobj_description(marker.oid,'pg_authid')=
+                       'neon-control:catalog-role:' || $1 || ':' || $2 || ':v1:' ||
+                       $5 || ':' || $6 || ':' || $7 || ':' || $9::oid::text || ':' || id.name_hash)
+               AND CASE WHEN $7='delete' THEN NOT EXISTS (
+                   SELECT FROM pg_catalog.pg_authid WHERE oid=$9 OR rolname::text=$8)
+                 ELSE EXISTS (
+                   SELECT FROM pg_catalog.pg_authid login
+                   WHERE login.oid=$9 AND login.rolname::text=$8 AND login.rolcanlogin
+                     AND login.rolpassword=$10
+                     AND pg_catalog.shobj_description(login.oid,'pg_authid')='neon-control/branch/' || $2
+                     AND NOT (login.rolsuper OR login.rolcreaterole OR login.rolcreatedb OR
+                              login.rolreplication OR login.rolbypassrls)
+                     AND NOT EXISTS (SELECT FROM pg_catalog.pg_auth_members WHERE member=login.oid)) END",
+            &[&expected.project, &expected.branch, &expected.tenant, &expected.timeline,
+              &generation, &expected.operation, &expected.action, &expected.name,
+              &expected.oid, &expected.verifier],
+        ).await?;
+        // NULL（例如缺少实际范围 GUC）同样没有资格；不能降级为空目录成功。
+        ensure!(row.get::<_, Option<bool>>(0) == Some(true), "DSGA Reader catalog source differs");
+        transaction.commit().await?;
+        Ok::<_, anyhow::Error>(())
+    }).await;
+    match result {
+        Ok(Ok(())) => Ok(()),
+        Ok(Err(_)) => bail!("DSGA Reader catalog source unconfirmed"),
+        Err(_) => bail!("DSGA Reader catalog observation deadline"),
+    }
+}
+
+/// HBA 发布前后均实读同一原登记事实。复制尚未追上或期间换代时返回失败，
+/// 外层不得缓存成功认证回执；这里不暂停 WAL、不执行目录 DDL、不开放 Admission。
+pub(crate) async fn refresh_reader_catalog(
+    config: &Config,
+    pgdata: &Path,
+    port: u16,
+    spec: &ComputeSpec,
+    expected: &ReaderCatalogRole<'_>,
+    before_write: impl FnOnce() -> Result<()>,
+) -> Result<Receipt> {
+    verify_reader_catalog(config, spec, expected).await?;
+    let receipt = refresh_with_prewrite(config, pgdata, port, spec, true, before_write).await?;
+    verify_reader_catalog(config, spec, expected).await?;
+    Ok(receipt)
+}
+
 pub(crate) async fn refresh(
     config: &Config,
     pgdata: &Path,
@@ -564,11 +679,25 @@ pub(crate) async fn refresh(
     spec: &ComputeSpec,
     publish: bool,
 ) -> Result<Receipt> {
+    refresh_with_prewrite(config, pgdata, port, spec, publish, || Ok(())).await
+}
+
+/// 失效回调紧邻首次认证文件写入。此前全是只读来源/名单查询，WAL 延迟
+/// 失败不应破坏原成功回执；回调之后无论错误、取消或超时都不得猜测保留。
+async fn refresh_with_prewrite(
+    config: &Config,
+    pgdata: &Path,
+    port: u16,
+    spec: &ComputeSpec,
+    publish: bool,
+    before_write: impl FnOnce() -> Result<()>,
+) -> Result<Receipt> {
     let (logins, roles) = if publish {
         tokio::try_join!(service_logins(config, spec), catalog_logins(config, spec))?
     } else {
         (Vec::new(), Vec::new())
     };
+    before_write()?;
     let receipt = prepare_for_logins(pgdata, port, spec, publish, &logins, &roles)?;
     reload_and_verify(config, &receipt).await?;
     Ok(receipt)

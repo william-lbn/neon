@@ -28,6 +28,7 @@ enum Service {
     Function,
     Realtime,
     CatalogRole,
+    CatalogRoleRefresh,
 }
 
 impl Service {
@@ -45,6 +46,10 @@ struct Login {
     project_id: String,
     branch_id: String,
     endpoint_id: String,
+    // 只有 Reader 刷新必须携带原 Writer/当前 branch 的存储身份；不能仅自证
+    // 目标 Reader 自己的 Timeline，从而误收养同 branch 历史切点的物理角色。
+    tenant_id: Option<String>,
+    timeline_id: Option<String>,
     pg_boot_id: DsgUint64,
     database: String,
     function_id: Option<String>,
@@ -122,6 +127,20 @@ fn valid_catalog_role_name(name: &str) -> bool {
 }
 
 impl Login {
+    fn accepts_mode(&self, mode: &ComputeMode) -> bool {
+        if self.service == Service::CatalogRoleRefresh {
+            *mode == ComputeMode::Replica
+        } else {
+            *mode == ComputeMode::Primary
+        }
+    }
+
+    fn matches_storage(&self, tenant: &str, timeline: &str) -> bool {
+        self.service != Service::CatalogRoleRefresh
+            || (self.tenant_id.as_deref() == Some(tenant)
+                && self.timeline_id.as_deref() == Some(timeline))
+    }
+
     fn validate(&self) -> Result<()> {
         ensure!(
             self.protocol_version == 1
@@ -143,8 +162,28 @@ impl Login {
             "invalid service login request"
         );
         ensure!(
-            (self.service == Service::CatalogRole) == self.catalog_role.is_some(),
+            matches!(
+                self.service,
+                Service::CatalogRole | Service::CatalogRoleRefresh
+            ) == self.catalog_role.is_some(),
             "invalid catalog role action scope"
+        );
+        ensure!(
+            if self.service == Service::CatalogRoleRefresh {
+                [self.tenant_id.as_deref(), self.timeline_id.as_deref()]
+                    .iter()
+                    .all(|value| {
+                        value.is_some_and(|value| {
+                            value.len() == 32
+                                && value
+                                    .bytes()
+                                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+                        })
+                    })
+            } else {
+                self.tenant_id.is_none() && self.timeline_id.is_none()
+            },
+            "invalid Reader catalog storage scope"
         );
         let valid_scope = match self.service {
             Service::Function => {
@@ -172,7 +211,7 @@ impl Login {
                                     }))
                         })
             }
-            Service::CatalogRole => {
+            Service::CatalogRole | Service::CatalogRoleRefresh => {
                 self.function_id.is_none()
                     && self.schema.is_none()
                     && self.realtime_id.is_none()
@@ -180,7 +219,11 @@ impl Login {
                     && self.catalog_role.as_ref().is_some_and(|role| {
                         valid_realtime_id(&role.operation_id, "op_")
                             && valid_catalog_role_name(&role.name)
-                            && (role.action == CatalogAction::Create) == (role.expected_oid == 0)
+                            && (if self.service == Service::CatalogRoleRefresh {
+                                self.database == "postgres" && role.expected_oid > 0
+                            } else {
+                                (role.action == CatalogAction::Create) == (role.expected_oid == 0)
+                            })
                             && (role.action == CatalogAction::Delete) == self.verifier.is_null()
                     })
             }
@@ -237,6 +280,10 @@ struct Receipt {
     #[serde(skip_serializing_if = "Service::is_managed_auth")]
     service: Service,
     branch_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tenant_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    timeline_id: Option<String>,
     pg_boot_id: DsgUint64,
     #[serde(skip_serializing_if = "Option::is_none")]
     function_id: Option<String>,
@@ -284,7 +331,7 @@ pub(crate) async fn reconcile(
             .try_lock()
             .map_err(|_| anyhow::anyhow!("DSGA configuration unavailable"))?;
         let _lifecycle = compute.dsg_suspension.try_read()?;
-        ensure!(!*_lifecycle, "Writer is draining");
+        ensure!(!*_lifecycle, "Compute is draining");
         compute.verify_dsg_running()?;
         let original = {
             let state = compute
@@ -294,43 +341,93 @@ pub(crate) async fn reconcile(
             state
                 .pspec
                 .clone()
-                .context("Writer configuration unavailable")?
+                .context("Compute configuration unavailable")?
         };
         compute.verify_dsg_storage(&original)?;
         let spec = original.spec;
         let boot = compute
             .frozen_dsg_startup()
-            .context("Writer boot unavailable")?;
+            .context("Compute boot unavailable")?;
         ensure!(
-            spec.mode == ComputeMode::Primary
+            input.accepts_mode(&spec.mode)
+                && input.matches_storage(
+                    &original.tenant_id.to_string(),
+                    &original.timeline_id.to_string()
+                )
                 && spec.project_id.as_deref() == Some(input.project_id.as_str())
                 && spec.branch_id.as_deref() == Some(input.branch_id.as_str())
                 && spec.endpoint_id.as_deref() == Some(input.endpoint_id.as_str())
                 && claims.vm_uid == boot.vm_uid
                 && claims.compute_instance_id == boot.compute_instance_id,
-            "service login does not match the current Writer"
+            "service login does not match the current Compute scope"
         );
         runtime
             .block_on(async {
-                let reader = compute.dsg_sql_client().await?;
-                let observation = reader.memory_status().await?;
-                ensure!(
-                    observation.observed.instance.pg_boot_id == input.pg_boot_id,
-                    "service login does not match the current PostgreSQL boot"
-                );
-                Ok::<_, anyhow::Error>(())
+                let observed = observe_boot(&compute, input.pg_boot_id);
+                if input.service == Service::CatalogRoleRefresh {
+                    // 配置锁下的 Reader 只读观察单次最多 3 秒；不继承资源协调
+                    // 请求可等待 70 秒的 SDK 上界，避免挂住普通配置生命周期。
+                    tokio::time::timeout(Duration::from_secs(3), observed)
+                        .await
+                        .map_err(|_| anyhow::anyhow!("Reader boot observation deadline"))??;
+                    Ok(())
+                } else {
+                    observed.await
+                }
             })
-            .map_err(|_| {
+            .map_err(|_: anyhow::Error| {
                 anyhow::anyhow!("service login boot observation unavailable or different")
             })?;
         let mut config = compute.get_tokio_conn_conf(Some("compute_ctl:DSGA_service_login"));
         config.dbname(&input.database);
-        let catalog_oid = runtime.block_on(apply(
-            &config,
-            &input,
-            &original.tenant_id.to_string(),
-            &original.timeline_id.to_string(),
-        ))?;
+        // Reader 只能确认原 Writer 事务已复制；显式分支不进入 apply，因此不会
+        // 创建临时 DDL 函数、修改角色/密码/登记标记，也不会借此开放 Admission。
+        let catalog_oid = if input.service == Service::CatalogRoleRefresh {
+            let role = input
+                .catalog_role
+                .as_ref()
+                .context("Reader catalog source missing")?;
+            compute.refresh_dsg_reader_catalog(
+                &spec,
+                &crate::dsg_hba::ReaderCatalogRole {
+                    project: &input.project_id,
+                    branch: &input.branch_id,
+                    tenant: &original.tenant_id.to_string(),
+                    timeline: &original.timeline_id.to_string(),
+                    generation: input.generation.get(),
+                    operation: &role.operation_id,
+                    action: role.action.as_str(),
+                    name: &role.name,
+                    oid: role.expected_oid,
+                    verifier: input.verifier.as_str(),
+                },
+            )?;
+            // HBA nonce 只能证明原文件已经加载；等待之后还必须核对原 PG boot。
+            // 若重启或读失败，删除本地成功回执，不能将跨 boot 的观察拼接成成功。
+            let confirmed = runtime.block_on(async {
+                tokio::time::timeout(
+                    Duration::from_secs(3),
+                    observe_boot(&compute, input.pg_boot_id),
+                )
+                .await
+                .map_err(|_| anyhow::anyhow!("Reader boot observation deadline"))?
+            });
+            if confirmed.is_err() {
+                *compute
+                    .dsg_authentication_receipt
+                    .write()
+                    .map_err(|_| anyhow::anyhow!("DSGA authentication state poisoned"))? = None;
+                anyhow::bail!("Reader catalog boot unconfirmed after HBA refresh");
+            }
+            Some(role.expected_oid)
+        } else {
+            runtime.block_on(apply(
+                &config,
+                &input,
+                &original.tenant_id.to_string(),
+                &original.timeline_id.to_string(),
+            ))?
+        };
         let catalog_role = match (input.catalog_role, catalog_oid) {
             (Some(role), Some(role_oid)) if role_oid > 0 => Some(CatalogRoleReceipt {
                 operation_id: role.operation_id,
@@ -340,11 +437,15 @@ pub(crate) async fn reconcile(
             (None, None) => None,
             _ => anyhow::bail!("catalog role receipt unavailable"),
         };
-        compute.refresh_dsg_hba(&spec, true)?;
+        if input.service != Service::CatalogRoleRefresh {
+            compute.refresh_dsg_hba(&spec, true)?;
+        }
         Ok::<_, anyhow::Error>(Receipt {
             protocol_version: 1,
             service: input.service,
             branch_id: input.branch_id,
+            tenant_id: input.tenant_id,
+            timeline_id: input.timeline_id,
             pg_boot_id: input.pg_boot_id,
             function_id: input.function_id,
             schema: input.schema,
@@ -365,6 +466,17 @@ pub(crate) async fn reconcile(
     }
 }
 
+/// 只读原生 boot 观察与配置中的 VM/Compute 冻结来源绑定；它不设置门禁。
+async fn observe_boot(compute: &ComputeNode, expected: DsgUint64) -> Result<()> {
+    let reader = compute.dsg_sql_client().await?;
+    let observation = reader.memory_status().await?;
+    ensure!(
+        observation.observed.instance.pg_boot_id == expected,
+        "service login does not match the current PostgreSQL boot"
+    );
+    Ok(())
+}
+
 async fn connect(config: &Config) -> Result<Client> {
     let (client, driver) = config.connect(NoTls).await?;
     tokio::spawn(async move {
@@ -379,6 +491,10 @@ async fn apply(
     tenant: &str,
     timeline: &str,
 ) -> Result<Option<u32>> {
+    ensure!(
+        input.service != Service::CatalogRoleRefresh,
+        "Reader catalog refresh cannot apply catalog writes"
+    );
     let generation = i64::try_from(input.generation.get())?;
     let verifier = input.verifier.as_str();
     let relations = input
@@ -481,5 +597,108 @@ mod tests {
             *modified.pointer_mut(pointer).unwrap() = delta;
             assert!(!valid(modified), "accepted {pointer}");
         }
+    }
+
+    #[test]
+    fn reader_catalog_refresh_requires_original_oid_and_keeps_writer_isolation() {
+        use super::{ComputeMode, Service};
+        let verifier = format!(
+            "SCRAM-SHA-256$4096:{}${}:{}",
+            "AQEBAQEBAQEBAQEBAQEBAQ==",
+            "AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI=",
+            "AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM="
+        );
+        let base = json!({
+            "protocol_version":1,"service":"catalog_role_refresh",
+            "project_id":"prj_0123456789abcdef","branch_id":"br_0123456789abcdef",
+            "endpoint_id":"ep_0123456789abcdef","pg_boot_id":"42",
+            "tenant_id":"11111111111111111111111111111111",
+            "timeline_id":"22222222222222222222222222222222",
+            "catalog_role":{"operation_id":"op_000000000000000000000004",
+                "action":"create","name":"customer test","expected_oid":16395},
+            "database":"postgres","generation":"3","verifier":verifier
+        });
+        let valid =
+            |v: Value| serde_json::from_value::<Login>(v).is_ok_and(|r| r.validate().is_ok());
+        for action in ["create", "rotate", "delete"] {
+            let mut value = base.clone();
+            value["catalog_role"]["action"] = json!(action);
+            if action == "delete" {
+                value["verifier"] = Value::Null;
+            }
+            let request: Login = serde_json::from_value(value).unwrap();
+            request.validate().unwrap();
+            assert!(request.accepts_mode(&ComputeMode::Replica));
+            assert!(!request.accepts_mode(&ComputeMode::Primary));
+            assert!(request.matches_storage(
+                "11111111111111111111111111111111",
+                "22222222222222222222222222222222"
+            ));
+            assert!(!request.matches_storage(
+                "11111111111111111111111111111111",
+                "33333333333333333333333333333333"
+            ));
+            assert!(!request.matches_storage(
+                "44444444444444444444444444444444",
+                "22222222222222222222222222222222"
+            ));
+        }
+        for (pointer, change) in [
+            ("/catalog_role/expected_oid", json!(0)),
+            ("/catalog_role/operation_id", json!("op_other")),
+            ("/catalog_role/name", json!("/.*")),
+            ("/catalog_role/action", json!("observe")),
+            ("/database", json!("tenant_db")),
+            ("/generation", json!("0")),
+            ("/pg_boot_id", json!("0")),
+            ("/tenant_id", Value::Null),
+            ("/timeline_id", Value::Null),
+            ("/tenant_id", json!("unknown")),
+            ("/timeline_id", json!("abcdef")),
+            ("/verifier", Value::Null),
+            ("/service", json!("catalog_role")),
+        ] {
+            let mut value = base.clone();
+            *value.pointer_mut(pointer).unwrap() = change;
+            assert!(!valid(value), "accepted {pointer}");
+        }
+        let mut writer = base.clone();
+        writer.as_object_mut().unwrap().remove("tenant_id");
+        writer.as_object_mut().unwrap().remove("timeline_id");
+        writer["service"] = json!("catalog_role");
+        writer["catalog_role"]["expected_oid"] = json!(0);
+        let writer: Login = serde_json::from_value(writer).unwrap();
+        writer.validate().unwrap();
+        assert!(writer.service == Service::CatalogRole);
+        assert!(writer.accepts_mode(&ComputeMode::Primary));
+        assert!(!writer.accepts_mode(&ComputeMode::Replica));
+    }
+
+    #[tokio::test]
+    async fn reader_catalog_refresh_cannot_reach_mutating_apply_even_without_connection() {
+        let request: Login = serde_json::from_value(json!({
+            "protocol_version":1,"service":"catalog_role_refresh",
+            "project_id":"prj_0123456789abcdef","branch_id":"br_0123456789abcdef",
+            "endpoint_id":"ep_0123456789abcdef","pg_boot_id":"42",
+            "tenant_id":"11111111111111111111111111111111",
+            "timeline_id":"22222222222222222222222222222222",
+            "catalog_role":{"operation_id":"op_000000000000000000000004",
+                "action":"delete","name":"customer","expected_oid":16395},
+            "database":"postgres","generation":"3","verifier":null
+        }))
+        .unwrap();
+        request.validate().unwrap();
+        let error = super::apply(
+            &tokio_postgres::Config::new(),
+            &request,
+            "tenant",
+            "timeline",
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(
+            error.to_string(),
+            "Reader catalog refresh cannot apply catalog writes"
+        );
     }
 }
