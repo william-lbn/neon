@@ -222,7 +222,7 @@ pub(crate) fn prepare(
     spec: &ComputeSpec,
     publish: bool,
 ) -> Result<Receipt> {
-    prepare_for_logins(pgdata, port, spec, publish, &[])
+    prepare_for_logins(pgdata, port, spec, publish, &[], &[])
 }
 
 fn prepare_for_logins(
@@ -231,6 +231,7 @@ fn prepare_for_logins(
     spec: &ComputeSpec,
     publish: bool,
     service_logins: &[(String, String)],
+    catalog_logins: &[String],
 ) -> Result<Receipt> {
     ensure!(
         spec.dynamic_shared_buffers.is_some() && spec.databricks_settings.is_none(),
@@ -291,6 +292,10 @@ fn prepare_for_logins(
         hba.push_str(&format!(
             "local all {roles} scram-sha-256\nhost all {roles} all scram-sha-256\n"
         ));
+        for role in catalog_logins {
+            let role = token(role)?;
+            hba.push_str(&format!("host all {role} all scram-sha-256\n"));
+        }
         for (database, role) in service_logins {
             // These are actual database and role names. Keep the rules distinct
             // from the ordinary role rules and from the local proxy trust list.
@@ -489,6 +494,69 @@ fn hex_id(value: &str) -> bool {
             .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
 }
 
+async fn catalog_logins(config: &Config, spec: &ComputeSpec) -> Result<Vec<String>> {
+    let Some((branch, project)) = spec.branch_id.as_deref().zip(spec.project_id.as_deref()) else {
+        return Ok(Vec::new());
+    };
+    let Some(branch_key) = branch.strip_prefix("br_").filter(|id| hex_id(id)) else {
+        return Ok(Vec::new());
+    };
+    if !project.strip_prefix("prj_").is_some_and(hex_id) {
+        return Ok(Vec::new());
+    }
+    let prefix = format!("dsga_catalog_role_{branch_key}_");
+    let scope = format!("neon-control:catalog-role:{project}:{branch}:v1:");
+    let ownership = format!("neon-control/branch/{branch}");
+    let client = connect(config).await?;
+    // 历史分支不会借用父分支的 marker。角色名、原 OID 和完整摘要必须同时
+    // 来自本次 PostgreSQL 实读，HBA 不接受 Proxy 或调用者提供的名单。
+    let rows = tokio::time::timeout(
+        Duration::from_secs(3),
+        client.query(
+            "SELECT login.rolname::text
+             FROM pg_catalog.pg_authid login
+             CROSS JOIN LATERAL (SELECT pg_catalog.encode(pg_catalog.sha256(
+                 pg_catalog.convert_to(login.rolname::text,'UTF8')),'hex') AS name_hash) id
+             JOIN pg_catalog.pg_authid marker
+               ON marker.rolname::text=$1 || pg_catalog.substr(id.name_hash,1,20)
+             CROSS JOIN LATERAL (SELECT pg_catalog.shobj_description(marker.oid,'pg_authid') AS tag) proof
+             WHERE login.rolcanlogin AND login.rolpassword LIKE 'SCRAM-SHA-256$%'
+               AND pg_catalog.shobj_description(login.oid,'pg_authid')=$3
+               AND NOT (login.rolsuper OR login.rolcreaterole OR login.rolcreatedb OR
+                        login.rolreplication OR login.rolbypassrls)
+               AND NOT (marker.rolcanlogin OR marker.rolsuper OR marker.rolcreaterole OR
+                        marker.rolcreatedb OR marker.rolreplication OR marker.rolbypassrls OR marker.rolinherit)
+               AND marker.rolpassword IS NULL
+               AND NOT EXISTS (SELECT FROM pg_catalog.pg_auth_members
+                   WHERE member IN (marker.oid,login.oid) OR roleid=marker.oid)
+               AND pg_catalog.starts_with(proof.tag,$2)
+               AND pg_catalog.substr(proof.tag,pg_catalog.length($2)+1)
+                   ~ ('^[1-9][0-9]{0,18}:op_[0-9a-f]{24}:(create|rotate):' ||
+                      login.oid::text || ':' || id.name_hash || '$')
+               AND session_user='cloud_admin' AND current_user='cloud_admin'
+             ORDER BY login.rolname LIMIT 129",
+            &[&prefix, &scope, &ownership],
+        ),
+    )
+    .await
+    .context("DSGA catalog login read deadline")?
+    .map_err(|_| anyhow::anyhow!("DSGA catalog login source unavailable"))?;
+    ensure!(
+        rows.len() <= 128,
+        "DSGA catalog login list exceeds capacity"
+    );
+    rows.into_iter()
+        .map(|row| {
+            let role: String = row.get(0);
+            ensure!(
+                !role.starts_with('/'),
+                "DSGA catalog login cannot use an HBA regex"
+            );
+            Ok(role)
+        })
+        .collect()
+}
+
 pub(crate) async fn refresh(
     config: &Config,
     pgdata: &Path,
@@ -496,12 +564,12 @@ pub(crate) async fn refresh(
     spec: &ComputeSpec,
     publish: bool,
 ) -> Result<Receipt> {
-    let logins = if publish {
-        service_logins(config, spec).await?
+    let (logins, roles) = if publish {
+        tokio::try_join!(service_logins(config, spec), catalog_logins(config, spec))?
     } else {
-        Vec::new()
+        (Vec::new(), Vec::new())
     };
-    let receipt = prepare_for_logins(pgdata, port, spec, publish, &logins)?;
+    let receipt = prepare_for_logins(pgdata, port, spec, publish, &logins, &roles)?;
     reload_and_verify(config, &receipt).await?;
     Ok(receipt)
 }

@@ -27,6 +27,7 @@ enum Service {
     DataApi,
     Function,
     Realtime,
+    CatalogRole,
 }
 
 impl Service {
@@ -50,6 +51,7 @@ struct Login {
     schema: Option<String>,
     realtime_id: Option<String>,
     relations: Option<Vec<RealtimeRelation>>,
+    catalog_role: Option<CatalogRole>,
     generation: DsgUint64,
     // Explicit null disables the exact registered service authorization.
     verifier: serde_json::Value,
@@ -60,6 +62,63 @@ struct Login {
 struct RealtimeRelation {
     schema: String,
     name: String,
+}
+
+#[derive(Clone, Copy, Deserialize, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum CatalogAction {
+    Create,
+    Rotate,
+    Delete,
+}
+
+impl CatalogAction {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Create => "create",
+            Self::Rotate => "rotate",
+            Self::Delete => "delete",
+        }
+    }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CatalogRole {
+    operation_id: String,
+    action: CatalogAction,
+    name: String,
+    expected_oid: u32,
+}
+
+#[derive(Serialize)]
+struct CatalogRoleReceipt {
+    operation_id: String,
+    action: CatalogAction,
+    role_oid: u32,
+}
+
+fn valid_catalog_role_name(name: &str) -> bool {
+    let lower = name.to_ascii_lowercase();
+    !name.is_empty()
+        && name.len() <= 63
+        && name.trim() == name
+        && !name.starts_with('/')
+        && !name.chars().any(char::is_control)
+        && ![
+            "app_owner",
+            "cloud_admin",
+            "postgres",
+            "zenith_admin",
+            "public",
+            "none",
+        ]
+        .contains(&lower.as_str())
+        && ![
+            "pg_", "neon_", "control_", "app_da_", "fn_", "rtp_", "rtr_", "dsga_",
+        ]
+        .iter()
+        .any(|prefix| lower.starts_with(prefix))
 }
 
 impl Login {
@@ -82,6 +141,10 @@ impl Login {
                 && (self.verifier.is_null()
                     || self.verifier.as_str().is_some_and(crate::dsg_roles::scram)),
             "invalid service login request"
+        );
+        ensure!(
+            (self.service == Service::CatalogRole) == self.catalog_role.is_some(),
+            "invalid catalog role action scope"
         );
         let valid_scope = match self.service {
             Service::Function => {
@@ -108,6 +171,18 @@ impl Login {
                                             && valid_identifier(&relation.name)
                                     }))
                         })
+            }
+            Service::CatalogRole => {
+                self.function_id.is_none()
+                    && self.schema.is_none()
+                    && self.realtime_id.is_none()
+                    && self.relations.is_none()
+                    && self.catalog_role.as_ref().is_some_and(|role| {
+                        valid_realtime_id(&role.operation_id, "op_")
+                            && valid_catalog_role_name(&role.name)
+                            && (role.action == CatalogAction::Create) == (role.expected_oid == 0)
+                            && (role.action == CatalogAction::Delete) == self.verifier.is_null()
+                    })
             }
             _ => {
                 self.function_id.is_none()
@@ -169,6 +244,8 @@ struct Receipt {
     schema: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     realtime_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    catalog_role: Option<CatalogRoleReceipt>,
     generation: DsgUint64,
     enabled: bool,
 }
@@ -248,12 +325,21 @@ pub(crate) async fn reconcile(
             })?;
         let mut config = compute.get_tokio_conn_conf(Some("compute_ctl:DSGA_service_login"));
         config.dbname(&input.database);
-        runtime.block_on(apply(
+        let catalog_oid = runtime.block_on(apply(
             &config,
             &input,
             &original.tenant_id.to_string(),
             &original.timeline_id.to_string(),
         ))?;
+        let catalog_role = match (input.catalog_role, catalog_oid) {
+            (Some(role), Some(role_oid)) if role_oid > 0 => Some(CatalogRoleReceipt {
+                operation_id: role.operation_id,
+                action: role.action,
+                role_oid,
+            }),
+            (None, None) => None,
+            _ => anyhow::bail!("catalog role receipt unavailable"),
+        };
         compute.refresh_dsg_hba(&spec, true)?;
         Ok::<_, anyhow::Error>(Receipt {
             protocol_version: 1,
@@ -263,6 +349,7 @@ pub(crate) async fn reconcile(
             function_id: input.function_id,
             schema: input.schema,
             realtime_id: input.realtime_id,
+            catalog_role,
             generation: input.generation,
             enabled: !input.verifier.is_null(),
         })
@@ -286,7 +373,12 @@ async fn connect(config: &Config) -> Result<Client> {
     Ok(client)
 }
 
-async fn apply(config: &Config, input: &Login, tenant: &str, timeline: &str) -> Result<()> {
+async fn apply(
+    config: &Config,
+    input: &Login,
+    tenant: &str,
+    timeline: &str,
+) -> Result<Option<u32>> {
     let generation = i64::try_from(input.generation.get())?;
     let verifier = input.verifier.as_str();
     let relations = input
@@ -308,6 +400,15 @@ async fn apply(config: &Config, input: &Login, tenant: &str, timeline: &str) -> 
              SET auto_explain.log_min_duration=-1; SET pgaudit.log='none'; SET pgaudit.role='';
              SET pgaudit.log_parameter=off; SET pg_stat_statements.track='none'; SET neon.forward_ddl=false;"
         ).await?;
+        if let Some(role) = &input.catalog_role {
+            client.batch_execute(include_str!("../../dsg_catalog_role.sql")).await?;
+            let row = client.query_one(
+                "SELECT pg_temp.dsga_apply_catalog_role($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
+                &[&input.project_id, &input.branch_id, &tenant, &timeline, &generation,
+                  &role.operation_id, &role.action.as_str(), &role.name, &role.expected_oid, &verifier],
+            ).await?;
+            return Ok(Some(row.get(0)));
+        }
         match input.service {
             Service::Realtime => {
                 client.batch_execute(include_str!("../../dsg_realtime_login.sql")).await?;
@@ -331,10 +432,10 @@ async fn apply(config: &Config, input: &Login, tenant: &str, timeline: &str) -> 
                 client.query_one(function,
                     &[&input.project_id, &input.branch_id, &tenant, &timeline, &generation, &verifier]).await
             }
-        }
+        }.map(|_| None)
     }).await;
     match result {
-        Ok(Ok(_)) => Ok(()),
+        Ok(Ok(oid)) => Ok(oid),
         Ok(Err(error)) => anyhow::bail!(
             "service login SQLSTATE {}",
             error.code().map_or("connection", |code| code.code())
@@ -346,6 +447,39 @@ async fn apply(config: &Config, input: &Login, tenant: &str, timeline: &str) -> 
             )
             .await;
             anyhow::bail!("service login SQL deadline")
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Login;
+    use serde_json::{Value, json};
+
+    #[test]
+    fn catalog_role_authorizes_only_its_original_scope_and_oid() {
+        let input = json!({
+            "protocol_version": 1, "service": "catalog_role",
+            "project_id": "prj_0123456789abcdef", "branch_id": "br_0123456789abcdef",
+            "endpoint_id": "ep_0123456789abcdef", "pg_boot_id": "42",
+            "catalog_role": {"operation_id": "op_000000000000000000000004",
+                             "action": "delete", "name": "customer test", "expected_oid": 16395},
+            "database": "postgres", "generation": "3", "verifier": null
+        });
+        let valid =
+            |v: Value| serde_json::from_value::<Login>(v).is_ok_and(|req| req.validate().is_ok());
+        assert!(valid(input.clone()));
+        for (pointer, delta) in [
+            ("/service", json!("function")),
+            ("/catalog_role/action", json!("create")),
+            ("/catalog_role/expected_oid", json!(0)),
+            ("/catalog_role/name", json!("/.*")),
+            ("/catalog_role/name", json!("dsga_catalog_role_marker")),
+            ("/catalog_role/operation_id", json!("op_wrong")),
+        ] {
+            let mut modified = input.clone();
+            *modified.pointer_mut(pointer).unwrap() = delta;
+            assert!(!valid(modified), "accepted {pointer}");
         }
     }
 }
