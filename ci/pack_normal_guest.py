@@ -36,6 +36,10 @@ def pinned_sha(value, pattern):
     return isinstance(value, str) and bool(pattern.fullmatch(value)) and value != "0" * len(value)
 
 
+def pinned_digest(value):
+    return isinstance(value, str) and value.startswith("sha256:") and pinned_sha(value[7:], release.SHA256)
+
+
 def read_inputs(path):
     value = read_json(path.read_bytes())
     images = ("base_image", "disk_tools_image", "kernel_image")
@@ -47,8 +51,7 @@ def read_inputs(path):
     for field in images:
         ref = value[field]
         name, separator, digest = ref.partition("@") if isinstance(ref, str) else ("", "", "")
-        if (not separator or not IMAGE_NAME.fullmatch(name) or not release.DIGEST.fullmatch(digest)
-                or not pinned_sha(digest[7:], release.SHA256)):
+        if not separator or not IMAGE_NAME.fullmatch(name) or not pinned_digest(digest):
             raise ValueError(f"Normal Guest {field} must use an immutable OCI digest")
     if (not all(pinned_sha(value[k], release.SHA256) for k in files)
             or not all(pinned_sha(value[k], release.SHA) for k in sources)):
@@ -59,6 +62,56 @@ def read_inputs(path):
 def file_sha(path):
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def inspect_manifest(reference):
+    raw = subprocess.check_output(["docker", "buildx", "imagetools", "inspect", "--raw", reference])
+    if reference.rsplit("@", 1)[1] != "sha256:" + hashlib.sha256(raw).hexdigest():
+        raise ValueError("Normal Guest base manifest bytes differ from the requested digest")
+    manifest = read_json(raw)
+    if not isinstance(manifest, dict) or manifest.get("schemaVersion") != 2:
+        raise ValueError("Invalid normal Guest base manifest")
+    return manifest
+
+
+def verify_base_provenance(inputs, postgres_source, package_lock_sha256):
+    reference = inputs["base_image"]
+    manifest = inspect_manifest(reference)
+    if "manifests" in manifest:
+        descriptors = manifest["manifests"]
+        if not isinstance(descriptors, list):
+            raise ValueError("Invalid normal Guest base manifest list")
+        platforms = [
+            descriptor.get("digest") for descriptor in descriptors
+            if isinstance(descriptor, dict) and isinstance(descriptor.get("platform"), dict)
+            and descriptor["platform"].get("os") == "linux" and descriptor["platform"].get("architecture") == "amd64"
+        ]
+        if len(platforms) != 1 or not pinned_digest(platforms[0]):
+            raise ValueError("Normal Guest base lacks one immutable linux/amd64 manifest")
+        reference = reference.rsplit("@", 1)[0] + "@" + platforms[0]
+        manifest = inspect_manifest(reference)
+    config = manifest.get("config")
+    if not isinstance(config, dict) or not pinned_digest(config.get("digest")):
+        raise ValueError("Normal Guest base lacks a pinned image configuration")
+    image = read_json(subprocess.check_output([
+        "docker", "buildx", "imagetools", "inspect", "--format", "{{json .Image}}", reference,
+    ]))
+    if not isinstance(image, dict) or (image.get("os"), image.get("architecture")) != ("linux", "amd64"):
+        raise ValueError("Normal Guest base platform differs from linux/amd64")
+    image_config = image.get("config")
+    labels = image_config.get("Labels") if isinstance(image_config, dict) else None
+    expected = {
+        "org.opencontainers.image.revision": inputs["neon_source"],
+        "io.neon.guest.autoscaling.source": inputs["guest_autoscaling_source"],
+        "io.neon.pg.major": str(inputs["postgres_major"]),
+        "io.neon.pg.source": postgres_source,
+        "io.neon.ordinary.package-lock.sha256": package_lock_sha256,
+    }
+    if not isinstance(labels, dict) or any(labels.get(key) != value for key, value in expected.items()):
+        raise ValueError("Normal Guest base source labels differ from the locked assembly inputs")
+    # 标签从该平台基础镜像读回；既有独立验收继续验证内核、PG ELF 和根盘。
+    return {"base_image": inputs["base_image"], "platform_image": reference,
+            "config_digest": config["digest"], "labels": expected}
 
 
 def docker_build(builder, dockerfile, context, destination, arguments, options=()):
@@ -94,6 +147,8 @@ def pack(args):
     output = args.output.resolve()
     if output.exists():
         raise FileExistsError(output)
+    postgres_source = lock["postgres"][f"v{major}"]
+    base_provenance = verify_base_provenance(inputs, postgres_source, pinned["ordinary_package_lock_sha256"])
     # 只有最终 OCI 独立读回成功才公开完成目录。构建或验证中断后可以用相同产物名重试。
     with tempfile.TemporaryDirectory(prefix=".normal-guest-", dir=output.parent) as directory:
         scratch = Path(directory)
@@ -132,11 +187,12 @@ def pack(args):
             raise ValueError("Guest build observed a different ordinary source tree")
         shutil.copyfile(generated, candidate / generated.name)
         (candidate / "assembly-inputs.json").write_text(json.dumps(inputs, indent=2, sort_keys=True) + "\n")
+        (candidate / "base-provenance.json").write_text(json.dumps(base_provenance, indent=2, sort_keys=True) + "\n")
         disk_sha = file_sha(disk / "disk.qcow2")
         archive, metadata = candidate / "guest.oci.tar", candidate / "oci-metadata.json"
         docker_build(args.buildx_builder, "normal-guest-oci.Dockerfile", disk, f"type=oci,dest={archive}", {
             "BOOT_KERNEL_IMAGE": inputs["kernel_image"], "NEON_SOURCE": inputs["neon_source"],
-            "AUTOSCALING_SOURCE": inputs["guest_autoscaling_source"], "POSTGRES_SOURCE": lock["postgres"][f"v{major}"],
+            "AUTOSCALING_SOURCE": inputs["guest_autoscaling_source"], "POSTGRES_SOURCE": postgres_source,
             "POSTGRES_MAJOR": str(major), "ORDINARY_PACKAGE_LOCK_SHA256": pinned["ordinary_package_lock_sha256"],
         }, ("--metadata-file", str(metadata), "--tag", args.tag))
         digest = read_json(metadata.read_bytes())["containerimage.digest"]
