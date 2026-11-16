@@ -638,8 +638,8 @@ components:
         - status
       properties:
         status:
-          description: LFC prewarm status
-          enum: [not_prewarmed, prewarming, completed, failed, skipped]
+          enum: [not_prewarmed, prewarming, completed, failed, skipped, cancelled]
+          description: LFC prewarm status. skipped also means that the target native metadata bound is unavailable or the compressed/decoded metadata exceeds it; no prewarm SQL is dispatched in those cases.
           type: string
         error:
           description: LFC prewarm error, if any

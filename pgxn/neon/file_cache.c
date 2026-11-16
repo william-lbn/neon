@@ -42,6 +42,7 @@
 #include "utils/dynahash.h"
 #include "utils/guc.h"
 #include "utils/jsonb.h"
+#include "utils/memutils.h"
 #include "utils/timestamp.h"
 
 #if PG_VERSION_NUM >= 150000
@@ -2217,8 +2218,24 @@ lfc_get_stats(size_t *num_entries)
 {
 	LfcStatsEntry *entries;
 	size_t		n = 0;
+	uint64		state_chunks;
+	uint64		state_bytes;
 
-#define MAX_ENTRIES 10
+	/*-
+	 * 接收清单是可选优化，不能在SQL取前缀前无限占用Compute内存。这里用
+	 * 原启动LFC包络和原生格式给出完整输入上限，不把较小的运行期soft
+	 * limit或prewarm_limit误作完整来源大小，保留大源到小目标的前缀语义。
+	 * 来源chunk粒度可以不同：最多按每个目标页一条tag、每条最大bitmap
+	 * 计算保守上界。bytea传输不含VARHDRSZ，且原生分配仍受MaxAllocSize
+	 * 限制。此统计仅限制接收，不授予额外normal/Host额度或修改缓存。
+	 */
+	state_chunks = (uint64) lfc_max_size * MB / BLCKSZ;
+	state_bytes = sizeof(FileCacheState) - VARHDRSZ
+		+ state_chunks * sizeof(BufferTag)
+		+ (state_chunks * MAX_BLOCKS_PER_CHUNK + 7) / 8;
+	state_bytes = Min(state_bytes, (uint64) MaxAllocSize - VARHDRSZ);
+
+#define MAX_ENTRIES 11
 	entries = palloc(sizeof(LfcStatsEntry) * MAX_ENTRIES);
 
 	entries[n++] = (LfcStatsEntry) {"file_cache_chunk_size_pages", lfc_ctl == NULL,
@@ -2241,6 +2258,8 @@ lfc_get_stats(size_t *num_entries)
 									lfc_ctl ? lfc_ctl->limit : 0 };
 	entries[n++] = (LfcStatsEntry) {"file_cache_chunks_pinned", lfc_ctl == NULL,
 									lfc_ctl ? lfc_ctl->pinned : 0 };
+	entries[n++] = (LfcStatsEntry) {"file_cache_prewarm_state_max_bytes", lfc_ctl == NULL,
+									lfc_max_size > 0 ? state_bytes : 0 };
 	Assert(n <= MAX_ENTRIES);
 #undef MAX_ENTRIES
 

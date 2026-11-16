@@ -75,6 +75,8 @@ pub enum LfcPrewarmState {
     /// but received `Not Found 404`. This should normally happen only during the
     /// first endpoint start after creation with `autoprewarm: true`.
     /// This may also happen if LFC is turned off or not initialized
+    /// 目标原生元数据限额不可用或完整来源超过限额时，也只跳过可选预热。
+    /// 此时尚未派发预热SQL；普通页面读取和已经建立的SQL就绪不受影响。
     ///
     /// During the orchestrated prewarm via API, when a caller explicitly
     /// provides the LFC state key to prewarm from, it's the caller responsibility

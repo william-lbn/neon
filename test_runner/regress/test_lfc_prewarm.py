@@ -182,6 +182,81 @@ def test_lfc_prewarm(neon_simple_env: NeonEnv, method: PrewarmMethod):
 
 
 @pytest.mark.skipif(not USE_LFC, reason="LFC is disabled, skipping")
+@pytest.mark.parametrize("chunk_blocks", [1, 8, 128])
+def test_lfc_prewarm_metadata_bound_preserves_larger_source_prefix(
+    neon_simple_env: NeonEnv, chunk_blocks: int
+):
+    # 原生统计按启动包络计算，不复制C结构布局。较小soft limit和前缀上限
+    # 不能把已合法接收的原完整清单误判为新资源许可或强制全量预热。
+    # 最大chunk为1MiB；给原启动目录保留空间，避免测到已有满缓存跳过
+    # 分支而未进入本测试需要的前缀预热。目标仍低于原启动最大值。
+    maximum_mib = 256 if chunk_blocks == 128 else 64
+    soft_mib = 128 if chunk_blocks == 128 else 8
+    endpoint = neon_simple_env.endpoints.create_start(
+        branch_name="main",
+        config_lines=[
+            "autovacuum=off",
+            "shared_buffers=1MB",
+            f"neon.max_file_cache_size={maximum_mib}MB",
+            f"neon.file_cache_size_limit={maximum_mib}MB",
+            f"neon.file_cache_chunk_size={chunk_blocks}",
+            "neon.file_cache_prewarm_limit=1000",
+        ],
+    )
+    read_bound = (
+        "SELECT lfc_value FROM neon.neon_get_lfc_stats() "
+        "AS s(lfc_key text, lfc_value bigint) "
+        "WHERE lfc_key='file_cache_prewarm_state_max_bytes'"
+    )
+    with endpoint.connect() as conn, conn.cursor() as cur:
+        cur.execute("CREATE SCHEMA neon; CREATE EXTENSION neon WITH SCHEMA neon")
+        cur.execute(
+            "CREATE TABLE metadata_budget AS SELECT i, repeat('m', 128) AS payload "
+            "FROM generate_series(1,50000) AS g(i)"
+        )
+        cur.execute("SELECT sum(length(payload)) FROM metadata_budget")
+        assert cur.fetchone() == (6400000,)
+        cur.execute("SELECT neon.get_local_cache_state(1000)")
+        (state,) = cur.fetchone()
+        assert state is not None
+        cur.execute(read_bound)
+        bound_rows = cur.fetchall()
+        assert len(bound_rows) == 1
+        (bound,) = bound_rows[0]
+        assert 0 < len(state) <= bound < maximum_mib * 1024 * 1024
+        source_chunks = struct.unpack_from("=I", state, 4)[0]
+        assert source_chunks > 2
+    endpoint.stop()
+    endpoint.start()
+    endpoint.safe_psql(f"ALTER SYSTEM SET neon.file_cache_size_limit={soft_mib}")
+    endpoint.safe_psql("ALTER SYSTEM SET neon.file_cache_prewarm_limit=2")
+    endpoint.safe_psql("SELECT pg_reload_conf()")
+
+    def updated():
+        assert endpoint.safe_psql("SHOW neon.file_cache_size_limit") == [(f"{soft_mib}MB",)]
+        assert endpoint.safe_psql("SHOW neon.file_cache_prewarm_limit") == [("2",)]
+
+    wait_until(updated)
+    with endpoint.connect() as conn, conn.cursor() as cur:
+        cur.execute(read_bound)
+        assert cur.fetchall() == [(bound,)]
+        cur.execute(
+            "SELECT lfc_key,lfc_value FROM neon.neon_get_lfc_stats() "
+            "AS s(lfc_key text,lfc_value bigint) "
+            "WHERE lfc_key IN ('file_cache_size','file_cache_limit')"
+        )
+        original = dict(cur.fetchall())
+        assert original["file_cache_size"] < original["file_cache_limit"]
+        cur.execute("SELECT neon.prewarm_local_cache(%s,1)", (state,))
+        cur.execute("SELECT * FROM neon.get_prewarm_info()")
+        total, prewarmed, skipped, active = cur.fetchone()
+        assert 0 < total <= 2 * chunk_blocks
+        assert total == prewarmed + skipped and active == 0
+        cur.execute("SELECT count(*),sum(length(payload)) FROM metadata_budget")
+        assert cur.fetchone() == (50000, 6400000)
+
+
+@pytest.mark.skipif(not USE_LFC, reason="LFC is disabled, skipping")
 def test_lfc_prewarm_respects_destination_limit(neon_simple_env: NeonEnv):
     endpoint = neon_simple_env.endpoints.create_start(
         branch_name="main",

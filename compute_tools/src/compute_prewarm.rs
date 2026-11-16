@@ -1,6 +1,6 @@
 use crate::compute::ComputeNode;
 use anyhow::{Context, Result, bail};
-use async_compression::tokio::bufread::{ZstdDecoder, ZstdEncoder};
+use async_compression::tokio::bufread::ZstdEncoder;
 use compute_api::responses::LfcOffloadState;
 use compute_api::responses::LfcPrewarmState;
 use http::StatusCode;
@@ -11,6 +11,8 @@ use std::time::{Duration, Instant};
 use tokio::{io::AsyncReadExt, select, spawn};
 use tokio_util::sync::CancellationToken;
 use tracing::{error, info, warn};
+
+mod metadata;
 
 /// A pair of url and a token to query endpoint storage for LFC prewarm-related tasks
 struct EndpointStoragePair {
@@ -105,6 +107,34 @@ impl ComputeNode {
         #[cfg(feature = "testing")]
         fail::fail_point!("compute-prewarm", |_| bail!("compute-prewarm failpoint"));
 
+        // 先从原维护连接读取原生格式/启动缓存包络，不能让未限额清单先进入
+        // Compute内存。旧扩展没有该统计时只跳过可选预热，不试探无限旧路径。
+        // 后续使用同一PG连接；原SQL仍负责格式、容量和合法页面读取的校验。
+        let client = select! {
+            _ = token.cancelled() => return Ok(LfcPrewarmState::Cancelled),
+            client = ComputeNode::get_maintenance_client(&self.tokio_conn_conf) => client,
+        }
+        .context("connecting to postgres for LFC metadata bound")?;
+        let rows = select! {
+            _ = token.cancelled() => return Ok(LfcPrewarmState::Cancelled),
+            rows = client.query(
+                "SELECT lfc_value FROM neon.neon_get_lfc_stats() AS stats(lfc_key text, lfc_value bigint) WHERE lfc_key = 'file_cache_prewarm_state_max_bytes'",
+                &[],
+            ) => rows,
+        }
+        .context("reading native LFC metadata bound")?;
+        let raw_limit = match rows.as_slice() {
+            [] => None,
+            [row] => row
+                .try_get::<_, Option<i64>>(0)
+                .context("reading native LFC metadata limit")?,
+            _ => bail!("duplicate native LFC metadata bound"),
+        };
+        let Some(limit) = metadata::Limit::from_native(raw_limit)? else {
+            info!("skipping optional LFC prewarm: native metadata bound unavailable or disabled");
+            return Ok(LfcPrewarmState::Skipped);
+        };
+
         info!(%url, "requesting LFC state from endpoint storage");
         let mut now = Instant::now();
         let request = Client::new().get(&url).bearer_auth(storage_token);
@@ -119,33 +149,31 @@ impl ComputeNode {
             StatusCode::NOT_FOUND => return Ok(LfcPrewarmState::Skipped),
             status => bail!("{status} querying endpoint storage"),
         }
+        let lfc_state = match metadata::response(response, limit, &token).await? {
+            metadata::Read::Ready(bytes) => bytes,
+            metadata::Read::Cancelled => return Ok(LfcPrewarmState::Cancelled),
+            metadata::Read::TooLarge => {
+                info!("skipping optional LFC prewarm: compressed metadata exceeds native envelope");
+                return Ok(LfcPrewarmState::Skipped);
+            }
+        };
         let state_download_time_ms = now.elapsed().as_millis() as u32;
         now = Instant::now();
-
-        let mut uncompressed = Vec::new();
-        let lfc_state = select! {
-            _ = token.cancelled() => return Ok(LfcPrewarmState::Cancelled),
-            lfc_state = response.bytes() => lfc_state
-        }
-        .context("getting request body from endpoint storage")?;
-
-        let mut decoder = ZstdDecoder::new(lfc_state.iter().as_slice());
-        select! {
-            _ = token.cancelled() => return Ok(LfcPrewarmState::Cancelled),
-            read = decoder.read_to_end(&mut uncompressed) => read
-        }
-        .context("decoding LFC state")?;
+        let uncompressed = match metadata::decode(&lfc_state, limit, &token).await? {
+            metadata::Read::Ready(bytes) => bytes,
+            metadata::Read::Cancelled => return Ok(LfcPrewarmState::Cancelled),
+            metadata::Read::TooLarge => {
+                info!("skipping optional LFC prewarm: decoded metadata exceeds native envelope");
+                return Ok(LfcPrewarmState::Skipped);
+            }
+        };
+        drop(lfc_state);
         let uncompress_time_ms = now.elapsed().as_millis() as u32;
         now = Instant::now();
 
         let uncompressed_len = uncompressed.len();
         info!(%url, "downloaded LFC state, uncompressed size {uncompressed_len}");
 
-        let client = select! {
-            _ = token.cancelled() => return Ok(LfcPrewarmState::Cancelled),
-            client = ComputeNode::get_maintenance_client(&self.tokio_conn_conf) => client,
-        }
-        .context("connecting to postgres")?;
         let statement = select! {
             _ = token.cancelled() => return Ok(LfcPrewarmState::Cancelled),
             statement = client.prepare("select neon.prewarm_local_cache($1)") => statement,
