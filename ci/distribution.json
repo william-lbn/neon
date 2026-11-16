@@ -4,7 +4,7 @@
   "autoscaling_commit": "fea6170208f45e2d49d0763bf5e4d5734afbf9db",
   "control_plane": {
     "repository": "william-lbn/control-plane",
-    "commit": "72b160415a3d564111db054e0e45be31d623e8b0",
+    "commit": "27804cd25c47b06c5ae17061445d930460ae9c86",
     "images": [
       "control-api",
       "control-web",
@@ -77,5 +77,5 @@
     "ordinary_package_lock_sha256": "20f70bf0e7f50dfacdd9177425b0d1d056e4c0821116cf2a5dc50aa7288a9c49"
   },
   "helm_repository": "william-lbn/neon-helm",
-  "helm_commit": "af4644c2a5469ef0ce8ba3a19a3c5d654895d0b5"
+  "helm_commit": "264248d3a30621b14a32af031ec865fab8830fe9"
 }
