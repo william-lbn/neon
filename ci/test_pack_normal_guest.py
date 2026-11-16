@@ -45,6 +45,8 @@ class PackNormalGuestTests(unittest.TestCase):
             {"guest_autoscaling_source": "main"},
             {"postgres_major": "17"},
             {"postgres_major": 16},
+            {"runtime_elf_sha256": {"compute_ctl": "a" * 64}},
+            {"runtime_elf_sha256": None},
         ):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 self.write_inputs(**changes)
@@ -162,3 +164,14 @@ class PackNormalGuestTests(unittest.TestCase):
                 (self.root / "normal-readback.json").write_text(json.dumps(readback))
                 with self.assertRaisesRegex(ValueError, "Independent normal Guest"):
                     packer.assembly_receipt(*args)
+        runtime = {"compute_ctl": "a" * 64, "neonvmd": "b" * 64, "dsga_resource_guard": "c" * 64}
+        self.write_inputs(runtime_elf_sha256=runtime)
+        self.assertEqual(packer.read_inputs(self.input_path)["runtime_elf_sha256"], runtime)
+        args = (*args[:2], inputs | {"runtime_elf_sha256": runtime}, *args[3:])
+        root["runtime_elf_sha256"] = runtime
+        (self.root / "normal-readback.json").write_text(json.dumps(readback))
+        self.assertEqual(packer.assembly_receipt(*args)["runtime_elf_sha256"], runtime)
+        root["runtime_elf_sha256"] = runtime | {"dsga_resource_guard": "f" * 64}
+        (self.root / "normal-readback.json").write_text(json.dumps(readback))
+        with self.assertRaisesRegex(ValueError, "runtime ELF readback differs"):
+            packer.assembly_receipt(*args)

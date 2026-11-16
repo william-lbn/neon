@@ -45,7 +45,8 @@ def read_inputs(path):
     images = ("base_image", "disk_tools_image", "kernel_image")
     files = ("builder_sha256", "kernel_sha256", "postgres_elf_sha256")
     sources = ("neon_source", "guest_autoscaling_source")
-    if (not isinstance(value, dict) or set(value) != {*images, *files, *sources, "postgres_major"}
+    required = {*images, *files, *sources, "postgres_major"}
+    if (not isinstance(value, dict) or not required <= value.keys() <= required | {"runtime_elf_sha256"}
             or type(value["postgres_major"]) is not int or value["postgres_major"] not in (17, 18)):
         raise ValueError("Invalid normal Guest assembly inputs")
     for field in images:
@@ -56,6 +57,11 @@ def read_inputs(path):
     if (not all(pinned_sha(value[k], release.SHA256) for k in files)
             or not all(pinned_sha(value[k], release.SHA) for k in sources)):
         raise ValueError("Normal Guest files and source commits must be independently pinned")
+    if "runtime_elf_sha256" in value:
+        runtime = value["runtime_elf_sha256"]
+        if (not isinstance(runtime, dict) or set(runtime) != {"compute_ctl", "neonvmd", "dsga_resource_guard"}
+                or not all(pinned_sha(item, release.SHA256) for item in runtime.values())):
+            raise ValueError("Normal Guest runtime executables must each be independently pinned")
     return value
 
 
@@ -157,6 +163,9 @@ def assembly_receipt(directory, tag, inputs, pinned, postgres_source, packaging_
             or oci["assets"]["vmlinuz"][-1]["material"]["sha256"] != inputs["kernel_sha256"]
             or not pinned_sha(packaging_source, release.SHA)):
         raise ValueError("Independent normal Guest root readback differs from the locked material")
+    runtime = inputs.get("runtime_elf_sha256")
+    if runtime is not None and root.get("runtime_elf_sha256") != runtime:
+        raise ValueError("Independent normal Guest runtime ELF readback differs from the locked material")
     paths = ("assembly-inputs.json", "base-provenance.json", "ordinary-input-readback.json",
              "normal-readback.json", "oci-metadata.json", "guest.oci.tar")
     return {
@@ -168,6 +177,7 @@ def assembly_receipt(directory, tag, inputs, pinned, postgres_source, packaging_
         "disk_sha256": disk_sha, "kernel_sha256": inputs["kernel_sha256"],
         "system_manifest_sha256": root["system_manifest_sha256"],
         "native_birth_manifest_sha256": root["native_birth_manifest_sha256"],
+        **({"runtime_elf_sha256": runtime} if runtime is not None else {}),
         "files_sha256": {name: file_sha(directory / name) for name in paths},
     }
 
@@ -249,12 +259,21 @@ def pack(args):
             "POSTGRES_MAJOR": str(major), "ORDINARY_PACKAGE_LOCK_SHA256": pinned["ordinary_package_lock_sha256"],
         }, ("--metadata-file", str(metadata), "--tag", args.tag))
         digest = read_json(metadata.read_bytes())["containerimage.digest"]
+        runtime = inputs.get("runtime_elf_sha256")
+        runtime_args = []
+        if runtime is not None:
+            # 独立验证器从最终 ext4 重算摘要。缺文件、旧 Builder 或原盘 ELF
+            # 任一不符都会在发布完成目录之前失败。
+            runtime_path = scratch / "runtime-elf-sha256.json"
+            runtime_path.write_text(json.dumps(runtime, sort_keys=True) + "\n")
+            runtime_args = ["--runtime-elf-sha256", str(runtime_path)]
         subprocess.run([
             "python3", str(readback), "verify-normal-guest-oci", "--archive", str(archive), "--image-digest", digest,
             "--disk-sha256", disk_sha, "--kernel-sha256", inputs["kernel_sha256"], "--builder", str(staged_builder),
             "--builder-sha256", inputs["builder_sha256"], "--plan", str(plan), "--plan-sha256", pinned["build_plan_sha256"],
             "--base-sha256", inputs["base_image"].rsplit(":", 1)[1], "--postgres-major", str(major),
-            "--postgres-sha256", inputs["postgres_elf_sha256"], "--output", str(candidate / "normal-readback.json"),
+            "--postgres-sha256", inputs["postgres_elf_sha256"], *runtime_args,
+            "--output", str(candidate / "normal-readback.json"),
         ], check=True, cwd=scratch, env={**os.environ, "TMPDIR": str(scratch)})
         receipt = assembly_receipt(candidate, args.tag, inputs, pinned, postgres_source, packaging_source, disk_sha)
         (candidate / "assembly-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
