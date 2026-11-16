@@ -365,8 +365,10 @@ impl<'a> Backend<'a, ComputeUserInfoMaybeEndpoint> {
             }
         };
 
-        // TODO: replace with some metric
-        info!("user successfully authenticated");
+        // 认证结果可能已经包含密码拒绝。只为实际获准的连接记录成功。
+        if res.is_ok() {
+            info!("user successfully authenticated");
+        }
         res
     }
 }
