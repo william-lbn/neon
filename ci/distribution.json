@@ -1,7 +1,7 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "8baabbb1797e687e75f75c51cf676cd575731fd6",
+  "autoscaling_commit": "6eeb02c53804b6a5e3572421bcb92d278370588c",
   "control_plane": {
     "repository": "william-lbn/control-plane",
     "commit": "afcbe20fd17ac1b060aba99ca85c38f4d5c6da5d",
@@ -70,6 +70,11 @@
     "v16": "full",
     "v17": "full",
     "v18": "dsga-core"
+  },
+  "normal_guest_inputs": {
+    "architecture": "linux/amd64",
+    "build_plan_sha256": "562887e138657ce35200d2d7fc2fc362bc9fd328bd9d58a75aad5e3e2e1614cd",
+    "ordinary_package_lock_sha256": "20f70bf0e7f50dfacdd9177425b0d1d056e4c0821116cf2a5dc50aa7288a9c49"
   },
   "helm_repository": "william-lbn/neon-helm",
   "helm_commit": "af4644c2a5469ef0ce8ba3a19a3c5d654895d0b5"

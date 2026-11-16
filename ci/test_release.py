@@ -86,6 +86,19 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertTrue(all(result["images"][image]["source_commit"] == control["commit"] for image in control["images"]))
         self.assertNotIn("control-api", release.expected_images(self.lock, "legacy"))
 
+    def test_normal_guest_requires_the_exact_shared_build_plan_and_package_lock(self):
+        inputs = dsga_release.verify_normal_guest_input_lock(self.lock)
+        self.assertEqual(inputs["architecture"], "linux/amd64")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "compute").mkdir()
+            (root / "compute/normal-build-plan-amd64.json").write_bytes(b"modified input\n")
+            with self.assertRaisesRegex(ValueError, "differs from the locked bytes"):
+                dsga_release.verify_normal_guest_input_lock(self.lock, root)
+        self.lock["normal_guest_inputs"]["ordinary_package_lock_sha256"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "independently pinned SHA256"):
+            dsga_release.verify_normal_guest_input_lock(self.lock)
+
     def test_control_plane_receipts_are_required_and_locked(self):
         original = self.images.pop("control-api")
         with self.assertRaisesRegex(ValueError, "Distribution incomplete"):

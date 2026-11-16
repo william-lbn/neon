@@ -1,0 +1,46 @@
+{
+  "protocol_version": 1,
+  "compute_uid": 1000,
+  "compute_gid": 1000,
+  "compute_argv": [
+    "/usr/local/bin/compute_ctl",
+    "--pgdata",
+    "/var/db/postgres/compute",
+    "--connstr",
+    "postgresql://cloud_admin@127.0.0.1:55432/postgres",
+    "--compute-id",
+    "@neon-workload@",
+    "--pgbin",
+    "/usr/local/bin/postgres",
+    "--config",
+    "/neonvm/runtime/dsga-compute-public.json",
+    "--pg-init-timeout",
+    "60"
+  ],
+  "compute_env": [
+    "LC_ALL=C",
+    "OTEL_SDK_DISABLED=true",
+    "PATH=/usr/local/bin:/usr/bin:/bin:/neonvm/bin"
+  ],
+  "loader_paths": [
+    "/lib/ld-musl-x86_64.so.1",
+    "/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+    "/lib/x86_64-linux-gnu/libc.so.6",
+    "/lib/x86_64-linux-gnu/libgcc_s.so.1",
+    "/lib/x86_64-linux-gnu/libm.so.6",
+    "/lib64/ld-linux-x86-64.so.2",
+    "/usr/lib/libcap.so.2.69",
+    "/usr/lib/libffi.so.8.1.2",
+    "/usr/lib/libgmp.so.10.5.0",
+    "/usr/lib/libgnutls.so.30.38.0",
+    "/usr/lib/libhogweed.so.6.8",
+    "/usr/lib/libidn2.so.0.3.8",
+    "/usr/lib/libnettle.so.8.8",
+    "/usr/lib/libp11-kit.so.0.3.1",
+    "/usr/lib/libseccomp.so.2.5.5",
+    "/usr/lib/libtasn1.so.6.6.4",
+    "/usr/lib/libunistring.so.5.0.0"
+  ],
+  "execution_model": "trusted-controller-v1",
+  "compute_identity_source": "runtime-v1"
+}

@@ -44,6 +44,22 @@ def verify_workflow_pins(lock):
             raise ValueError(f"Reusable workflow differs from pinned source: {repo}/{workflow}/{sha}")
 
 
+def verify_normal_guest_input_lock(lock, root=ROOT):
+    inputs = lock.get("normal_guest_inputs")
+    if (not isinstance(inputs, dict) or set(inputs) != {
+            "architecture", "build_plan_sha256", "ordinary_package_lock_sha256"}
+            or inputs["architecture"] != "linux/amd64"):
+        raise ValueError("Invalid normal Guest build input lock")
+    for name in ("build_plan_sha256", "ordinary_package_lock_sha256"):
+        value = inputs[name]
+        if not isinstance(value, str) or not release.SHA256.fullmatch(value) or value == "0" * 64:
+            raise ValueError(f"Normal Guest {name} must be an independently pinned SHA256")
+    plan = root / "compute/normal-build-plan-amd64.json"
+    if hashlib.sha256(plan.read_bytes()).hexdigest() != inputs["build_plan_sha256"]:
+        raise ValueError("Normal Guest build plan differs from the locked bytes")
+    return inputs
+
+
 def prepare(arch):
     if arch != "amd64":
         raise ValueError("Unified DSGA Chart templates currently support amd64 only")
@@ -51,6 +67,7 @@ def prepare(arch):
     release.validate_lock(lock, "dsga")
     compute.validate()
     verify_workflow_pins(lock)
+    verify_normal_guest_input_lock(lock)
     version = f"0.2.0-dsga.{os.environ.get('GITHUB_RUN_ID')}.{os.environ.get('GITHUB_RUN_ATTEMPT')}.{arch}"
     verify_attempt(version, arch)
     actual = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
