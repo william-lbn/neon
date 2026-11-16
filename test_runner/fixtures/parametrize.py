@@ -74,7 +74,9 @@ def pytest_generate_tests(metafunc: Metafunc):
 
     pg_versions: list[PgVersion]
     if (v := os.getenv("DEFAULT_PG_VERSION")) is None:
-        pg_versions = [version for version in PgVersion if version != PgVersion.NOT_SET]
+        # PG18 uses a separate, explicitly selected fixture until generic test
+        # images include its PostgreSQL distribution as well.
+        pg_versions = [PgVersion.V14, PgVersion.V15, PgVersion.V16, PgVersion.V17]
     else:
         pg_versions = [PgVersion(v)]
 

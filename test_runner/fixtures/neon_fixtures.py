@@ -3690,7 +3690,7 @@ class PSQL:
         if (d := os.getenv("POSTGRES_DISTRIB_DIR")) is not None and (
             v := os.getenv("DEFAULT_PG_VERSION")
         ) is not None:
-            search_path = Path(d) / f"v{v}" / "bin"
+            search_path = Path(d) / PgVersion(v).v_prefixed / "bin"
 
         full_path = shutil.which(path, path=search_path)
         assert full_path is not None
