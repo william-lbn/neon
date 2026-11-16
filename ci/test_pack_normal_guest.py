@@ -2,6 +2,8 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import shlex
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -67,6 +69,25 @@ class PackNormalGuestTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Builder bytes differ"):
             packer.pack(args)
         self.assertFalse(output.exists())
+
+    def test_disk_stage_refuses_initialized_or_linked_postgres_data(self):
+        dockerfile = Path(packer.__file__).with_name("normal-guest-disk.Dockerfile")
+        lines = dockerfile.read_text().splitlines()
+        start = next(index for index, line in enumerate(lines) if "| sha256sum -c -" in line)
+        stop = next(index for index, line in enumerate(lines) if "mkdir /out;" in line)
+        guard = "\n".join(line.removesuffix("\\") for line in lines[start + 1:stop])
+        version = self.root / "PG_VERSION"
+        guard = guard.replace("/rootdisk/var/db/postgres/compute/PG_VERSION", shlex.quote(str(version)))
+
+        def check():
+            return subprocess.run(["/bin/sh", "-eu", "-c", guard], capture_output=True)
+
+        self.assertEqual(check().returncode, 0)
+        version.write_text("17\n")
+        self.assertNotEqual(check().returncode, 0)
+        version.unlink()
+        version.symlink_to(self.root / "missing")
+        self.assertNotEqual(check().returncode, 0)
 
     def base_provenance_fixture(self):
         repository = self.inputs["base_image"].split("@")[0]

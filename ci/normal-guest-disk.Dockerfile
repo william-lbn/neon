@@ -29,7 +29,11 @@ RUN --network=none set -eu; \
         "$PACKAGE_LOCK_SHA256" /input/package-lock.json \
         "$VM_BUILDER_SHA256" /input/vm-builder \
         "$POSTGRES_SHA256" /rootdisk/usr/local/bin/postgres | sha256sum -c -; \
-    test "! -e /rootdisk/var/db/postgres/compute/PG_VERSION"; \
+    pg_version=/rootdisk/var/db/postgres/compute/PG_VERSION; \
+    if [ -e "$pg_version" ] || [ -L "$pg_version" ]; then \
+        printf 'Normal Guest root has pre-existing state at %s\n' "$pg_version" >&2; \
+        exit 1; \
+    fi; \
     mkdir /out; \
     /input/vm-builder --system-mode=normal-split-v3 --normal-ordinary-controls-version=2 \
         --normal-ordinary-package-lock=/input/package-lock.json \
