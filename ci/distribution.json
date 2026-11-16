@@ -4,7 +4,7 @@
   "autoscaling_commit": "4fefa48ad70a3c0dc8e5bc28b750115d16cf2d42",
   "control_plane": {
     "repository": "william-lbn/control-plane",
-    "commit": "cd562d9c2fbf37b6daf11319c96625ad635e3a86",
+    "commit": "1d0ce2a3f5a077daa86a34a1c248c52922f25e4c",
     "images": [
       "control-api",
       "control-web",
