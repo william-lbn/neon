@@ -188,9 +188,13 @@ jobs:
               --label "org.opencontainers.image.version=$TAG" \
               --cache-from "type=registry,ref=$cache" --cache-to "type=registry,ref=$cache,mode=min" \
               --provenance mode=max --sbom true
+            material=()
+            if [[ "$target" == runtime && "$ARCH" == amd64 && "$PG" =~ ^v(17|18)$ && "$TAG" =~ ^0\.2\.0-dsga\.[1-9][0-9]*\.[1-9][0-9]*\.amd64$ ]]; then
+              material=(--normal-material)
+            fi
             python3 ci/compute.py record --pg "$PG" --target "$target" --image "$image" \
-              --metadata "$target.json" --output "output/$name.json"
-            if [[ "$target" == runtime ]]; then
+              --metadata "$target.json" --output "output/$name.json" "${material[@]}"
+            if [[ "$target" == runtime && "${#material[@]}" == 0 ]]; then
               digest=$(jq -er '."containerimage.digest"' "$target.json")
               docker pull "$image@$digest"
               expected=$(jq -er --arg pg "$PG" '.postgres[$pg]' ci/distribution.json)

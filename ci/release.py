@@ -9,6 +9,8 @@ import pathlib
 import re
 import subprocess
 
+import normal_release
+
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 LOCK = json.loads((ROOT / "ci/distribution.json").read_text())
 SHA = re.compile(r"[a-f0-9]{40}")
@@ -52,7 +54,7 @@ def load_images(directory):
     return images
 
 
-def expected_images(lock=None, channel="legacy"):
+def expected_images(lock=None, channel="legacy", normal=False):
     lock = LOCK if lock is None else lock
     profiles = lock.get("postgres_profiles", {v: "full" for v in lock["postgres"]})
     images = {"neon", "neon-build-tools"}
@@ -60,6 +62,8 @@ def expected_images(lock=None, channel="legacy"):
     images |= set(lock["compute_components"]) | set(lock["autoscaling_images"])
     if channel == "dsga":
         images |= set(lock["control_plane"]["images"])
+        if normal:
+            images |= normal_release.EXTRA_IMAGES
     for version in lock["postgres"]:
         images |= {f"compute-node-{version}", f"vm-compute-node-{version}"}
         if profiles[version] == "full":
@@ -106,10 +110,13 @@ def verify_records(images, lock, tag, arch, neon_commit, channel):
         raise ValueError("Invalid Neon source commit")
     if channel == "dsga" and (arch != "amd64" or not DSGA_VERSION.fullmatch(tag)):
         raise ValueError("DSGA candidate requires the immutable amd64 SemVer tag")
-    expected = expected_images(lock, channel)
+    normal = normal_release.declared(images) if channel == "dsga" else False
+    expected = expected_images(lock, channel, normal)
     if set(images) != expected:
         raise ValueError(f"Distribution incomplete. Missing={sorted(expected - images.keys())}; extra={sorted(images.keys() - expected)}")
     source = {name: (lock["autoscaling_repository"], lock["autoscaling_commit"]) for name in lock["autoscaling_images"]}
+    if normal:
+        source["vm-kernel-normal"] = (lock["autoscaling_repository"], lock["autoscaling_commit"])
     if channel == "dsga":
         control = lock["control_plane"]
         source.update({name: (control["repository"], control["commit"]) for name in control["images"]})
@@ -134,6 +141,9 @@ def verify_records(images, lock, tag, arch, neon_commit, channel):
         for version in lock["postgres"]:
             name = f"vm-compute-node-{version}"
             verify_vm_disk(images[name], vm_input_references(images, name))
+            if normal and version in normal_release.VERSIONS:
+                normal_release.verify(images[name]["guest_disk"]["normal_guest"], images[name], images,
+                                      lock, neon_commit, execution_identity(tag))
 
 
 def image_reference(item):
@@ -150,20 +160,24 @@ def verify_vm_disk(item, inputs):
     if not isinstance(disk, dict) or disk.get("image") != image_reference(item) or disk.get("inputs") != inputs:
         raise ValueError(f"VM disk proof is missing or detached from its images: {item['name']}")
     size = disk.get("virtual_size")
-    if (disk.get("system_mode") != "legacy" or disk.get("format") != "qcow2"
+    mode = disk.get("system_mode")
+    is_normal = mode == normal_release.MODE and item["name"] in {"vm-compute-node-v17", "vm-compute-node-v18"}
+    if ((mode != "legacy" and not is_normal) or disk.get("format") != "qcow2"
             or type(size) is not int or size < 4 * 2**30
             or not isinstance(disk.get("sha256"), str) or not SHA256.fullmatch(disk["sha256"])):
         raise ValueError(f"VM disk format, size or digest is invalid: {item['name']}")
+    if (is_normal and not isinstance(disk.get("normal_guest"), dict)) or (mode == "legacy" and "normal_guest" in disk):
+        raise ValueError("VM disk normal evidence must match its explicit system mode")
 
 
-def read_vm_disk(path, image, inputs):
+def read_vm_disk(path, image, inputs, system_mode="legacy"):
     info = json.loads(subprocess.check_output(["qemu-img", "info", "--output=json", "-f", "qcow2", path]))
     if info.get("backing-filename") or info.get("format-specific", {}).get("data", {}).get("data-file"):
         raise ValueError("The released guest disk must be self-contained")
     subprocess.run(["qemu-img", "check", "-f", "qcow2", path], check=True)
     with path.open("rb") as stream:
         digest = hashlib.file_digest(stream, "sha256").hexdigest()
-    return {"system_mode": "legacy", "format": info["format"], "virtual_size": info["virtual-size"],
+    return {"system_mode": system_mode, "format": info["format"], "virtual_size": info["virtual-size"],
             "sha256": digest, "image": image, "inputs": inputs}
 
 
@@ -189,7 +203,9 @@ def verify_capabilities(capabilities, lock, tag, arch, images):
     for key in ("artifact_sha256", "config_sha256", "notes_sha256"):
         if not re.fullmatch(r"[a-f0-9]{64}", kernel.get(key, "")):
             raise ValueError(f"Missing actual kernel build identity: {key}")
-    expected_digests = {name: images[name]["digest"] for name in lock["autoscaling_images"]}
+    normal = normal_release.declared(images)
+    auto_images = set(lock["autoscaling_images"]) | ({"vm-kernel-normal"} if normal else set())
+    expected_digests = {name: images[name]["digest"] for name in auto_images}
     if capabilities.get("image_digests") != expected_digests:
         raise ValueError("Autoscaling capability image digests differ from release records")
     expected_kernel = images["vm-kernel"]["image"] + "@" + images["vm-kernel"]["digest"]
@@ -197,6 +213,10 @@ def verify_capabilities(capabilities, lock, tag, arch, images):
         raise ValueError("Kernel capability is not bound to the released vm-kernel image")
     if kernel.get("normal_qualification") is not False or kernel.get("normal_metadata_guard") is not False:
         raise ValueError("The public kernel profile cannot grant normal physical qualification")
+    if normal:
+        normal_release.verify_kernel(capabilities, images)
+    elif "normal_kernel" in capabilities:
+        raise ValueError("Normal Guest kernel evidence requires the complete normal lane")
     return capabilities
 
 
@@ -250,6 +270,11 @@ def make_manifest(images, lock, tag, arch, neon_commit, verification_commit, cha
             "postgres_native_validation": verify_native_receipts(native_receipts, lock, tag),
             "execution": execution_identity(tag),
         })
+        if normal_release.declared(images):
+            # 只声明物料模式，不能把打包/只读验收升级为KVM或实例资格。
+            output.update(schema_version=3, vm_system_mode="mixed",
+                          vm_system_modes={version: normal_release.MODE if version in normal_release.VERSIONS else "legacy"
+                                           for version in lock["postgres"]})
     return output
 
 
@@ -262,6 +287,7 @@ def main():
     record.add_argument("--arch", choices=["amd64", "arm64"], default=os.environ.get("ARCH", "amd64"))
     record.add_argument("--vm-disk", type=pathlib.Path, help="QCOW2 extracted from the published OCI digest")
     record.add_argument("--vm-input-images", type=pathlib.Path, help="Same-run image records used by the builder")
+    record.add_argument("--normal-guest", type=pathlib.Path, help="Completed normal Guest assembly directory with original OCI/readback files")
     lookup = sub.add_parser("lookup")
     lookup.add_argument("--directory", default="artifacts")
     lookup.add_argument("--name", required=True)
@@ -292,10 +318,17 @@ def main():
         if needs_vm_disk:
             if args.vm_disk is None or args.vm_input_images is None:
                 raise ValueError("DSGA VM images require the published disk and input records")
-            inputs = vm_input_references(load_images(args.vm_input_images), args.name)
-            item["guest_disk"] = read_vm_disk(args.vm_disk, image_reference(item), inputs)
+            images = load_images(args.vm_input_images)
+            inputs = vm_input_references(images, args.name)
+            mode = normal_release.MODE if args.normal_guest is not None else "legacy"
+            item["guest_disk"] = read_vm_disk(args.vm_disk, image_reference(item), inputs, mode)
+            if args.normal_guest is not None:
+                item["guest_disk"]["normal_guest"] = normal_release.read_bundle(args.normal_guest)
             verify_vm_disk(item, inputs)
-        elif args.vm_disk is not None or args.vm_input_images is not None:
+            if args.normal_guest is not None:
+                normal_release.verify(item["guest_disk"]["normal_guest"], item, images, LOCK,
+                                      item["source_commit"], execution)
+        elif args.vm_disk is not None or args.vm_input_images is not None or args.normal_guest is not None:
             raise ValueError("VM disk arguments are only supported by the DSGA VM build")
         path = pathlib.Path(args.output)
         path.parent.mkdir(parents=True, exist_ok=True)

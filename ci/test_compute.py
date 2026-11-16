@@ -1,14 +1,36 @@
 import argparse
+import hashlib
 import json
 import pathlib
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import compute
 import release
 
 
 class ComputeBuildTests(unittest.TestCase):
+    def test_normal_compute_material_checks_published_elf_and_postgres_source(self):
+        item = {"image": "docker.io/williamluckyli/compute-node-v17:test", "digest": "sha256:" + "1" * 64}
+        expected = compute.LOCK["postgres"]["v17"]
+
+        def record_call(command, **opts):
+            if command[1] == "cp":
+                destination = command[-1]
+                destination.write_bytes(b"\x7fELF" + destination.name.encode())
+
+        with patch.object(compute.subprocess, "run", side_effect=record_call) as run:
+            with patch.object(compute.subprocess, "check_output", side_effect=[f"postgres ({expected})", "container\n"]):
+                observed = compute.normal_compute_material(item, "v17")
+            self.assertEqual(observed, {"postgres_source": expected,
+                                        "postgres_elf_sha256": hashlib.sha256(b"\x7fELFpostgres").hexdigest(),
+                                        "runtime_elf_sha256": {"compute_ctl": hashlib.sha256(b"\x7fELFcompute_ctl").hexdigest()}})
+            self.assertIn(item["image"] + "@" + item["digest"], run.call_args_list[0].args[0])
+            with patch.object(compute.subprocess, "check_output", return_value="postgres (old)"):
+                with self.assertRaisesRegex(ValueError, "different locked source"):
+                    compute.normal_compute_material(item, "v17")
+
     def test_every_full_extension_exports_its_original_sources(self):
         with tempfile.TemporaryDirectory() as directory:
             for target in compute.extension_targets():

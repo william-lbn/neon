@@ -129,7 +129,7 @@ def docker_build(builder, dockerfile, context, destination, arguments, options=(
     ], check=True)
 
 
-def assembly_receipt(directory, tag, inputs, pinned, postgres_source, packaging_source, disk_sha):
+def assembly_receipt(directory, tag, inputs, pinned, postgres_source, packaging_source, disk_sha, execution=None):
     """Bind the packer's inputs to the independently verified final OCI."""
     metadata = read_json((directory / "oci-metadata.json").read_bytes())
     readback = read_json((directory / "normal-readback.json").read_bytes())
@@ -178,6 +178,7 @@ def assembly_receipt(directory, tag, inputs, pinned, postgres_source, packaging_
         "system_manifest_sha256": root["system_manifest_sha256"],
         "native_birth_manifest_sha256": root["native_birth_manifest_sha256"],
         **({"runtime_elf_sha256": runtime} if runtime is not None else {}),
+        **({"execution": execution} if execution is not None else {}),
         "files_sha256": {name: file_sha(directory / name) for name in paths},
     }
 
@@ -207,6 +208,15 @@ def pack(args):
         raise ValueError("Independent Guest readback must use the locked Autoscaling source")
     subprocess.run(["git", "-C", str(autoscaling), "diff", "--quiet", actual, "--",
                     "ci/distribution.py", "ci/distribution.json"], check=True)
+    execution = None
+    if release.DSGA_VERSION.fullmatch(tag):
+        execution = release.validate_current_execution(tag)
+        # 发行物统一用本次工作流的准确源码和独立的实际 ELF 输入。
+        if (repository != f"{lock['registry']}/vm-compute-node-v{major}"
+                or inputs["neon_source"] != packaging_source
+                or inputs["guest_autoscaling_source"] != actual
+                or "runtime_elf_sha256" not in inputs):
+            raise ValueError("Normal Guest release assembly must use the current run's locked product material")
     output = args.output.resolve()
     if output.exists():
         raise FileExistsError(output)
@@ -275,7 +285,7 @@ def pack(args):
             "--postgres-sha256", inputs["postgres_elf_sha256"], *runtime_args,
             "--output", str(candidate / "normal-readback.json"),
         ], check=True, cwd=scratch, env={**os.environ, "TMPDIR": str(scratch)})
-        receipt = assembly_receipt(candidate, args.tag, inputs, pinned, postgres_source, packaging_source, disk_sha)
+        receipt = assembly_receipt(candidate, args.tag, inputs, pinned, postgres_source, packaging_source, disk_sha, execution)
         (candidate / "assembly-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
         candidate.rename(output)
 

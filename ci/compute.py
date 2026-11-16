@@ -6,11 +6,13 @@ and the original regression sources instead of uploading compiler scratch files.
 The final image still uses the upstream EXTENSIONS=all assembly and runtime.
 """
 import argparse
+import hashlib
 import json
 import os
 import pathlib
 import re
 import subprocess
+import tempfile
 
 from source_lock import validate_postgres_sources
 from release import DSGA_VERSION, validate_current_execution
@@ -135,6 +137,36 @@ def render(args):
     pathlib.Path(args.output).write_text("".join(output))
 
 
+def normal_compute_material(item, version):
+    """Read the executable bytes from the published image locked to this attempt."""
+    expected = LOCK["postgres"][version]
+    reference = item["image"] + "@" + item["digest"]
+    subprocess.run(["docker", "pull", reference], check=True)
+    reported = subprocess.check_output([
+        "docker", "run", "--rm", "--network", "none", "--entrypoint", "/usr/local/bin/postgres",
+        reference, "--version",
+    ], text=True)
+    if f"({expected})" not in reported:
+        raise ValueError("Published PostgreSQL reports a different locked source")
+    with tempfile.TemporaryDirectory(prefix="neon-guest-compute-") as directory:
+        target = pathlib.Path(directory)
+        container = subprocess.check_output(["docker", "create", reference], text=True).strip()
+        try:
+            digests = {}
+            for name in ("postgres", "compute_ctl"):
+                file = target / name
+                subprocess.run(["docker", "cp", f"{container}:/usr/local/bin/{name}", file], check=True)
+                with file.open("rb") as stream:
+                    if stream.read(4) != b"\x7fELF":
+                        raise ValueError(f"Published executable is not ELF: {name}")
+                    stream.seek(0)
+                    digests[name] = hashlib.file_digest(stream, "sha256").hexdigest()
+        finally:
+            subprocess.run(["docker", "rm", container], check=True, stdout=subprocess.DEVNULL)
+    return {"postgres_source": expected, "postgres_elf_sha256": digests["postgres"],
+            "runtime_elf_sha256": {"compute_ctl": digests["compute_ctl"]}}
+
+
 def record(args):
     digest = json.loads(pathlib.Path(args.metadata).read_text())["containerimage.digest"]
     if not re.fullmatch(r"sha256:[a-f0-9]{64}", digest):
@@ -153,6 +185,10 @@ def record(args):
             "source_repository": "william-lbn/neon",
             "architecture": "linux/" + args.arch, "execution": execution,
             "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()}
+    if getattr(args, "normal_material", False):
+        if execution is None or args.stage or args.target != "runtime" or args.arch != "amd64" or args.pg not in ("v17", "v18"):
+            raise ValueError("Normal Guest material requires the same-run PG17/18 amd64 runtime image")
+        item.update(normal_compute_material(item, args.pg))
     path = pathlib.Path(args.output)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(item, indent=2) + "\n")
@@ -199,6 +235,7 @@ def main():
     for name in ["pg", "target", "image", "metadata", "output"]:
         recording.add_argument("--" + name, required=True)
     recording.add_argument("--stage", action="store_true")
+    recording.add_argument("--normal-material", action="store_true")
     recording.add_argument("--arch", choices=["amd64", "arm64"], default=os.environ.get("ARCH", "amd64"))
     args = parser.parse_args()
     if args.command == "validate":

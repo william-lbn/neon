@@ -171,6 +171,9 @@ class PackNormalGuestTests(unittest.TestCase):
         root["runtime_elf_sha256"] = runtime
         (self.root / "normal-readback.json").write_text(json.dumps(readback))
         self.assertEqual(packer.assembly_receipt(*args)["runtime_elf_sha256"], runtime)
+        execution = packer.release.execution_identity("0.2.0-dsga.1234.2.amd64")
+        self.assertEqual(packer.assembly_receipt(*args, execution=execution)["execution"], execution)
+        self.assertNotIn("execution", packer.assembly_receipt(*args))
         root["runtime_elf_sha256"] = runtime | {"dsga_resource_guard": "f" * 64}
         (self.root / "normal-readback.json").write_text(json.dumps(readback))
         with self.assertRaisesRegex(ValueError, "runtime ELF readback differs"):

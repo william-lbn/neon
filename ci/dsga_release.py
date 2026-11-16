@@ -101,8 +101,11 @@ def finalize_assets(directory, tag, source_commit):
         raise ValueError("Release assets do not match the exact source/version")
     validated = release.make_manifest(manifest["images"], release.LOCK, tag, "amd64", source_commit, source_commit,
                                       "dsga", manifest.get("autoscaling_capabilities"), manifest.get("postgres_native_validation"))
-    for key in ("source_lock", "qualification", "chart_version", "release_tier", "vm_system_mode", "execution"):
-        if manifest.get(key) != validated[key]:
+    fields = ("schema_version", "channel", "architecture", "verification_commit",
+              "source_lock", "qualification", "chart_version", "release_tier",
+              "vm_system_mode", "vm_system_modes", "execution")
+    for key in fields:
+        if manifest.get(key) != validated.get(key):
             raise ValueError(f"Release asset contract differs: {key}")
     raw_manifest = (path / "distribution-manifest.json").read_bytes()
     manifest_hash = hashlib.sha256(raw_manifest).hexdigest()
@@ -138,6 +141,11 @@ def finalize_assets(directory, tag, source_commit):
         if (item.get("sha256") != hashlib.sha256(chart.read_bytes()).hexdigest()
                 or item.get("lint") != "pass" or item.get("offline_render") != "pass"):
             raise ValueError(f"Chart package differs from its validation receipt: {chart.name}")
+    vm_profile = (
+        "PG17、PG18 使用 normal-split-v3，包内保留同次发行的镜像、根盘和组件读回证据。"
+        if manifest["schema_version"] == 3
+        else "本包使用 legacy VM 系统模式与公开默认内核。"
+    )
     notes = f"""# Neon DSGA candidate {tag}
 
 统一源码、镜像与 Helm 候选发行，平台 linux/amd64。
@@ -152,7 +160,7 @@ def finalize_assets(directory, tag, source_commit):
 - 同 run 运行 PG17/18 原生内核回归、镜像源码/digest/架构校验、真实 WAL 装载、SQL/存储恢复 smoke、Helm lint/template/打包门禁。
 - PG14–17 保留 full profile；PG18 为 dsga-core，包含 PostgreSQL、contrib 与 Neon 必需扩展，不包含尚未联合适配的第三方全扩展集。
 
-本包使用 legacy VM system mode 与公开默认内核构建，production_ready=false，physical_memory_release_qualified=false。代码中最近完成的伸缩实现已纳入准确 SHA，但本候选物料没有 normal-split-v3 内核、构建计划及实例资格证明；真实物理缩容和三节点验收不由此 CI 自动授予。Chart 保持资格门禁关闭。本发布不修改任何 latest 标签。
+{vm_profile} production_ready=false，physical_memory_release_qualified=false。Chart 保持资格门禁关闭，真实物理缩容和三节点验收由 Kubernetes 实测完成。
 
 部署以 distribution-manifest.json 的 image@sha256 引用及配套 Chart/values 为准。文件完整性见 SHA256SUMS；最终运行证据：{release.execution_identity(tag)['run_url']}。
 """
