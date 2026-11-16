@@ -95,6 +95,11 @@ class ReleaseContractTests(unittest.TestCase):
             (root / "compute/normal-build-plan-amd64.json").write_bytes(b"modified input\n")
             with self.assertRaisesRegex(ValueError, "differs from the locked bytes"):
                 dsga_release.verify_normal_guest_input_lock(self.lock, root)
+            plan = "compute/normal-build-plan-amd64.json"
+            (root / plan).write_bytes((dsga_release.ROOT / plan).read_bytes())
+            (root / "compute/normal-ordinary-package-lock-amd64.json").write_bytes(b"modified package source lock\n")
+            with self.assertRaisesRegex(ValueError, "ordinary package lock differs from the locked bytes"):
+                dsga_release.verify_normal_guest_input_lock(self.lock, root)
         self.lock["normal_guest_inputs"]["ordinary_package_lock_sha256"] = "0" * 64
         with self.assertRaisesRegex(ValueError, "independently pinned SHA256"):
             dsga_release.verify_normal_guest_input_lock(self.lock)

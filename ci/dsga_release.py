@@ -54,9 +54,12 @@ def verify_normal_guest_input_lock(lock, root=ROOT):
         value = inputs[name]
         if not isinstance(value, str) or not release.SHA256.fullmatch(value) or value == "0" * 64:
             raise ValueError(f"Normal Guest {name} must be an independently pinned SHA256")
-    plan = root / "compute/normal-build-plan-amd64.json"
-    if hashlib.sha256(plan.read_bytes()).hexdigest() != inputs["build_plan_sha256"]:
-        raise ValueError("Normal Guest build plan differs from the locked bytes")
+    for name, path, label in (
+        ("build_plan_sha256", "compute/normal-build-plan-amd64.json", "build plan"),
+        ("ordinary_package_lock_sha256", "compute/normal-ordinary-package-lock-amd64.json", "ordinary package lock"),
+    ):
+        if hashlib.sha256((root / path).read_bytes()).hexdigest() != inputs[name]:
+            raise ValueError(f"Normal Guest {label} differs from the locked bytes")
     return inputs
 
 
