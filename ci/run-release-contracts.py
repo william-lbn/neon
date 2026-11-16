@@ -2,7 +2,8 @@
 """只加载不依赖运行中 PG 的发行契约；原生回归由同 run 的 PG 工作流硬门禁执行。"""
 import unittest
 
-MODULES = ["test_compute", "test_source_lock", "test_postgres_config_cache", "test_release", "test_slo_acceptance"]
+MODULES = ["test_compute", "test_source_lock", "test_postgres_config_cache", "test_release", "test_slo_acceptance",
+           "test_pack_normal_guest"]
 suite = unittest.defaultTestLoader.loadTestsFromNames(MODULES)
 if suite.countTestCases() == 0:
     raise SystemExit("No distribution contract tests found")
