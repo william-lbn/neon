@@ -9,6 +9,10 @@ on:
         type: choice
         options: [amd64]
         default: amd64
+      normal_guest:
+        description: Build both PostgreSQL 17 and 18 normal-split-v3 Guests
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -36,6 +40,9 @@ jobs:
       pg18: ${{ steps.meta.outputs.pg18 }}
       postgres_matrix: ${{ steps.meta.outputs.postgres_matrix }}
       distribution_artifact: ${{ steps.meta.outputs.distribution_artifact }}
+      normal_carrier_pg17: ${{ steps.normal-inputs.outputs.carrier_pg17 }}
+      normal_carrier_pg18: ${{ steps.normal-inputs.outputs.carrier_pg18 }}
+      normal_ordinary: ${{ steps.normal-inputs.outputs.ordinary }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -43,6 +50,20 @@ jobs:
           persist-credentials: false
       - run: python3 ci/compute.py validate
       - run: python3 ci/run-release-contracts.py
+      - name: Check the normal Guest input images before starting the matrix
+        id: normal-inputs
+        if: inputs.normal_guest
+        env:
+          CARRIER_PG17: ${{ vars.DSGA_NORMAL_GUEST_CARRIER_PG17 }}
+          CARRIER_PG18: ${{ vars.DSGA_NORMAL_GUEST_CARRIER_PG18 }}
+          ORDINARY: ${{ vars.DSGA_NORMAL_ORDINARY_SOURCES }}
+        run: |
+          set -euo pipefail
+          for ref in "$CARRIER_PG17" "$CARRIER_PG18" "$ORDINARY"; do
+            [[ "$ref" =~ ^docker\.io/williamluckyli/[a-z0-9._-]+@sha256:[a-f0-9]{64}$ ]]
+          done
+          printf 'carrier_pg17=%s\ncarrier_pg18=%s\nordinary=%s\n' \
+            "$CARRIER_PG17" "$CARRIER_PG18" "$ORDINARY" >> "$GITHUB_OUTPUT"
       - name: Require configured publishing credentials before expensive builds
         env:
           DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -69,17 +90,18 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@b6c4ff274d6bb2c2097721d409befd0ca99a564e
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@a1febcdb49586ec16090d37ea7103ca1cb239aaf
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
       source_ref: ${{ needs.prepare.outputs.autoscaling }}
+      normal_kernel: ${{ inputs.normal_guest || false }}
     secrets: inherit
   control-plane:
     needs: prepare
     permissions:
       contents: read
-    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@dd891caf76701622bc3c0d0bcbf4f7430184e19a
+    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@e3fec475d2de513bb429a58bf6942c20aa817046
     with:
       source_sha: ${{ needs.prepare.outputs.control_plane }}
       release_tag: ${{ needs.prepare.outputs.tag }}
@@ -331,7 +353,35 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           token: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Build VM disk from our compute and our source-built vm-builder
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        if: inputs.normal_guest && (matrix.pg == 'v17' || matrix.pg == 'v18')
+        with:
+          repository: william-lbn/autoscaling
+          ref: ${{ needs.prepare.outputs.autoscaling }}
+          path: normal-autoscaling-source
+          persist-credentials: false
+      - name: Build and independently reread the normal PostgreSQL Guest
+        if: inputs.normal_guest && (matrix.pg == 'v17' || matrix.pg == 'v18')
+        env:
+          PG: ${{ matrix.pg }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          CARRIER: ${{ matrix.pg == 'v17' && needs.prepare.outputs.normal_carrier_pg17 || needs.prepare.outputs.normal_carrier_pg18 }}
+          ORDINARY: ${{ needs.prepare.outputs.normal_ordinary }}
+        run: |
+          set -euo pipefail
+          sudo -n apt-get update
+          sudo -n apt-get install -y qemu-utils skopeo
+          docker pull --platform linux/amd64 "$ORDINARY"
+          container=$(docker create --platform linux/amd64 "$ORDINARY" true)
+          trap 'docker rm "$container" >/dev/null' EXIT
+          mkdir -m700 normal-ordinary-sources
+          docker cp "$container:/ordinary-sources/." normal-ordinary-sources/
+          builder=$(docker buildx inspect | sed -n 's/^Name:[[:space:]]*//p')
+          [[ -n "$builder" ]]
+          bash ci/build-normal-guest-release.sh "${PG#v}" "$TAG" artifacts normal-autoscaling-source \
+            normal-ordinary-sources "$builder" "output/normal-$PG" "$CARRIER"
+      - name: Build the legacy VM disk
+        if: ${{ !inputs.normal_guest || (matrix.pg != 'v17' && matrix.pg != 'v18') }}
         env:
           PG: ${{ matrix.pg }}
           DEBIAN: ${{ matrix.debian }}
@@ -364,9 +414,19 @@ jobs:
       - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
           name: images-vm-compute-${{ matrix.pg }}-attempt${{ github.run_attempt }}
-          path: output/*.json
+          path: |
+            output/*.json
+            output/normal-*/*.json
           retention-days: 90
           if-no-files-found: error
+      - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+        if: failure() && inputs.normal_guest && (matrix.pg == 'v17' || matrix.pg == 'v18')
+        with:
+          name: normal-guest-failure-${{ matrix.pg }}-attempt${{ github.run_attempt }}
+          path: output/normal-*.pending/
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: ignore
   validate:
     needs: [prepare, postgres-17, postgres-18, autoscaling, control-plane, core-components, compute-components, vm-compute]
     permissions:
