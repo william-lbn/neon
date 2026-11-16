@@ -44,6 +44,12 @@
 #include "access/xlogrecovery.h"
 #endif
 
+#if PG_VERSION_NUM >= 170000
+#include "utils/injection_point.h"
+#else
+#define INJECTION_POINT(name) ((void) 0)
+#endif
+
 #include "hll.h"
 #include "bitmap.h"
 #include "file_cache.h"
@@ -716,8 +722,11 @@ lfc_prewarm(FileCacheState* fcs, uint32 n_workers)
 	size_t fcs_size;
 	size_t snapshot_blocks;
 	size_t selected_blocks;
+	size_t selected_size;
 	uint32 selected_pages;
 	const uint8 *bitmap;
+	FileCacheState *selected;
+	uint8 *selected_bitmap;
 	dsm_segment *seg;
 	BackgroundWorkerHandle* bgw_handle[MAX_PREWARM_WORKERS];
 
@@ -792,19 +801,43 @@ lfc_prewarm(FileCacheState* fcs, uint32 n_workers)
 		LWLockRelease(lfc_lock);
 		elog(ERROR, "LFC: skip prewarm because another prewarm is still active");
 	}
+
+	/*
+	 * 目标只消费已验证的前缀，因此DSM也只承担该前缀的实际成本。来源
+	 * chunk粒度可能与当前配置不同，不能用依赖lfc_blocks_per_chunk的
+	 * SIZE_FOR_CHUNKS宏；bitmap必须从来源尾部复制到新n_chunks之后。
+	 */
+	selected_size = sizeof(FileCacheState) + n_entries * sizeof(BufferTag)
+		+ (selected_blocks + 7) / 8;
+	NEON_INJECTION_POINT("neon-lfc-prewarm-before-dsm-create");
+	seg = dsm_create(selected_size, 0);
+	selected = (FileCacheState *) dsm_segment_address(seg);
+	memcpy(selected, fcs, sizeof(FileCacheState) + n_entries * sizeof(BufferTag));
+	SET_VARSIZE(selected, selected_size);
+	selected->n_chunks = n_entries;
+	selected->n_pages = selected_pages;
+	selected_bitmap = FILE_CACHE_STATE_BITMAP(selected);
+	memcpy(selected_bitmap, bitmap, (selected_blocks + 7) / 8);
+	if (selected_blocks % 8 != 0)
+		selected_bitmap[selected_blocks / 8] &= (1U << (selected_blocks % 8)) - 1;
+	NEON_INJECTION_POINT("neon-lfc-prewarm-after-dsm-create");
+
+	/*
+	 * 分配及初始化成功后，才在原排他锁内一次发布handle与active。分配
+	 * ERROR时尚未改变共享预热状态，PG原事务清理会释放LWLock及本请求
+	 * ResourceOwner持有的DSM；后继请求无需重启或手工清除active。保持
+	 * 此处排他，避免多个后端在锁外为同一预热并发占用额外DSM预算。
+	 */
 	lfc_ctl->n_prewarm_entries = n_entries;
 	lfc_ctl->n_prewarm_workers = n_workers;
 	lfc_ctl->prewarm_active = true;
 	lfc_ctl->prewarm_canceled = false;
 	lfc_ctl->prewarm_batch = prewarm_batch;
 	lfc_ctl->total_prewarm_pages = selected_pages;
+	lfc_ctl->prewarm_lfc_state_handle = dsm_segment_handle(seg);
 	memset(lfc_ctl->prewarm_workers, 0, n_workers*sizeof(PrewarmWorkerState));
 
 	LWLockRelease(lfc_lock);
-
-	seg = dsm_create(fcs_size, 0);
-	memcpy(dsm_segment_address(seg), fcs, fcs_size);
-	lfc_ctl->prewarm_lfc_state_handle = dsm_segment_handle(seg);
 
 	/* Spawn background workers */
 	for (uint32 i = 0; i < n_workers; i++)
@@ -828,8 +861,16 @@ lfc_prewarm(FileCacheState* fcs, uint32 n_workers)
 					(errcode(ERRCODE_INSUFFICIENT_RESOURCES),
 					 errmsg("LFC: registering dynamic bgworker prewarm failed"),
 					 errhint("Consider increasing the configuration parameter \"%s\".", "max_worker_processes")));
-			n_workers = i;
+			/*
+			 * 未注册的槽已终止。与get_prewarm_info的共享读使用同一原锁
+			 * 发布终态，不能只由读取者持锁而让完成标记在锁外改变。
+			 */
+			LWLockAcquire(lfc_lock, LW_EXCLUSIVE);
+			for (uint32 j = i; j < n_workers; j++)
+				lfc_ctl->prewarm_workers[j].completed = GetCurrentTimestamp();
 			lfc_ctl->prewarm_canceled = true;
+			LWLockRelease(lfc_lock);
+			n_workers = i;
 			break;
 		}
 	}
@@ -857,6 +898,8 @@ lfc_prewarm(FileCacheState* fcs, uint32 n_workers)
 			PG_END_TRY();
 		} while (interrupted);
 
+		/* 等待退出时不持LFC锁；退出后在同一临界区检查并补记异常终态。 */
+		LWLockAcquire(lfc_lock, LW_EXCLUSIVE);
 		if (!lfc_ctl->prewarm_workers[i].completed)
 		{
 			/* Background worker doesn't set completion time: it means that it was abnormally terminated */
@@ -864,6 +907,7 @@ lfc_prewarm(FileCacheState* fcs, uint32 n_workers)
 			/* Set completion time to prevent get_prewarm_info from considering this worker as active */
 			lfc_ctl->prewarm_workers[i].completed = GetCurrentTimestamp();
 		}
+		LWLockRelease(lfc_lock);
 	}
 	dsm_detach(seg);
 
@@ -983,7 +1027,13 @@ lfc_prewarm_main(Datum main_arg)
 	 */
 	Assert(n_sent == n_received || lfc_ctl->prewarm_canceled);
 	elog(LOG, "LFC: worker %d complete prewarming: loaded %ld pages", worker_id, (long)n_received);
+	/*
+	 * 最后的完成标记在原锁下发布，同时使此前累计的页数对持共享锁的
+	 * 终态观察可见；逐页I/O和预取循环不增加持锁范围。
+	 */
+	LWLockAcquire(lfc_lock, LW_EXCLUSIVE);
 	lfc_ctl->prewarm_workers[worker_id].completed = GetCurrentTimestamp();
+	LWLockRelease(lfc_lock);
 }
 
 void
@@ -2100,7 +2150,7 @@ get_prewarm_info(PG_FUNCTION_ARGS)
 		PrewarmWorkerState* ws = &lfc_ctl->prewarm_workers[i];
 		prewarmed_pages += ws->prewarmed_pages;
 		skipped_pages += ws->skipped_pages;
-		active_workers += ws->completed != 0;
+		active_workers += ws->completed == 0;
 	}
 	LWLockRelease(lfc_lock);
 

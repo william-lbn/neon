@@ -1,14 +1,20 @@
+import os
 import random
+import shlex
+import struct
+from contextlib import closing
 from enum import StrEnum
 from threading import Thread
 from time import sleep
 from typing import Any
 
 import psutil
+import psycopg2
 import pytest
 from fixtures.endpoint.http import EndpointHttpClient
 from fixtures.log_helper import log
-from fixtures.neon_fixtures import NeonEnv
+from fixtures.neon_fixtures import NeonEnv, NeonEnvBuilder
+from fixtures.pg_version import PgVersion
 from fixtures.utils import USE_LFC, wait_until
 from prometheus_client.parser import text_string_to_metric_families as prom_parse_impl
 from psycopg2.extensions import cursor as Cursor
@@ -214,14 +220,231 @@ def test_lfc_prewarm_respects_destination_limit(neon_simple_env: NeonEnv):
         with conn.cursor() as cur:
             cur.execute("SELECT neon.prewarm_local_cache(%s, 1)", (state,))
             cur.execute(
-                "SELECT total_pages, prewarmed_pages, skipped_pages FROM neon.get_prewarm_info()"
+                "SELECT total_pages, prewarmed_pages, skipped_pages, active_workers "
+                "FROM neon.get_prewarm_info()"
             )
-            total, prewarmed, skipped = cur.fetchone()
+            total, prewarmed, skipped, active = cur.fetchone()
             assert 0 < total <= 2 * 8
             assert prewarmed > 0
             assert total == prewarmed + skipped
+            assert active == 0
             cur.execute("SELECT count(*), sum(length(payload)) FROM prewarm_budget")
             assert cur.fetchone() == (50000, 6400000)
+
+
+@pytest.mark.parametrize("chunk_blocks", [1, 8, 128])
+def test_lfc_prewarm_compact_dsm_and_allocation_recovery(
+    neon_env_builder: NeonEnvBuilder, pg_config_configure: str, chunk_blocks: int
+):
+    """从原SQL入口检验紧凑DSM的真实字节、分配错误清理及同boot后继预热。"""
+    # 通用regress可能使用未编译注入点的PG，先核能力再启动独占环境。
+    # 专项入口显式设置严格开关；任何能力缺失必须失败，不能以skip充数。
+    # 通用环境若确有注入能力，仍可直接选择本用例运行。
+    required = os.environ.get("NEON_TEST_REQUIRE_LFC_INJECTION", "0")
+    assert required in ("0", "1"), "invalid NEON_TEST_REQUIRE_LFC_INJECTION"
+    unavailable = None
+    if not USE_LFC:
+        unavailable = "LFC is disabled"
+    elif neon_env_builder.pg_version < PgVersion.V17:
+        unavailable = "the injection_points extension requires PostgreSQL 17+"
+    elif "--enable-injection-points" not in shlex.split(pg_config_configure):
+        unavailable = "PostgreSQL was configured without --enable-injection-points"
+    if unavailable is not None:
+        if required == "1":
+            pytest.fail(f"required LFC injection test unavailable: {unavailable}")
+        pytest.skip(unavailable)
+    env = neon_env_builder.init_start()
+    endpoint = env.endpoints.create_start(
+        branch_name="main",
+        config_lines=[
+            "autovacuum = off",
+            "shared_buffers = 1MB",
+            "neon.max_file_cache_size = 256MB",
+            "neon.file_cache_size_limit = 256MB",
+            f"neon.file_cache_chunk_size = {chunk_blocks}",
+            "neon.file_cache_prewarm_limit = 1000",
+            "dynamic_shared_memory_type = mmap",
+            "min_dynamic_shared_memory = 0",
+        ],
+    )
+    with closing(endpoint.connect()) as conn, conn.cursor() as cur:
+        cur.execute("CREATE SCHEMA neon; CREATE EXTENSION neon WITH SCHEMA neon")
+        # 此测试必须用启用injection-points的PG候选；缺模块/能力应明确失败，
+        # 不能把未触及真实分配入口的运行记为负控通过。
+        cur.execute("CREATE EXTENSION injection_points")
+        cur.execute(
+            "CREATE TABLE compact_prewarm AS "
+            "SELECT i, repeat('x', 128) AS payload FROM generate_series(1, 50000) AS g(i)"
+        )
+        cur.execute("SELECT sum(length(payload)) FROM compact_prewarm")
+        assert cur.fetchone() == (6400000,)
+        cur.execute("SELECT neon.get_local_cache_state(1000)")
+        state = bytes(cur.fetchone()[0])
+    endpoint.stop()
+    endpoint.start()
+
+    # compute_ctl重启会重建PGDATA，必须在目标boot加载并实读新上限。
+    endpoint.safe_psql("ALTER SYSTEM SET neon.file_cache_prewarm_limit = 2")
+    endpoint.safe_psql("SELECT pg_reload_conf()")
+
+    def target_limit_loaded():
+        assert endpoint.safe_psql("SHOW neon.file_cache_prewarm_limit") == [("2",)]
+
+    wait_until(target_limit_loaded)
+
+    # bytea不包含C varlena头；这些offset对应发行中FileCacheState与BufferTag
+    # 的实际布局。后续逐字节比较原chunk及原bitmap，避免只检查结果页数。
+    magic, chunks, _pages, chunk_log = struct.unpack_from("=IIIH", state)
+    assert magic == 0xFCFCFCFC and chunks > 2 and (1 << chunk_log) == chunk_blocks
+    source_bitmap = state[16 + chunks * 20 :]
+    selected_bits = 2 * chunk_blocks
+    expected_bitmap = bytearray(source_bitmap[: (selected_bits + 7) // 8])
+    if selected_bits % 8:
+        expected_bitmap[-1] &= (1 << (selected_bits % 8)) - 1
+    expected_pages = sum(value.bit_count() for value in expected_bitmap)
+    assert expected_pages > 0
+
+    dsm_dir = endpoint.pg_data_dir_path() / "pg_dynshmem"
+
+    def dsm_files():
+        return {
+            path.name: (path.stat().st_ino, path.stat().st_size)
+            for path in dsm_dir.glob("mmap.*")
+        }
+
+    def read_sql(sql, params=None):
+        observer.execute(sql, params)
+        return observer.fetchall()
+
+    with (
+        closing(endpoint.connect()) as conn,
+        conn.cursor() as cur,
+        closing(endpoint.connect()) as observer_conn,
+        observer_conn.cursor() as observer,
+    ):
+        cur.execute("SELECT pg_postmaster_start_time(), pg_backend_pid()")
+        boot, backend_pid = cur.fetchone()
+        cur.execute("SELECT injection_points_set_local()")
+        before = dsm_files()
+        loaded_total = 0
+        for point in (
+            "neon-lfc-prewarm-before-dsm-create",
+            "neon-lfc-prewarm-after-dsm-create",
+        ):
+            cur.execute("SELECT injection_points_attach(%s, 'error')", (point,))
+            try:
+                with pytest.raises(
+                    psycopg2.Error, match=f"error triggered for injection point {point}"
+                ) as failed:
+                    cur.execute("SELECT neon.prewarm_local_cache(%s, 1)", (state,))
+                assert failed.value.pgcode == "XX000"
+            finally:
+                cur.execute("SELECT injection_points_detach(%s)", (point,))
+            assert dsm_files() == before
+            assert endpoint.safe_psql("SELECT pg_postmaster_start_time()") == [(boot,)]
+            cur.execute("SELECT neon.prewarm_local_cache(%s, 1)", (state,))
+            cur.execute("SELECT * FROM neon.get_prewarm_info()")
+            total, loaded, skipped, active = cur.fetchone()
+            assert total == expected_pages == loaded + skipped and active == 0
+            loaded_total += loaded
+            assert dsm_files() == before
+
+        # compute_ctl将pg_dynshmem指向共享/dev/shm，不能修改该目录权限。
+        # 仅原子切换本夹具自己的链接到只读私有目录，让原OpenTransientFile
+        # 返回EACCES；保留已有DSM映射，finally恢复原链接后再检验同boot恢复。
+        assert dsm_dir.is_symlink()
+        original_target = dsm_dir.readlink()
+        denied_dir = endpoint.pg_data_dir_path() / "prewarm-denied-dsm"
+        link_swap = endpoint.pg_data_dir_path() / "prewarm-dsm-link-swap"
+        denied_dir.mkdir(mode=0o500)
+        try:
+            link_swap.symlink_to(denied_dir.name)
+            link_swap.replace(dsm_dir)
+            with pytest.raises(
+                psycopg2.Error, match="could not open shared memory segment"
+            ) as failed:
+                cur.execute("SELECT neon.prewarm_local_cache(%s, 1)", (state,))
+            assert failed.value.pgcode == "42501"
+        finally:
+            if link_swap.is_symlink():
+                link_swap.unlink()
+            link_swap.symlink_to(original_target)
+            link_swap.replace(dsm_dir)
+            denied_dir.rmdir()
+        assert dsm_files() == before
+        cur.execute("SELECT neon.prewarm_local_cache(%s, 1)", (state,))
+        cur.execute("SELECT * FROM neon.get_prewarm_info()")
+        total, loaded, skipped, active = cur.fetchone()
+        assert total == expected_pages == loaded + skipped and active == 0
+        loaded_total += loaded
+        assert dsm_files() == before
+
+        point = "neon-lfc-prewarm-after-dsm-create"
+        # wait持原LFC排他锁，控制会话必须先处理reload、加载模块并预热目录。
+        # 用同一会话的已执行prepared语句观察/唤醒，不能在持锁期间新建冷会话。
+        assert read_sql("SHOW neon.file_cache_prewarm_limit") == [("2",)]
+        observer.execute(
+            "PREPARE c6_wait AS SELECT wait_event FROM pg_stat_activity WHERE pid = %s",
+            (backend_pid,),
+        )
+        read_sql("EXECUTE c6_wait")
+        observer.execute("PREPARE c6_detach(text) AS SELECT injection_points_detach($1)")
+        with pytest.raises(psycopg2.Error, match="could not detach injection point"):
+            read_sql("EXECUTE c6_detach('c6-unused-point')")
+        observer.execute("PREPARE c6_wake(text) AS SELECT injection_points_wakeup($1)")
+        with pytest.raises(psycopg2.Error, match="could not find injection point"):
+            read_sql("EXECUTE c6_wake('c6-unused-point')")
+        cur.execute("SELECT injection_points_attach(%s, 'wait')", (point,))
+        errors = []
+
+        def prewarm():
+            try:
+                cur.execute("SELECT neon.prewarm_local_cache(%s, 1)", (state,))
+            except BaseException as error:
+                errors.append(error)
+
+        thread = Thread(target=prewarm)
+        thread.start()
+        try:
+
+            def allocation_waiting():
+                assert read_sql("EXECUTE c6_wait") == [(point,)]
+
+            wait_until(allocation_waiting)
+            allocated = dsm_files()
+            added = allocated.keys() - before.keys()
+            assert len(added) == 1
+            raw = (dsm_dir / next(iter(added))).read_bytes()
+            expected_size = 20 + 2 * 20 + len(expected_bitmap)
+            assert len(raw) == expected_size < len(state) + 4
+            assert int.from_bytes(raw[:4], "little") >> 2 == expected_size
+            assert struct.unpack_from("=IIIH", raw, 4) == (magic, 2, expected_pages, chunk_log)
+            assert raw[20:60] == state[16:56]
+            assert raw[60:] == expected_bitmap
+        finally:
+            try:
+                read_sql("EXECUTE c6_detach(%s)", (point,))
+            finally:
+                try:
+                    read_sql("EXECUTE c6_wake(%s)", (point,))
+                except psycopg2.Error:
+                    # 若分配前已失败，线程会携带原错误返回；没有waiter可唤醒。
+                    pass
+                finally:
+                    thread.join(timeout=30)
+        assert not thread.is_alive()
+        assert not errors, errors
+        assert dsm_files() == before
+        cur.execute("SELECT * FROM neon.get_prewarm_info()")
+        total, prewarmed, skipped, active = cur.fetchone()
+        assert total == expected_pages == prewarmed + skipped
+        # 前面的恢复已可预热同一前缀，所以最后一轮可以全skip；单页chunk
+        # 也可能在启动时即全部命中。其余粒度要求整个恢复序列实际取过页。
+        assert (loaded_total + prewarmed > 0 or chunk_blocks == 1) and active == 0
+        cur.execute("SELECT count(*), sum(length(payload)) FROM compact_prewarm")
+        assert cur.fetchone() == (50000, 6400000)
+        cur.execute("SELECT pg_postmaster_start_time(), pg_backend_pid()")
+        assert cur.fetchone() == (boot, backend_pid)
 
 
 @pytest.mark.skipif(not USE_LFC, reason="LFC is disabled, skipping")
