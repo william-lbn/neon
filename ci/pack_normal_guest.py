@@ -123,6 +123,55 @@ def docker_build(builder, dockerfile, context, destination, arguments, options=(
     ], check=True)
 
 
+def assembly_receipt(directory, tag, inputs, pinned, postgres_source, packaging_source, disk_sha):
+    """Bind the packer's inputs to the independently verified final OCI."""
+    metadata = read_json((directory / "oci-metadata.json").read_bytes())
+    readback = read_json((directory / "normal-readback.json").read_bytes())
+    ordinary = read_json((directory / "ordinary-input-readback.json").read_bytes())
+    oci, root = readback["oci"], readback["root"]
+    digest = metadata["containerimage.digest"]
+    layers = oci.get("rootfs_diff_ids")
+    if (not pinned_digest(digest) or readback.get("kind") != "normal-guest-oci-readback"
+            or readback.get("protocol_version") != 1
+            or oci.get("image_digest") != digest or oci.get("architecture") != pinned["architecture"]
+            or not pinned_digest(oci.get("platform_manifest_digest"))
+            or not pinned_digest(oci.get("config_digest"))
+            or not isinstance(layers, list) or not layers or not all(pinned_digest(v) for v in layers)
+            or readback.get("builder_sha256") != inputs["builder_sha256"]):
+        raise ValueError("Independent normal Guest OCI readback differs from the produced image or Builder")
+    expected_root = {
+        "kind": "normal-guest-root-readback",
+        "protocol_version": 1,
+        "architecture": pinned["architecture"],
+        "system_profile": "neon-dsga-normal-system-source-v3",
+        "build_plan_sha256": pinned["build_plan_sha256"],
+        "base_image_sha256": inputs["base_image"].rsplit(":", 1)[1],
+        "postgres_major": inputs["postgres_major"],
+        "postgres_elf_sha256": inputs["postgres_elf_sha256"],
+    }
+    if (any(root.get(key) != value for key, value in expected_root.items())
+            or not all(pinned_sha(root.get(k), release.SHA256) for k in
+                       ("system_manifest_sha256", "native_birth_manifest_sha256"))
+            or ordinary.get("package_lock_sha256") != pinned["ordinary_package_lock_sha256"]
+            or oci["assets"]["disk.qcow2"][-1]["material"]["sha256"] != disk_sha
+            or oci["assets"]["vmlinuz"][-1]["material"]["sha256"] != inputs["kernel_sha256"]
+            or not pinned_sha(packaging_source, release.SHA)):
+        raise ValueError("Independent normal Guest root readback differs from the locked material")
+    paths = ("assembly-inputs.json", "base-provenance.json", "ordinary-input-readback.json",
+             "normal-readback.json", "oci-metadata.json", "guest.oci.tar")
+    return {
+        "kind": "normal-guest-assembly", "protocol_version": 1, "build_mode": "normal-split-v3",
+        "image": tag + "@" + digest, "architecture": pinned["architecture"],
+        "packaging_source": packaging_source, "compute_source": inputs["neon_source"],
+        "guest_autoscaling_source": inputs["guest_autoscaling_source"],
+        "postgres_source": postgres_source, "postgres_major": inputs["postgres_major"],
+        "disk_sha256": disk_sha, "kernel_sha256": inputs["kernel_sha256"],
+        "system_manifest_sha256": root["system_manifest_sha256"],
+        "native_birth_manifest_sha256": root["native_birth_manifest_sha256"],
+        "files_sha256": {name: file_sha(directory / name) for name in paths},
+    }
+
+
 def pack(args):
     inputs = read_inputs(args.inputs)
     repository, separator, tag = args.tag.rpartition(":")
@@ -137,6 +186,10 @@ def pack(args):
     builder = args.vm_builder.resolve(strict=True)
     if file_sha(builder) != inputs["builder_sha256"]:
         raise ValueError("Normal Guest Builder bytes differ from the pinned input")
+    packaging_source = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
+    # 收据引用准确的包装源码。相关已跟踪输入有修改时，禁止给产物记入提交身份。
+    subprocess.run(["git", "-C", str(root), "diff", "--quiet", packaging_source, "--",
+                    "ci", str(plan.relative_to(root)), str(ordinary.relative_to(root))], check=True)
     autoscaling = args.autoscaling_source.resolve(strict=True)
     readback = autoscaling / "ci/distribution.py"
     actual = subprocess.check_output(["git", "-C", str(autoscaling), "rev-parse", "HEAD"], text=True).strip()
@@ -203,6 +256,8 @@ def pack(args):
             "--base-sha256", inputs["base_image"].rsplit(":", 1)[1], "--postgres-major", str(major),
             "--postgres-sha256", inputs["postgres_elf_sha256"], "--output", str(candidate / "normal-readback.json"),
         ], check=True, cwd=scratch, env={**os.environ, "TMPDIR": str(scratch)})
+        receipt = assembly_receipt(candidate, args.tag, inputs, pinned, postgres_source, packaging_source, disk_sha)
+        (candidate / "assembly-receipt.json").write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
         candidate.rename(output)
 
 

@@ -125,3 +125,40 @@ class PackNormalGuestTests(unittest.TestCase):
                 with patch.object(packer.subprocess, "check_output", side_effect=[manifest, json.dumps(stale).encode()]):
                     with self.assertRaisesRegex(ValueError, "source labels differ"):
                         packer.verify_base_provenance(inputs, postgres, ordinary)
+
+    def test_assembly_receipt_is_bound_to_final_oci_and_root(self):
+        inputs = self.inputs
+        digest = "sha256:" + "a" * 64
+        pinned = {"architecture": "linux/amd64", "build_plan_sha256": "b" * 64,
+                  "ordinary_package_lock_sha256": "c" * 64}
+        disk_sha = "d" * 64
+        oci = {"image_digest": digest, "platform_manifest_digest": digest,
+               "config_digest": "sha256:" + "e" * 64,
+               "architecture": pinned["architecture"], "rootfs_diff_ids": [digest],
+               "assets": {"disk.qcow2": [{"material": {"sha256": disk_sha}}],
+                          "vmlinuz": [{"material": {"sha256": inputs["kernel_sha256"]}}]}}
+        root = {"kind": "normal-guest-root-readback", "protocol_version": 1,
+                "architecture": pinned["architecture"], "system_profile": "neon-dsga-normal-system-source-v3",
+                "build_plan_sha256": pinned["build_plan_sha256"], "base_image_sha256": "1" * 64,
+                "postgres_major": 17, "postgres_elf_sha256": inputs["postgres_elf_sha256"],
+                "system_manifest_sha256": "f" * 64, "native_birth_manifest_sha256": "9" * 64}
+        readback = {"kind": "normal-guest-oci-readback", "protocol_version": 1,
+                    "builder_sha256": inputs["builder_sha256"], "oci": oci, "root": root}
+        documents = {"normal-readback.json": readback, "assembly-inputs.json": inputs, "base-provenance.json": {},
+                     "oci-metadata.json": {"containerimage.digest": digest},
+                     "ordinary-input-readback.json": {"package_lock_sha256": pinned["ordinary_package_lock_sha256"]}}
+        for name, doc in documents.items():
+            (self.root / name).write_text(json.dumps(doc))
+        (self.root / "guest.oci.tar").write_bytes(b"archive fixture")
+        args = (self.root, "registry.example/neon/guest:test", inputs, pinned, "a" * 40, "b" * 40, disk_sha)
+        proof = packer.assembly_receipt(*args)
+        self.assertEqual(proof["image"], args[1] + "@" + digest)
+        self.assertEqual(proof["compute_source"], inputs["neon_source"])
+        self.assertEqual(proof["files_sha256"]["guest.oci.tar"], packer.file_sha(self.root / "guest.oci.tar"))
+        for scope, key, invalid in ((oci, "image_digest", "sha256:" + "7" * 64),
+                                    (root, "postgres_major", 18),
+                                    (root, "build_plan_sha256", "0" * 64)):
+            with self.subTest(key=key), patch.dict(scope, {key: invalid}):
+                (self.root / "normal-readback.json").write_text(json.dumps(readback))
+                with self.assertRaisesRegex(ValueError, "Independent normal Guest"):
+                    packer.assembly_receipt(*args)
