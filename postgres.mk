@@ -74,11 +74,29 @@ $(foreach pg_version,$(POSTGRES_VERSIONS),postgres-$(pg_version)): postgres-%: p
 ### These are not intended to be called directly, but are dependencies for the
 ### main targets.
 
+# The pinned revision identifies both a Git checkout and a source export.
+postgres_source_pin = python3 -c 'import json, re, sys; pin = json.load(open(sys.argv[1]))[sys.argv[2]][1]; print(pin) if isinstance(pin, str) and re.fullmatch("[0-9a-f]{40}", pin) else sys.exit("invalid pinned PostgreSQL commit")' "$(ROOT_PROJECT_DIR)/vendor/revisions.json" "$(1)"
+
+# An order-only prerequisite also validates cache hits without reconfiguring.
+postgres_source_targets := $(addprefix postgres-source-verify-,$(POSTGRES_VERSIONS))
+.PHONY: $(postgres_source_targets)
+$(postgres_source_targets): postgres-source-verify-%:
+	@set -eu; \
+	pin=$$($(call postgres_source_pin,$*)); \
+	source="$(ROOT_PROJECT_DIR)/vendor/postgres-$*"; \
+	if test -e "$$source/.git"; then \
+		actual=$$(git -C "$$source" rev-parse --verify HEAD); \
+		if test "$$actual" != "$$pin"; then \
+			printf 'PostgreSQL %s source does not match pinned revision\n' "$*" >&2; \
+			exit 1; \
+		fi; \
+	fi
+
 # Run 'configure'
 # 发行锁改变后必须重新配置，更新 --with-extra-version 的实际 PG 身份；
 # 否则增量编译会使用新源码，却在二进制/头文件中保留旧 SHA。构建规则自身
 # 改变也需失效旧配置；未变化时保留缓存，避免每次构建都重跑 configure。
-$(BUILD_DIR)/%/config.status: $(ROOT_PROJECT_DIR)/vendor/revisions.json $(ROOT_PROJECT_DIR)/postgres.mk
+$(BUILD_DIR)/%/config.status: $(ROOT_PROJECT_DIR)/vendor/revisions.json $(ROOT_PROJECT_DIR)/postgres.mk | postgres-source-verify-%
 	mkdir -p $(BUILD_DIR)
 	test -e $(BUILD_DIR)/CACHEDIR.TAG || echo "$(CACHEDIR_TAG_CONTENTS)" > $(BUILD_DIR)/CACHEDIR.TAG
 
@@ -90,8 +108,7 @@ $(BUILD_DIR)/%/config.status: $(ROOT_PROJECT_DIR)/vendor/revisions.json $(ROOT_P
 	mkdir -p $(BUILD_DIR)/$*
 
 	VERSION=$*; \
-	EXTRA_VERSION=$$(cd $(ROOT_PROJECT_DIR)/vendor/postgres-$$VERSION && git rev-parse HEAD 2>/dev/null) || \
-	EXTRA_VERSION=$$(jq -r --arg version "$$VERSION" '.[$$version][1]' $(ROOT_PROJECT_DIR)/vendor/revisions.json); \
+	EXTRA_VERSION=$$($(call postgres_source_pin,$*)) || exit 1; \
 	(cd $(BUILD_DIR)/$$VERSION && \
 	env PATH="$(EXTRA_PATH_OVERRIDES):$$PATH" $(ROOT_PROJECT_DIR)/vendor/postgres-$$VERSION/configure \
 		CFLAGS='$(PG_CFLAGS)' LDFLAGS='$(PG_LDFLAGS)' \
