@@ -31,7 +31,9 @@ fn go_safe_renderer_is_accepted_by_actual_compute_parser() -> Result<()> {
         let decoded: ComputeConfig = serde_json::from_slice(&encoded)?;
         ensure!(decoded.compute_ctl_config.jwks.keys.len() == 1);
         let tls = decoded.compute_ctl_config.tls.as_ref().unwrap();
-        ensure!(tls.key_path == "/run/neon/management/control.key");
+        // NeonVM TLSProvisioning 在管理挂载提供并轮换这对证书和密钥。
+        ensure!(tls.key_path == "/run/neon/management/tls.key");
+        ensure!(tls.cert_path == "/run/neon/management/tls.crt");
         let spec = decoded.spec.expect("renderer must attach original spec");
         let parsed = ParsedSpec::try_from(spec.clone())?;
         parsed.validate().map_err(anyhow::Error::msg)?;
