@@ -1,5 +1,8 @@
 name: Distribution pull request checks
-on: [pull_request]
+on:
+  push:
+    branches: ['codex/dsga-neon-v3-20261019']
+  pull_request:
 permissions:
   contents: read
 jobs:
