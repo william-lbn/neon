@@ -1,6 +1,9 @@
 name: Distribution pull request checks
-# Push release dispatch is owned by the default-branch workflow; this file is PR-only.
-on: [pull_request]
+# 质量门禁同时覆盖 PR 和 DSGA 研发分支直接 Push；完整发行仍由 dsga-release.yml 显式触发。
+on:
+  push:
+    branches: ['codex/dsga-neon-*']
+  pull_request:
 permissions:
   contents: read
 jobs:
@@ -50,4 +53,3 @@ jobs:
         env:
           CARGO_BUILD_JOBS: "4"
         run: cargo test --locked -p compute_api
-
