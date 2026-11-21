@@ -52,3 +52,16 @@ jobs:
         env:
           CARGO_BUILD_JOBS: "4"
         run: cargo test --locked -p compute_api
+
+  unified-dsga-release:
+    name: Unified DSGA candidate release
+    needs: [contracts, dsga-pg17]
+    permissions:
+      contents: write
+      actions: read
+      packages: write
+    uses: ./.github/workflows/dsga-release.yml
+    with:
+      arch: amd64
+      normal_guest: false
+    secrets: inherit
