@@ -1,5 +1,8 @@
 name: Distribution pull request checks
-on: [pull_request]
+on:
+  push:
+    branches: ['codex/dsga-neon-v3-20261019']
+  pull_request:
 permissions:
   contents: read
 jobs:
@@ -49,3 +52,17 @@ jobs:
         env:
           CARGO_BUILD_JOBS: "4"
         run: cargo test --locked -p compute_api
+
+  unified-dsga-release:
+    if: github.event_name == 'push'
+    name: Unified DSGA candidate release
+    needs: [contracts, dsga-pg17]
+    permissions:
+      contents: write
+      actions: read
+      packages: write
+    uses: ./.github/workflows/dsga-release.yml
+    with:
+      arch: amd64
+      normal_guest: false
+    secrets: inherit
