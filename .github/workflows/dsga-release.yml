@@ -92,12 +92,12 @@ jobs:
         run: python3 ci/dsga_release.py prepare --arch "$ARCH"
   postgres-17:
     needs: prepare
-    uses: william-lbn/postgres/.github/workflows/build.yml@646159ec9e7a5a53ca19cf77184efd8684431855
+    uses: william-lbn/postgres/.github/workflows/build.yml@203e1e83eff9dcb73e03cbeff685f51f7da9539c
     with:
       source_sha: ${{ needs.prepare.outputs.pg17 }}
   postgres-18:
     needs: prepare
-    uses: william-lbn/postgres/.github/workflows/build.yml@55481bcfb9d2e72c4d4033babba58ac433a2bc88
+    uses: william-lbn/postgres/.github/workflows/build.yml@47f4ff0d390996bffeaa6a14aa58ea6c29637855
     with:
       source_sha: ${{ needs.prepare.outputs.pg18 }}
   autoscaling:
