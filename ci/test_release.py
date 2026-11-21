@@ -246,7 +246,7 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertNotIn("python3 -m unittest discover -s ci -p 'test_*.py' -v", branch_pr)
         self.assertIn("  dsga-unified-release:\n    needs: contracts", branch_pr)
         self.assertIn(
-            "uses: william-lbn/neon/.github/workflows/dsga-release.yml@376107edde8cab58b238873c4a253ad359810bc4",
+            "uses: william-lbn/neon/.github/workflows/dsga-release.yml@17c5401a37509249ed68c21c8612cfe5f879ec0c",
             branch_pr,
         )
         self.assertIn(
