@@ -111,6 +111,11 @@ class ReleaseContractTests(unittest.TestCase):
         # Push/manual dispatch on the one approved development branch invokes the full
         # immutable candidate pipeline; it must never run for arbitrary branches or PRs.
         self.assertIn("  dsga-unified-release:", branch_pr)
+        # Publishing is hard-gated by the complete source-level test suite for both
+        # Push and manual candidate dispatch; no registry write can start before it.
+        self.assertIn("  contracts:", branch_pr)
+        self.assertIn("python3 -m unittest discover -s ci -p 'test_*.py' -v", branch_pr)
+        self.assertIn("  dsga-unified-release:\n    needs: contracts", branch_pr)
         self.assertIn(
             "uses: william-lbn/neon/.github/workflows/dsga-release.yml@08eff7a8fff7c4ad8808c3d0015b4dcabce5afc6",
             branch_pr,
