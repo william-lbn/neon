@@ -8,16 +8,19 @@ permissions:
   contents: read
 jobs:
   contracts:
-    if: github.event_name == 'pull_request'
+    # The complete source contract suite must pass before a candidate release can publish.
     runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
       - run: python3 ci/compute.py validate
-      - run: python3 -m unittest discover -s ci -p 'test_*.py' -v
+      - name: Run the complete Neon source and release contract suite
+        run: python3 -m unittest discover -s ci -p 'test_*.py' -v
 
   dsga-unified-release:
+    needs: contracts
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/codex/dsga-neon-v3-20261019'
     name: Unified DSGA candidate release
     permissions:
