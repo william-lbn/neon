@@ -80,6 +80,12 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("      normal_guest:", workflow)
         self.assertIn("      DOCKERHUB_USERNAME:", workflow)
         self.assertIn("      DOCKERHUB_TOKEN:", workflow)
+        # Only the default-branch dispatcher owns push events; this branch-local
+        # PR workflow must not start a duplicate release candidate.
+        branch_pr = (Path(__file__).resolve().parents[1] / ".github/workflows/pull-request.yml").read_text()
+        self.assertIn("on: [pull_request]", branch_pr)
+        self.assertNotIn("  push:", branch_pr)
+        self.assertIn("  workflow_dispatch:", workflow)
 
     def test_complete_candidate_has_exact_profiles_and_stays_unqualified(self):
         result = self.manifest()
