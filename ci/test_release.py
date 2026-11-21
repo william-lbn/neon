@@ -83,6 +83,7 @@ class ReleaseContractTests(unittest.TestCase):
         # The maintained branch owns its push trigger and calls the local reusable
         # release workflow; PRs run validation gates without publishing artifacts.
         branch_pr = (Path(__file__).resolve().parents[1] / ".github/workflows/pull-request.yml").read_text()
+        self.assertIn("on:\\n  push:\\n    branches: ['codex/dsga-neon-v3-20261019']", branch_pr)
         self.assertIn("branches: ['codex/dsga-neon-v3-20261019']", branch_pr)
         self.assertIn("  unified-dsga-release:", branch_pr)
         self.assertIn("    if: github.event_name == 'push'", branch_pr)
