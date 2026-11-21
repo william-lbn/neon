@@ -85,6 +85,10 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("  push:", branch_pr)
         self.assertIn("branches: ['codex/dsga-neon-v3-20261019']", branch_pr)
         self.assertIn("  workflow_dispatch:", branch_pr)
+        # Stale PR builds may be cancelled, but an active immutable candidate release
+        # must finish; otherwise it can leave an incomplete tag/draft in the registry.
+        self.assertIn("group: neon-dsga-ci-${{ github.workflow }}-", branch_pr)
+        self.assertIn("cancel-in-progress: ${{ github.event_name == 'pull_request' }}", branch_pr)
 
         # The expensive PG17/PG18 standalone gates run for PRs only. On feature pushes,
         # the unified release workflow owns those same native checks in one run, avoiding
