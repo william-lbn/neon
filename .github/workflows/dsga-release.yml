@@ -1,7 +1,7 @@
 name: DSGA unified candidate distribution
 on:
   push:
-    branches: ['codex/dsga-neon-v3-20261019']
+    branches: ['codex/dsga-neon-*']
   workflow_dispatch:
     inputs:
       arch:
