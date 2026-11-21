@@ -221,16 +221,32 @@ def verify_capabilities(capabilities, lock, tag, arch, images):
 
 
 def load_native_receipts(directory):
+    root = pathlib.Path(directory)
+    if not root.is_dir():
+        raise ValueError("Native PostgreSQL receipt directory is missing")
     receipts = {}
-    for path in pathlib.Path(directory).rglob("source-manifest.json"):
+    manifests = sorted(root.rglob("source-manifest.json"))
+    if not manifests:
+        raise ValueError("No native PostgreSQL source manifests were downloaded")
+    for path in manifests:
         item = json.loads(path.read_text())
-        version = f"v{item.get('pg_major')}"
+        if not isinstance(item, dict) or type(item.get("pg_major")) is not int:
+            raise ValueError(f"Malformed native PostgreSQL source manifest: {path}")
+        version = f"v{item['pg_major']}"
         if version in receipts:
             raise ValueError(f"Conflicting/duplicate native PG receipt: {version}")
-        checksums = path.with_name("postgres.sha256").read_text().split()
-        if not checksums or not re.fullmatch(r"[a-f0-9]{64}", checksums[0]):
-            raise ValueError("Native PG gate has no binary digest")
-        item["postgres_binary_sha256"] = checksums[0]
+        checksum_path = path.with_name("postgres.sha256")
+        if not checksum_path.is_file():
+            raise ValueError(f"Native PG gate is missing postgres.sha256: {version}")
+        checksum_lines = [line for line in checksum_path.read_text().splitlines() if line.strip()]
+        if len(checksum_lines) != 1:
+            raise ValueError(f"Native PG gate must contain exactly one binary checksum: {version}")
+        checksum_fields = checksum_lines[0].split()
+        if (len(checksum_fields) != 2
+                or not re.fullmatch(r"[a-f0-9]{64}", checksum_fields[0])
+                or pathlib.Path(checksum_fields[1].lstrip("*")).name != "postgres"):
+            raise ValueError(f"Native PG gate has an invalid postgres binary checksum: {version}")
+        item["postgres_binary_sha256"] = checksum_fields[0]
         receipts[version] = item
     return receipts
 
@@ -240,7 +256,8 @@ def verify_native_receipts(receipts, lock, tag):
         raise ValueError("Both native PostgreSQL gates are required")
     execution = execution_identity(tag)
     for version, item in receipts.items():
-        expected = {"kind": "postgres-native-validation", "source_repository": "william-lbn/postgres",
+        expected = {"kind": "postgres-native-validation", "schema_version": 1,
+                    "source_repository": "william-lbn/postgres",
                     "source_commit": lock["postgres"][version], "pg_major": int(version[1:]),
                     "scope": "native-kernel-not-vm", "normal_qualification": False, "production_ready": False,
                     "run_id": execution["run_id"], "run_attempt": execution["run_attempt"],
