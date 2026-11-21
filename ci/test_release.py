@@ -335,7 +335,7 @@ class ReleaseContractTests(unittest.TestCase):
                 }))
                 (evidence / "postgres.sha256").write_text(
                     ("a" if major == 17 else "b") * 64
-                    + "  /home/runner/work/postgres/postgres\\n"
+                    + "  /home/runner/work/postgres/postgres\n"
                 )
             receipts = release.load_native_receipts(root)
             self.assertEqual(set(receipts), {"v17", "v18"})
@@ -343,7 +343,7 @@ class ReleaseContractTests(unittest.TestCase):
             self.assertEqual(receipts["v18"]["postgres_binary_sha256"], "b" * 64)
 
             checksum = root / "pg18" / "build" / "evidence" / "postgres.sha256"
-            checksum.write_text("bad-checksum  /home/runner/work/postgres/postgres\\n")
+            checksum.write_text("bad-checksum  /home/runner/work/postgres/postgres\n")
             with self.assertRaisesRegex(ValueError, "invalid postgres binary checksum"):
                 release.load_native_receipts(root)
 
@@ -356,7 +356,7 @@ class ReleaseContractTests(unittest.TestCase):
                 evidence = root / name
                 evidence.mkdir()
                 (evidence / "source-manifest.json").write_text(json.dumps({"pg_major": 17}))
-                (evidence / "postgres.sha256").write_text("c" * 64 + "  /tmp/postgres\\n")
+                (evidence / "postgres.sha256").write_text("c" * 64 + "  /tmp/postgres\n")
             with self.assertRaisesRegex(ValueError, "Conflicting/duplicate"):
                 release.load_native_receipts(root)
 
