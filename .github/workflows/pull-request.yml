@@ -15,8 +15,9 @@ jobs:
   dsga-pg17:
     # 专项门禁必须真实运行，不能以contracts中的环境skip代替。只编译宿主PG，
     # 不打包镜像，不部署K8s；真实VM/Provider能力按V3另行验收。
+    # 本Job还包含Neon扩展、Rust客户端及双模式原生回归，预留足够编译/测试时间。
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
