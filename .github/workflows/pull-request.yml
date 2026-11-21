@@ -1,18 +1,27 @@
-name: Distribution pull request checks
-# Pull requests run quality gates here; direct feature pushes use the default-branch release dispatcher.
-on: [pull_request]
+name: Distribution checks and DSGA release dispatcher
+on:
+  pull_request:
+  push:
+    branches: ['codex/dsga-neon-v3-20261019']
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
   contracts:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
-      - run: python3 ci/compute.py validate
-      - run: python3 ci/run-release-contracts.py
+      - name: Validate compute source and pinned PostgreSQL gitlinks
+        run: python3 ci/compute.py validate
+      - name: Run release, distribution and workflow source-lock contracts
+        run: python3 -m unittest discover -s ci -p 'test_*.py' -v
+
   dsga-pg17:
+    if: github.event_name == 'pull_request'
     # 专项门禁必须真实运行，不能以contracts中的环境skip代替。只编译宿主PG，
     # 不打包镜像，不部署K8s；真实VM/Provider能力按V3另行验收。
     # 本Job还包含Neon扩展、Rust客户端及双模式原生回归，预留足够编译/测试时间。
@@ -55,7 +64,21 @@ jobs:
   # PG18 的 workflow ref、source_sha、distribution.json 与 vendor gitlink 必须保持同一完整 SHA。
   # 不得改用浮动分支或跳过该门禁，否则 Compute 与发行镜像可能来自不同内核源码。
   dsga-pg18:
+    if: github.event_name == 'pull_request'
     name: PostgreSQL 18 DSGA native kernel gate
     uses: william-lbn/postgres/.github/workflows/build.yml@47f4ff0d390996bffeaa6a14aa58ea6c29637855
     with:
       source_sha: 47f4ff0d390996bffeaa6a14aa58ea6c29637855
+
+  dsga-unified-release:
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/codex/dsga-neon-v3-20261019'
+    name: Unified DSGA candidate release
+    permissions:
+      contents: write
+      actions: read
+      packages: write
+    uses: william-lbn/neon/.github/workflows/dsga-release.yml@e18824ec106e3d52f0a59cabd75a2e9d371bb57f
+    with:
+      arch: amd64
+      normal_guest: false
+    secrets: inherit
