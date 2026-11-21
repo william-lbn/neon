@@ -67,6 +67,8 @@ jobs:
           persist-credentials: false
       - run: python3 ci/compute.py validate
       - run: python3 ci/run-release-contracts.py
+      - name: Preflight pinned PGRAG and ONNX Runtime sources before expensive builds
+        run: bash ci/preflight-pgrag-sources.sh
       - name: Check the normal Guest input images before starting the matrix
         id: normal-inputs
         if: inputs.normal_guest
