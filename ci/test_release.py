@@ -80,8 +80,12 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("      DOCKERHUB_TOKEN:", workflow)
         # Compute and image validation need registry access; pass only the two
         # Docker Hub credentials to those reusable workflows.
-        compute_job = workflow.split("  compute:\\n", 1)[1].split("\\n  compute-components:", 1)[0]
-        validate_job = workflow.split("  validate:\\n", 1)[1].split("\\n  helm:", 1)[0]
+        compute_job = workflow.split("  compute:\n", 1)[1].split("\n  compute-components:", 1)[0]
+        validate_job = workflow.split("  validate:\n", 1)[1].split("\n  helm:", 1)[0]
+        validator_workflow = (Path(__file__).resolve().parents[1] / ".github/workflows/_validate-dsga.yml").read_text()
+        self.assertIn("    secrets:", validator_workflow)
+        self.assertIn("      DOCKERHUB_USERNAME:", validator_workflow)
+        self.assertIn("      DOCKERHUB_TOKEN:", validator_workflow)
         for job in (compute_job, validate_job):
             self.assertIn("DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}", job)
             self.assertIn("DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}", job)
