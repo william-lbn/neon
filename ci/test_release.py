@@ -78,6 +78,10 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("      normal_guest:", workflow)
         self.assertIn("      DOCKERHUB_USERNAME:", workflow)
         self.assertIn("      DOCKERHUB_TOKEN:", workflow)
+        # The reusable release is immutable once registry writes begin. A later Push
+        # may queue the newest candidate, but must never cancel this run mid-publication.
+        self.assertIn("cancel-in-progress: false", workflow)
+        self.assertIn("dsga-distribution-${{ github.ref }}-", workflow)
 
         branch_pr = (Path(__file__).resolve().parents[1] / ".github/workflows/pull-request.yml").read_text()
         # Both PR validation and the branch-push release dispatcher are registered.
