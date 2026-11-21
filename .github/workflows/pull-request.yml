@@ -13,16 +13,17 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   contracts:
-    if: github.event_name == 'pull_request'
+    # Every PR and every candidate-release trigger must pass the complete source-level
+    # contract suite before any cross-repository build or registry write can begin.
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
       - name: Validate compute source and pinned PostgreSQL gitlinks
         run: python3 ci/compute.py validate
-      - name: Run release, distribution and workflow source-lock contracts
+      - name: Run the complete Neon source and release contract suite
         run: python3 -m unittest discover -s ci -p 'test_*.py' -v
 
   dsga-pg17:
@@ -76,6 +77,7 @@ jobs:
       source_sha: 47f4ff0d390996bffeaa6a14aa58ea6c29637855
 
   dsga-unified-release:
+    needs: contracts
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/codex/dsga-neon-v3-20261019'
     name: Unified DSGA candidate release
     permissions:
