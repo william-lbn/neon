@@ -54,7 +54,8 @@ jobs:
           CARGO_BUILD_JOBS: "4"
         run: cargo test --locked -p compute_api
 
-  # PG18 使用与发行锁相同的不可变源码提交，执行真实内核回归与 DSGA 原生门禁。
+  # PG18 的 workflow ref、source_sha、distribution.json 与 vendor gitlink 必须保持同一完整 SHA。
+  # 不得改用浮动分支或跳过该门禁，否则 Compute 与发行镜像可能来自不同内核源码。
   dsga-pg18:
     name: PostgreSQL 18 DSGA native kernel gate
     uses: william-lbn/postgres/.github/workflows/build.yml@47f4ff0d390996bffeaa6a14aa58ea6c29637855
