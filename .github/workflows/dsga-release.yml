@@ -446,7 +446,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@53d58555e349b9742f71e62720373349df4919c9
+    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@b361300311c399915ab317ae787e7f18564c0d35
     with:
       helm_sha: ${{ needs.prepare.outputs.helm }}
       release_version: ${{ needs.prepare.outputs.tag }}
