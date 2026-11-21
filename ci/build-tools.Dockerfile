@@ -6,7 +6,7 @@ RUN echo 'Acquire::Retries "5";' > /etc/apt/apt.conf.d/80-retries \
     && apt-get update && apt-get install -y --no-install-recommends \
        autoconf automake bison build-essential ca-certificates clang cmake curl flex \
        git jq libcurl4-openssl-dev libreadline-dev libseccomp-dev libssl-dev libtool \
-       libxml2-dev libzstd-dev mold pkg-config unzip wget zlib1g-dev \
+       libxml2-dev libzstd-dev mold pkg-config python3 unzip wget zlib1g-dev \
     && rm -rf /var/lib/apt/lists/* \
     && useradd -m -u 1000 -s /bin/bash nonroot
 ARG BUILD_JOBS=2
