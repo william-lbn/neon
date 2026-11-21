@@ -1,7 +1,6 @@
 name: Distribution pull request checks
 # Pull requests run quality gates here; direct feature pushes use the default-branch release dispatcher.
-on:
-  pull_request:
+on: [pull_request]
 permissions:
   contents: read
 jobs:
