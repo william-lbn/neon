@@ -357,11 +357,11 @@ class ReleaseContractTests(unittest.TestCase):
                 release.load_native_receipts(root)
 
             checksum = evidence / "postgres.sha256"
-            checksum.write_text("a" * 64 + "  /tmp/not-postgres\\n")
+            checksum.write_text("a" * 64 + "  /tmp/not-postgres\n")
             with self.assertRaisesRegex(ValueError, "invalid postgres binary checksum"):
                 release.load_native_receipts(root)
 
-            checksum.write_text("a" * 64 + "  /tmp/postgres\\n" + "b" * 64 + "  /tmp/postgres\\n")
+            checksum.write_text("a" * 64 + "  /tmp/postgres\n" + "b" * 64 + "  /tmp/postgres\n")
             with self.assertRaisesRegex(ValueError, "exactly one binary checksum"):
                 release.load_native_receipts(root)
 
