@@ -98,6 +98,24 @@ class ReleaseContractTests(unittest.TestCase):
         # 正则退化为零匹配时也必须失败，不能把“没有检查任何引用”当作固定版本通过。
         self.assertGreater(checked, 0, "No external action or reusable workflow references were checked")
 
+    def test_build_tools_image_contains_and_smoke_tests_python_source_lock_runtime(self):
+        root = Path(__file__).resolve().parents[1]
+        build_tools = (root / "ci/build-tools.Dockerfile").read_text()
+        postgres_make = (root / "postgres.mk").read_text()
+        release_workflow = (root / ".github/workflows/dsga-release.yml").read_text()
+
+        # postgres.mk validates pinned PostgreSQL revisions through python3.
+        self.assertIn("pin = json.load(open(sys.argv[1]))", postgres_make)
+        self.assertIn("python3 -c", postgres_make)
+        install_block = build_tools.split("apt-get install -y --no-install-recommends", 1)[1].split("&& rm -rf", 1)[0]
+        self.assertRegex(install_block, r"\\bpython3\\b")
+
+        # The exact pushed build-tools digest is executed before any dependent image build.
+        self.assertIn("Verify the published build-tools image contains the required source-lock toolchain", release_workflow)
+        self.assertIn('docker run --rm --network none --entrypoint bash "$IMAGE" -euc', release_workflow)
+        for executable in ("python3 --version", "make --version", "git --version", "mold --version", "jq --version"):
+            self.assertIn(executable, release_workflow)
+
     def test_reusable_workflow_refs_match_the_exact_source_lock(self):
         # Cross-repository workflow code and image source commits are one immutable
         # release contract. The feature-branch dispatcher must call the complete
