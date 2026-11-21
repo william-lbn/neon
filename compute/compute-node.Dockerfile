@@ -1179,6 +1179,7 @@ RUN git init -q onnxruntime-src && \
     git -C onnxruntime-src fetch --depth 1 origin 387127404e6c1d84b3468c387d864877ed1c67fe && \
     git -C onnxruntime-src checkout --detach FETCH_HEAD && \
     test "$(git -C onnxruntime-src rev-parse HEAD)" = "387127404e6c1d84b3468c387d864877ed1c67fe" && \
+    test "$(git -C onnxruntime-src rev-parse 'HEAD^{tree}')" = "4d3be68b9a81291f481a53b0850d99fed5007205" && \
     cd onnxruntime-src && \
     patch -p1 < /ext-src/onnxruntime.patch && \
     echo "#nothing to test here" > neon-test.sh
