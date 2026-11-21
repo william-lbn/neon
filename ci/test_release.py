@@ -80,14 +80,12 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("      normal_guest:", workflow)
         self.assertIn("      DOCKERHUB_USERNAME:", workflow)
         self.assertIn("      DOCKERHUB_TOKEN:", workflow)
-        # The maintained branch owns its push trigger and calls the local reusable
-        # release workflow; PRs run validation gates without publishing artifacts.
+        # Push events are registered by the default-branch dispatcher; this branch-local
+        # workflow remains PR-only so it cannot start a duplicate release candidate.
         branch_pr = (Path(__file__).resolve().parents[1] / ".github/workflows/pull-request.yml").read_text()
-        self.assertIn("on:\\n  push:\\n    branches: ['codex/dsga-neon-v3-20261019']", branch_pr)
-        self.assertIn("branches: ['codex/dsga-neon-v3-20261019']", branch_pr)
-        self.assertIn("  unified-dsga-release:", branch_pr)
-        self.assertIn("    if: github.event_name == 'push'", branch_pr)
-        self.assertIn("    uses: ./.github/workflows/dsga-release.yml", branch_pr)
+        self.assertIn("on: [pull_request]", branch_pr)
+        self.assertNotIn("  push:", branch_pr)
+        self.assertNotIn("  unified-dsga-release:", branch_pr)
         self.assertIn("  workflow_dispatch:", workflow)
 
     def test_complete_candidate_has_exact_profiles_and_stays_unqualified(self):
