@@ -3,6 +3,7 @@ on:
   pull_request:
   push:
     branches: ['codex/dsga-neon-v3-20261019']
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -16,7 +17,7 @@ jobs:
       - run: python3 -m unittest discover -s ci -p 'test_*.py' -v
 
   dsga-unified-release:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/codex/dsga-neon-v3-20261019'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/codex/dsga-neon-v3-20261019'
     name: Unified DSGA candidate release
     permissions:
       contents: write
