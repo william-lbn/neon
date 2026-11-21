@@ -67,6 +67,11 @@ class ReleaseContractTests(unittest.TestCase):
         return release.make_manifest(self.images, self.lock, self.tag, "amd64", self.neon, self.neon,
                                      "dsga", self.capabilities, self.native)
 
+    def test_reusable_workflow_refs_match_the_exact_source_lock(self):
+        # Cross-repository workflow code and image source commits are one immutable
+        # release contract; changing either side alone must fail before expensive builds.
+        dsga_release.verify_workflow_pins(self.lock)
+
     def test_complete_candidate_has_exact_profiles_and_stays_unqualified(self):
         result = self.manifest()
         self.assertEqual(result["schema_version"], 2)
