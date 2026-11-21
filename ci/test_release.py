@@ -116,6 +116,18 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertLess(workflow.index("bash ci/preflight-pgrag-sources.sh"), workflow.index("  postgres-17:"))
         self.assertNotIn("secrets.", script)
 
+    def test_pgrag_extensions_resolve_dependencies_compatible_with_pinned_rust(self):
+        root = Path(__file__).resolve().parents[1]
+        dockerfile = (root / "compute/compute-node.Dockerfile").read_text()
+        block = dockerfile.split("FROM rust-extensions-build-pgrx14 AS pgrag-build", 1)[1].split(
+            "#########################################################################################", 1
+        )[0]
+        self.assertEqual(
+            block.count("CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback cargo pgrx install --release"),
+            3,
+        )
+        self.assertNotIn("rustup update", block)
+
     def test_pg_tiktoken_resolves_dependencies_with_pinned_rust_msrV(self):
         root = Path(__file__).resolve().parents[1]
         dockerfile = (root / "compute/compute-node.Dockerfile").read_text()

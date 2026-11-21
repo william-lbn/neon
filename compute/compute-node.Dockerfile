@@ -1209,21 +1209,21 @@ RUN . venv/bin/activate && \
 WORKDIR /ext-src/pgrag-src
 RUN cd exts/rag && \
     sed -i 's/pgrx = "0.14.1"/pgrx = { version = "0.14.1", features = [ "unsafe-postgres" ] }/g' Cargo.toml && \
-    cargo pgrx install --release && \
+    CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback cargo pgrx install --release && \
     echo "trusted = true" >> /usr/local/pgsql/share/extension/rag.control
 
 RUN cd exts/rag_bge_small_en_v15 && \
     sed -i 's/pgrx = "0.14.1"/pgrx = { version = "0.14.1", features = [ "unsafe-postgres" ] }/g' Cargo.toml && \
     ORT_LIB_LOCATION=/ext-src/onnxruntime-src/build/Linux \
         REMOTE_ONNX_URL=http://pg-ext-s3-gateway.pg-ext-s3-gateway.svc.cluster.local/pgrag-data/bge_small_en_v15.onnx \
-        cargo pgrx install --release --features remote_onnx && \
+        CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback cargo pgrx install --release --features remote_onnx && \
     echo "trusted = true" >> /usr/local/pgsql/share/extension/rag_bge_small_en_v15.control
 
 RUN cd exts/rag_jina_reranker_v1_tiny_en && \
     sed -i 's/pgrx = "0.14.1"/pgrx = { version = "0.14.1", features = [ "unsafe-postgres" ] }/g' Cargo.toml && \
     ORT_LIB_LOCATION=/ext-src/onnxruntime-src/build/Linux \
         REMOTE_ONNX_URL=http://pg-ext-s3-gateway.pg-ext-s3-gateway.svc.cluster.local/pgrag-data/jina_reranker_v1_tiny_en.onnx \
-        cargo pgrx install --release --features remote_onnx && \
+        CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback cargo pgrx install --release --features remote_onnx && \
     echo "trusted = true" >> /usr/local/pgsql/share/extension/rag_jina_reranker_v1_tiny_en.control
 
 
