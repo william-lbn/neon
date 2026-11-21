@@ -53,3 +53,10 @@ jobs:
         env:
           CARGO_BUILD_JOBS: "4"
         run: cargo test --locked -p compute_api
+
+  # PG18 使用与发行锁相同的不可变源码提交，执行真实内核回归与 DSGA 原生门禁。
+  dsga-pg18:
+    name: PostgreSQL 18 DSGA native kernel gate
+    uses: william-lbn/postgres/.github/workflows/build.yml@47f4ff0d390996bffeaa6a14aa58ea6c29637855
+    with:
+      source_sha: 47f4ff0d390996bffeaa6a14aa58ea6c29637855
