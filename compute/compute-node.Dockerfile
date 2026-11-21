@@ -1307,7 +1307,8 @@ RUN wget https://github.com/kelvich/pg_tiktoken/archive/9118dd4549b7d8c0bbc98e04
 FROM rust-extensions-build-pgrx12 AS pg_tiktoken-build
 COPY --from=pg_tiktoken-src /ext-src/ /ext-src/
 WORKDIR /ext-src/pg_tiktoken-src
-RUN cargo pgrx install --release && \
+# The pinned Rust 1.88 toolchain must not resolve crates that require Rust 1.89+.
+RUN CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback cargo pgrx install --release && \
     echo "trusted = true" >> /usr/local/pgsql/share/extension/pg_tiktoken.control
 
 #########################################################################################
