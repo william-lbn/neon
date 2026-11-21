@@ -158,6 +158,19 @@ jobs:
           cache-to: type=gha,scope=neon-build-tools-${{ env.ARCH }},mode=min
           provenance: mode=max
           sbom: true
+      - name: Verify the published build-tools image contains the required source-lock toolchain
+        env:
+          IMAGE: ${{ env.REGISTRY }}/neon-build-tools:${{ needs.prepare.outputs.tag }}@${{ steps.build.outputs.digest }}
+        run: |
+          set -euo pipefail
+          docker pull "$IMAGE"
+          docker run --rm --network none --entrypoint bash "$IMAGE" -euc '
+            python3 --version
+            make --version
+            git --version
+            mold --version
+            jq --version
+          '
       - env:
           TAG: ${{ needs.prepare.outputs.tag }}
           DIGEST: ${{ steps.build.outputs.digest }}
