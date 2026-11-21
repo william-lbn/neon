@@ -89,8 +89,8 @@ class ReleaseContractTests(unittest.TestCase):
         # The expensive PG17/PG18 standalone gates run for PRs only. On feature pushes,
         # the unified release workflow owns those same native checks in one run, avoiding
         # duplicate native builds while keeping the complete candidate evidence together.
-        self.assertIn("  dsga-pg17:\\n    if: github.event_name == 'pull_request'", branch_pr)
-        self.assertIn("  dsga-pg18:\\n    if: github.event_name == 'pull_request'", branch_pr)
+        self.assertIn("  dsga-pg17:\n    if: github.event_name == 'pull_request'", branch_pr)
+        self.assertIn("  dsga-pg18:\n    if: github.event_name == 'pull_request'", branch_pr)
         self.assertIn("git submodule update --init --depth 1 vendor/postgres-v17", branch_pr)
 
         pg18_gate = (
@@ -110,7 +110,7 @@ class ReleaseContractTests(unittest.TestCase):
         )
         self.assertRegex(
             branch_pr,
-            r"uses: william-lbn/neon/\\.github/workflows/dsga-release\\.yml@[a-f0-9]{40}",
+            r"uses: william-lbn/neon/\.github/workflows/dsga-release\.yml@[a-f0-9]{40}",
         )
         self.assertIn("      normal_guest: false", branch_pr)
         self.assertIn("  workflow_dispatch:", workflow)
