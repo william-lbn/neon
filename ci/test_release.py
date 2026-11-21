@@ -71,6 +71,12 @@ class ReleaseContractTests(unittest.TestCase):
         # Cross-repository workflow code and image source commits are one immutable
         # release contract; changing either side alone must fail before expensive builds.
         dsga_release.verify_workflow_pins(self.lock)
+        workflow = (Path(__file__).resolve().parents[1] / ".github/workflows/dsga-release.yml").read_text()
+        self.assertIn("  workflow_call:", workflow)
+        self.assertIn("      arch:", workflow)
+        self.assertIn("      normal_guest:", workflow)
+        self.assertIn("      DOCKERHUB_USERNAME:", workflow)
+        self.assertIn("      DOCKERHUB_TOKEN:", workflow)
 
     def test_complete_candidate_has_exact_profiles_and_stays_unqualified(self):
         result = self.manifest()
