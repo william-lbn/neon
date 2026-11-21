@@ -108,7 +108,7 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("pin = json.load(open(sys.argv[1]))", postgres_make)
         self.assertIn("python3 -c", postgres_make)
         install_block = build_tools.split("apt-get install -y --no-install-recommends", 1)[1].split("&& rm -rf", 1)[0]
-        self.assertRegex(install_block, r"\\bpython3\\b")
+        self.assertRegex(install_block, r"\bpython3\b")
 
         # The exact pushed build-tools digest is executed before any dependent image build.
         self.assertIn("Verify the published build-tools image contains the required source-lock toolchain", release_workflow)
