@@ -3,6 +3,7 @@ import argparse
 import copy
 import json
 import os
+import re
 from pathlib import Path
 import tempfile
 import unittest
@@ -66,6 +67,32 @@ class ReleaseContractTests(unittest.TestCase):
     def manifest(self):
         return release.make_manifest(self.images, self.lock, self.tag, "amd64", self.neon, self.neon,
                                      "dsga", self.capabilities, self.native)
+
+    def test_all_external_actions_and_reusable_workflows_are_full_sha_pinned(self):
+        root = Path(__file__).resolve().parents[1]
+        yaml_roots = [root / ".github/workflows", root / ".github/actions"]
+        yaml_files = sorted(
+            path
+            for directory in yaml_roots
+            if directory.exists()
+            for pattern in ("*.yml", "*.yaml")
+            for path in directory.rglob(pattern)
+        )
+        self.assertTrue(yaml_files, "No workflow or composite-action YAML files found")
+        uses_pattern = re.compile(r"^\\s*(?:-\\s*)?uses:\\s*(\\S+)")
+        for path in yaml_files:
+            for line_number, line in enumerate(path.read_text().splitlines(), 1):
+                match = uses_pattern.match(line)
+                if not match:
+                    continue
+                reference = match.group(1)
+                if reference.startswith("./"):
+                    continue
+                self.assertRegex(
+                    reference,
+                    r"^[^@\\s]+@[0-9a-f]{40}$",
+                    f"External action or reusable workflow must use a full immutable SHA: {path}:{line_number}: {reference}",
+                )
 
     def test_reusable_workflow_refs_match_the_exact_source_lock(self):
         # Cross-repository workflow code and image source commits are one immutable
