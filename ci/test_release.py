@@ -98,6 +98,21 @@ class ReleaseContractTests(unittest.TestCase):
         # 正则退化为零匹配时也必须失败，不能把“没有检查任何引用”当作固定版本通过。
         self.assertGreater(checked, 0, "No external action or reusable workflow references were checked")
 
+    def test_release_prepare_preflights_pgrag_sources_before_build_matrices(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "ci/preflight-pgrag-sources.sh").read_text()
+        workflow = (root / ".github/workflows/dsga-release.yml").read_text()
+
+        self.assertIn("387127404e6c1d84b3468c387d864877ed1c67fe", script)
+        self.assertIn("4d3be68b9a81291f481a53b0850d99fed5007205", script)
+        self.assertIn("d213b09034f02524764ed54039d24ff51505edd9", script)
+        self.assertIn("7361654ea24f08cbb9db13c2ee1c0fe008f6114076401bb871619690dafc5225", script)
+        self.assertIn("patch --dry-run -p1", script)
+        self.assertIn("sha256sum --check --status", script)
+        self.assertIn("Preflight pinned PGRAG and ONNX Runtime sources before expensive builds", workflow)
+        self.assertLess(workflow.index("bash ci/preflight-pgrag-sources.sh"), workflow.index("  postgres-17:"))
+        self.assertNotIn("secrets.", script)
+
     def test_pgrag_onnxruntime_source_is_pinned_to_verified_release_commit(self):
         root = Path(__file__).resolve().parents[1]
         dockerfile = (root / "compute/compute-node.Dockerfile").read_text()
