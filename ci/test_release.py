@@ -71,6 +71,7 @@ class ReleaseContractTests(unittest.TestCase):
         # Cross-repository workflow code and image source commits are one immutable
         # release contract; the main-branch dispatcher invokes this exact reusable
         # workflow snapshot while the caller's pushed branch SHA supplies product code.
+        # The main-branch PR workflow is the registered push-event entry point.
         dsga_release.verify_workflow_pins(self.lock)
         workflow = (Path(__file__).resolve().parents[1] / ".github/workflows/dsga-release.yml").read_text()
         self.assertIn("  workflow_call:", workflow)
