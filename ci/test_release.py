@@ -108,8 +108,15 @@ class ReleaseContractTests(unittest.TestCase):
         # PostgreSQL majors compile the exact same DSGA test source.
         self.assertIn("#define NEON_INJECTION_POINT(name) INJECTION_POINT(name, NULL)", compat)
         self.assertIn("#define NEON_INJECTION_POINT(name) INJECTION_POINT(name)", compat)
-        self.assertIn('NEON_INJECTION_POINT("neon-clear-buffer-cache-after-peek")', source)
-        self.assertNotIn('INJECTION_POINT("neon-clear-buffer-cache-after-peek")', source)
+        injection_calls = [
+            line.strip()
+            for line in source.splitlines()
+            if "INJECTION_POINT(" in line
+        ]
+        self.assertEqual(
+            injection_calls,
+            ['NEON_INJECTION_POINT("neon-clear-buffer-cache-after-peek");'],
+        )
 
     def test_build_tools_image_contains_and_smoke_tests_python_source_lock_runtime(self):
         root = Path(__file__).resolve().parents[1]
