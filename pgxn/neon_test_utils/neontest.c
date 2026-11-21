@@ -307,7 +307,7 @@ clear_buffer_cache(PG_FUNCTION_ARGS)
 			DsgBufferAccessEnd(&access);
 			/* 暂停在真实有效tail提示上，收缩后该ID失效，不能只测试低位前缀。 */
 			if (isvalid && i >= NBuffers)
-				INJECTION_POINT("neon-clear-buffer-cache-after-peek");
+				NEON_INJECTION_POINT("neon-clear-buffer-cache-after-peek");
 #endif
 
 			/*
