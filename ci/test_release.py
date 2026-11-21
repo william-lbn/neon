@@ -108,7 +108,7 @@ class ReleaseContractTests(unittest.TestCase):
         # only because it serves the exact Microsoft 1.18.1 release commit object.
         self.assertIn("https://github.com/raymondxyang/onnxruntime.git", dockerfile)
         self.assertIn("git -C onnxruntime-src fetch --depth 1 origin " + release_commit, dockerfile)
-        self.assertIn('git -C onnxruntime-src rev-parse HEAD) = "' + release_commit + '"', dockerfile)
+        self.assertIn('git -C onnxruntime-src rev-parse HEAD)" = "' + release_commit + '"', dockerfile)
         self.assertIn("4d3be68b9a81291f481a53b0850d99fed5007205", dockerfile)
         build_deps = dockerfile.split("FROM $BASE_IMAGE_SHA AS build-deps", 1)[1].split("FROM build-deps AS pg-build", 1)[0]
         self.assertRegex(build_deps, r"\bgit\b")
