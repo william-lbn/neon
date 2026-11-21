@@ -86,7 +86,7 @@ jobs:
       contents: write
       actions: read
       packages: write
-    uses: william-lbn/neon/.github/workflows/dsga-release.yml@17c5401a37509249ed68c21c8612cfe5f879ec0c
+    uses: william-lbn/neon/.github/workflows/dsga-release.yml@8fe41263af181dc10704c27bf5460fb3ff766e70
     with:
       arch: amd64
       normal_guest: false
