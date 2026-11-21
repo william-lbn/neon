@@ -58,7 +58,7 @@ printf '%s\n' "$@" > config.status
             parent = self.init_repository(root)("rev-parse", "HEAD")
             pin = "a" * 40
             revision.write_text(json.dumps({"v17": ["17.11", pin]}))
-            (root / "vendor/postgres-v17/.neon-source-revision").write_text(pin + "\\n")
+            (root / "vendor/postgres-v17/.neon-source-revision").write_text(pin + "\n")
             result = run_make()
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn(pin, status.read_text())
@@ -83,7 +83,7 @@ printf '%s\n' "$@" > config.status
     def test_export_receipt_must_match_locked_revision(self):
         with self.build_fixture() as (root, source, revision, status, run_make):
             revision.write_text(json.dumps({"v17": ["17.11", "a" * 40]}))
-            (source / ".neon-source-revision").write_text("b" * 40 + "\\n")
+            (source / ".neon-source-revision").write_text("b" * 40 + "\n")
             result = run_make()
             self.assertNotEqual(result.returncode, 0, result.stdout)
             self.assertIn("does not match pinned revision", result.stderr)
@@ -106,15 +106,15 @@ printf '%s\n' "$@" > config.status
             revision = root / "vendor/revisions.json"
             revision.write_text(json.dumps({"v17": ["17.11", "1" * 40]}))
             receipt = source / ".neon-source-revision"
-            receipt.write_text("1" * 40 + "\\n")
+            receipt.write_text("1" * 40 + "\n")
 
             # 只替代高成本的 configure 可执行文件，依赖判断使用被测的完整
             # postgres.mk。输出实际参数和调用次数，能发现旧 SHA 被缓存的问题。
             configure = source / "configure"
             configure.write_text(
                 "#!/bin/sh\n"
-                'printf "%s\\n" "$@" > config.status\n'
-                'printf "configured\\n" >> configure-runs\n'
+                'printf "%s\n" "$@" > config.status\n'
+                'printf "configured\n" >> configure-runs\n'
             )
             configure.chmod(0o755)
             os.utime(rule, (1, 1))
@@ -148,7 +148,7 @@ printf '%s\n' "$@" > config.status
             )
 
             revision.write_text(json.dumps({"v17": ["17.11", "2" * 40]}))
-            receipt.write_text("2" * 40 + "\\n")
+            receipt.write_text("2" * 40 + "\n")
             # 明确模拟缓存早于新锁；兼容只比较秒级时间戳的旧版 Make。
             earlier = time.time() - 5
             os.utime(status, (earlier, earlier))
