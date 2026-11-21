@@ -1171,8 +1171,15 @@ ARG PG_VERSION
 WORKDIR /ext-src
 COPY compute/patches/onnxruntime.patch .
 
-RUN wget https://github.com/microsoft/onnxruntime/archive/refs/tags/v1.18.1.tar.gz -O onnxruntime.tar.gz && \
-    mkdir onnxruntime-src && cd onnxruntime-src && tar xzf ../onnxruntime.tar.gz --strip-components=1 -C . && \
+# Microsoft/onnxruntime is temporarily unavailable at its original GitHub URL.
+# This mirror contains the exact Microsoft 1.18.1 release commit; verify the full
+# Git object SHA before applying the unchanged Neon Eigen/dependency patch.
+RUN git init -q onnxruntime-src && \
+    git -C onnxruntime-src remote add origin https://github.com/raymondxyang/onnxruntime.git && \
+    git -C onnxruntime-src fetch --depth 1 origin 387127404e6c1d84b3468c387d864877ed1c67fe && \
+    git -C onnxruntime-src checkout --detach FETCH_HEAD && \
+    test "$(git -C onnxruntime-src rev-parse HEAD)" = "387127404e6c1d84b3468c387d864877ed1c67fe" && \
+    cd onnxruntime-src && \
     patch -p1 < /ext-src/onnxruntime.patch && \
     echo "#nothing to test here" > neon-test.sh
 
