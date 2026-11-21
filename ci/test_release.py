@@ -347,6 +347,34 @@ class ReleaseContractTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "invalid postgres binary checksum"):
                 release.load_native_receipts(root)
 
+    def test_native_receipt_loader_rejects_missing_or_ambiguous_binary_checksums(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            evidence = root / "pg17"
+            evidence.mkdir()
+            (evidence / "source-manifest.json").write_text(json.dumps({"pg_major": 17}))
+            with self.assertRaisesRegex(ValueError, "missing postgres.sha256"):
+                release.load_native_receipts(root)
+
+            checksum = evidence / "postgres.sha256"
+            checksum.write_text("a" * 64 + "  /tmp/not-postgres\\n")
+            with self.assertRaisesRegex(ValueError, "invalid postgres binary checksum"):
+                release.load_native_receipts(root)
+
+            checksum.write_text("a" * 64 + "  /tmp/postgres\\n" + "b" * 64 + "  /tmp/postgres\\n")
+            with self.assertRaisesRegex(ValueError, "exactly one binary checksum"):
+                release.load_native_receipts(root)
+
+    def test_native_receipt_loader_rejects_non_integer_postgres_major(self):
+        for major in (True, 17.0, "17", None):
+            with self.subTest(major=major), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                evidence = root / "evidence"
+                evidence.mkdir()
+                (evidence / "source-manifest.json").write_text(json.dumps({"pg_major": major}))
+                with self.assertRaisesRegex(ValueError, "Malformed native PostgreSQL source manifest"):
+                    release.load_native_receipts(root)
+
     def test_native_receipt_loader_rejects_duplicate_major_and_missing_receipts(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
