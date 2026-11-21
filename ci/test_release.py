@@ -98,6 +98,21 @@ class ReleaseContractTests(unittest.TestCase):
         # 正则退化为零匹配时也必须失败，不能把“没有检查任何引用”当作固定版本通过。
         self.assertGreater(checked, 0, "No external action or reusable workflow references were checked")
 
+    def test_pgrag_onnxruntime_source_is_pinned_to_verified_release_commit(self):
+        root = Path(__file__).resolve().parents[1]
+        dockerfile = (root / "compute/compute-node.Dockerfile").read_text()
+        patch = (root / "compute/patches/onnxruntime.patch").read_text()
+        release_commit = "387127404e6c1d84b3468c387d864877ed1c67fe"
+
+        # The original Microsoft GitHub endpoint is unavailable. The mirror is accepted
+        # only because it serves the exact Microsoft 1.18.1 release commit object.
+        self.assertIn("https://github.com/raymondxyang/onnxruntime.git", dockerfile)
+        self.assertIn("git -C onnxruntime-src fetch --depth 1 origin " + release_commit, dockerfile)
+        self.assertIn('git -C onnxruntime-src rev-parse HEAD) = "' + release_commit + '"', dockerfile)
+        self.assertNotIn("github.com/microsoft/onnxruntime/archive", dockerfile)
+        # The existing Neon dependency patch must still apply to the same upstream file blob.
+        self.assertIn("index d213b09034", patch)
+
     def test_neon_test_utils_uses_pg_compatible_injection_point_api(self):
         root = Path(__file__).resolve().parents[1]
         source = (root / "pgxn/neon_test_utils/neontest.c").read_text()
