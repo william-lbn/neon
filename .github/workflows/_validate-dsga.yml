@@ -17,6 +17,11 @@ on:
       distribution_artifact:
         type: string
         required: true
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
 permissions:
   contents: read
   actions: read
