@@ -69,10 +69,8 @@ class ReleaseContractTests(unittest.TestCase):
 
     def test_reusable_workflow_refs_match_the_exact_source_lock(self):
         # Cross-repository workflow code and image source commits are one immutable
-        # release contract; the main-branch dispatcher invokes this exact reusable
-        # workflow snapshot while the caller's pushed branch SHA supplies product code.
-        # The main-branch PR workflow is the registered push-event entry point.
-        # Its reusable-workflow SHA must stay aligned with this callable workflow snapshot.
+        # release contract. The feature-branch dispatcher must call the complete
+        # candidate workflow, while PR-only native gates must not duplicate push builds.
         dsga_release.verify_workflow_pins(self.lock)
         workflow = (Path(__file__).resolve().parents[1] / ".github/workflows/dsga-release.yml").read_text()
         self.assertIn("  workflow_call:", workflow)
@@ -80,22 +78,41 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("      normal_guest:", workflow)
         self.assertIn("      DOCKERHUB_USERNAME:", workflow)
         self.assertIn("      DOCKERHUB_TOKEN:", workflow)
-        # Push events are registered by the default-branch dispatcher; this branch-local
-        # workflow remains PR-only so it cannot start a duplicate release candidate.
+
         branch_pr = (Path(__file__).resolve().parents[1] / ".github/workflows/pull-request.yml").read_text()
-        self.assertIn("on: [pull_request]", branch_pr)
-        self.assertNotIn("  push:", branch_pr)
-        self.assertNotIn("  unified-dsga-release:", branch_pr)
-        # Both PostgreSQL major versions must have explicit native DSGA gates in CI.
-        # PG18 is a reusable workflow pinned to the exact same commit as the source lock.
-        self.assertIn("  dsga-pg17:", branch_pr)
-        self.assertIn("  dsga-pg18:", branch_pr)
+        # Both PR validation and the branch-push release dispatcher are registered.
+        self.assertIn("  pull_request:", branch_pr)
+        self.assertIn("  push:", branch_pr)
+        self.assertIn("branches: ['codex/dsga-neon-v3-20261019']", branch_pr)
+        self.assertIn("  workflow_dispatch:", branch_pr)
+
+        # The expensive PG17/PG18 standalone gates run for PRs only. On feature pushes,
+        # the unified release workflow owns those same native checks in one run, avoiding
+        # duplicate native builds while keeping the complete candidate evidence together.
+        self.assertIn("  dsga-pg17:\\n    if: github.event_name == 'pull_request'", branch_pr)
+        self.assertIn("  dsga-pg18:\\n    if: github.event_name == 'pull_request'", branch_pr)
+        self.assertIn("git submodule update --init --depth 1 vendor/postgres-v17", branch_pr)
+
         pg18_gate = (
             "uses: william-lbn/postgres/.github/workflows/build.yml@"
             + self.lock["postgres"]["v18"]
         )
         self.assertIn(pg18_gate, branch_pr)
         self.assertIn("source_sha: " + self.lock["postgres"]["v18"], branch_pr)
+
+        # Push/manual dispatch on the one approved development branch invokes the full
+        # immutable candidate pipeline; it must never run for arbitrary branches or PRs.
+        self.assertIn("  dsga-unified-release:", branch_pr)
+        self.assertIn(
+            "if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') "
+            "&& github.ref == 'refs/heads/codex/dsga-neon-v3-20261019'",
+            branch_pr,
+        )
+        self.assertRegex(
+            branch_pr,
+            r"uses: william-lbn/neon/\\.github/workflows/dsga-release\\.yml@[a-f0-9]{40}",
+        )
+        self.assertIn("      normal_guest: false", branch_pr)
         self.assertIn("  workflow_dispatch:", workflow)
 
     def test_complete_candidate_has_exact_profiles_and_stays_unqualified(self):
