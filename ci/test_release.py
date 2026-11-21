@@ -78,6 +78,11 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("      normal_guest:", workflow)
         self.assertIn("      DOCKERHUB_USERNAME:", workflow)
         self.assertIn("      DOCKERHUB_TOKEN:", workflow)
+        # Local image validation also needs registry read credentials, passed explicitly.
+        validate_job = workflow.split("  validate:\n", 1)[1].split("\n  helm:", 1)[0]
+        self.assertIn("DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}", validate_job)
+        self.assertIn("DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}", validate_job)
+        self.assertNotIn("secrets: inherit", validate_job)
         # Cross-repository workflows receive only the credentials they actually use.
         # Local compute and validation workflows need no secrets; the Autoscaling
         # and Control Plane builders receive only Docker Hub credentials.
