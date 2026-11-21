@@ -2,6 +2,23 @@ name: DSGA unified candidate distribution
 on:
   push:
     branches: ['codex/dsga-neon-v3-20261019']
+  workflow_call:
+    inputs:
+      arch:
+        description: Candidate platform (Helm currently supports amd64 only)
+        type: string
+        required: false
+        default: amd64
+      normal_guest:
+        description: Build both PostgreSQL 17 and 18 normal-split-v3 Guests
+        type: boolean
+        required: false
+        default: false
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
   workflow_dispatch:
     inputs:
       arch:
