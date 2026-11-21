@@ -86,6 +86,16 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("on: [pull_request]", branch_pr)
         self.assertNotIn("  push:", branch_pr)
         self.assertNotIn("  unified-dsga-release:", branch_pr)
+        # Both PostgreSQL major versions must have explicit native DSGA gates in CI.
+        # PG18 is a reusable workflow pinned to the exact same commit as the source lock.
+        self.assertIn("  dsga-pg17:", branch_pr)
+        self.assertIn("  dsga-pg18:", branch_pr)
+        pg18_gate = (
+            "uses: william-lbn/postgres/.github/workflows/build.yml@"
+            + self.lock["postgres"]["v18"]
+        )
+        self.assertIn(pg18_gate, branch_pr)
+        self.assertIn("source_sha: " + self.lock["postgres"]["v18"], branch_pr)
         self.assertIn("  workflow_dispatch:", workflow)
 
     def test_complete_candidate_has_exact_profiles_and_stays_unqualified(self):
