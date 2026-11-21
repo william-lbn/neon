@@ -1,8 +1,6 @@
 name: Distribution pull request checks
-# 质量门禁同时覆盖 PR 和 DSGA 研发分支直接 Push；完整发行仍由 dsga-release.yml 显式触发。
+# Pull requests run quality gates here; direct feature pushes use the default-branch release dispatcher.
 on:
-  push:
-    branches: ['codex/dsga-neon-*']
   pull_request:
 permissions:
   contents: read
