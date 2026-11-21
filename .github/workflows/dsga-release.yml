@@ -32,8 +32,10 @@ permissions:
   contents: read
 concurrency:
   group: dsga-distribution-${{ github.ref }}-${{ inputs.arch || 'amd64' }}
-  # New feature-branch commits supersede unfinished candidates; published versions stay immutable.
-  cancel-in-progress: ${{ github.event_name == 'push' }}
+  # Once a candidate starts, its image tags, receipts and release assets are bound to
+  # this run/attempt. Never cancel it on a later Push: cancellation can strand partial
+  # registry writes and an incomplete draft. The caller serializes one running + latest pending.
+  cancel-in-progress: false
 env:
   REGISTRY: docker.io/williamluckyli
   ARCH: ${{ inputs.arch || 'amd64' }}
