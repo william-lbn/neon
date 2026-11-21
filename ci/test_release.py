@@ -111,7 +111,7 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn('git -C onnxruntime-src rev-parse HEAD) = "' + release_commit + '"', dockerfile)
         self.assertIn("4d3be68b9a81291f481a53b0850d99fed5007205", dockerfile)
         build_deps = dockerfile.split("FROM $BASE_IMAGE_SHA AS build-deps", 1)[1].split("FROM build-deps AS pg-build", 1)[0]
-        self.assertRegex(build_deps, r"\\bgit\\b")
+        self.assertRegex(build_deps, r"\bgit\b")
         self.assertNotIn("github.com/microsoft/onnxruntime/archive", dockerfile)
         # The existing Neon dependency patch must still apply to the same upstream file blob.
         self.assertIn("index d213b09034", patch)
