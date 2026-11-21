@@ -112,6 +112,10 @@ class ReleaseContractTests(unittest.TestCase):
         # immutable candidate pipeline; it must never run for arbitrary branches or PRs.
         self.assertIn("  dsga-unified-release:", branch_pr)
         self.assertIn(
+            "uses: william-lbn/neon/.github/workflows/dsga-release.yml@08eff7a8fff7c4ad8808c3d0015b4dcabce5afc6",
+            branch_pr,
+        )
+        self.assertIn(
             "if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') "
             "&& github.ref == 'refs/heads/codex/dsga-neon-v3-20261019'",
             branch_pr,
