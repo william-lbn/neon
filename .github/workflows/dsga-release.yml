@@ -462,7 +462,7 @@ jobs:
       postgres_matrix: ${{ needs.prepare.outputs.postgres_matrix }}
       distribution_artifact: ${{ needs.prepare.outputs.distribution_artifact }}
     # _validate-dsga.yml declares these same required secrets in workflow_call;
-    # keep this mapping explicit so image readback never depends on secrets: inherit.
+    # keep this mapping explicit so image readback receives only its required credentials.
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
