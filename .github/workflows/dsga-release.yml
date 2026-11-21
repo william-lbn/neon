@@ -458,6 +458,9 @@ jobs:
       source_commit: ${{ needs.prepare.outputs.source_commit }}
       postgres_matrix: ${{ needs.prepare.outputs.postgres_matrix }}
       distribution_artifact: ${{ needs.prepare.outputs.distribution_artifact }}
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
   helm:
     needs: [prepare, validate]
     permissions:
