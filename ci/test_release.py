@@ -78,6 +78,19 @@ class ReleaseContractTests(unittest.TestCase):
         self.assertIn("      normal_guest:", workflow)
         self.assertIn("      DOCKERHUB_USERNAME:", workflow)
         self.assertIn("      DOCKERHUB_TOKEN:", workflow)
+        # Cross-repository workflows receive only the credentials they actually use.
+        # Local compute and validation workflows need no secrets; the Autoscaling
+        # and Control Plane builders receive only Docker Hub credentials.
+        self.assertNotIn("secrets: inherit", workflow)
+        self.assertIn(
+            "DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}",
+            workflow,
+        )
+        self.assertIn(
+            "DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}",
+            workflow,
+        )
+
         # The reusable release is immutable once registry writes begin. A later Push
         # may queue the newest candidate, but must never cancel this run mid-publication.
         self.assertIn("cancel-in-progress: false", workflow)
@@ -130,6 +143,15 @@ class ReleaseContractTests(unittest.TestCase):
             r"uses: william-lbn/neon/\.github/workflows/dsga-release\.yml@[a-f0-9]{40}",
         )
         self.assertIn("      normal_guest: false", branch_pr)
+        self.assertNotIn("secrets: inherit", branch_pr)
+        self.assertIn(
+            "DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}",
+            branch_pr,
+        )
+        self.assertIn(
+            "DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}",
+            branch_pr,
+        )
         self.assertIn("  workflow_dispatch:", workflow)
 
     def test_complete_candidate_has_exact_profiles_and_stays_unqualified(self):
