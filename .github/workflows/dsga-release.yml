@@ -90,7 +90,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@4fefa48ad70a3c0dc8e5bc28b750115d16cf2d42
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@ed287643b7cc4a1c18fa454aee9fae937cc1c9bf
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
@@ -101,7 +101,7 @@ jobs:
     needs: prepare
     permissions:
       contents: read
-    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@1d0ce2a3f5a077daa86a34a1c248c52922f25e4c
+    uses: william-lbn/control-plane/.github/workflows/dsga-control-artifacts.yml@7e45686fc6eb1045dbcf281f45e555b6e0001d7f
     with:
       source_sha: ${{ needs.prepare.outputs.control_plane }}
       release_tag: ${{ needs.prepare.outputs.tag }}
@@ -446,7 +446,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@f51f13f44c20e6cdc86e4149cc79b97d2213832b
+    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@53d58555e349b9742f71e62720373349df4919c9
     with:
       helm_sha: ${{ needs.prepare.outputs.helm }}
       release_version: ${{ needs.prepare.outputs.tag }}
