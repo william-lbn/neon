@@ -1,14 +1,9 @@
 name: Distribution pull request checks
-on:
-  pull_request:
-  push:
-    branches: ['codex/dsga-neon-v3-20261019']
-  workflow_dispatch:
+on: [pull_request]
 permissions:
   contents: read
 jobs:
   contracts:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -16,16 +11,3 @@ jobs:
           persist-credentials: false
       - run: python3 ci/compute.py validate
       - run: python3 -m unittest discover -s ci -p 'test_*.py' -v
-
-  dsga-unified-release:
-    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/codex/dsga-neon-v3-20261019'
-    name: Unified DSGA candidate release
-    permissions:
-      contents: write
-      actions: read
-      packages: write
-    uses: william-lbn/neon/.github/workflows/dsga-release.yml@3c29182bf1ce1abcb7837af1b7772c63df16a7c3
-    with:
-      arch: amd64
-      normal_guest: false
-    secrets: inherit
