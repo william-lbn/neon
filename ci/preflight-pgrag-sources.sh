@@ -13,30 +13,18 @@ readonly PGRAG_SHA256="7361654ea24f08cbb9db13c2ee1c0fe008f6114076401bb871619690d
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
 
-echo "[preflight] Verify ONNX Runtime 1.18.1 release commit and tree"
-curl -fsSL --retry 5 "https://api.github.com/repos/${ORT_REPOSITORY}/git/commits/${ORT_COMMIT}" -o "$tmp/ort-commit.json"
-python3 - "$tmp/ort-commit.json" "$ORT_COMMIT" "$ORT_TREE" <<'PY'
-import json
-import sys
-
-document = json.load(open(sys.argv[1], encoding="utf-8"))
-expected_commit, expected_tree = sys.argv[2:4]
-if document.get("sha") != expected_commit:
-    raise SystemExit("ONNX Runtime release commit SHA mismatch")
-if document.get("tree", {}).get("sha") != expected_tree:
-    raise SystemExit("ONNX Runtime release tree SHA mismatch")
-PY
-
-echo "[preflight] Verify the exact patched dependency manifest blob"
-mkdir -p "$tmp/patch-root/cmake"
-curl -fsSL --retry 5 "https://raw.githubusercontent.com/${ORT_REPOSITORY}/${ORT_COMMIT}/cmake/deps.txt" -o "$tmp/patch-root/cmake/deps.txt"
-actual_blob="$(git hash-object "$tmp/patch-root/cmake/deps.txt")"
-if [[ "$actual_blob" != "$ORT_DEPS_BLOB" ]]; then
-  echo "ONNX Runtime cmake/deps.txt blob mismatch: $actual_blob" >&2
-  exit 1
-fi
-patch --dry-run -p1 -d "$tmp/patch-root" < compute/patches/onnxruntime.patch
-
+echo "[preflight] Fetch and verify ONNX Runtime 1.18.1 release commit"
+git init -q "$tmp/onnxruntime"
+git -C "$tmp/onnxruntime" remote add origin "https://github.com/${ORT_REPOSITORY}.git"
+git -C "$tmp/onnxruntime" fetch --depth 1 origin "$ORT_COMMIT"
+git -C "$tmp/onnxruntime" checkout --detach FETCH_HEAD
+actual_commit="$(git -C "$tmp/onnxruntime" rev-parse HEAD)"
+actual_tree="$(git -C "$tmp/onnxruntime" rev-parse 'HEAD^{tree}')"
+actual_blob="$(git -C "$tmp/onnxruntime" rev-parse "HEAD:cmake/deps.txt")"
+[[ "$actual_commit" == "$ORT_COMMIT" ]]
+[[ "$actual_tree" == "$ORT_TREE" ]]
+[[ "$actual_blob" == "$ORT_DEPS_BLOB" ]]
+patch --dry-run -p1 -d "$tmp/onnxruntime" < compute/patches/onnxruntime.patch
 echo "[preflight] Verify pinned PGRAG v0.1.2 archive"
 curl -fL --retry 5 "$PGRAG_URL" -o "$tmp/pgrag.tar.gz"
 echo "$PGRAG_SHA256  $tmp/pgrag.tar.gz" | sha256sum --check --status
