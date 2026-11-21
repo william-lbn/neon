@@ -59,3 +59,31 @@ def validate_postgres_sources(root: Path, source_ref="HEAD", require_checkout=Fa
             ).returncode:
                 raise ValueError(f"Postgres checkout has uncommitted source changes: {version}")
     return lock
+
+
+def prepare_postgres_source_context(root: Path):
+    """Write source SHA receipts after validating every clean PostgreSQL checkout.
+
+    Docker build contexts contain submodule source files but not the parent
+    repository's .git/modules metadata. The receipt preserves the exact source
+    identity inside the context without copying host Git metadata into the image.
+    """
+    revisions = json.loads((root / "vendor/revisions.json").read_text())
+    for version in revisions:
+        (root / f"vendor/postgres-{version}/.neon-source-revision").unlink(missing_ok=True)
+
+    validate_postgres_sources(root, require_checkout=True)
+
+    receipts = {}
+    for version, revision in revisions.items():
+        checkout = root / f"vendor/postgres-{version}"
+        status = subprocess.check_output(
+            ["git", "-C", str(checkout), "status", "--porcelain", "--untracked-files=all"],
+            text=True,
+        )
+        if status:
+            raise ValueError(f"Postgres checkout is not clean before Docker export: {version}")
+        actual = revision[1]
+        (checkout / ".neon-source-revision").write_text(actual + "\n")
+        receipts[version] = actual
+    return receipts

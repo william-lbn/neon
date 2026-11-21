@@ -84,12 +84,17 @@ $(postgres_source_targets): postgres-source-verify-%:
 	@set -eu; \
 	pin=$$($(call postgres_source_pin,$*)); \
 	source="$(ROOT_PROJECT_DIR)/vendor/postgres-$*"; \
-	if test -e "$$source/.git"; then \
-		actual=$$(git -C "$$source" rev-parse --verify HEAD); \
-		if test "$$actual" != "$$pin"; then \
-			printf 'PostgreSQL %s source does not match pinned revision\n' "$*" >&2; \
-			exit 1; \
-		fi; \
+	if test -e "$$source/.git" && actual=$$(git -C "$$source" rev-parse --verify HEAD 2>/dev/null); then \
+		:; \
+	elif test -s "$$source/.neon-source-revision"; then \
+		actual=$$(cat "$$source/.neon-source-revision"); \
+	else \
+		printf 'PostgreSQL %s source has neither usable Git metadata nor a validated Docker-context receipt\n' "$*" >&2; \
+		exit 1; \
+	fi; \
+	if test "$$actual" != "$$pin"; then \
+		printf 'PostgreSQL %s source does not match pinned revision\n' "$*" >&2; \
+		exit 1; \
 	fi
 
 # Run 'configure'

@@ -578,5 +578,15 @@ class ReleaseContractTests(unittest.TestCase):
                 release.load_images(d)
 
 
+    def test_docker_build_jobs_prepare_verified_postgres_source_receipts(self):
+        root = Path(__file__).resolve().parents[1]
+        compute_workflow = (root / ".github/workflows/_compute-images.yml").read_text()
+        release_workflow = (root / ".github/workflows/dsga-release.yml").read_text()
+        self.assertEqual(compute_workflow.count("python3 ci/compute.py prepare-source-context"), 3)
+        self.assertIn("python3 ci/compute.py prepare-source-context", release_workflow)
+        postgres_make = (root / "postgres.mk").read_text()
+        self.assertIn(".neon-source-revision", postgres_make)
+        self.assertIn("validated Docker-context receipt", postgres_make)
+
 if __name__ == "__main__":
     unittest.main()

@@ -58,6 +58,8 @@ jobs:
         run: |
           python3 ci/compute.py validate --require-pg-checkout "$PG"
           [[ "$(python3 ci/compute.py profile --pg "$PG")" == "$EXPECTED_PROFILE" ]]
+      - name: Prepare verified PostgreSQL source receipts for Docker context
+        run: python3 ci/compute.py prepare-source-context
       - id: matrix
         run: echo "value=$(python3 ci/compute.py matrix)" >> "$GITHUB_OUTPUT"
       - name: Verify immutable run and attempt before registry writes
@@ -112,6 +114,8 @@ jobs:
           ref: ${{ inputs.source_commit || github.sha }}
           submodules: recursive
           persist-credentials: false
+      - name: Prepare verified PostgreSQL source receipts for Docker context
+        run: python3 ci/compute.py prepare-source-context
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           name: compute-dependencies-${{ inputs.pg }}-attempt${{ github.run_attempt }}
@@ -157,6 +161,8 @@ jobs:
           ref: ${{ inputs.source_commit || github.sha }}
           submodules: recursive
           persist-credentials: false
+      - name: Prepare verified PostgreSQL source receipts for Docker context
+        run: python3 ci/compute.py prepare-source-context
       - uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
           pattern: compute-*-attempt${{ github.run_attempt }}

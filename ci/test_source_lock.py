@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from source_lock import validate_postgres_sources
+from source_lock import prepare_postgres_source_context, validate_postgres_sources
 
 
 class SourceLockTests(unittest.TestCase):
@@ -133,6 +133,27 @@ class SourceLockTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "uncommitted source"):
             validate_postgres_sources(self.root, "index", ["v17"])
 
+
+    def test_prepare_source_context_writes_only_verified_clean_submodule_receipts(self):
+        checkout, commit = self.make_checkout()
+        self.lock["postgres"]["v17"] = commit
+        self.revisions["v17"][1] = commit
+        self.write_manifests()
+        self.git("update-index", "--cacheinfo", "160000", commit, "vendor/postgres-v17")
+        self.git(
+            "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+            "-c", "commit.gpgsign=false", "commit", "-qm", "pin actual source",
+        )
+
+        receipts = prepare_postgres_source_context(self.root)
+        marker = checkout / ".neon-source-revision"
+        self.assertEqual(receipts, {"v17": commit})
+        self.assertEqual(marker.read_text(), commit + "\n")
+
+        marker.unlink()
+        (checkout / "unexpected.c").write_text("untracked source change\n")
+        with self.assertRaisesRegex(ValueError, "not clean before Docker export"):
+            prepare_postgres_source_context(self.root)
 
 if __name__ == "__main__":
     unittest.main()

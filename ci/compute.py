@@ -14,7 +14,7 @@ import re
 import subprocess
 import tempfile
 
-from source_lock import validate_postgres_sources
+from source_lock import prepare_postgres_source_context, validate_postgres_sources
 from release import DSGA_VERSION, validate_current_execution
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -215,6 +215,7 @@ def validate(source_ref="HEAD", require_checkout=False):
 def main():
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("prepare-source-context")
     validation = sub.add_parser("validate")
     validation.add_argument("--source-ref", default="HEAD", help="HEAD, another commit, or index before committing")
     validation.add_argument("--require-pg-checkout", action="append", default=[], metavar="VERSION")
@@ -238,7 +239,10 @@ def main():
     recording.add_argument("--normal-material", action="store_true")
     recording.add_argument("--arch", choices=["amd64", "arm64"], default=os.environ.get("ARCH", "amd64"))
     args = parser.parse_args()
-    if args.command == "validate":
+    if args.command == "prepare-source-context":
+        receipts = prepare_postgres_source_context(ROOT)
+        print(f"Prepared verified PostgreSQL source receipts: {len(receipts)} submodules")
+    elif args.command == "validate":
         validate(args.source_ref, args.require_pg_checkout)
     elif args.command == "matrix":
         print(json.dumps({"target": extension_targets()}, separators=(",", ":")))

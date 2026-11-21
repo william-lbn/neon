@@ -2,6 +2,7 @@ import argparse
 import hashlib
 import json
 import pathlib
+import re
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -85,6 +86,17 @@ class ComputeBuildTests(unittest.TestCase):
                 block = output.read_text().split(" AS extension-tests\n", 1)[1].split("\nFROM ", 1)[0]
                 self.assertEqual("pg_hint_plan_${PG_VERSION:?}.patch" in block, version in ["v16", "v17"])
 
+
+    def test_compute_metrics_support_every_locked_postgres_major(self):
+        source = (compute.ROOT / "compute/jsonnet/neon.libsonnet").read_text()
+        match = re.search(r"MAX_SUPPORTED_VERSION\s*=\s*(\d+)", source)
+        self.assertIsNotNone(match)
+        maximum = int(match.group(1))
+        required = max(int(version[1:]) for version in compute.LOCK["postgres"])
+        self.assertGreaterEqual(maximum, required)
+        # PG17 introduced pg_stat_checkpointer; PG18 retains the same metric columns.
+        self.assertIn("pg_stat_checkpointer", (compute.ROOT / "compute/etc/sql_exporter/checkpoints_req.17.sql").read_text())
+        self.assertIn("pg_stat_checkpointer", (compute.ROOT / "compute/etc/sql_exporter/checkpoints_timed.17.sql").read_text())
 
 if __name__ == "__main__":
     unittest.main()

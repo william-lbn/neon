@@ -195,6 +195,8 @@ jobs:
           submodules: recursive
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Prepare verified PostgreSQL source receipts for Docker context
+        run: python3 ci/compute.py prepare-source-context
       - name: Verify immutable run and attempt before any registry write
         env:
           RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
