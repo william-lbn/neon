@@ -98,6 +98,19 @@ class ReleaseContractTests(unittest.TestCase):
         # 正则退化为零匹配时也必须失败，不能把“没有检查任何引用”当作固定版本通过。
         self.assertGreater(checked, 0, "No external action or reusable workflow references were checked")
 
+    def test_neon_test_utils_uses_pg_compatible_injection_point_api(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / "pgxn/neon_test_utils/neontest.c").read_text()
+        compat = (root / "pgxn/neon/neon_pgversioncompat.h").read_text()
+
+        # PG17 exposes INJECTION_POINT(name); PG18 exposes INJECTION_POINT(name, arg).
+        # Keep this test extension on the shared compatibility wrapper so both pinned
+        # PostgreSQL majors compile the exact same DSGA test source.
+        self.assertIn("#define NEON_INJECTION_POINT(name) INJECTION_POINT(name, NULL)", compat)
+        self.assertIn("#define NEON_INJECTION_POINT(name) INJECTION_POINT(name)", compat)
+        self.assertIn('NEON_INJECTION_POINT("neon-clear-buffer-cache-after-peek")', source)
+        self.assertNotIn('INJECTION_POINT("neon-clear-buffer-cache-after-peek")', source)
+
     def test_build_tools_image_contains_and_smoke_tests_python_source_lock_runtime(self):
         root = Path(__file__).resolve().parents[1]
         build_tools = (root / "ci/build-tools.Dockerfile").read_text()
