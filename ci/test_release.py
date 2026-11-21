@@ -79,7 +79,7 @@ class ReleaseContractTests(unittest.TestCase):
             for path in directory.rglob(pattern)
         )
         self.assertTrue(yaml_files, "No workflow or composite-action YAML files found")
-        uses_pattern = re.compile(r"^\\s*(?:-\\s*)?uses:\\s*(\\S+)")
+        uses_pattern = re.compile(r"^\s*(?:-\s*)?uses:\s*(\S+)")
         for path in yaml_files:
             for line_number, line in enumerate(path.read_text().splitlines(), 1):
                 match = uses_pattern.match(line)
@@ -90,7 +90,7 @@ class ReleaseContractTests(unittest.TestCase):
                     continue
                 self.assertRegex(
                     reference,
-                    r"^[^@\\s]+@[0-9a-f]{40}$",
+                    r"^[^@\s]+@[0-9a-f]{40}$",
                     f"External action or reusable workflow must use a full immutable SHA: {path}:{line_number}: {reference}",
                 )
 
