@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   contracts:
-    # Every PR and every candidate-release trigger must pass the complete source-level
-    # contract suite before any cross-repository build or registry write can begin.
+    # 发行入口只加载不依赖运行中 PG 的完整契约集，并由统一 runner 拒绝失败和跳过。
+    # 原生内核用例由后续专用门禁构建真实 PG 后执行，不能在无工具链时用 discover 代替。
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -23,8 +23,10 @@ jobs:
           persist-credentials: false
       - name: Validate compute source and pinned PostgreSQL gitlinks
         run: python3 ci/compute.py validate
-      - name: Run the complete Neon source and release contract suite
-        run: python3 -m unittest discover -s ci -p 'test_*.py' -v
+      - name: Validate workflow syntax and expressions
+        run: bash ci/check-workflows.sh
+      - name: Run all source and release contracts without skipped tests
+        run: python3 ci/run-release-contracts.py
 
   dsga-pg17:
     if: github.event_name == 'pull_request'

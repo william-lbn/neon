@@ -80,6 +80,7 @@ class ReleaseContractTests(unittest.TestCase):
         )
         self.assertTrue(yaml_files, "No workflow or composite-action YAML files found")
         uses_pattern = re.compile(r"^\s*(?:-\s*)?uses:\s*(\S+)")
+        checked = 0
         for path in yaml_files:
             for line_number, line in enumerate(path.read_text().splitlines(), 1):
                 match = uses_pattern.match(line)
@@ -88,11 +89,14 @@ class ReleaseContractTests(unittest.TestCase):
                 reference = match.group(1)
                 if reference.startswith("./"):
                     continue
+                checked += 1
                 self.assertRegex(
                     reference,
                     r"^[^@\s]+@[0-9a-f]{40}$",
                     f"External action or reusable workflow must use a full immutable SHA: {path}:{line_number}: {reference}",
                 )
+        # 正则退化为零匹配时也必须失败，不能把“没有检查任何引用”当作固定版本通过。
+        self.assertGreater(checked, 0, "No external action or reusable workflow references were checked")
 
     def test_reusable_workflow_refs_match_the_exact_source_lock(self):
         # Cross-repository workflow code and image source commits are one immutable
@@ -162,10 +166,12 @@ class ReleaseContractTests(unittest.TestCase):
         # Push/manual dispatch on the one approved development branch invokes the full
         # immutable candidate pipeline; it must never run for arbitrary branches or PRs.
         self.assertIn("  dsga-unified-release:", branch_pr)
-        # Publishing is hard-gated by the complete source-level test suite for both
-        # Push and manual candidate dispatch; no registry write can start before it.
+        # 发布前运行全部独立发行契约，统一入口对失败/跳过返回非零；原生 PG 测试
+        # 仍由专用工作流执行，不能把无工具链的全目录 discover 当作源码契约检查。
         self.assertIn("  contracts:", branch_pr)
-        self.assertIn("python3 -m unittest discover -s ci -p 'test_*.py' -v", branch_pr)
+        self.assertIn("bash ci/check-workflows.sh", branch_pr)
+        self.assertIn("python3 ci/run-release-contracts.py", branch_pr)
+        self.assertNotIn("python3 -m unittest discover -s ci -p 'test_*.py' -v", branch_pr)
         self.assertIn("  dsga-unified-release:\n    needs: contracts", branch_pr)
         self.assertIn(
             "uses: william-lbn/neon/.github/workflows/dsga-release.yml@47084902bcb5ee0e2a88ee100ea19dae3de5f2e3",
