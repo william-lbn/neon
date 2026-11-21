@@ -9,7 +9,7 @@ permissions:
 # 同一 PR 的新提交取消旧 PR 检查；发行 Push 不取消正在运行的候选发行。
 # GitHub 保留一个运行中的任务和一个最新 pending 任务，避免长时间原生构建互相抢占。
 concurrency:
-  group: neon-dsga-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: neon-dsga-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   contracts:
