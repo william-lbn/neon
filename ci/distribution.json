@@ -1,10 +1,10 @@
 {
   "registry": "docker.io/williamluckyli",
   "autoscaling_repository": "william-lbn/autoscaling",
-  "autoscaling_commit": "92feac2f20391cbfe785f75784eb505e4f8e7538",
+  "autoscaling_commit": "dae04078541986f22da75d3491db99f652c0e6ca",
   "control_plane": {
     "repository": "william-lbn/control-plane",
-    "commit": "b75609ec3b50cbe088dd1844aaaa057a18f82090",
+    "commit": "3c94d32a790e1f06525538506d4e3acb8ad324bc",
     "images": [
       "control-api",
       "control-web",
@@ -77,5 +77,5 @@
     "ordinary_package_lock_sha256": "20f70bf0e7f50dfacdd9177425b0d1d056e4c0821116cf2a5dc50aa7288a9c49"
   },
   "helm_repository": "william-lbn/neon-helm",
-  "helm_commit": "cbeedb79c4c3849c636b703fbc7edc346d2b043e"
+  "helm_commit": "c02e76a2991d7316bc1c5b606f09e45028126e73"
 }
