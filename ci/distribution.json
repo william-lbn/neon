@@ -77,5 +77,5 @@
     "ordinary_package_lock_sha256": "20f70bf0e7f50dfacdd9177425b0d1d056e4c0821116cf2a5dc50aa7288a9c49"
   },
   "helm_repository": "william-lbn/neon-helm",
-  "helm_commit": "a27f55dfc09f1c5848ccee21b0c9f835c2bc9f93"
+  "helm_commit": "917d06b5b0368d81880187a42e368291c96a8472"
 }
