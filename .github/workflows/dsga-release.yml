@@ -109,7 +109,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@d542ebe4c1e4ad219bd385d16473c7a527ed3796
+    uses: william-lbn/autoscaling/.github/workflows/dockerhub.yml@1a000066f5681e46d2103448175aec4d21e34b80
     with:
       tag: ${{ needs.prepare.outputs.tag }}
       arch: ${{ inputs.arch || 'amd64' }}
@@ -488,7 +488,7 @@ jobs:
     permissions:
       contents: read
       actions: read
-    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@917d06b5b0368d81880187a42e368291c96a8472
+    uses: william-lbn/neon-helm/.github/workflows/dsga-package.yml@88df1e7260503cebcd077651d22357a2edfb8004
     with:
       helm_sha: ${{ needs.prepare.outputs.helm }}
       release_version: ${{ needs.prepare.outputs.tag }}
